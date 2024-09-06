@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Batch record error found.</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+        <style>
+            * {box-sizing: border-box;}
+            .center {width: 100%; margin: auto; text-align: center;}
+            .menu {width: 25%; float: left;}
+            .main {width: 75%; float: right;}
+
+        </style>
+    </head>
+    <body class="center">
+        <h2>An error was found by Accountability.</h2>
+        <h3>You and your supervisor have been notified.</h3>
+        <h3>This email is for training purposes only.</h3>
+        <Div>
+            <p>
+                Affected Person: <br />
+                "& DataCardValue2.Selected.DisplayName &"
+            </p>
+            <p>
+                Date of occurance: <br />
+                "& DateValue(DataCardValue8.SelectedDate) &"
+            </p>
+            <p>
+                WJ: <br />
+                "& DataCardValue1.Text &"
+            </p>
+            <p>
+                Production Line: <br />
+                "& DataCardValue7.Selected.Value &"
+            </p>
+            <p>
+                Production Area of the error: <br />
+                "& DataCardValue3.Selected.Value &"
+            </p>
+            <p>
+                Error type: <br />
+                "& DataCardValue4.Selected.Value &"
+            </p>
+            <p>
+                Comments: <br />
+                "& DataCardValue5.Text &"
+            </p>
+            <p>
+                This email may have an attatchment that demonstrates the error.
+            </p>
+        </Div>
+    </body>
+</html>

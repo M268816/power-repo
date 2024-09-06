@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Batch record error found.</title>
+    <!--[if !mso]><!-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<![endif]-->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin: 5px; padding: 8px; width: 100%;">
+    <table style="width: 100%; margin: auto; font-family: Verdana, Geneva, Tahoma, sans-serif; border-collapse: separate;">
+        <tr>
+            <td style="width: 20%;"></td> <!-- Left margin -->
+            <td style="width: 60%; margin: auto; padding: 8px; background-color: antiquewhite; border: 1px solid lightgray; border-radius: 5px; box-shadow: 3px 3px 1px 1px lightgray;">
+                <h2 style="text-align: center;">Accountability has shared an error with you.</h2>
+                <h3 style="text-align: center;">This email is for training purposes only.</h3>
+                <p style="text-indent: 2em;">
+                    This email was automatically generated to inform you about an error identified during the accountability
+                    process. As part of our "Right First Time" initiative, these findings are crucial for both your
+                    professional development and the continuous improvement of our processes. Addressing these errors
+                    helps us enhance individual training and identify areas where our procedures may need updates or
+                    clarification. Please review the information below and the attached document (if provided) for a detailed
+                    explanation of your error.
+                </p>
+                <center>
+                <table role="presentation" style="width: 95%; margin: 0 auto; padding: 8px; background-color: cyan; border: 1px solid gray; border-radius: 5px;  box-shadow: 3px 3px 1px 1px lightgray;">
+                        <tr>
+                            <td style="width: 50%; padding: 8px; text-align: right;">Date of occurrence:</td>
+                            <td style="width: 50%; padding: 8px; text-align: left;">@{triggerBody()?['text_3']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; text-align: right;">WJ:</td>
+                            <td style="padding: 8px; text-align: left;">@{triggerBody()?['text_5']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; text-align: right;">Production Line:</td>
+                            <td style="padding: 8px; text-align: left;">@{triggerBody()?['text']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; text-align: right;">Area of process:</td>
+                            <td style="padding: 8px; text-align: left;">@{triggerBody()?['text_2']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; text-align: right;">Type of error:</td>
+                            <td style="padding: 8px; text-align: left;">@{triggerBody()?['text_1']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; text-align: center;" colspan="2">Additional Comments:</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; text-align: left; text-indent: 2em;" colspan="2">@{triggerBody()?['text_4']}</td>
+                        </tr>
+                    </table>
+                    </center>
+            </td>
+            <td style="width: 20%;"></td> <!-- Right margin -->
+        </tr>
+    </table>
+</body>
+</html>

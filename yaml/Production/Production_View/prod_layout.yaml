@@ -1,0 +1,1834 @@
+- prod_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+      X: =
+    Children:
+    - prod_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =locPadding
+          PaddingLeft: =locPadding
+          PaddingRight: =locPadding
+          PaddingTop: =locPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - prod_update:
+            Control: Classic/Button
+            Properties:
+              OnSelect: "=\n\nUpdateContext({locLoading:{Visible: true, Value: 30, Text: \"Updating\"}});\n/*Update Code*/\n\nUpdateContext({locLoading:{Visible: true, Value: 95, Text: \"Finishing Up\"}});\n/*Garbage Collecting*/\n\n/*End*/\nUpdateContext({locLoading:{Visible: true, Value: 100, Text: \"Completed\"}});\nUpdateContext({locLoading:{Visible: false, Value: -1, Text: \"Not Loading\"}});\n\n\n/*Start Loading Prompt*/\nUpdateContext({\n    locLoadingType: \"goals\"\n    });\n\n/*Today and Now function updates*/\nSet(varNowHour, Hour(Now()));\nSet(varNowDay, Today());\n\n/*Set Shift*/\nIf(\n    varNowHour >= 23,\n    Set(varShiftSelect, \"C Shift\"),\n    varNowHour >= 15,\n    Set(varShiftSelect, \"B Shift\"),\n    varNowHour >= 7,\n    Set(varShiftSelect, \"A Shift\"),\n    Set(varShiftSelect, \"C Shift\")\n);\n\n/*Set hourly goals per line and catalog*/\nSwitch(\n    varProductionLine,\n    \"SSC\",\n    Switch(\n        Mid(prod_catalog.Text, 6 ,3),\n        \"015\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"015\")).Goal_Setting),\n        \"003\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"003\")).Goal_Setting),\n        \"006\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"006\")).Goal_Setting)\n    ),\n    \"SSC2\",\n    Switch(\n        Mid(prod_catalog.Text, 6 ,3),\n        \"015\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"015\")).Goal_Setting),\n        \"003\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"003\")).Goal_Setting),\n        \"006\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"006\")).Goal_Setting)\n    ),\n    \"XL1\",\n    Switch(\n        Mid(prod_catalog.Text, 6 ,2),\n        \"02\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"02\")).Goal_Setting),\n        \"03\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"03\")).Goal_Setting),\n        \"04\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"04\")).Goal_Setting),\n        \"05\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"05\")).Goal_Setting),\n        \"10\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"10\")).Goal_Setting)\n    ),\n    \"XL2\",\n    Switch(\n        Mid(prod_catalog.Text, 6 ,2),\n        \"02\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"02\")).Goal_Setting),\n        \"03\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"03\")).Goal_Setting),\n        \"04\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"04\")).Goal_Setting),\n        \"05\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"05\")).Goal_Setting),\n        \"10\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"10\")).Goal_Setting)\n    ),\n    \"XL3\",\n    Switch(\n        Mid(prod_catalog.Text, 6 ,2),\n        \"03\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"03\")).Goal_Setting),\n        \"04\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"04\")).Goal_Setting),\n        \"05\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"05\")).Goal_Setting),\n        \"10\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"10\")).Goal_Setting)\n    ),\n    \"XL4\",\n    Switch(\n        Mid(prod_catalog.Text, 6 ,2),\n        \"51\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"02\")).Goal_Setting),\n        \"02\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"02\")).Goal_Setting),\n        \"03\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"03\")).Goal_Setting),\n        \"04\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"04\")).Goal_Setting),\n        \"05\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"05\")).Goal_Setting),\n        \"10\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"10\")).Goal_Setting)\n    ),\n    \"XL5\",\n    Switch(\n        Mid(prod_catalog.Text, 6 ,2),\n        \"02\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"02\")).Goal_Setting),\n        \"03\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"03\")).Goal_Setting),\n        \"04\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"04\")).Goal_Setting),\n        \"05\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"05\")).Goal_Setting),\n        \"10\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"10\")).Goal_Setting)\n    ),\n    \"XLT\",\n    Switch(\n        Upper(Mid(prod_catalog.Text, 6 ,2)),\n        \"1T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1T\")).Goal_Setting),\n        \"2T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2T\")).Goal_Setting),\n        \"3T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3T\")).Goal_Setting),\n        \"1F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1F\")).Goal_Setting),\n        \"2F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2F\")).Goal_Setting),\n        \"3F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3F\")).Goal_Setting),\n        \"1S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1S\")).Goal_Setting),\n        \"2S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2S\")).Goal_Setting),\n        \"3S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3S\")).Goal_Setting),\n        \"1Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1Z\")).Goal_Setting),\n        \"2Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2Z\")).Goal_Setting),\n        \"3Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3Z\")).Goal_Setting),\n        \"1H\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1Z\")).Goal_Setting),\n        \"2H\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2Z\")).Goal_Setting),\n        \"3H\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3Z\")).Goal_Setting)\n    ),\n    \"XLT2\",\n    Switch(\n        Upper(Mid(prod_catalog.Text, 6 ,2)),\n        \"1T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1T\")).Goal_Setting),\n        \"2T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2T\")).Goal_Setting),\n        \"3T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3T\")).Goal_Setting),\n        \"1F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1F\")).Goal_Setting),\n        \"2F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2F\")).Goal_Setting),\n        \"3F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3F\")).Goal_Setting),\n        \"1S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1S\")).Goal_Setting),\n        \"2S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2S\")).Goal_Setting),\n        \"3S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3S\")).Goal_Setting),\n        \"1Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1Z\")).Goal_Setting),\n        \"2Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2Z\")).Goal_Setting),\n        \"3Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3Z\")).Goal_Setting)\n    ),\n    \"XLT3\",\n    Switch(\n        Upper(Mid(prod_catalog.Text, 6 ,2)),\n        \"1T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1T\")).Goal_Setting),\n        \"2T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2T\")).Goal_Setting),\n        \"3T\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3T\")).Goal_Setting),\n        \"1F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1F\")).Goal_Setting),\n        \"2F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2F\")).Goal_Setting),\n        \"3F\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3F\")).Goal_Setting),\n        \"1S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1S\")).Goal_Setting),\n        \"2S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2S\")).Goal_Setting),\n        \"3S\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3S\")).Goal_Setting),\n        \"1Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"1Z\")).Goal_Setting),\n        \"2Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"2Z\")).Goal_Setting),\n        \"3Z\",\n        Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"3Z\")).Goal_Setting)\n    )\n);\n\n/* XLT Special Catalog Catch for goal updates */\nIf(\n    And(Left(prod_catalog.Text,2) = \"SN\", varProductionLine = \"XLT\"),\n    Set(varGoals, LookUp(Goal_Settings, And(Line.Value = varProductionLine, Size.Value = \"SN\")).Goal_Setting)\n);\n\n/*Check logged in personnel and get labor hours.*/\nSet(\n    varLaborHours,\n    /*Sum of Hours per logged in person*/\n    Round(\n        Sum(\n            CountRows(varRunner)*8,\n            CountRows(varMiddle)*8,\n            CountRows(varPackager)*8,\n            CountRows(varBagger)*8\n        ) /\n        /*Divided By total hours per line*/\n        Switch(\n            varProductionLine,\n            \"SSC\", 16,\n            \"SSC2\", 16,\n            \"XL1\", 24,\n            \"XL2\", 24,\n            \"XL3\", 32,\n            \"XL4\", 32,\n            \"XL5\", 40,\n            \"XLT\", 24,\n            \"XLT2\", 24,\n            \"XLT3\", 24,\n            1\n        ),\n        2\n    )\n);\n/*Returns decimal (percent) of calculated labor hours*/\n\n/*Set goal per labor hour by multiplying line's goal by labor hour percent*/\nSet(varGoalsPerLaborHours, RoundUp((varGoals * varLaborHours),0));\n\n/*Set adjusted goal, that is, goal per labor hour plus an additional 5% increase per Leela, hardcoded for now, variable later?*/\nSet(varAdjustedGoals, RoundUp(varGoalsPerLaborHours * 1.05, 0));\n\n/*Update Loading Text variable*/\nUpdateContext({locLoadingType: \"downtime\"});\n\n/*Run flow to collect downtime data locally.*/\nClearCollect(\n    collectLocalDowntimeData,\n    ForAll(\n        Table(ParseJSON(\n            flow_get_downtime_v2.Run(\n                varProductionLine,\n                Text(Today(), \"yyyy-mm-dd\")\n            ).output\n            )),\n        {\n            ID: Value(Value._id),\n            Line: Text(Value._line),\n            Lot: Text(Value._lot),\n            Catalog: Text(Value._catalog),\n            Started: DateTimeValue(Value._started),\n            Ended: DateTimeValue(Value._ended),\n            Reason: Text(Value._reason),\n            Total_Downtime: Value(Value._total_downtime),\n            Comments: Text(Value._comments),\n            Shift_Letter: Text(Value._shift_letter),\n            Shift_Letter_12h: Text(Value._shift_letter_12h),\n            Edit_Person: Value._edit_person,\n            Edit_Reason: Text(Value._edit_reason)\n        }\n    )\n);\n\n/*Update Loading Text variable*/\nUpdateContext({locLoadingType: \"unit\"});\n\n/*Run flow to collect unit data locally*/\nClearCollect(\n    collectLocalUnitData,\n    ForAll(\n        Table(ParseJSON(\n            flow_get_units_v2.Run(varProductionLine,\n            Text(Today(), \"yyyy-mm-dd\")).output\n            )),\n        {\n            ID: Value(Value._id),\n            Lot: Text(Value._lot),\n            Catalog: Text(Value._catalog),\n            Line: Text(Value._line),\n            Hour_Starting: DateTimeValue(Value._hour_starting),\n            Hour_Ending: DateTimeValue(Value._hour_ending),\n            Unit_Starting: Value(Value._unit_starting),\n            Unit_Ending: Value(Value._unit_ending),\n            Amount_Built: Value(Value._amount_built),\n            Goal: Value(Value._goal),\n            QA_Units: Value(Value._qa_units),\n            Reject_Labels: Value(Value._reject_labels),\n            Reject_Units: Value(Value._reject_units),\n            Reject_Cartridges: Value(Value._reject_cartridges),\n            Quality: Boolean(Value._quality),\n            Safety: Boolean(Value._safety),\n            Shift_Letter: Text(Value._shift_letter),\n            Shift_Letter_12h: Text(Value._shift_letter_12h),\n            Edit_Person: Value._edit_person,\n            Edit_Reason: Text(Value._edit_reason)\n        }\n    )\n);\n\n/*Update Loading Text variable*/\nUpdateContext({locLoadingType: \"schema\"});\n\n/*Create and reset Schema for displaying hourly informaiton*/\nClearCollect(\n    collectHourlySchema,\n    {\n        SCH_Hour_Starting: DateAdd(DateTime(Year(Now()),Month(Now()),Day(Now()),0,0,0), -1, TimeUnit.Hours),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),0,0,0),\n        SCH_Shift_Letter: \"C\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),0,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),1,0,0),\n        SCH_Shift_Letter: \"C\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),1,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),2,0,0),\n        SCH_Shift_Letter: \"C\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),2,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),3,0,0),\n        SCH_Shift_Letter: \"C\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),3,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),4,0,0),\n        SCH_Shift_Letter: \"C\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),4,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),5,0,0),\n        SCH_Shift_Letter: \"C\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),5,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),6,0,0),\n        SCH_Shift_Letter: \"C\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),6,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),7,0,0),\n        SCH_Shift_Letter: \"C\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),7,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),8,0,0),\n        SCH_Shift_Letter: \"A\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),8,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),9,0,0),\n        SCH_Shift_Letter: \"A\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),9,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),10,0,0),\n        SCH_Shift_Letter: \"A\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),10,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),11,0,0),\n        SCH_Shift_Letter: \"A\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),11,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),12,0,0),\n        SCH_Shift_Letter: \"A\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),12,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),13,0,0),\n        SCH_Shift_Letter: \"A\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),13,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),14,0,0),\n        SCH_Shift_Letter: \"A\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),14,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),15,0,0),\n        SCH_Shift_Letter: \"A\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),15,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),16,0,0),\n        SCH_Shift_Letter: \"B\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),16,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),17,0,0),\n        SCH_Shift_Letter: \"B\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),17,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),18,0,0),\n        SCH_Shift_Letter: \"B\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),18,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),19,0,0),\n        SCH_Shift_Letter: \"B\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),19,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),20,0,0),\n        SCH_Shift_Letter: \"B\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),20,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),21,0,0),\n        SCH_Shift_Letter: \"B\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),21,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),22,0,0),\n        SCH_Shift_Letter: \"B\"\n    },\n    {\n        SCH_Hour_Starting: DateTime(Year(Now()),Month(Now()),Day(Now()),22,0,0),\n        SCH_Hour_Ending: DateTime(Year(Now()),Month(Now()),Day(Now()),23,0,0),\n        SCH_Shift_Letter: \"B\"\n    }\n);\n\n/*Update Loading Text variable*/\nUpdateContext({locLoadingType: \"join\"});\n\n/*Join Schema (on visible) and Local Unit Data*/\n\nClearCollect(collectJoinedUnitDisplay,\n    // Iterate through all source records and join to destination collection\n    ForAll(\n \n        // Iterate through the source collection\n        collectHourlySchema,\n        { \n            // Columns to appear in dataset\n            ID: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).ID,\n            Catalog: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Catalog,\n            Lot: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Lot,\n            Line: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Line,\n            Hour_Starting: ThisRecord.SCH_Hour_Starting,\n            Hour_Ending: ThisRecord.SCH_Hour_Ending,\n            Unit_Starting: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Unit_Starting,\n            Unit_Ending: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Unit_Ending,\n            Amount_Built: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Amount_Built,\n            Goal: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Goal,\n            QA_Units: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).QA_Units,\n            Reject_Labels: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Reject_Labels,\n            Reject_Units: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Reject_Units,\n            Reject_Cartridges: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Reject_Cartridges,\n            Quality: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Quality,\n            Safety: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Safety,\n            Shift_Letter: ThisRecord.SCH_Shift_Letter,\n            Shift_Letter_12h: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Shift_Letter_12h,\n            Edit_Person: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Edit_Person,\n            Edit_Reason: LookUp(collectLocalUnitData, SCH_Hour_Ending = Hour_Ending).Edit_Reason\n        }\n    )\n);\n\n/*Join Schema (on visible) and Local Downtime Data*/\n\nClearCollect(collectJoinedDowntimeDisplay,\n    // Iterate through all source records and join to destination collection\n    ForAll(\n \n        // Iterate through the source collection\n        collectHourlySchema,\n        { \n            // Columns to appear in dataset\n            ID:\n                LookUp(\n                    collectLocalDowntimeData,\n                    /*Both the...*/\n                    And(\n                        /*Time and total downtime must be...*/\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The total downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).ID,\n\n            Line:\n                LookUp(\n                    collectLocalDowntimeData,\n                    /*Both the...*/\n                    And(\n                        /*Time and total downtime must be...*/\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The total downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Line,\n\n            Lot:\n                LookUp(\n                    collectLocalDowntimeData,\n                    /*Both the...*/\n                    And(\n                        /*Time and total downtime must be...*/\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The total downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Lot,\n            \n            Catalog:\n                LookUp(\n                    collectLocalDowntimeData,\n                    /*Both the...*/\n                    And(\n                        /*Time and total downtime must be...*/\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n\n                        ),\n                        /*The total downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Catalog,\n            \n            Started: ThisRecord.SCH_Hour_Starting,\n            Ended: ThisRecord.SCH_Hour_Ending,\n\n            Reason:\n                First(\n                    Sort(\n                        Sort(\n                            AddColumns(\n                                Filter(\n                                    collectLocalDowntimeData,\n                                    /*Both the...*/\n                                    And(\n                                        /*Time and total downtime must be...*/\n                                        Or(\n                                            /*Either the end time is between than the start and end schema hour*/\n                                            And(\n                                                Ended <= SCH_Hour_Ending,\n                                                Ended > SCH_Hour_Starting\n                                            ),\n                                            /*Or the start time is between the start and end schema hour*/\n                                            And(\n                                                Started >= SCH_Hour_Starting,\n                                                Started < SCH_Hour_Ending\n                                            ),\n                                            /*Or the time passes through this hour*/\n                                            And(\n                                                Started < SCH_Hour_Starting,\n                                                Ended > SCH_Hour_Starting\n                                            )\n                                        )\n                                    )\n                                ),\n                                Time_Calc,\n                                If(\n                                    And(\n                                        Started >= SCH_Hour_Starting,\n                                        Ended <= SCH_Hour_Ending\n                                    ),\n                                    Total_Downtime,\n                                    Total_Downtime -\n                                    If(\n                                        Started < SCH_Hour_Starting,\n                                        DateDiff(Started, SCH_Hour_Starting, TimeUnit.Minutes),\n                                        0\n                                    ) +\n                                    If(\n                                        Ended > SCH_Hour_Ending,\n                                        DateDiff(Ended, SCH_Hour_Ending, TimeUnit.Minutes),\n                                        0\n                                    )\n                                )\n                            ),\n                            Time_Calc,\n                            SortOrder.Descending\n                        ),\n                        Total_Downtime,\n                        SortOrder.Descending\n                    )\n                ).Reason,\n            \n            Total_Downtime:\n                If(                   \n                    !IsBlank(\n                        LookUp(\n                            collectLocalDowntimeData,\n                            Or(\n                                /*Either the end time is between than the start and end schema hour*/\n                                And(\n                                    Ended <= SCH_Hour_Ending,\n                                    Ended > SCH_Hour_Starting\n                                ),\n                                /*Or the start time is between the start and end schema hour*/\n                                And(\n                                    Started >= SCH_Hour_Starting,\n                                    Started < SCH_Hour_Ending\n                                ),\n                                /*Or the time passes through this hour*/\n                                And(\n                                    Started < SCH_Hour_Starting,\n                                    Ended > SCH_Hour_Starting\n                                )\n                            )\n                        )\n                    ),\n\n                    Sum(\n                        Filter(\n                            collectLocalDowntimeData,\n                            Or(\n                                /*Either the end time is between than the start and end schema hour*/\n                                And(\n                                    Ended <= SCH_Hour_Ending,\n                                    Ended > SCH_Hour_Starting\n                                ),\n                                /*Or the start time is between the start and end schema hour*/\n                                And(\n                                    Started >= SCH_Hour_Starting,\n                                    Started < SCH_Hour_Ending\n                                ),\n                                /*Or the time passes through this hour*/\n                                And(\n                                    Started < SCH_Hour_Starting,\n                                    Ended > SCH_Hour_Starting\n                                )\n                            )\n                        ),\n                        /*Difference between endtime and start time*/\n                        DateDiff(\n                            /*Find the max starting time for that hour*/\n                            Max(\n                                Started,\n                                DateTime(\n                                    Year(Started),Month(SCH_Hour_Starting),Day(SCH_Hour_Starting),\n                                    Hour(SCH_Hour_Starting),0,0\n                                )\n                            ),\n                            /*Find the min ending time for that hour*/\n                            Min(\n                                Ended,\n                                DateTime(\n                                    Year(Ended),Month(SCH_Hour_Ending),Day(SCH_Hour_Ending),\n                                    Hour(SCH_Hour_Ending),0,0\n                                )\n                            ),\n                            TimeUnit.Minutes\n                        )\n                    )\n                ),\n            \n            Comments:\n                LookUp(\n                    collectLocalDowntimeData,\n                    /*Both the...*/\n                    And(\n                        /*Time and total downtime must be...*/\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The total downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Comments,\n\n            Shift_Letter: ThisRecord.SCH_Shift_Letter,\n\n            Edit_Person:\n                LookUp(\n                    collectLocalDowntimeData,\n                    /*Both the...*/\n                    And(\n                        /*Time and total downtime must be...*/\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The total downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Edit_Person,\n\n            Edit_Reason:\n                LookUp(\n                    collectLocalDowntimeData,\n                    /*Both the...*/\n                    And(\n                        /*Time and total downtime must be...*/\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The total downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Edit_Reason\n        }\n    )\n);\n\n/* Stop Loading Prompt */"
+              Text: ="update"
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Visible: =false
+        - prod_logo:
+            Control: Image
+            Properties:
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Width: =10
+        - prod_exit:
+            Control: Classic/Icon
+            Variant: ChevronLeft
+            Properties:
+              OnSelect: |-
+                =Set(varShiftSelect, "Null");
+
+                Set(varRunner, Blank());
+                Set(varMiddle, Blank());
+                Set(varBagger, Blank());
+                Set(varPackager, Blank());
+
+                //Reset(p_m_s_lot);
+                //Reset(p_m_s_cat);
+
+                Navigate(Operators, ScreenTransition.UnCover);
+              Color: =varColorAccent
+              Height: =Parent.Height * 0.75
+              Icon: =Icon.ChevronLeft
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Width: =Self.Height
+              Y: =Parent.Height/2 - Self.Height/2
+        - prod_exit_title:
+            Control: Label
+            Properties:
+              OnSelect: =Select(prod_exit)
+              Text: ="Change Operators"
+              Color: =varColorAccent
+              Font: =Font.Verdana
+              Height: =prod_exit.Height
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Width / 9
+              Width: =Parent.Width * 0.08
+              X: =prod_exit.X + prod_exit.Width
+              Y: =prod_exit.Y
+        - prod_h_title:
+            Control: Text
+            Properties:
+              Align: ='TextCanvas.Align'.Center
+              FontColor: =varColor5
+              Size: =24
+              Text: ="Encapsualtion Daily Management System"
+              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+              FillPortions: =5
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+        - prod_h_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =prod_h_n_pallet.Width * 2 + locPadding * 3
+            Children:
+            - prod_h_n_pallet:
+                Control: Image
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({locPopups: {Visible: true, Value: "pallet"}});
+                  Image: |-
+                    ="data:image/svg+xml;utf8, " & EncodeUrl("
+
+                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M36.15,84a9.53,9.53,0,0,0-1,13.34,9.26,9.26,0,0,0,13.18,1,9.54,9.54,0,0,0,1-13.34A9.26,9.26,0,0,0,36.15,84Z'/><path class='cls-1' d='M86.37,61.08c1.91,5.26,6.85,7.82,11,5.72s6-8.07,4.14-13.33-6.85-7.83-11-5.72S84.47,55.82,86.37,61.08Z'/><path class='cls-1' d='M43.12,67c1.3,3.41,4.67,5,7.53,3.62s4.12-5.3,2.82-8.7-4.67-5-7.53-3.61S41.82,63.6,43.12,67Z'/><path class='cls-1' d='M82.68,92.15C87,95.43,93.8,94.33,97.88,89.7s3.91-11-.4-14.32S86.37,73.2,82.29,77.83,78.38,88.87,82.68,92.15Z'/><path class='cls-1' d='M87.23,41.49A6.79,6.79,0,0,0,89,31.93a7.07,7.07,0,0,0-9.79-1.39,6.79,6.79,0,0,0-1.78,9.56A7.09,7.09,0,0,0,87.23,41.49Z'/><path class='cls-1' d='M68.16,52.31A8.53,8.53,0,0,0,69.4,40.13a9,9,0,0,0-12.49-.63,8.52,8.52,0,0,0-1.23,12.17A9,9,0,0,0,68.16,52.31Z'/><path class='cls-1' d='M69.91-.08A70,70,0,0,0,5,96.07c.37.91,1.71,4.38,2.13,5.14A10.61,10.61,0,0,0,27,96.1c0-.34-.57-4.13-.74-4.93C18.6,54.49,82.1-9.68,106.94,41.73c19.2,47.45-37.31,90.26-39.68,64.64-.12-4,2.95-12-2-14.45C60,89.34,57,95.21,53.37,100.64c-.52.78-1.06,1.56-1.61,2.31-2.2,4.43-6.56,5.18-11,4.94-2.66-.14-6.14-2-7.48-2a10.67,10.67,0,0,0-8,17.75,44.36,44.36,0,0,0,3.94,3.24A70,70,0,1,0,69.91-.08Z'/></svg>
+
+
+
+                    ")
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  Y: =Parent.Height/2 - Self.Height/2
+            - prod_h_n_bugs:
+                Control: Image
+                Properties:
+                  OnSelect: =Navigate(Bugs)
+                  Image: |-
+                    ="data:image/svg+xml;utf8, " & EncodeUrl("
+
+                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M80.07,33.73a24.48,24.48,0,1,0,24.48,24.48A24.51,24.51,0,0,0,80.07,33.73ZM65,47.65a1.45,1.45,0,0,1,1.7-1.16l5.62,1.06a8.34,8.34,0,0,1,7.46-4.65h.47a8.37,8.37,0,0,1,7.47,4.65l5.62-1.06a1.45,1.45,0,0,1,.54,2.85l-5.35,1a8.46,8.46,0,0,1,0,.87.85.85,0,0,1-.85.85H72.28a.85.85,0,0,1-.85-.85,6.35,6.35,0,0,1,0-.87l-5.35-1A1.45,1.45,0,0,1,65,47.65Zm28.88,19.7a1.45,1.45,0,0,1-.27,2.88,1.24,1.24,0,0,1-.27,0l-5.62-1.06a7.74,7.74,0,0,1-3.43,3.79c-1.88.82-6.8.8-8.67-.07a7.64,7.64,0,0,1-3.3-3.72L66.67,70.2a1.24,1.24,0,0,1-.27,0A1.46,1.46,0,0,1,65,69a1.44,1.44,0,0,1,1.16-1.69l5.35-1a6.35,6.35,0,0,1,0-.87v-5.3H66.16a1.45,1.45,0,1,1,0-2.9h5.27V56.06A1.09,1.09,0,0,1,72.52,55H87.46a1.09,1.09,0,0,1,1.09,1.09v1.21h5.32a1.45,1.45,0,0,1,0,2.9H88.55v5.3a8.46,8.46,0,0,1,0,.87Z'/><path class='cls-1' d='M69.91-.08a70,70,0,0,0-66,93.27c.13.38.7,1.8.82,2.12a15.3,15.3,0,0,0,25.62,5c.37-.4,2.29-2.41,2.29-2.41L47.45,83.05a2,2,0,0,1,2.92.12,38.81,38.81,0,0,0,6.27,6,2,2,0,0,1,.2,3L43.62,105.34s-3,2.72-3.65,3.29a16.13,16.13,0,0,0,5,26.69c.49.21,2.5.88,3,1.05A70,70,0,1,0,69.91-.08ZM80.07,92a33.81,33.81,0,1,1,33.81-33.81A33.85,33.85,0,0,1,80.07,92Z'/></svg>
+
+
+
+                    ")
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  X: =Parent.Width * 0.99 - Self.Width
+                  Y: =Parent.Height/2 - Self.Height/2
+    - prod_body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - prod_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =varColor3
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =locPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =locPadding
+              PaddingLeft: =locPadding
+              PaddingRight: =locPadding
+              PaddingTop: =locPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - prod_n_shift:
+                Control: Classic/DropDown
+                Properties:
+                  OnChange: =Set(varShiftSelect, Self.SelectedText.Value);
+                  Default: |-
+                    =If(
+                        !IsBlankOrError(varShiftSelect),
+                        varShiftSelect,
+                        "All"
+                    )
+                  Items: =["All", "A Shift", "B Shift", "C Shift"]
+                  BorderThickness: =0
+                  ChevronBackground: =varColor1
+                  ChevronFill: =varColorAccent
+                  ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                  ChevronHoverFill: =ColorFade(Self.ChevronFill, -20%)
+                  Fill: =varColor5
+                  FillPortions: =1
+                  FocusedBorderThickness: =0
+                  Height: =Parent.Height
+                  HoverFill: =ColorFade(Self.Fill, -20%)
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  SelectionFill: |-
+                    =//RGBA(56, 96, 178, 1)
+                    varColor3
+                  Size: =Self.Height / 3.5
+                  Width: =Parent.Width
+                  X: =Parent.Width/2 - Self.Width/2
+                  Y: =Parent.Height - Parent.Height
+            - prod_n_seperator_0:
+                Control: Rectangle
+                Properties:
+                  Height: =1
+                  LayoutMinWidth: =10
+            - prod_n_hourly:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: "=/*Set the time*/\r\nSet(varNowTime, TimeValue(Now()));\r\n\r\n/*Check for lot, catalog, and operator change times then navigate to hourly inputs*/\r\nIf(\r\n    /*check for lots and catalog through check made in color change on cat and lot fields*/\r\n    Or(\r\n        IsBlank(prod_lot.Text),\r\n        IsBlank(prod_catalog.Text),\r\n        prod_catalog.Fill = varColorNo,\r\n        prod_lot.Fill = varColorNo\r\n    ),\r\n    UpdateContext({locPopups: {Visible: true, Value: \"error\"}}),\r\n    \r\n    /*check against line and time stored in collectNotifyTimes*/\r\n    And(\r\n        Hour(varNowTime) in LookUp(collectNotifyTimes, varProductionLine in line.Value).hour,\r\n        /*Time must be within 15 minutes before and after the checked Hour.*/\r\n        varNowTime > DateAdd(DateTime(Year(varNowTime),Month(varNowTime),Day(varNowTime),Hour(varNowTime),Minute(0),Second(0)), -10, TimeUnit.Minutes),\r\n        varNowTime < DateAdd(DateTime(Year(varNowTime),Month(varNowTime),Day(varNowTime),Hour(varNowTime),Minute(0),Second(0)), 10,TimeUnit.Minutes)\r\n\r\n    ),\r\n    UpdateContext({locPopups: {Visible: true, Value: \"ops\"}}),\r\n\r\n    Set(varUnitMode, FormMode.New);\r\n        Navigate(Units,ScreenTransition.CoverRight);\r\n    \r\n);"
+                  Text: ="Hourly Input"
+                  Color: =varColor0
+                  DisplayMode: =If(App.ActiveScreen.Name = "Home", DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =varColorAccent
+                  FillPortions: =2
+                  FontWeight: =FontWeight.Normal
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 8
+            - prod_n_downtime:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: "=If(\r\n    Or(\r\n        IsBlank(prod_lot.Text),\r\n        IsBlank(prod_catalog.Text),\r\n        prod_catalog.Fill = varColorNo,\r\n        prod_lot.Fill = varColorNo\r\n    ),\r\n    \r\n    UpdateContext({locLotError: true, locPopup:true}),\r\n    \r\n    Set(varDowntimeMode,FormMode.New);\r\n        Navigate(Downtime_View, ScreenTransition.CoverRight);\r\n);"
+                  Text: ="Downtime Input"
+                  Color: =varColor0
+                  DisplayMode: =If(App.ActiveScreen.Name = "Home", DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =varColorAccent
+                  FillPortions: =2
+                  FontWeight: =FontWeight.Normal
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 8
+            - prod_n_rejects:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: =Navigate(Rejects_Input, ScreenTransition.CoverRight);
+                  Text: ="Input Rejects"
+                  Color: =varColor0
+                  DisplayMode: =If(App.ActiveScreen.Name = "Home", DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =varColorAccent
+                  FillPortions: =2
+                  FontWeight: =FontWeight.Normal
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 8
+            - prod_n_materials:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: =Navigate(Materials, ScreenTransition.CoverRight)
+                  Text: ="Order Materials"
+                  Color: =varColor0
+                  DisplayMode: =If(App.ActiveScreen.Name = "Home", DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =varColorAccent
+                  FillPortions: =2
+                  FontWeight: =FontWeight.Normal
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 8
+            - prod_n_schedule:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: =Navigate(Schedule,ScreenTransition.CoverRight)
+                  Text: ="View Schedule"
+                  Color: =varColor0
+                  DisplayMode: =If(App.ActiveScreen.Name = "Home", DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =varColorAccent
+                  FillPortions: =2
+                  FontWeight: =FontWeight.Normal
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 8
+            - prod_n_performance:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: =Navigate(Performance,ScreenTransition.CoverRight)
+                  Text: ="View Performance"
+                  Color: =varColor0
+                  DisplayMode: =If(App.ActiveScreen.Name = "Home", DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =varColorAccent
+                  FillPortions: =2
+                  FontWeight: =FontWeight.Normal
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 8
+            - prod_n_seperator_1:
+                Control: Rectangle
+                Properties:
+                  Height: =1
+                  LayoutMinWidth: =10
+            - prod_n_footer:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - prod_n_f_text:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =6
+                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
+                      Height: =Parent.Height
+                      Width: =Parent.Width
+        - prod_main:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =9
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =locPadding
+              PaddingLeft: =locPadding
+              PaddingRight: =locPadding
+              PaddingTop: =locPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - prod_overview:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =varColor4
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                Children:
+                - prod_o_goal_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Hourly Goal"
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =varColor5
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: =Parent.Height - Self.Height*10
+                - prod_o_goal:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =//varGoals & " / " & varGoalsPerLaborHours & " / " & varAdjustedGoals
+
+                        varAdjustedGoals
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =Color.Black
+                      Fill: =ColorFade(varColor4, 50%)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: =Parent.Height - Self.Height*9
+                - prod_o_total_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Total Units"
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =varColor5
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: =Parent.Height - Self.Height*8
+                - prod_o_total:
+                    Control: Label
+                    Properties:
+                      Text: "=/* Daily Goal Tracking*/\r\n\r\n/*Find sum of 'actual' column from filtered collection*/\r\nSum(\r\n    /*The Filtered local unit data*/\r\n    Filter(\r\n        collectLocalUnitData,\r\n        \r\n        /*Filter by todays date*/\r\n        Text(Hour_Ending, DateTimeFormat.ShortDate) = Text(Today(),DateTimeFormat.ShortDate),\r\n        \r\n        /*Filter by selected line*/\r\n        Line = varProductionLine,\r\n        \r\n        /*Filter with a switch, by selected shift*/\r\n        Switch(varShiftSelect,\r\n            \"A Shift\",\r\n            Shift_Letter = \"A\",\r\n            \"B Shift\",\r\n            Shift_Letter = \"B\",\r\n            \"C Shift\",\r\n            Shift_Letter = \"C\",\r\n            \"D Shift\",\r\n            Shift_Letter_12h = \"D\",\r\n            \"E Shift\",\r\n            Shift_Letter_12h = \"E\",\r\n            Shift_Letter = Shift_Letter\r\n            )\r\n        ),\r\n    /*Sum the 'actual' column*/\r\n    Amount_Built*1\r\n    )\r\n\r\n/*Concatenate*/\r\n& \" / \" & \r\n\r\n/*Find sum of 'goal' column from filtered collection*/\r\nSum(\r\n    /*The Filtered local unit data*/\r\n    Filter(\r\n        collectLocalUnitData,\r\n        \r\n        /*Filter by todays date*/\r\n        Text(Hour_Ending, DateTimeFormat.ShortDate) = Text(Today(),DateTimeFormat.ShortDate),\r\n        \r\n        /*Filter by selected line*/\r\n        Line = varProductionLine,\r\n        \r\n        /*Filter with a switch, by selected shift*/\r\n        Switch(varShiftSelect,\r\n            \"A Shift\",\r\n            Shift_Letter = \"A\",\r\n            \"B Shift\",\r\n            Shift_Letter = \"B\",\r\n            \"C Shift\",\r\n            Shift_Letter = \"C\",\r\n            \"D Shift\",\r\n            Shift_Letter_12h = \"D\",\r\n            \"E Shift\",\r\n            Shift_Letter_12h = \"E\",\r\n            Shift_Letter = Shift_Letter\r\n            )\r\n        ),\r\n    /*Sum the 'goal' column*/\r\n    Goal\r\n    )\r\n\r\n"
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =Color.Black
+                      Fill: =ColorFade(varColor4, 50%)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: =Parent.Height - Self.Height*7
+                - prod_o_average_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Average"
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =varColor5
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: =Parent.Height - Self.Height*6
+                - prod_o_average:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =IfError(
+                            Round(
+                                Average(
+                                    Filter(
+                                        collectLocalUnitData,
+                                        DateValue(Hour_Ending) = DateValue(Today()),
+                                        Line = varProductionLine,
+                                        Switch(varShiftSelect,
+                                            "A Shift",
+                                            Shift_Letter = "A",
+                                            "B Shift",
+                                            Shift_Letter = "B",
+                                            "C Shift",
+                                            Shift_Letter = "C",
+                                            Shift_Letter = Shift_Letter
+                                        )
+                                    ),
+                                    Amount_Built
+                                ),
+                                0
+                            ),
+                            "0"
+                        )
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =Color.Black
+                      Fill: =ColorFade(varColor4, 50%)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: |+
+                        =Parent.Height - Self.Height*5
+                - prod_o_rejects_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Total Rejects"
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =varColor5
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: =Parent.Height - Self.Height*4
+                - prod_o_rejects:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =IfError(
+                            Sum(
+                                Filter(
+                                    collectLocalUnitData,
+                                    DateValue(Hour_Ending) = DateValue(Today()),
+                                    Line = varProductionLine,
+                                    Switch(varShiftSelect,
+                                        "A Shift",
+                                        Shift_Letter = "A",
+                                        "B Shift",
+                                        Shift_Letter = "B",
+                                        "C Shift",
+                                        Shift_Letter = "C",
+                                        "D Shift",
+                                        Shift_Letter_12h = "D",
+                                        "E Shift",
+                                        Shift_Letter_12h = "E",
+                                        "All",
+                                        Shift_Letter = Shift_Letter
+                                        )
+                                    ),
+                                Reject_Cartridges + Reject_Units
+                                ),
+                            "ERROR"
+                            )
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =Color.Black
+                      Fill: =ColorFade(varColor4, 50%)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: =Parent.Height - Self.Height*3
+                - prod_o_downtime_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Downtime"
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =varColor5
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: |+
+                        =Parent.Height - Self.Height*2
+                - prod_o_downtime:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =IfError(
+                            Sum(
+                                Filter(
+                                    collectLocalDowntimeData,
+                                    DateValue(Ended) >= (DateValue(DateAdd(Today(),-1,TimeUnit.Hours))),
+                                    Line = varProductionLine,
+                                    Switch(varShiftSelect,
+                                        "A Shift",
+                                        Shift_Letter = "A",
+                                        "B Shift",
+                                        Shift_Letter = "B",
+                                        "C Shift",
+                                        Shift_Letter = "C",
+                                        "All",
+                                        Shift_Letter = Shift_Letter
+                                    )
+                                ),
+                                Total_Downtime
+                            ),
+                            "SUM ERROR"
+                        )
+                      Align: =Align.Center
+                      BorderColor: =Color.Black
+                      Color: =Color.Black
+                      Fill: =ColorFade(varColor4, 50%)
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =Parent.Height/10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                      Width: =Parent.Width
+                      Y: =Parent.Height - Self.Height
+            - prod_section_0:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =9
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =locPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingLeft: =locPadding
+                  PaddingRight: =locPadding
+                  PaddingTop: =locPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - prod_section_1:
+                    Control: GroupContainer
+                    Variant: manualLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.Regular
+                      Fill: =varColor3
+                      Height: =Parent.Height * 0.10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =8
+                      RadiusBottomRight: =8
+                      RadiusTopLeft: =8
+                      RadiusTopRight: =8
+                      Width: =Parent.Width * 0.99 - Self.X
+                      Y: =Parent.Height * 0.01
+                    Children:
+                    - prod_packager:
+                        Control: Label
+                        Properties:
+                          Text: =First(varPackager).DisplayName
+                          Font: =Font.Verdana
+                          Height: =prod_runner_title.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Size: =prod_section_2.Width / 100
+                          Width: =Parent.Width  - Self.X
+                          X: =prod_packager_title.X + prod_packager_title.Width
+                          Y: =prod_bagger_title.Y + prod_bagger_title.Height
+                    - prod_packager_title:
+                        Control: Label
+                        Properties:
+                          Text: ="Packager :"
+                          Align: =Align.Right
+                          Font: =Font.Verdana
+                          Height: =prod_runner_title.Height
+                          Size: =prod_section_2.Width / 100
+                          Width: =prod_runner_title.Width
+                          X: =prod_middle.X + prod_middle.Width
+                          Y: =prod_bagger_title.Y + prod_bagger_title.Height
+                    - prod_bagger:
+                        Control: Label
+                        Properties:
+                          Text: |-
+                            =Switch(
+                                varProductionLine,
+                                "SSC",
+                                "No Bagger Needed",
+                                "SSC2",
+                                "No Bagger Needed",
+                                First(varBagger).DisplayName
+                            )
+                          Font: =Font.Verdana
+                          Height: =prod_runner_title.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Size: =prod_section_2.Width / 100
+                          Width: =Parent.Width  - Self.X
+                          X: =prod_bagger_title.X + prod_bagger_title.Width
+                          Y: =prod_bagger_title.Y
+                    - prod_bagger_title:
+                        Control: Label
+                        Properties:
+                          Text: ="Bagger :"
+                          Align: =Align.Right
+                          Font: =Font.Verdana
+                          Height: =prod_runner_title.Height
+                          Size: =prod_section_2.Width / 100
+                          Width: =prod_runner_title.Width
+                          X: =prod_runner.X +  prod_runner.Width
+                          Y: =1-1
+                    - prod_middle:
+                        Control: Label
+                        Properties:
+                          Text: |-
+                            =Switch(
+                                varProductionLine,
+                                "XL3",
+                                First(varMiddle).DisplayName,
+                                "XL4",
+                                First(varMiddle).DisplayName,
+                                "XL5",
+                                First(varMiddle).DisplayName,
+                                "No Middle Needed"
+                            )
+                          Font: =Font.Verdana
+                          Height: =prod_runner_title.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Size: =prod_section_2.Width / 100
+                          Width: =(Parent.Width  - Self.X - prod_packager_title.Width) / 2
+                          X: =prod_runner_title.X + prod_runner_title.Width
+                          Y: =prod_runner_title.Y + prod_runner_title.Height
+                    - prod_middle_title:
+                        Control: Label
+                        Properties:
+                          Text: ="Middle :"
+                          Align: =Align.Right
+                          Font: =Font.Verdana
+                          Height: =prod_runner_title.Height
+                          Size: =prod_section_2.Width / 100
+                          Width: =prod_runner_title.Width
+                          X: =prod_runner_title.X
+                          Y: =prod_runner_title.Y + prod_runner_title.Height
+                    - prod_runner:
+                        Control: Label
+                        Properties:
+                          Text: |-
+                            =If(
+                                CountRows(varRunner) > 2,
+                                "Too many runners selected",
+                                CountRows(varRunner) = 1,
+                                First(varRunner).DisplayName,
+                                First(varRunner).DisplayName & ", " & Last(varRunner).DisplayName
+                                )
+                          Font: =Font.Verdana
+                          Height: =prod_runner_title.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Size: =prod_section_2.Width / 100
+                          Width: =(Parent.Width  - Self.X - prod_bagger_title.Width) / 2
+                          X: =prod_runner_title.X + prod_runner_title.Width
+                          Y: =Parent.Height * 0.02
+                    - prod_runner_title:
+                        Control: Label
+                        Properties:
+                          Text: ="Runner :"
+                          Align: =Align.Right
+                          Font: =Font.Verdana
+                          Height: =Parent.Height/ 2
+                          Size: =prod_section_2.Width / 100
+                          Width: =Parent.Width * 0.10
+                          X: =prod_lot.X + prod_lot.Width
+                          Y: =1-1
+                    - prod_catalog:
+                        Control: Classic/TextInput
+                        Properties:
+                          OnChange: |-
+                            =Set(varCatalog, prod_catalog.Text);
+                            Select(prod_update);
+                          Default: =""
+                          HintText: ="Scan Catalog"
+                          Align: =Align.Center
+                          Fill: |-
+                            =If(
+                                Or(
+                                    IsBlank(Self.Text),
+                                    And(
+                                        Len(Self.Text) <=11,
+                                        Len(Self.Text) >= 10,
+                                        Upper(Left(Self.Text, 1)) = "K",
+                                        Or(
+                                            IsNumeric(Mid(Self.Text, 6,2)),
+                                            IsNumeric(Mid(Self.Text, 6,1))
+                                        ),
+                                        Or(
+                                            IsNumeric(Right(Self.Text, 1)),
+                                            IsNumeric(Mid(Self.Text, Len(Self.Text)-1, 1))
+                                            )
+                                        ),
+                                    Self.Text = "QA",
+                                    Self.Text = "LAL",
+                                    Upper(Left(Self.Text, 1 )) = "S"
+                                    ),
+                                varColor5,
+                                varColorNo
+                            )
+                          Font: =Font.Verdana
+                          Height: =prod_lot.Height
+                          PaddingLeft: =5
+                          Size: =Self.Width / 14
+                          Width: =prod_lot.Width
+                          X: =Parent.Width * 0.02
+                          Y: =prod_lot.Y
+                    - prod_lot:
+                        Control: Classic/TextInput
+                        Properties:
+                          OnChange: =Set(varLot, prod_lot.Text);
+                          Default: =""
+                          HintText: ="Scan Lot"
+                          MaxLength: =9
+                          Align: =Align.Center
+                          Fill: |-
+                            =If(
+                                Or(
+                                    IsBlank(prod_lot.Text),
+                                    And(
+                                        Len(prod_lot.Text) = 9,
+                                        IsNumeric(Right(prod_lot.Text, 5)),
+                                        IsNumeric(Mid(prod_lot.Text, 2, 1))
+                                    ),
+                                Self.Text = "QA",
+                                Self.Text = "LAL"
+                                ),
+                                varColor5,
+                                varColorNo
+                            )
+                          Font: =Font.Verdana
+                          Height: =Parent.Height - Self.Y - Parent.Width * 0.01
+                          PaddingLeft: =5
+                          Size: =Self.Width / 14
+                          Width: =Parent.Width * 0.20
+                          X: =prod_catalog.X + prod_catalog.Width + Parent.Width * 0.02
+                          Y: =Parent.Width * 0.01
+                - prod_section_2:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.None
+                      Fill: =varColor5
+                      FillPortions: =9
+                      Height: =Parent.Height - Self.Y - Parent.Width * 0.01
+                      LayoutGap: |-
+                        =If(
+                            locDowntimeExpanded,
+                            0,
+                            Parent.Width * 0.01
+                        )
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =8
+                      RadiusBottomRight: =8
+                      RadiusTopLeft: =8
+                      RadiusTopRight: =8
+                      Width: =Parent.Width - Self.X - Parent.Width * 0.01
+                      X: =prod_section_1.X
+                      Y: =prod_section_1.Y + prod_section_1.Height + Parent.Width * 0.01
+                    Children:
+                    - prod_units:
+                        Control: GroupContainer
+                        Variant: manualLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Fill: =varColor5
+                          Height: =Parent.Height - Self.Y - Parent.Width * 0.01
+                          LayoutMinWidth: =0
+                          RadiusBottomLeft: =8
+                          RadiusBottomRight: =8
+                          RadiusTopLeft: =8
+                          RadiusTopRight: =8
+                          Visible: =!locDowntimeExpanded
+                          Width: =(Parent.Width - Self.X - Parent.Width * 0.02) / 2
+                          Y: =prod_section_1.Y + prod_section_1.Height + Parent.Height * 0.01
+                        Children:
+                        - p_m_u_gallery:
+                            Control: Gallery
+                            Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                            Properties:
+                              OnSelect: "=//SelectedState;\r\nIf(\r\n    /*If the selected ID is blank*/\r\n    IsBlankOrError(p_m_u_gallery.Selected.ID),\r\n    \r\n    /*Also check if*/\r\n    If(\r\n        /*The catalog and lot are entered correctly*/\r\n        Or(\r\n            IsBlank(prod_lot.Text),\r\n            IsBlank(prod_catalog.Text),\r\n            prod_catalog.Fill = varColorNo,\r\n            prod_lot.Fill = varColorNo\r\n        ),\r\n\r\n        /*Show error if the lot and cat are empty*/\r\n        UpdateContext({locLotError: true}),\r\n\r\n        /*Else set the unit form to new, the id to Blank, and navigate*/\r\n        Set(varUnitMode, FormMode.New);\r\n            Set(varSelectedUnitID, Blank());\r\n                Navigate(Units, ScreenTransition.CoverRight);\r\n    ),\r\n    \r\n    /*If the ID is not blank change the unit form to edit, set the ID, and navigate*/\r\n    Set(varUnitMode, FormMode.Edit);\r\n            Set(varSelectedUnitID, p_m_u_gallery.Selected.ID);\r\n                Navigate(Units, ScreenTransition.CoverRight);\r\n);\r\n"
+                              Items: |-
+                                =/* Old Gallery that pulls directly from local data, unjoined version
+                                Sort(
+                                    Filter(
+                                        collectLocalUnitData,
+                                        DateValue(Hour_Ending) = DateValue(Today()),
+                                        Line = varProductionLine,
+                                        Switch(varShiftSelect,
+                                            "A Shift",
+                                            Shift_Letter = "A",
+                                            "B Shift",
+                                            Shift_Letter = "B",
+                                            "C Shift",
+                                            Shift_Letter = "C",
+                                            "D Shift",
+                                            Shift_Letter_12h = "D",
+                                            "E Shift",
+                                            Shift_Letter_12h = "E",
+                                            "All",
+                                            Shift_Letter = Shift_Letter
+                                                )            
+                                            ),
+                                    Hour_Ending,
+                                    SortOrder.Descending
+                                    )*/
+
+
+                                /*Filter Joined collection on shift letter, sort not needed as it is built into the joined collection*/
+                                Filter(
+                                    collectJoinedUnitDisplay,
+                                    Switch(varShiftSelect,
+                                            "A Shift",
+                                            Shift_Letter = "A",
+                                            "B Shift",
+                                            Shift_Letter = "B",
+                                            "C Shift",
+                                            Shift_Letter = "C",
+                                            "All",
+                                            Shift_Letter = Shift_Letter
+                                                )
+                                    )
+                              BorderColor: =RGBA(0, 0, 0, 1)
+                              DelayItemLoading: =true
+                              Height: =Parent.Height - Self.Y
+                              Layout: =Layout.Vertical
+                              LoadingSpinner: =LoadingSpinner.Data
+                              ShowScrollbar: =false
+                              TemplatePadding: =0
+                              TemplateSize: =Self.Height / 8
+                              Transition: =Transition.Push
+                              Width: =Parent.Width
+                              X: =1-1
+                              Y: =p_m_u_header.Y + p_m_u_header.Height
+                            Children:
+                            - p_m_u_gallery_layout:
+                                Control: GroupContainer
+                                Variant: horizontalAutoLayoutContainer
+                                Properties:
+                                  Height: =Parent.TemplateHeight - p_m_u_g_seperator.Height
+                                  LayoutMode: =LayoutMode.Auto
+                                  Width: =Parent.TemplateWidth
+                                  X: =1-1
+                                  Y: =1-1
+                                Children:
+                                - p_m_u_g_time_layout:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      LayoutMode: =LayoutMode.Auto
+                                    Children:
+                                    - p_m_u_g_hour_starting:
+                                        Control: Label
+                                        Properties:
+                                          OnSelect: =Select(p_m_u_gallery)
+                                          Text: =TimeValue(ThisItem.Hour_Starting)
+                                          Align: =Align.Center
+                                          Color: =Color.Black
+                                          Fill: =varColor4
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          Height: =p_m_u_g_hour_ending.Height
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =Parent.Width/11
+                                          Size: =prod_section_2.Width / 100
+                                          Width: =Parent.Width
+                                          X: =p_m_u_g_hour_ending.X
+                                          Y: =p_m_u_g_hour_ending.Y + Self.Height
+                                    - p_m_u_g_hour_ending:
+                                        Control: Label
+                                        Properties:
+                                          OnSelect: =Select(p_m_u_gallery)
+                                          Text: =TimeValue(ThisItem.Hour_Ending)
+                                          Align: =Align.Center
+                                          Color: =Color.Black
+                                          Fill: =varColor3
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          Height: =(Parent.Height - p_m_u_g_seperator.Height)/2
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =Parent.Width/11
+                                          Size: =prod_section_2.Width / 100
+                                          Width: =Parent.Width
+                                          X: =1-1
+                                          Y: =1-1
+                                - p_m_u_g_lot_layout:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      LayoutMode: =LayoutMode.Auto
+                                    Children:
+                                    - p_m_u_g_catalog:
+                                        Control: Label
+                                        Properties:
+                                          OnSelect: =Select(p_m_u_gallery)
+                                          Text: =ThisItem.Catalog
+                                          Align: =Align.Center
+                                          Color: =Color.Black
+                                          Fill: =varColor4
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          Height: =p_m_u_g_hour_ending.Height
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =Parent.Width/11
+                                          Size: =p_m_u_g_hour_ending.Size
+                                          Width: =Parent.Width
+                                          X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 1)
+                                          Y: =p_m_u_g_hour_ending.Y + Self.Height
+                                    - p_m_u_g_lot:
+                                        Control: Label
+                                        Properties:
+                                          OnSelect: =Select(p_m_u_gallery)
+                                          Text: =ThisItem.Lot
+                                          Align: =Align.Center
+                                          Color: =Color.Black
+                                          Fill: =varColor4
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          Height: =(Parent.Height - p_m_u_g_seperator.Height)/2
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =Parent.Width/11
+                                          Size: =p_m_u_g_hour_ending.Size
+                                          Width: =Parent.Width
+                                          X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 1)
+                                          Y: =1-1
+                                - p_m_u_g_built:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: =ThisItem.Amount_Built
+                                      Align: =Align.Center
+                                      BorderColor: |-
+                                        =If(
+                                            ThisItem.Amount_Built = 0,
+                                            varColor4,
+                                            ThisItem.Amount_Built = Blank(),
+                                            varColor4,
+                                            Value(ThisItem.Amount_Built) <= Value(varGoals),
+                                            varColorNo,
+                                            Value(ThisItem.Amount_Built) >= Value(varGoals),
+                                            varColorYes,
+                                            varColor4
+                                        )
+                                      Color: |-
+                                        =If(
+                                            ThisItem.Amount_Built = 0,
+                                            varColor0,
+                                            ThisItem.Amount_Built = Blank(),
+                                            varColor0,
+                                            Value(ThisItem.Amount_Built) <= Value(varGoals),
+                                            varColor5,
+                                            Value(ThisItem.Amount_Built) >= Value(varGoals),
+                                            varColor5,
+                                            varColor0
+                                        )
+                                      Fill: |-
+                                        =If(
+                                            /*If the build amount is zero or has not been calculated*/
+                                            ThisItem.Amount_Built = 0,
+                                            varColor4,
+                                            ThisItem.Amount_Built = Blank(),
+                                            varColor4,
+                                            /*If the build amount is less than 80% goal*/
+                                            Value(ThisItem.Amount_Built) < Value(ThisItem.Goal) * 0.80,
+                                            varColorNo,
+                                            /*If the build amount is between 80% and 100% Goal*/
+                                            And(
+                                                Value(ThisItem.Amount_Built) >= Value(ThisItem.Goal) * 0.80,
+                                                Value(ThisItem.Amount_Built) < Value(ThisItem.Goal)
+                                            ),
+                                            varColor1,
+                                            /*If the built amount equals or is greater than goal*/
+                                            Value(ThisItem.Amount_Built) >= Value(ThisItem.Goal),
+                                            varColorYes,
+                                            varColor4
+                                        )
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      PaddingRight: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 2)
+                                      Y: =1-1
+                                - p_m_u_g_goal:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: |-
+                                        =If(
+                                            Value(ThisItem.Goal) = 0,
+                                            0,
+                                            ThisItem.Goal
+                                            )
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 2)
+                                      Y: =1-1
+                                - p_m_u_g_all_rejects:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: |-
+                                        =Sum(
+                                            Value(ThisItem.Reject_Units),
+                                            Value(ThisItem.Reject_Cartridges)
+                                        )
+                                      Align: =Align.Center
+                                      Color: |-
+                                        =If(
+                                            Sum(
+                                                ThisItem.Reject_Cartridges,
+                                                ThisItem.Reject_Units
+                                            ) < 1,
+                                            varColor0,
+                                            varColorNo
+                                        )
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Visible: =!locUnitsExpanded
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 2)
+                                      Y: =1-1
+                                - p_m_u_g_unit_starting:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: =ThisItem.Unit_Starting
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Visible: =locUnitsExpanded
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 3)
+                                      Y: =1-1
+                                - p_m_u_g_unit_ending:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: =ThisItem.Unit_Ending
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Visible: =locUnitsExpanded
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 4)
+                                      Y: =1-1
+                                - p_m_u_g_qa:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: =ThisItem.QA_Units
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Visible: =locUnitsExpanded
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 5)
+                                      Y: =1-1
+                                - p_m_u_g_labels:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: =ThisItem.Reject_Labels
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Visible: =locUnitsExpanded
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 6)
+                                      Y: =1-1
+                                - p_m_u_g_units:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: =ThisItem.Reject_Units
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Visible: =locUnitsExpanded
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 7)
+                                      Y: =1-1
+                                - p_m_u_g_carts:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_u_gallery)
+                                      Text: =ThisItem.Reject_Cartridges
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Visible: =locUnitsExpanded
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 8)
+                                      Y: =1-1
+                            - p_m_u_g_seperator:
+                                Control: Rectangle
+                                Properties:
+                                  OnSelect: =Parent.TemplateHeight * 0.02
+                                  Fill: =varColorAccent
+                                  Height: =Parent.TemplateHeight * 0.05
+                                  Width: =Parent.Width
+                                  X: =1-1
+                                  Y: =Parent.TemplateHeight - Self.Height
+                        - p_m_u_header:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              Height: =Parent.Height * 0.05
+                              LayoutMode: =LayoutMode.Auto
+                              Width: =Parent.Width
+                              X: =1-1
+                              Y: =p_m_u_title.Height + p_m_u_title.Y
+                            Children:
+                            - p_m_u_h_time:
+                                Control: Label
+                                Properties:
+                                  Text: ="Time"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                            - p_m_u_h_lot:
+                                Control: Label
+                                Properties:
+                                  Text: ="Lot"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                            - p_m_u_h_built:
+                                Control: Label
+                                Properties:
+                                  Text: ="Built"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                            - p_m_u_h_goal:
+                                Control: Label
+                                Properties:
+                                  Text: ="Goal"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                            - p_m_u_h_all_rejects:
+                                Control: Label
+                                Properties:
+                                  Text: ="Rejects"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                                  Visible: =!locUnitsExpanded
+                            - p_m_u_h_starting:
+                                Control: Label
+                                Properties:
+                                  Text: ="Starting Unit"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                                  Visible: =If(prod_downtime.Visible, false, true)
+                            - p_m_u_h_ending:
+                                Control: Label
+                                Properties:
+                                  Text: ="Ending Unit"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                                  Visible: =If(prod_downtime.Visible, false, true)
+                            - p_m_u_h_qa:
+                                Control: Label
+                                Properties:
+                                  Text: ="QAs"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                                  Visible: =If(prod_downtime.Visible, false, true)
+                            - p_m_u_h_labels:
+                                Control: Label
+                                Properties:
+                                  Text: ="Label Rejects"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                                  Visible: =If(prod_downtime.Visible, false, true)
+                            - p_m_u_h_units:
+                                Control: Label
+                                Properties:
+                                  Text: ="Unit Rejects"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                                  Visible: =If(prod_downtime.Visible, false, true)
+                            - p_m_u_h_cart:
+                                Control: Label
+                                Properties:
+                                  Text: ="Cart Rejects"
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 12
+                                  Visible: =If(prod_downtime.Visible, false, true)
+                        - p_m_u_title:
+                            Control: Label
+                            Properties:
+                              Text: ="Unit Entries"
+                              Align: =Align.Center
+                              BorderColor: =Color.Black
+                              Color: =RGBA(255, 255, 255, 1)
+                              Fill: =varColor2
+                              Font: =Font.Verdana
+                              Height: =Parent.Height * 0.08
+                              Size: =Self.Height / 2.5
+                              Width: =Parent.Width
+                              X: =1-1
+                              Y: =1-1
+                        - p_m_u_view_toggle:
+                            Control: Classic/Icon
+                            Variant: ExpandView
+                            Properties:
+                              OnSelect: =UpdateContext({locUnitsExpanded:!locUnitsExpanded});
+                              Color: =varColorAccent
+                              Height: =p_m_u_title.Height
+                              Icon: |-
+                                =If(
+                                    locUnitsExpanded,
+                                    Icon.CollapseView,
+                                    Icon.ExpandView
+                                )
+                              PaddingBottom: =Self.Width * 0.05
+                              PaddingLeft: =Self.Width * 0.05
+                              PaddingRight: =Self.Width * 0.05
+                              PaddingTop: =Self.Width * 0.05
+                              Width: =Self.Height
+                              X: =Parent.Width - Self.Width
+                              Y: =1-1
+                    - prod_downtime:
+                        Control: GroupContainer
+                        Variant: manualLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Fill: =varColor5
+                          Height: =prod_units.Height
+                          LayoutMinWidth: =0
+                          RadiusBottomLeft: =8
+                          RadiusBottomRight: =8
+                          RadiusTopLeft: =8
+                          RadiusTopRight: =8
+                          Visible: =!locUnitsExpanded
+                          Width: =prod_units.Width
+                          Y: =prod_units.Y
+                        Children:
+                        - p_m_d_gallery:
+                            Control: Gallery
+                            Variant: galleryVertical
+                            Properties:
+                              OnSelect: "=SelectedState;\nIf(\n    IsBlankOrError(p_m_d_gallery.Selected.ID),\n    \n    If(\n        Or(\n            IsBlank(prod_lot.Text),\n            IsBlank(prod_catalog.Text),\n            prod_catalog.Fill = varColorNo,\n            prod_lot.Fill = varColorNo\n        ),\n\n        UpdateContext({locLotError: true}),\n    \n        Set(varDowntimeMode, FormMode.New);\n            Set(varDowntimeID, Blank());\n                Navigate(Downtime_View, ScreenTransition.CoverRight);\n    ),\n    \n    Set(varDowntimeMode, FormMode.Edit);\n        Set(varDowntimeID, p_m_d_gallery.Selected.ID);\n            Navigate(Downtime_View, ScreenTransition.CoverRight);\n);"
+                              Items: |-
+                                =/*
+                                SortByColumns(
+                                    Filter(
+                                        //collectLocalDowntimeData,
+                                        Downtime,
+                                        DateValue(Started) = DateValue(Today()),
+                                        Line.Value = varProductionLine,
+                                        Switch(varShiftSelect,
+                                            "A Shift",
+                                            Shift_Letter = "A",
+                                            "B Shift",
+                                            Shift_Letter = "B",
+                                            "C Shift",
+                                            Shift_Letter = "C",
+                                            "D Shift",
+                                            Shift_Letter_12h = "D",
+                                            "E Shift",
+                                            Shift_Letter_12h = "E",
+                                            "All",
+                                            Shift_Letter = Shift_Letter
+                                            )
+                                        ),
+                                    "Started",
+                                    SortOrder.Descending
+                                    )
+                                */
+
+                                Sort(
+                                    /*Filter Joined Collection on Shift letter*/
+                                    Filter(
+                                        If(
+                                            locShowAllDowntime,
+                                            collectLocalDowntimeData,
+                                            collectJoinedDowntimeDisplay
+                                        ),
+                                        DateTimeValue(Started) >= DateAdd(Today(),-1,TimeUnit.Hours),
+                                        Switch(varShiftSelect,
+                                                "A Shift",
+                                                Shift_Letter = "A",
+                                                "B Shift",
+                                                Shift_Letter = "B",
+                                                "C Shift",
+                                                Shift_Letter = "C",
+                                                "All",
+                                                Shift_Letter = Shift_Letter
+                                                    )
+                                        ),
+                                    Ended,
+                                    SortOrder.Ascending
+                                )
+                              DelayItemLoading: =true
+                              Height: =Parent.Height - Self.Y
+                              Layout: =Layout.Vertical
+                              LoadingSpinner: =LoadingSpinner.Data
+                              ShowScrollbar: =false
+                              TemplatePadding: =0
+                              TemplateSize: =Self.Height / 8
+                              Transition: =Transition.Push
+                              Width: =Parent.Width
+                              X: =1-1
+                              Y: =p_m_d_header.Y + p_m_d_header.Height
+                            Children:
+                            - p_m_d_g_layout:
+                                Control: GroupContainer
+                                Variant: horizontalAutoLayoutContainer
+                                Properties:
+                                  Height: =Parent.TemplateHeight - p_m_d_g_seperator.Height
+                                  LayoutMode: =LayoutMode.Auto
+                                  Width: =Parent.Width
+                                  X: =1-1
+                                  Y: =1-1
+                                Children:
+                                - p_m_d_g_time_layout:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      LayoutMode: =LayoutMode.Auto
+                                    Children:
+                                    - p_m_d_g_started:
+                                        Control: Label
+                                        Properties:
+                                          OnSelect: =Select(p_m_d_gallery)
+                                          Text: =TimeValue(ThisItem.Started)
+                                          Align: =Align.Center
+                                          Color: =Color.Black
+                                          Fill: =varColor4
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          Height: =p_m_d_g_ended.Height
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =Parent.Width/11
+                                          Size: =prod_section_2.Width / 100
+                                          Width: =Parent.Width
+                                          X: =p_m_d_g_ended.X
+                                          Y: =p_m_d_g_ended.Y + Self.Height
+                                    - p_m_d_g_ended:
+                                        Control: Label
+                                        Properties:
+                                          OnSelect: =Select(p_m_d_gallery)
+                                          Text: =TimeValue(ThisItem.Ended)
+                                          Align: =Align.Center
+                                          Color: =Color.Black
+                                          Fill: =varColor3
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          Height: =(Parent.Height - p_m_u_g_seperator.Height)/2
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =Parent.Width/11
+                                          Size: =prod_section_2.Width / 100
+                                          Width: =Parent.Width
+                                          X: =1-1
+                                          Y: =1-1
+                                - p_m_d_g_lot_layout:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      LayoutMode: =LayoutMode.Auto
+                                    Children:
+                                    - p_m_d_g_catalog:
+                                        Control: Label
+                                        Properties:
+                                          OnSelect: =Select(p_m_d_gallery)
+                                          Text: =ThisItem.Catalog
+                                          Align: =Align.Center
+                                          Color: =Color.Black
+                                          Fill: =varColor4
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          Height: =p_m_u_g_hour_ending.Height
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =Parent.Width/11
+                                          Size: =prod_section_2.Width / 100
+                                          Width: =Parent.Width
+                                          X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 1)
+                                          Y: =p_m_u_g_hour_ending.Y + Self.Height
+                                    - p_m_d_g_lot:
+                                        Control: Label
+                                        Properties:
+                                          OnSelect: =Select(p_m_d_gallery)
+                                          Text: =ThisItem.Lot
+                                          Align: =Align.Center
+                                          Color: =Color.Black
+                                          Fill: =varColor4
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          Height: =(Parent.Height - p_m_u_g_seperator.Height)/2
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =Parent.Width/11
+                                          Size: =prod_section_2.Width / 100
+                                          Width: =Parent.Width
+                                          X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 1)
+                                          Y: =1-1
+                                - p_m_d_g_total:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_d_gallery)
+                                      Text: =ThisItem.Total_Downtime
+                                      Align: =Align.Center
+                                      Color: =If(Value(Self.Text) >= 48, Color.White, Color.Black)
+                                      Fill: =If(Value(Self.Text) >= 48, varColorNo, varColor4)
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 2)
+                                      Y: =1-1
+                                - p_m_d_g_reason:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_d_gallery)
+                                      Text: =ThisItem.Reason
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =1
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Size: =prod_section_2.Width / 100
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 2)
+                                      Y: =1-1
+                                - p_m_d_g_comments:
+                                    Control: Label
+                                    Properties:
+                                      OnSelect: =Select(p_m_d_gallery)
+                                      Text: =ThisItem.Comments
+                                      Align: =Align.Center
+                                      Color: =Color.Black
+                                      Fill: =varColor4
+                                      FillPortions: =3
+                                      Font: =Font.Verdana
+                                      Height: =Parent.Height
+                                      LayoutMinWidth: =0
+                                      Overflow: =Overflow.Scroll
+                                      Size: =prod_section_2.Width / 100
+                                      Visible: =locDowntimeExpanded
+                                      Width: =Parent.Width / 11
+                                      X: =p_m_u_g_hour_ending.X + (p_m_u_g_hour_ending.Width * 2)
+                                      Y: =1-1
+                            - p_m_d_g_seperator:
+                                Control: Rectangle
+                                Properties:
+                                  OnSelect: =Select(Parent);
+                                  Fill: =varColorAccent
+                                  Height: =p_m_d_gallery.TemplateHeight * 0.05
+                                  Width: =p_m_d_gallery.TemplateWidth
+                                  X: =1-1
+                                  Y: =p_m_d_gallery.TemplateHeight - Self.Height
+                        - p_m_d_header:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              Height: =Parent.Height * 0.05
+                              LayoutMode: =LayoutMode.Auto
+                              Width: =Parent.Width
+                              X: =1-1
+                              Y: =p_m_d_title.Y + p_m_d_title.Height
+                            Children:
+                            - p_m_d_h_time:
+                                Control: Label
+                                Properties:
+                                  Text: ="Time"
+                                  Align: =Align.Center
+                                  BorderColor: =Color.Black
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  LayoutMinWidth: =0
+                                  Size: =Self.Width / 13
+                                  Width: =Parent.Width/5
+                                  Y: =p_m_d_title.Height
+                            - p_m_d_h_lot:
+                                Control: Label
+                                Properties:
+                                  Text: ="Lot"
+                                  Align: =Align.Center
+                                  BorderColor: =Color.Black
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =p_m_d_h_time.Height
+                                  LayoutMinWidth: =0
+                                  Size: =p_m_d_h_time.Size
+                                  Width: =Parent.Width/5
+                                  Y: =p_m_d_title.Height
+                            - p_m_d_h_total:
+                                Control: Label
+                                Properties:
+                                  Text: ="Downtime Total"
+                                  Align: =Align.Center
+                                  BorderColor: =Color.Black
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =p_m_d_h_time.Height
+                                  LayoutMinWidth: =0
+                                  Size: =p_m_d_h_time.Size
+                                  Width: =Parent.Width/5
+                                  Y: =p_m_d_title.Height
+                            - p_m_d_h_reason:
+                                Control: Label
+                                Properties:
+                                  Text: ="Downtime Reason"
+                                  Align: =Align.Center
+                                  BorderColor: =Color.Black
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =p_m_d_h_time.Height
+                                  LayoutMinWidth: =0
+                                  Size: =p_m_d_h_time.Size
+                                  Width: =Parent.Width/5
+                                  X: =p_m_d_h_total.X + p_m_d_h_total.Width
+                                  Y: =p_m_d_title.Height
+                            - p_m_d_h_comments:
+                                Control: Label
+                                Properties:
+                                  Text: ="Comments"
+                                  Align: =Align.Center
+                                  BorderColor: =Color.Black
+                                  Color: =varColor0
+                                  Fill: =varColor3
+                                  FillPortions: =3
+                                  Font: =Font.Verdana
+                                  Height: =p_m_d_h_time.Height
+                                  LayoutMinWidth: =0
+                                  Size: =p_m_d_h_time.Size
+                                  Visible: =locDowntimeExpanded
+                                  Width: =Parent.Width/5
+                                  X: =p_m_d_h_time.X + p_m_d_h_time.Width
+                                  Y: =p_m_d_title.Height
+                        - p_m_d_title:
+                            Control: Label
+                            Properties:
+                              Text: ="Downtime Entries"
+                              Align: =Align.Center
+                              BorderColor: =Color.Black
+                              Color: =RGBA(255, 255, 255, 1)
+                              Fill: =varColor2
+                              Font: =Font.Verdana
+                              Height: =Parent.Height * 0.08
+                              Size: =Self.Height / 2.5
+                              Width: =Parent.Width
+                              X: =1-1
+                              Y: =1-1
+                        - p_m_d_view_toggle:
+                            Control: Classic/Icon
+                            Variant: ExpandView
+                            Properties:
+                              OnSelect: =UpdateContext({locDowntimeExpanded:!locDowntimeExpanded});
+                              Color: =varColorAccent
+                              Height: =p_m_u_title.Height
+                              Icon: |-
+                                =If(
+                                    locDowntimeExpanded,
+                                    Icon.CollapseView,
+                                    Icon.ExpandView
+                                )
+                              PaddingBottom: =Self.Width * 0.05
+                              PaddingLeft: =Self.Width * 0.05
+                              PaddingRight: =Self.Width * 0.05
+                              PaddingTop: =Self.Width * 0.05
+                              Width: =Self.Height
+                              X: =Parent.Width - Self.Width
+                              Y: =1-1
+                        - p_m_d_view_button:
+                            Control: Classic/Button
+                            Properties:
+                              OnSelect: |-
+                                =UpdateContext({locShowAllDowntime: !locShowAllDowntime});
+                              Text: |-
+                                =If(
+                                    locShowAllDowntime,
+                                    "Show Top Hourly",
+                                    "Show All"
+                                )
+                              Color: =varColor0
+                              Fill: =varColorAccent
+                              Font: =Font.Verdana
+                              Height: =p_m_d_title.Height  * 0.80
+                              HoverColor: =varColor0
+                              HoverFill: =ColorFade(Self.Fill, -30%)
+                              Size: |-
+                                =If(
+                                    locShowAllDowntime,
+                                    Self.Width / 10,
+                                    Self.Width / 8
+                                )
+                              Width: =prod_section_2.Width * 0.08
+                              X: =Parent.Width * 0.02
+                              Y: =p_m_d_title.Height / 2 - Self.Height / 2

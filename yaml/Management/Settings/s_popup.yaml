@@ -1,0 +1,90 @@
+- s_popup:
+    Control: GroupContainer
+    Variant: manualLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =locPopup
+      Width: =Parent.Width
+    Children:
+    - s_p_warning:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          BorderColor: =varColorNo
+          BorderThickness: =1
+          Fill: =varColor4
+          Height: =Parent.Height * 0.40
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =Parent.Width * 0.005
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap
+          PaddingRight: =Self.LayoutGap
+          PaddingTop: =Self.LayoutGap
+          Width: =Parent.Width * 0.40
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - s_p_w_title:
+            Control: Label
+            Properties:
+              Text: |-
+                ="Caution.
+
+                Calcualting averages through the app may take several minutes. Large amounts of data will be processed. For faster calculations, open the excel sheet located within the management channel in the Encapsulation Applicaitons Team titled ""Goal_Calculations"".
+
+                Do you wish to proceed?"
+              Align: =Align.Center
+              FillPortions: =2
+              Font: =Font.Verdana
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Width / 48
+        - s_p_w_cancel:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopup: false});
+              Text: ="Cancel"
+              AlignInContainer: =AlignInContainer.Center
+              Color: =varColor5
+              Fill: =varColorNo
+              FillPortions: =0.5
+              Font: =Font.Verdana
+              Height: =Parent.Height * 0.50
+              HoverColor: =varColor5
+              HoverFill: =ColorFade(Self.Fill, -50%)
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Width / 18
+              Width: =Parent.Width / 2
+              X: =903
+              Y: =20
+        - s_p_w_submit:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopup: false});
+                Select(s_collect);
+              Text: ="Calculate Averages"
+              AlignInContainer: =AlignInContainer.Center
+              Color: =varColor5
+              Fill: =varColorYes
+              FillPortions: =0.5
+              Font: =Font.Verdana
+              Height: =Parent.Height * 0.50
+              HoverColor: =varColor5
+              HoverFill: =ColorFade(Self.Fill, -50%)
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Width / 18
+              Width: =Parent.Width / 2
+              X: =903
+              Y: =20

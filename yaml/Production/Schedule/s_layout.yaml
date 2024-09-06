@@ -1,0 +1,497 @@
+- s_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+      X: =
+    Children:
+    - s_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =locPadding
+          PaddingLeft: =locPadding
+          PaddingRight: =locPadding
+          PaddingTop: =locPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - s_logo:
+            Control: Image
+            Properties:
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              FillPortions: =1
+              LayoutMinHeight: =10
+              Width: =10
+        - s_h_b_exit:
+            Control: Classic/Icon
+            Variant: ChevronLeft
+            Properties:
+              OnSelect: =Navigate(Production_View, ScreenTransition.UnCover);
+              Color: =varColorAccent
+              Height: =10
+              Icon: =Icon.ChevronLeft
+              LayoutMinHeight: =10
+              Width: =Self.Height
+              X: =Parent.Width * 0.02
+              Y: =Parent.Height/2 - Self.Height/2
+        - s_h_title:
+            Control: Text
+            Properties:
+              Align: ='TextCanvas.Align'.Center
+              FontColor: =varColor5
+              Size: =24
+              Text: ="Encapsualtion Daily Management System"
+              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+              FillPortions: =6
+              LayoutMinHeight: =8
+              LayoutMinWidth: =10
+        - s_h_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =s_h_n_bugs.Width * 1 + locPadding * 2
+            Children:
+            - s_h_n_bugs:
+                Control: Image
+                Properties:
+                  OnSelect: =Navigate(Bugs)
+                  Image: |-
+                    ="data:image/svg+xml;utf8, " & EncodeUrl("
+
+                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M80.07,33.73a24.48,24.48,0,1,0,24.48,24.48A24.51,24.51,0,0,0,80.07,33.73ZM65,47.65a1.45,1.45,0,0,1,1.7-1.16l5.62,1.06a8.34,8.34,0,0,1,7.46-4.65h.47a8.37,8.37,0,0,1,7.47,4.65l5.62-1.06a1.45,1.45,0,0,1,.54,2.85l-5.35,1a8.46,8.46,0,0,1,0,.87.85.85,0,0,1-.85.85H72.28a.85.85,0,0,1-.85-.85,6.35,6.35,0,0,1,0-.87l-5.35-1A1.45,1.45,0,0,1,65,47.65Zm28.88,19.7a1.45,1.45,0,0,1-.27,2.88,1.24,1.24,0,0,1-.27,0l-5.62-1.06a7.74,7.74,0,0,1-3.43,3.79c-1.88.82-6.8.8-8.67-.07a7.64,7.64,0,0,1-3.3-3.72L66.67,70.2a1.24,1.24,0,0,1-.27,0A1.46,1.46,0,0,1,65,69a1.44,1.44,0,0,1,1.16-1.69l5.35-1a6.35,6.35,0,0,1,0-.87v-5.3H66.16a1.45,1.45,0,1,1,0-2.9h5.27V56.06A1.09,1.09,0,0,1,72.52,55H87.46a1.09,1.09,0,0,1,1.09,1.09v1.21h5.32a1.45,1.45,0,0,1,0,2.9H88.55v5.3a8.46,8.46,0,0,1,0,.87Z'/><path class='cls-1' d='M69.91-.08a70,70,0,0,0-66,93.27c.13.38.7,1.8.82,2.12a15.3,15.3,0,0,0,25.62,5c.37-.4,2.29-2.41,2.29-2.41L47.45,83.05a2,2,0,0,1,2.92.12,38.81,38.81,0,0,0,6.27,6,2,2,0,0,1,.2,3L43.62,105.34s-3,2.72-3.65,3.29a16.13,16.13,0,0,0,5,26.69c.49.21,2.5.88,3,1.05A70,70,0,1,0,69.91-.08ZM80.07,92a33.81,33.81,0,1,1,33.81-33.81A33.85,33.85,0,0,1,80.07,92Z'/></svg>
+
+
+
+                    ")
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  X: =Parent.Width * 0.99 - Self.Width
+                  Y: =Parent.Height/2 - Self.Height/2
+    - s_body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =locPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - p_schedule:
+            Control: GroupContainer
+            Variant: manualLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              Height: =Parent.Height - Self.Y
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =Parent.Width
+              X: =1-1
+            Children:
+            - p_s_deck:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  Height: =Parent.Height * 0.98 - Self.Y
+                  Width: =Parent.Width * 0.90
+                  X: =Parent.Width/2 - Self.Width/2
+                  Y: =p_s_process.Y + p_s_process.Height + Parent.Height * 0.02
+                Children:
+                - p_s_d_gallery:
+                    Control: Gallery
+                    Variant: BrowseLayout_Vertical_ThreeTextVariant_ver4.0
+                    Properties:
+                      Items: |-
+                        =SortByColumns(
+                            SortByColumns(
+                                Filter(
+                                    'Encapsulation Schedule',
+                                    Line.Value=varProductionLine,
+                                    Or(
+                                        Status.Value = Blank(),
+                                        Status.Value = "FK = FULLY KITTED",
+                                        Status.Value = "SK = SUBS KITTED",
+                                        Status.Value = "PK = PARTS KITTED",
+                                        Status.Value = "SO = SUBS ORDERED",
+                                        Status.Value = "H = ON HOLD"
+
+                                        )
+                                    ),
+                                "Daily_x0020_Priority_x002a_"
+                                ),
+                            "issue_x0020_date_x002a_"
+                            )
+                      BorderThickness: =1
+                      DelayItemLoading: =true
+                      DisplayMode: =DisplayMode.View
+                      Fill: =varColor4
+                      Height: =Parent.Height - Self.Y
+                      Layout: =Layout.Vertical
+                      TemplatePadding: =0
+                      TemplateSize: =Self.Height / 5
+                      Transition: =Transition.Pop
+                      Width: =Parent.Width
+                      X: =Parent.Width - Parent.Width
+                      Y: =p_s_d_title.Y + p_s_d_title.Height
+                    Children:
+                    - p_s_d_g_WJ:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: |-
+                            =ThisItem.'WJ #'
+                          Align: =Align.Center
+                          Font: =Font.Verdana
+                          Height: =(Parent.TemplateHeight - p_s_d_g_seperator.Height) / 2
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =Self.Height*0.1
+                          Size: =Self.Height/2.5
+                          Width: =Parent.TemplateWidth / 5
+                          X: =Parent.TemplateWidth - Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight - Parent.TemplateHeight
+                    - p_s_d_g_cat:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =Text(ThisItem.'Catalog Number*')
+                          Align: =Align.Center
+                          Font: =Font.Verdana
+                          Height: =p_s_d_g_WJ.Height
+                          PaddingTop: =0
+                          Size: =p_s_d_g_WJ.Size
+                          Width: =p_s_d_g_WJ.Width
+                          X: =p_s_d_g_WJ.X
+                          Y: =p_s_d_g_WJ.Y + p_s_d_g_WJ.Height
+                    - p_s_d_g_units:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: |-
+                            =/*
+                            "Priority " & 
+                            If(
+                                ThisItem.'Daily Priority*'="0",
+                                0,
+                                Left(
+                                    ThisItem.'Daily Priority*',
+                                    Find(".",ThisItem.'Daily Priority*')-1)
+                            )
+                            */
+                            Round(ThisItem.'# of units*',0) & " Units"
+                          Align: =Align.Center
+                          Font: =Font.Verdana
+                          Height: =p_s_d_g_WJ.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Size: =p_s_d_g_WJ.Size
+                          Width: =p_s_d_g_WJ.Width
+                          X: =p_s_d_g_WJ.X + p_s_d_g_WJ.Width
+                          Y: =p_s_d_g_WJ.Y
+                    - p_s_d_g_status:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =ThisItem.Status.Value
+                          Align: =Align.Center
+                          Color: =If(Self.Text = "H = ON HOLD", Color.White, RGBA(0, 0, 0, 1))
+                          Fill: =If(Self.Text = "H = ON HOLD", varColorNo, RGBA(0, 0, 0, 0))
+                          Font: =Font.Verdana
+                          Height: =p_s_d_g_WJ.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Size: =p_s_d_g_WJ.Size / 1.25
+                          Width: =p_s_d_g_WJ.Width
+                          X: =p_s_d_g_WJ.X + p_s_d_g_WJ.Width
+                          Y: =p_s_d_g_units.Y + p_s_d_g_units.Height
+                    - p_s_d_g_printed_title:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: ="Labels Printed?"
+                          Align: =Align.Center
+                          Font: =Font.Verdana
+                          Height: =p_s_d_g_WJ.Height
+                          PaddingTop: =Self.Height*0.1
+                          Size: =p_s_d_g_WJ.Size
+                          Width: =p_s_d_g_WJ.Width
+                          X: =p_s_d_g_WJ.X + (p_s_d_g_WJ.Width * 2)
+                          Y: =p_s_d_g_WJ.Y
+                    - p_s_d_g_printed:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =Text(ThisItem.'Labels Printed'.Value)
+                          Align: =Align.Center
+                          Color: =varColor5
+                          Fill: |-
+                            =Switch(Text(ThisItem.'Labels Printed'.Value),
+                            "Yes",
+                            varColorYes,
+                            "No",
+                            varColorNo
+                            )
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Bold
+                          Height: =p_s_d_g_WJ.Height
+                          PaddingTop: =0
+                          Size: =14
+                          Width: =p_s_d_g_WJ.Width
+                          X: =p_s_d_g_WJ.X + (p_s_d_g_WJ.Width * 2)
+                          Y: =p_s_d_g_printed_title.Y + p_s_d_g_printed_title.Height
+                    - p_s_d_g_comments:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: |-
+                            =//"Start Date " & Text(DateTimeValue(ThisItem.'Start Date*'), "yyyy-mm-dd")
+                            Text(ThisItem.Comments)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Lighter
+                          Height: =p_s_d_g_WJ.Height * 2
+                          Overflow: =Overflow.Scroll
+                          PaddingBottom: =Self.Height * 0.05
+                          PaddingLeft: =Self.Height * 0.10
+                          PaddingRight: =Self.Height * 0.05
+                          PaddingTop: =Self.Height * 0.05
+                          Size: =p_s_d_g_WJ.Size / 1.3
+                          Width: =p_s_d_g_WJ.Width * 2
+                          X: =p_s_d_g_printed.X + p_s_d_g_printed.Width
+                          Y: =p_s_d_g_WJ.Y
+                    - p_s_d_g_seperator:
+                        Control: Rectangle
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Fill: =varColorAccent
+                          Height: =Parent.TemplateHeight * 0.05
+                          Width: =Parent.TemplateWidth
+                          X: =Parent.TemplateWidth - Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight - Self.Height
+                - p_s_d_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Jobs On Deck"
+                      Align: =Align.Center
+                      Color: =varColor5
+                      Fill: =varColor2
+                      Font: =Font.Verdana
+                      Height: =p_schedule.Height * 0.05
+                      Size: =Self.Width / 68
+                      Width: =Parent.Width
+                      X: =Parent.Width/2 - Self.Width/2
+                      Y: =Parent.Height - Parent.Height
+            - p_s_process:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  Height: =Parent.Height * 0.20
+                  Width: =Parent.Width * 0.90
+                  X: =Parent.Width/2 - Self.Width/2
+                  Y: =Parent.Height * 0.02
+                Children:
+                - p_s_p_gallery:
+                    Control: Gallery
+                    Variant: BrowseLayout_Vertical_ThreeTextVariant_ver4.0
+                    Properties:
+                      Items: |-
+                        =SortByColumns(
+                            Filter(
+                                'Encapsulation Schedule',
+                                Line.Value=varProductionLine,
+                                Status.Value="IP = IN PROCESS"
+                                ),
+                            "Daily_x0020_Priority_x002a_"
+                            )
+                      DelayItemLoading: =true
+                      DisplayMode: =DisplayMode.View
+                      Fill: =varColor4
+                      Height: =Parent.Height - Self.Y
+                      Layout: =Layout.Vertical
+                      TemplatePadding: =0
+                      TemplateSize: =Self.Height
+                      Transition: =Transition.Pop
+                      Width: =Parent.Width
+                      X: =Parent.Width - Parent.Width
+                      Y: =p_s_p_title.Y + p_s_p_title.Height
+                    Children:
+                    - p_s_p_g_WJ:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: |-
+                            =ThisItem.'WJ #'
+                          Align: =Align.Center
+                          Font: =Font.Verdana
+                          Height: =(Parent.Height - p_s_p_g_seperator.Height) /2
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =Self.Height*0.1
+                          Size: =Self.Height / 2.5
+                          Width: =Parent.TemplateWidth / 5
+                          X: =Parent.TemplateWidth - Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight - Parent.TemplateHeight
+                    - p_s_p_g_cat:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =Text(ThisItem.'Catalog Number*')
+                          Align: =Align.Center
+                          Font: =Font.Verdana
+                          Height: =(Parent.TemplateHeight - p_s_p_g_seperator.Height) / 2
+                          PaddingTop: =Self.Height*0.1
+                          Size: =p_s_p_g_WJ.Size
+                          Width: =Parent.Width / 5
+                          X: =Parent.TemplateWidth - Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight/2
+                    - p_s_p_g_units:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =Left(ThisItem.'# of units*', Find(".",ThisItem.'# of units*')-1) & " Units"
+                          Align: =Align.Center
+                          Font: =Font.Verdana
+                          Height: =(Parent.TemplateHeight - p_s_p_g_seperator.Height)
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =Self.Height*0.1
+                          Size: =p_s_p_g_WJ.Size
+                          Width: =p_s_p_g_WJ.Width
+                          X: =p_s_p_g_WJ.X + p_s_p_g_WJ.Width
+                          Y: =Parent.Height - Parent.Height
+                    - p_s_p_g_printed_title:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: ="Labels Printed?"
+                          Align: =Align.Center
+                          Font: =Font.Verdana
+                          Height: =p_s_p_g_WJ.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =Self.Height*0.1
+                          Size: =p_s_p_g_WJ.Size
+                          Width: =p_s_p_g_WJ.Width
+                          X: =p_s_p_g_WJ.X + (p_s_p_g_WJ.Width * 2)
+                          Y: =Parent.Height - Parent.Height
+                    - p_s_p_g_printed:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =Text(ThisItem.'Labels Printed'.Value)
+                          Align: =Align.Center
+                          Color: =varColor5
+                          Fill: |-
+                            =Switch(
+                                Text(ThisItem.'Labels Printed'.Value),
+                                "Yes",
+                                varColorYes,
+                                "No",
+                                varColorNo
+                            )
+                          Font: =Font.Verdana
+                          Height: =p_s_p_g_WJ.Height
+                          Size: =p_s_p_g_WJ.Size
+                          Width: =p_s_p_g_WJ.Width
+                          X: =p_s_p_g_printed_title.X
+                          Y: '=p_s_p_g_printed_title.Y + p_s_p_g_printed_title.Height '
+                    - p_s_p_g_comments:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =ThisItem.Comments
+                          Fill: =RGBA(255, 255, 255, 0)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Lighter
+                          Height: =Parent.TemplateHeight - p_s_p_g_seperator.Height
+                          Overflow: =Overflow.Scroll
+                          PaddingBottom: =Self.Height * 0.05
+                          PaddingLeft: =Self.Height * 0.10
+                          PaddingRight: =Self.Height * 0.05
+                          PaddingTop: =Self.Height * 0.05
+                          Size: =p_s_p_g_WJ.Size / 1.3
+                          Width: =Parent.TemplateWidth - Self.X
+                          X: =p_s_p_g_WJ.X + (p_s_p_g_WJ.Width * 3)
+                          Y: =Parent.TemplateHeight - Parent.TemplateHeight
+                    - p_s_p_g_seperator:
+                        Control: Rectangle
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Fill: =varColorAccent
+                          Height: =Parent.Height * 0.05
+                          Width: =Parent.TemplateWidth
+                          X: =Parent.Width - Parent.Width
+                          Y: =Parent.TemplateHeight - Self.Height
+                - p_s_p_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Job in Process"
+                      Align: =Align.Center
+                      Color: =varColor5
+                      Fill: =varColor2
+                      Font: =Font.Verdana
+                      Height: =p_schedule.Height * 0.05
+                      Size: =Self.Width / 68
+                      Width: =Parent.Width
+                      X: =Parent.Width - Parent.Width
+                      Y: =Parent.Height - Parent.Height
