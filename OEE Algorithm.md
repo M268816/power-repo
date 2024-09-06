@@ -1,6 +1,6 @@
 # OEE2 Algorithm
 
-#### Preferred OEE
+## Preferred OEE
 > OEE = Quality * Performance * Availability
 
 Quality = Good Widgets / Total Widgets
@@ -10,12 +10,25 @@ Performance = Widget Output / Ideal Widget Output
 Availability = Runtime - Downtime / Total Time
 
 
-#### Millipore OEE1/OEE2 Calculations 
+## Millipore OEE1/OEE2 Calculations 
 > OEE1 = Output / (Ideal Output * Total Runtime)
 
 > OEE2 = Output / (Ideal Output * Planned Runtime)
 
 The ideal output is the constraint speed for each line, the slowest process of any line. For most XL lines this is the Uson Tester. 
+
+
+## OEE2 Algorithm Breakdown.
+
+The algorithm we use to gather and calculate OEE2 uses the same premise as the LSPS OEE2 calculation, but needed to be adapted to take into account the ideal output constraint variances from the catalog level constraints within the encapsulation lines. So, as a line switches products, we need to also change the constraint for the specific catalogs that run. To adjust for this, the ideal output is calcualted by each catalog that was run on the line. For example if we run a 10 inch product for 3 hours at 40 units per hour, and a 3 inch product for 4 hours at a 30 units per hour and 1 hour of planned downtime. We multiply the 3 hours of 10 inch by 40, the 4 hours of 3 inch by 30, sum them, then add them into the OEE2 calculation. The single hour of planned downtime is not added, as we only need the total planned runtime Lets also say the total output was only 100 units that shift as well.
+
+> OEE2 = 100 / ((40x3)+(30x4))
+> OEE2 = 0.4166 or 41.66% OEE
+
+Let's saty that the last hour of the shift was planned downtime, that extra hour would then be added onto the 3 inch product and counted as lost production, reducing the OEE percentage.
+
+> OEE2 = 100 / ((40x3)+(30x5))
+> OEE2 = 0.3703 or 37.03%
 
 
 ## Collecting Shift Specific OEE2 Data
@@ -413,7 +426,7 @@ The other data collected in the intial algorithm is used to display the data on 
 
 ## Collecting All OEE2 Data
 
-Collecting the OEE data works in a simmilar fashion, but without ne need to distinguish between each shift. The miggest difference in this algorithm is that it collects much more "display" data. Data that is pished to the screen to verify the final OEE2 percentage.
+Collecting the OEE data works in a simmilar fashion, but without the need to distinguish between each shift. The biggest difference in this algorithm is that it collects much more "display" data. Data that is pushed to the screen to verify the final OEE2 percentage.
 
 ``` c#
 /*Gather OEE Data*/
