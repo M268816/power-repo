@@ -36,7 +36,7 @@ Let's say that the last hour of the shift was planned runtime, that extra hour w
 
 This first step described above is added to a "constraint goal" array that will be used in the calculation to represent the Ideal Ouput multiplied by Planned Runtime.
 
-> OEE2 = Output / **(Ideal Output * Planned Runtime)**
+> OEE2 = Output / **(Ideal Output \* Planned Runtime)**
 
 > OEE2 = Output / ***Constraint Goal***
 
@@ -51,7 +51,7 @@ The problem with this method is the data collection itself. It relies on an oper
 
 To parse the data for OEE2 as accurately as possible, data must be collected for each shift, line, and catalog. The most important being each catalog, as each has its own operational constraint. From those filters we collect the unit output, constraint data, and runtime data.
 
-``` c#
+``` cs
 /*Gather Shift Specific OEE Data*/
 Set(varLoading,{Visible: true, Value: 60, Text: "Gathering OEE2 Data for Shifts"});
 /*Init this collection here or powerapps breaks*/
@@ -218,7 +218,7 @@ With(
 
 The constraint setting is collected through a database that holds all constraint data per catalog.
 
-``` c#
+``` cs
 constraint_setting:
     IfError(
         Average(
@@ -234,7 +234,7 @@ constraint_setting:
 
 The output is then collected by gathering the sum of the built units.
 
-``` c#
+``` cs
 output:
     Sum(
         Filter(collectProduction,
@@ -252,7 +252,7 @@ output:
 
 The runtime is calculated by finding the sum of all recorded runtime and outlying downtime that does not fall within the already recorded runtime or any OEE1 downtime codes.
 
-``` c#
+``` cs
 runtime:
     (
         /*Collect Runtime Minutes From Production*/
@@ -279,7 +279,7 @@ runtime:
 
 We then find a constraint goal to simplify the alrogithm while calculating OEE2. Within the OEE2 calculation this is determined to be the the Ideal Ouput multiplied by the Planned Runtime. And the following acts as the same calculation.
 
-```c#
+```cs
 constraint_goal:
     /*Constraint *  Runtime*/
     /*Constraint*/
@@ -321,7 +321,7 @@ constraint_goal:
 
 The collected data is then calculated through the OEE2 algorithm.
 
-``` c#
+``` cs
 /*Calculate Shift Specific OEE Data*/
 Set(varLoading,{Visible: true, Value: 65, Text: "Calculating OEE2 for Shifts"});
 Clear(collectShiftOEE);
@@ -420,7 +420,7 @@ ForAll(collectShiftSchema,
 
 OEE2 is calculated as the sum of the unit output / the constraint goal. It is converted to a percentile and rounded to the nearest thousandth.
 
-``` c#
+``` cs
 OEE2:
     IfError(
         Round(
@@ -444,7 +444,7 @@ The other data collected in the intial algorithm is used to display the data on 
 
 Collecting the OEE data works in a simmilar fashion, but without the need to distinguish between each shift. The biggest difference in this algorithm is that it collects much more "display" data. Data that is pushed to the screen to verify the final OEE2 percentage.
 
-``` c#
+``` cs
 /*Gather OEE Data*/
 Set(varLoading,{Visible: true, Value: 70, Text: "Gathering OEE2 Data"});
 /*
