@@ -20,13 +20,14 @@ The ideal output is the constraint speed for each line, the slowest process of a
 
 ## OEE2 Algorithm Breakdown.
 
-The algorithm we use to gather and calculate OEE2 uses the same premise as the LSPS OEE2 calculation, but needed to be adapted to take into account the ideal output constraint variances from the catalog level constraints within the encapsulation lines. So, as a line switches products, we need to also change the constraint for the specific catalogs that run. To adjust for this, the ideal output is calcualted by each catalog that was run on the line. For example if we run a 10 inch product for 3 hours at 40 units per hour, and a 3 inch product for 4 hours at a 30 units per hour and 1 hour of planned downtime. We multiply the 3 hours of 10 inch by 40, the 4 hours of 3 inch by 30, sum them, then add them into the OEE2 calculation. The single hour of planned downtime is not added, as we only need the total planned runtime Lets also say the total output was only 100 units that shift as well.
+The algorithm we use to gather and calculate OEE2 uses the same premise as the LSPS OEE2 calculation but needed to be adapted to consider the ideal output constraint variances from each catalog and line. So, as a line switches products, we need to also change the constraint for the specific catalogs that run and not supply a baseline or average constraint.
+To adjust for this, the ideal output is calculated by each catalog that was run on the line. For example, if we run a 10-inch product for 3 hours at 40 units per hour, and a 3-inch product for 4 hours at a 30 units per hour and 1 hour of planned downtime. We multiply the 3 hours of 10-inch by 40, the 4 hours of 3-inch by 30, sum them, then add them into the OEE2 calculation. The single hour of planned downtime is not added, as we only need the total planned runtime. Let’s also say the total output was only 100 units that shift as well.
 
 > OEE2 = 100 / ((40x3)+(30x4))
 
 > OEE2 = 0.4166 or 41.66% OEE
 
-Let's saty that the last hour of the shift was planned downtime, that extra hour would then be added onto the 3 inch product and counted as lost production, reducing the OEE percentage.
+Let's say that the last hour of the shift was planned downtime, that extra hour would then be added onto the 3 inch product and counted as lost production, reducing the OEE percentage.
 
 > OEE2 = 100 / ((40x3)+(30x5))
 
