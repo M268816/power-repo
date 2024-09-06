@@ -34,7 +34,172 @@
         - h_collect:
             Control: Classic/Button
             Properties:
-              OnSelect: "=/*Start*/\nSet(varLoading,{Visible: true, Value: 1, Text: \"Loading\"});\n\n/*Update Dates Variables*/\nUpdateContext({\n    locEndDate: varNowDay,\n    locStartDate: varNowDay\n    \n});\n\n/*Check if collections need updating*/\nSet(varLoading,{Visible: true, Value: 5, Text: \"Checking for updates\"});\nSet(varUpdateProduction,\n    /*Or(\n        Not(First(Sort(Production,ID,SortOrder.Descending)).ID = First(Sort(collectProduction,id,SortOrder.Descending)).id),\n        Not(varEndDate = locEndDate),\n        Not(varStartDate = locStartDate)\n    )*/\n    true\n);\n\n/*Set collection dates from selected local dates*/\nIf( Not(varEndDate = locEndDate), Set(varEndDate, locEndDate));\nIf( Not(varStartDate = locStartDate), Set(varStartDate, locStartDate));\n\n/*Collect Production*/\nSet(varLoading,{Visible: true, Value: 10, Text: \"Collecting Production Data\"});\nIf(varUpdateProduction,\n    If(\n        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,\n        Set(varLoading,{Visible: true, Value: 75, Text: \"Retrieving Production Data\"});\n        ClearCollect(collectProduction,\n            ForAll(\n                Filter(Production,\n                    Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),\n                    Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)\n                ),\n                {\n                    id: Value(ThisRecord.ID),\n                    shift: Text(ThisRecord.Shift_Letter),\n                    line: Text(ThisRecord.Line.Value),\n                    lot: Text(ThisRecord.Lot),\n                    catalog: Text(ThisRecord.Catalog),\n                    size: Text(ThisRecord.Size),\n                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),\n                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),\n                    goal: Value(ThisRecord.Hourly_Goal),\n                    amount_built: Value(ThisRecord.Amount_Built),\n                    unit_starting: Value(ThisRecord.Unit_Starting),\n                    unit_ending: Value(ThisRecord.Unit_Ending),\n                    reject_labels: Value(ThisRecord.Reject_Labels),\n                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),\n                    reject_units: Value(ThisRecord.Reject_Units),\n                    qa_units: Value(ThisRecord.QA_Units)\n                }\n            )\n        ),\n\n        DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,\n        Set(varLoading,{Visible: true, Value: 75, Text: \"Parsing PowerAutomate Flow\"});\n        ClearCollect(collectProduction,\n            ForAll(\n                Table(\n                    ParseJSON(\n                        flow_get_units_range_v2.Run(\n                            Text(\"All\"),\n                            Text(DateAdd(varEndDate, 23,TimeUnit.Hours), \"yyyy-mm-dd\"),\n                            Text(DateAdd(varStartDate, -1, TimeUnit.Hours), \"yyyy-mm-dd\")\n                        ).output\n                    )\n                ),\n                {\n                    id: Value(Value._ID),\n                    shift: Text(Value._shift),\n                    line: Text(Value._line),\n                    lot: Text(Value._lot),\n                    catalog: Text(Value._catalog),\n                    size: Text(Value._size),\n                    hour_ending: DateTimeValue(Value._hour_ending),\n                    hour_starting: DateTimeValue(Value._hour_starting),\n                    goal: Value(Value._goal),\n                    amount_built: Value(Value._amount_built),\n                    unit_starting: Value(Value._unit_starting),\n                    unit_ending: Value(Value._unit_ending),\n                    reject_labels: Value(Value._reject_labels),\n                    reject_cartridges: Value(Value._reject_cartridges),\n                    reject_units: Value(Value._reject_units),\n                    qa_units: Value(Value._qa)\n                }\n            )\n        ),\n\n        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,\n        Set(varLoading,{Visible: true, Value: 20, Text: \"Collecting Dataset 1\"});\n        Collect(material_1,\n            Sort(\n                Filter(Production,\n                    And(\n                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),\n                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        \n                    )\n                ),\n                Hour_Ending,\n                SortOrder.Ascending\n            )\n        );\n\n        Set(varLoading,{Visible: true, Value: 30, Text: \"Collecting Dataset 2\"});\n        Collect(material_2,\n            Sort(\n                Filter(Production,\n                    And(\n                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),\n                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        \n                    )\n                ),\n                Hour_Ending,\n                SortOrder.Descending\n            )\n        );\n\n        Set(varLoading,{Visible: true, Value: 40, Text: \"Inserting Dataset 1\"});\n        ClearCollect(fusion, material_1);\n\n        Set(varLoading,{Visible: true, Value: 50, Text: \"Inserting Dataset 2\"});\n        Collect(fusion,\n            Filter(material_2, Not(ID in material_1.ID))\n        );\n\n        Set(varLoading,{Visible: true, Value: 75, Text: \"Collecting Production Data from Joined Data\"});\n        ClearCollect(\n            collectProduction,\n            ForAll(\n                fusion,\n                {\n                    id: Value(ThisRecord.ID),\n                    shift: Text(ThisRecord.Shift_Letter),\n                    line: Text(ThisRecord.Line.Value),\n                    lot: Text(ThisRecord.Lot),\n                    catalog: Text(ThisRecord.Catalog),\n                    size: Text(ThisRecord.Size),\n                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),\n                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),\n                    goal: Value(ThisRecord.Hourly_Goal),\n                    amount_built: Value(ThisRecord.Amount_Built),\n                    unit_starting: Value(ThisRecord.Unit_Starting),\n                    unit_ending: Value(ThisRecord.Unit_Ending),\n                    reject_labels: Value(ThisRecord.Reject_Labels),\n                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),\n                    reject_units: Value(ThisRecord.Reject_Units),\n                    qa_units: Value(ThisRecord.QA_Units)\n                }\n            )\n        );\n\n        Set(varLoading,{Visible: true, Value: 80, Text: \"Garbage Collection\"});\n        Clear(fusion);\n        Clear(material_1);\n        Clear(material_2);\n    )\n);\n\n/*Update*/\nSet(varLoading,{Visible: true, Value: 100, Text: \"Finishing Collection\"});\nSet(varLoading,{Visible: false, Value: -1, Text: \"Not Loading\"});"
+              OnSelect: |-
+                =/*Start*/
+                Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
+
+                /*Update Dates Variables*/
+                UpdateContext({
+                    locEndDate: varNowDay,
+                    locStartDate: varNowDay
+                    
+                });
+
+                /*Check if collections need updating*/
+                Set(varLoading,{Visible: true, Value: 5, Text: "Checking for updates"});
+                Set(varUpdateProduction,
+                    /*Or(
+                        Not(First(Sort(Production,ID,SortOrder.Descending)).ID = First(Sort(collectProduction,id,SortOrder.Descending)).id),
+                        Not(varEndDate = locEndDate),
+                        Not(varStartDate = locStartDate)
+                    )*/
+                    true
+                );
+
+                /*Set collection dates from selected local dates*/
+                If( Not(varEndDate = locEndDate), Set(varEndDate, locEndDate));
+                If( Not(varStartDate = locStartDate), Set(varStartDate, locStartDate));
+
+                /*Collect Production*/
+                Set(varLoading,{Visible: true, Value: 10, Text: "Collecting Production Data"});
+                If(varUpdateProduction,
+                    If(
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Retrieving Production Data"});
+                        ClearCollect(collectProduction,
+                            ForAll(
+                                Filter(Production,
+                                    Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                    Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)
+                                ),
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Lot),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    size: Text(ThisRecord.Size),
+                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                                    goal: Value(ThisRecord.Hourly_Goal),
+                                    amount_built: Value(ThisRecord.Amount_Built),
+                                    unit_starting: Value(ThisRecord.Unit_Starting),
+                                    unit_ending: Value(ThisRecord.Unit_Ending),
+                                    reject_labels: Value(ThisRecord.Reject_Labels),
+                                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),
+                                    reject_units: Value(ThisRecord.Reject_Units),
+                                    qa_units: Value(ThisRecord.QA_Units)
+                                }
+                            )
+                        ),
+
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Parsing PowerAutomate Flow"});
+                        ClearCollect(collectProduction,
+                            ForAll(
+                                Table(
+                                    ParseJSON(
+                                        flow_get_units_range_v2.Run(
+                                            Text("All"),
+                                            Text(DateAdd(varEndDate, 23,TimeUnit.Hours), "yyyy-mm-dd"),
+                                            Text(DateAdd(varStartDate, -1, TimeUnit.Hours), "yyyy-mm-dd")
+                                        ).output
+                                    )
+                                ),
+                                {
+                                    id: Value(Value._ID),
+                                    shift: Text(Value._shift),
+                                    line: Text(Value._line),
+                                    lot: Text(Value._lot),
+                                    catalog: Text(Value._catalog),
+                                    size: Text(Value._size),
+                                    hour_ending: DateTimeValue(Value._hour_ending),
+                                    hour_starting: DateTimeValue(Value._hour_starting),
+                                    goal: Value(Value._goal),
+                                    amount_built: Value(Value._amount_built),
+                                    unit_starting: Value(Value._unit_starting),
+                                    unit_ending: Value(Value._unit_ending),
+                                    reject_labels: Value(Value._reject_labels),
+                                    reject_cartridges: Value(Value._reject_cartridges),
+                                    reject_units: Value(Value._reject_units),
+                                    qa_units: Value(Value._qa)
+                                }
+                            )
+                        ),
+
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,
+                        Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Dataset 1"});
+                        Collect(material_1,
+                            Sort(
+                                Filter(Production,
+                                    And(
+                                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        
+                                    )
+                                ),
+                                Hour_Ending,
+                                SortOrder.Ascending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 30, Text: "Collecting Dataset 2"});
+                        Collect(material_2,
+                            Sort(
+                                Filter(Production,
+                                    And(
+                                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        
+                                    )
+                                ),
+                                Hour_Ending,
+                                SortOrder.Descending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 40, Text: "Inserting Dataset 1"});
+                        ClearCollect(fusion, material_1);
+
+                        Set(varLoading,{Visible: true, Value: 50, Text: "Inserting Dataset 2"});
+                        Collect(fusion,
+                            Filter(material_2, Not(ID in material_1.ID))
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Collecting Production Data from Joined Data"});
+                        ClearCollect(
+                            collectProduction,
+                            ForAll(
+                                fusion,
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Lot),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    size: Text(ThisRecord.Size),
+                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                                    goal: Value(ThisRecord.Hourly_Goal),
+                                    amount_built: Value(ThisRecord.Amount_Built),
+                                    unit_starting: Value(ThisRecord.Unit_Starting),
+                                    unit_ending: Value(ThisRecord.Unit_Ending),
+                                    reject_labels: Value(ThisRecord.Reject_Labels),
+                                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),
+                                    reject_units: Value(ThisRecord.Reject_Units),
+                                    qa_units: Value(ThisRecord.QA_Units)
+                                }
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 80, Text: "Garbage Collection"});
+                        Clear(fusion);
+                        Clear(material_1);
+                        Clear(material_2);
+                    )
+                );
+
+                /*Update*/
+                Set(varLoading,{Visible: true, Value: 100, Text: "Finishing Collection"});
+                Set(varLoading,{Visible: false, Value: -1, Text: "Not Loading"});
               Text: ="collect"
               Visible: =false
               X: =20

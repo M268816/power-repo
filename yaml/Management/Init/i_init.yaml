@@ -2,7 +2,7 @@
     Control: Classic/Button
     Properties:
       OnSelect: |-
-        Set(varLoading, {Visible: true, Value:-1, Text: "Starting the Application"});
+        =Set(varLoading, {Visible: true, Value:-1, Text: "Starting the Application"});
 
         /*Load navigation first*/
         ClearCollect(collectNavigation,
