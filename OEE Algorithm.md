@@ -20,18 +20,31 @@ The ideal output is the constraint speed for each line, the slowest process of a
 
 ## OEE2 Algorithm Breakdown.
 
-The algorithm we use to gather and calculate OEE2 uses the same premise as the LSPS OEE2 calculation but needed to be adapted to consider the ideal output constraint variances from each catalog and line. So, as a line switches products, we need to also change the constraint for the specific catalogs that run and not supply a baseline or average constraint.
-To adjust for this, the ideal output is calculated by each catalog that was run on the line. For example, if we run a 10-inch product for 3 hours at 40 units per hour, and a 3-inch product for 4 hours at a 30 units per hour and 1 hour of planned downtime. We multiply the 3 hours of 10-inch by 40, the 4 hours of 3-inch by 30, sum them, then add them into the OEE2 calculation. The single hour of planned downtime is not added, as we only need the total planned runtime. Let’s also say the total output was only 100 units that shift as well.
+The algorithm we use to gather and calculate OEE2 uses the same premise as the LSPS OEE2 calculation but needed to be adapted to consider the ideal output constraint variances from each catalog and line. So, as a line switches products, we need to also change the constraint for the specific catalogs that run.
 
-> OEE2 = 100 / ((40x3)+(30x4))
+To adjust for this, the ideal output is calculated for each catalog run on the line. For example, if we run a 10-inch product for 3 hours at 40 units per hour, and a 3-inch product for 4 hours at a 30 units per hour and 1 hour of planned downtime. We multiply the 3 hours of 10-inch by 40, the 4 hours of 3-inch by 30, sum them, then parse them through the OEE2 calculation afterard. The single hour of planned downtime is not added, as we only need the total planned runtime. Let’s also say the total output was only 100 units that shift as well.
+
+> OEE2 = 100 / ((3\*40)+(4\*30))
 
 > OEE2 = 0.4166 or 41.66% OEE
 
-Let's say that the last hour of the shift was planned downtime, that extra hour would then be added onto the 3 inch product and counted as lost production, reducing the OEE percentage.
+Let's say that the last hour of the shift was planned runtime, that extra hour would then be added onto the 3 inch product and counted as lost production, reducing the OEE percentage.
 
-> OEE2 = 100 / ((40x3)+(30x5))
+> OEE2 = 100 / ((40\*3)+(30\*5))
 
 > OEE2 = 0.3703 or 37.03%
+
+This first step described above is added to a "constraint goal" array that will be used in the calculation to represent the Ideal Ouput multiplied by Planned Runtime.
+
+> OEE2 = Output / **(Ideal Output * Planned Runtime)**
+
+> OEE2 = Output / ***Constraint Goal***
+
+Each "constraint goal" is added together like we did above before returning the percantage from the total output.
+
+This relies on the filters given to the instructions for data collection beforehand. This means you can return a percentile of a single line, for a single day; or every line for months. Because of this constraint agnostic behaviour, the data *should* be extreamly reliable.
+
+The problem with this method is the data collection itself. It relies on an operator facing data entry method with only volunteer verification of the data from leads.
 
 
 ## Collecting Shift Specific OEE2 Data
@@ -405,7 +418,7 @@ ForAll(collectShiftSchema,
 );
 ```
 
-OEE2 is calculated as the sum of the unit output / the constraint goal. It is calculated into a 100 base percentile and rounded to the nearest thousandth.
+OEE2 is calculated as the sum of the unit output / the constraint goal. It is converted to a percentile and rounded to the nearest thousandth.
 
 ``` c#
 OEE2:
