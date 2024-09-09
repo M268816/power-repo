@@ -1,4 +1,6 @@
-# MilliporeSigma Encapsulation Applications 
+# MilliporeSigma Encapsulation Applications
+
+<div style="margin: auto; width: 60%;">
 
 | Application        | Version           | Status          |
 | ------------------ |:-----------------:| ---------------:|
@@ -12,6 +14,8 @@
 | V-Line Daily Management System for Management | v0.1.0 | WIP |
 | V-Line Daily Management System for Production | v0.0.0 | TBD |
 | V-Line Daily LinkHub | v0.0.0 | TBD |
+
+</div>
 
 ## PowerApps Packages
 

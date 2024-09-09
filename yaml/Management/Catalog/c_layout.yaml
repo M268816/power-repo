@@ -23,13 +23,14 @@
           DropShadow: =DropShadow.None
           Fill: =varColor1
           LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =locPadding
-          PaddingLeft: =locPadding
-          PaddingRight: =locPadding
-          PaddingTop: =locPadding
+          PaddingBottom: =varPadding
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
@@ -38,20 +39,501 @@
         - c_update:
             Control: Classic/Button
             Properties:
-              OnSelect: "=/*Update Code*/\nUpdateContext({locLoading:{Visible: true, Value: 10, Text: \"Updating\"}});\n\nUpdateContext(\n    {        \n        count_of_days:\n            RoundDown(\n                DateDiff(c_start_date.SelectedDate, c_end_date.SelectedDate, TimeUnit.Days) / 7,\n                0\n            ) * 5 +\n            Mod(5 + Weekday(c_end_date.SelectedDate) - Weekday(c_start_date.SelectedDate), 5) + 1\n    }\n);\n\nUpdateContext({locLoading:{Visible: true, Value: 20, Text: \"Creating Default Filters\"}});\n/*Set Default Filters*/\n/*Production*/\nUpdateContext({\n    locDefaultProductionFilter:\n        Filter(\n            collectProduction,\n            And(\n                hour_starting >= DateAdd(c_start_date.SelectedDate, -1, TimeUnit.Hours),\n                hour_ending <= DateAdd(c_end_date.SelectedDate, 23, TimeUnit.Hours)\n            ),\n            If(\n                Not(c_size.Selected.Size = \"All\"),\n                size = c_size.Selected.Size,\n                true\n            ),\n            If(\n                Not(c_shift.Selected.Value = \"All\"),\n                shift = c_shift.Selected.Value,\n                true\n            )\n        )\n});\n\n/*Downtime*/\nUpdateContext({\n    locDefaultDowntimeFilter:\n        Filter(\n            collectDowntime,\n            And(\n                started >= DateAdd(c_start_date.SelectedDate, -1, TimeUnit.Hours),\n                ended <= DateAdd(c_end_date.SelectedDate, 23, TimeUnit.Hours)\n            ),\n            If(\n                Not(c_size.Selected.Size = \"All\"),\n                size = c_size.Selected.Size,\n                true\n            ),\n            If(\n                Not(c_shift.Selected.Value = \"All\"),\n                shift = c_shift.Selected.Value,\n                true\n            )\n        )\n});\n\n/*Goal_Setting*/\nUpdateContext({\n    locDefaultGoalSetting:\n        ShowColumns(\n            Filter(Goal_Settings,\n                Constraint_Setting > 0,\n                If(\n                    c_size.Selected.Size = \"All\",\n                    Size.Value = Size.Value,\n                    Size.Value = c_size.Selected.Size\n                )\n            ),\n            Constraint_Setting,\n            Goal_Setting,\n            Line,\n            Size\n        )\n});\n\nUpdateContext({locLoading:{Visible: true, Value: 30, Text: \"Combining Databases\"}});\n/*Combine to find runtime*/\nClear(collectCombined);\nClearCollect(collectCombined, locDefaultProductionFilter);\nForAll(\n    collectLineSchema,\n    {\n        Line: SCH_Line,\n        \n        Value:\n        ForAll(\n            Filter(locDefaultDowntimeFilter, line = SCH_Line),\n            With(\n                {\n                    thisDowntime: ThisRecord,\n                    thisLine: SCH_Line\n                },\n                If(\n                    CountRows(Filter(locDefaultProductionFilter, line = thisLine,\n                        (hour_starting <= thisDowntime.started && hour_ending > thisDowntime.started) || \n                        (hour_starting < thisDowntime.ended && hour_ending >= thisDowntime.ended) ||\n                        (hour_starting >= thisDowntime.started && hour_ending <= thisDowntime.ended)\n                        )) = 0,\n                    Collect(collectCombined, thisDowntime)\n                )\n            )\n        )\n    }\n);\n\nUpdateContext({locLoading:{Visible: true, Value: 50, Text: \"Calculating Line Data\"}});\n/*Create a collection of OEE data for each line*/\nClear(collectLineOEE);\nForAll(collectLineSchema,\n    Collect(\n        collectLineOEE,\n        {\n            /*Shift*/\n            shift: c_shift.Selected.Value,\n\n            line: SCH_Line,\n\n            /*Goal Average per contraint operation*/\n            constraint_average:\n                Round(\n                    /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/\n                    If(\n                        c_size.Selected.Size = \"All\",\n                        \n                        IfError(\n                            Average(\n                                Filter(\n                                    locDefaultGoalSetting,\n                                    Line.Value = SCH_Line\n                                ),\n                                Constraint_Setting\n                            ),\n                            0\n                        ),\n                        \n                        First(\n                            Filter(\n                                locDefaultGoalSetting,\n                                Line.Value = SCH_Line\n                            )\n                        ).Constraint_Setting\n                    ),\n                    0\n                ),\n\n            /*Constratint setting by runtime*/\n            constraint_total:\n                Round(\n                    /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/\n                    If(\n                        c_size.Selected.Size = \"All\",\n                        \n                        IfError(\n                            Average(\n                                Filter(\n                                    locDefaultGoalSetting,\n                                    Line.Value = SCH_Line\n                                ),\n                                Constraint_Setting\n                            ),\n                            0\n                        ),\n                        \n                        First(\n                            Filter(\n                                locDefaultGoalSetting,\n                                Line.Value = SCH_Line\n                            )\n                        ).Constraint_Setting\n                    ) *\n                /*Collect Runtime Minutes From Production*/\n                ((CountRows(Filter(collectCombined, line = SCH_Line, amount_built > 0)) * 60) +\n                /*Collect Runtime Minues From Downtime*/\n                Sum(Filter(collectCombined, line = SCH_Line, Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")), total))/60,\n                    0\n                ),\n\n            /*Total sum of Units Built*/\n            total:\n                Sum(\n                    Filter(\n                        locDefaultProductionFilter,\n                        line = SCH_Line\n                    ),\n                    amount_built + reject_cartridges + reject_units\n                ),\n            \n            /*Sum of Good Units Built*/\n            output:\n                Sum(\n                    Filter(\n                        locDefaultProductionFilter,\n                        line = SCH_Line\n                    ),\n                    amount_built\n                ),\n            \n            /*Sum of Rejects*/\n            rejects:\n                Sum(\n                    Filter(\n                        locDefaultProductionFilter,\n                        line = SCH_Line\n                    ),\n                    reject_cartridges + reject_units\n                ),\n\n            /*Sum of Downtime, in minutes*/\n            downtime_total:\n                Sum(\n                    Filter(\n                        locDefaultDowntimeFilter,\n                        line = SCH_Line\n                    ),\n                    total\n                ),\n            \n            /*Sum of planned downtime in minutes*/\n            downtime_planned:\n                Sum(\n                    Filter(\n                        locDefaultDowntimeFilter,\n                        line = SCH_Line,\n                        reason = \"No Scheduled Work\" || reason = \"Engineering DT\" || reason = \"Planned Downtime\"\n                    ),\n                    total\n                ),\n            \n            runtime_hours:\n                /*Collect Runtime Minutes From Production*/\n                ((CountRows(Filter(collectCombined, line = SCH_Line, amount_built > 0)) * 60) +\n                /*Collect Runtime Minues From Downtime*/\n                Sum(Filter(collectCombined, line = SCH_Line, Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")), total))/60,\n            \n            runtime_total:\n                (    \n                    (count_of_days * If(c_shift.Selected.Value = \"All\", 1440, 480))\n                ) / 60,\n            \n\n            /*Percentage of Overall Performance || OEE2 = Output / (Constraint * Runtime) * 100*/\n            OEE2:\n                IfError(\n                    Round(\n                        /*Output*/\n                        Sum(\n                            Filter(\n                                locDefaultProductionFilter,\n                                line = SCH_Line\n                            ),\n                            amount_built\n                        ) /\n                        (\n                            /*Constraint*/\n                            (\n                                Round(\n                                    /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/\n                                    If(\n                                        c_size.Selected.Size = \"All\",\n                                        \n                                        IfError(\n                                            Average(\n                                                Filter(\n                                                    locDefaultGoalSetting,\n                                                    Line.Value = SCH_Line\n                                                ),\n                                                Constraint_Setting\n                                            ),\n                                            0\n                                        ),\n                                        \n                                        First(\n                                            Filter(\n                                                locDefaultGoalSetting,\n                                                Line.Value = SCH_Line\n                                            )\n                                        ).Constraint_Setting\n                                    ),\n                                    0\n                                )\n                            ) *\n                            /*Runtime Hours*/\n                            (\n                                /*Collect Runtime Minutes From Production*/\n                                ((CountRows(Filter(collectCombined, line = SCH_Line, amount_built > 0)) * 60) +\n                                /*Collect Runtime Minues From Downtime*/\n                                Sum(Filter(collectCombined, line = SCH_Line, Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")), total))/60\n                            )\n                        ) * 100,\n                        0\n                    ),\n                    0\n                )\n        }\n    )\n);\n\nUpdateContext({locLoading:{Visible: true, Value: 75, Text: \"Calculating OEE2\"}});\n/*Collect overall OEE*/\nClear(collectOEE2);\nCollect(\n    collectOEE2,\n    {\n        output:\n            Sum(\n                locDefaultProductionFilter,\n                amount_built\n            ),\n        \n        constraint_average:\n            Round(\n                /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/\n                If(\n                    c_size.Selected.Size = \"All\",\n                    \n                    IfError(\n                        Average(\n                            locDefaultGoalSetting,\n                            Constraint_Setting\n                        ),\n                        0\n                    ),\n                    \n                    First(\n                        locDefaultGoalSetting\n                    ).Constraint_Setting\n                ),\n                0\n            ),\n\n        constraint_goal:\n            Round(\n                /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/\n                If(\n                    c_size.Selected.Size = \"All\",\n                    \n                    IfError(\n                        Average(\n                            locDefaultGoalSetting,\n                            Constraint_Setting\n                        ),\n                        0\n                    ),\n                    \n                    First(\n                        locDefaultGoalSetting\n                    ).Constraint_Setting\n                ),\n                0\n            ) *\n            /*Collect Runtime Minutes From Production*/\n            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +\n            /*Collect Runtime Minues From Downtime*/\n            Sum(Filter(collectCombined, Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")), total))/60,\n\n        runtime_hours_planned:\n            /*Collect Runtime Minutes From Production*/\n            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +\n            /*Collect Runtime Minues From Downtime*/\n            Sum(Filter(collectCombined, Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")), total))/60,\n        \n        runtime_hours:\n            /*Collect Runtime Minutes From Production*/\n            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +\n            /*Collect Runtime Minues From Downtime*/\n            Sum(collectCombined, total))/60,\n\n        runtime_test:\n            (    \n                (count_of_days * 9 * 1440) - \n                Sum(\n                    Filter(\n                        locDefaultDowntimeFilter,\n                        reason = \"No Scheduled Work\" || reason = \"Engineering DT\" || reason = \"Planned Downtime\"\n                    ),\n                    total\n                )*1\n            ) / 60,\n        \n        OEE1:\n            IfError(\n                Round(\n                    /*Output*/\n                    Sum(\n                        locDefaultProductionFilter,\n                        amount_built\n                    ) /\n                    (\n                        /*Constraint*/\n                        (\n                            Round(\n                                /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/\n                                If(\n                                    c_size.Selected.Size = \"All\",\n                                    \n                                    IfError(\n                                        Average(\n                                            locDefaultGoalSetting,\n                                            Constraint_Setting\n                                        ),\n                                        0\n                                    ),\n                                    \n                                    First(\n                                        locDefaultGoalSetting\n                                    ).Constraint_Setting\n                                ),\n                                0\n                            )\n                        ) *\n                        /*Runtime Hours*/\n                        (\n                            /*Collect Runtime Minutes From Production*/\n                            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +\n                            /*Collect Runtime Minues From Downtime*/\n                            Sum(collectCombined, total))/60\n                        )\n                    ) * 100,\n                    0\n                ),\n                0\n            ),\n\n        TestOEE2:\n            Sum(collectLineOEE, OEE2) / CountIf(collectLineOEE, OEE2 > 0),\n        \n        OEE2:\n            IfError(\n                Round(\n                    /*Output*/\n                    Sum(\n                        locDefaultProductionFilter,\n                        amount_built\n                    ) /\n                    (\n                        /*Constraint*/\n                        (\n                            Round(\n                                /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/\n                                If(\n                                    c_size.Selected.Size = \"All\",\n                                    \n                                    IfError(\n                                        Average(\n                                            locDefaultGoalSetting,\n                                            Constraint_Setting\n                                        ),\n                                        0\n                                    ),\n                                    \n                                    First(\n                                        locDefaultGoalSetting\n                                    ).Constraint_Setting\n                                ),\n                                0\n                            )\n                        ) *\n                        /*Runtime Hours*/\n                        (\n                            /*Collect Runtime Minutes From Production*/\n                            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +\n                            /*Collect Runtime Minues From Downtime*/\n                            Sum(Filter(collectCombined, Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")), total))/60\n                        )\n                    ) * 100,\n                    0\n                ),\n                0\n            )\n    }\n);\n\n/*Garbage Collecting*/\nUpdateContext({locLoading:{Visible: true, Value: 95, Text: \"Finishing Up\"}});\n\n/*End*/\nUpdateContext({locLoading:{Visible: true, Value: 100, Text: \"Completed\"}});\nUpdateContext({locLoading:{Visible: false, Value: -1, Text: \"Not Loading\"}});"
+              OnSelect: |-
+                =/*Update Code*/
+                Set(varLoading,{Visible: true, Value: 10, Text: "Updating"});
+
+                UpdateContext(
+                    {        
+                        count_of_days:
+                            RoundDown(
+                                DateDiff(c_start_date.SelectedDate, c_end_date.SelectedDate, TimeUnit.Days) / 7,
+                                0
+                            ) * 5 +
+                            Mod(5 + Weekday(c_end_date.SelectedDate) - Weekday(c_start_date.SelectedDate), 5) + 1
+                    }
+                );
+
+                Set(varLoading,{Visible: true, Value: 20, Text: "Creating Default Filters"});
+                /*Set Default Filters*/
+                /*Production*/
+                UpdateContext({
+                    locDefaultProductionFilter:
+                        Filter(
+                            collectProduction,
+                            And(
+                                hour_starting >= DateAdd(c_start_date.SelectedDate, -1, TimeUnit.Hours),
+                                hour_ending <= DateAdd(c_end_date.SelectedDate, 23, TimeUnit.Hours)
+                            ),
+                            If(
+                                Not(c_size.Selected.Size = "All"),
+                                size = c_size.Selected.Size,
+                                true
+                            ),
+                            If(
+                                Not(c_shift.Selected.Value = "All"),
+                                shift = c_shift.Selected.Value,
+                                true
+                            )
+                        )
+                });
+
+                /*Downtime*/
+                UpdateContext({
+                    locDefaultDowntimeFilter:
+                        Filter(
+                            collectDowntime,
+                            And(
+                                started >= DateAdd(c_start_date.SelectedDate, -1, TimeUnit.Hours),
+                                ended <= DateAdd(c_end_date.SelectedDate, 23, TimeUnit.Hours)
+                            ),
+                            If(
+                                Not(c_size.Selected.Size = "All"),
+                                size = c_size.Selected.Size,
+                                true
+                            ),
+                            If(
+                                Not(c_shift.Selected.Value = "All"),
+                                shift = c_shift.Selected.Value,
+                                true
+                            )
+                        )
+                });
+
+                /*Goal_Setting*/
+                UpdateContext({
+                    locDefaultGoalSetting:
+                        ShowColumns(
+                            Filter(Goal_Settings,
+                                Constraint_Setting > 0,
+                                If(
+                                    c_size.Selected.Size = "All",
+                                    Size.Value = Size.Value,
+                                    Size.Value = c_size.Selected.Size
+                                )
+                            ),
+                            Constraint_Setting,
+                            Goal_Setting,
+                            Line,
+                            Size
+                        )
+                });
+
+                Set(varLoading,{Visible: true, Value: 30, Text: "Combining Databases"});
+                /*Combine to find runtime*/
+                Clear(collectCombined);
+                ClearCollect(collectCombined, locDefaultProductionFilter);
+                ForAll(
+                    collectLineSchema,
+                    {
+                        Line: SCH_Line,
+                        
+                        Value:
+                        ForAll(
+                            Filter(locDefaultDowntimeFilter, line = SCH_Line),
+                            With(
+                                {
+                                    thisDowntime: ThisRecord,
+                                    thisLine: SCH_Line
+                                },
+                                If(
+                                    CountRows(Filter(locDefaultProductionFilter, line = thisLine,
+                                        (hour_starting <= thisDowntime.started && hour_ending > thisDowntime.started) || 
+                                        (hour_starting < thisDowntime.ended && hour_ending >= thisDowntime.ended) ||
+                                        (hour_starting >= thisDowntime.started && hour_ending <= thisDowntime.ended)
+                                        )) = 0,
+                                    Collect(collectCombined, thisDowntime)
+                                )
+                            )
+                        )
+                    }
+                );
+
+                Set(varLoading,{Visible: true, Value: 50, Text: "Calculating Line Data"});
+                /*Create a collection of OEE data for each line*/
+                Clear(collectLineOEE);
+                ForAll(collectLineSchema,
+                    Collect(
+                        collectLineOEE,
+                        {
+                            /*Shift*/
+                            shift: c_shift.Selected.Value,
+
+                            line: SCH_Line,
+
+                            /*Goal Average per contraint operation*/
+                            constraint_average:
+                                Round(
+                                    /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/
+                                    If(
+                                        c_size.Selected.Size = "All",
+                                        
+                                        IfError(
+                                            Average(
+                                                Filter(
+                                                    locDefaultGoalSetting,
+                                                    Line.Value = SCH_Line
+                                                ),
+                                                Constraint_Setting
+                                            ),
+                                            0
+                                        ),
+                                        
+                                        First(
+                                            Filter(
+                                                locDefaultGoalSetting,
+                                                Line.Value = SCH_Line
+                                            )
+                                        ).Constraint_Setting
+                                    ),
+                                    0
+                                ),
+
+                            /*Constratint setting by runtime*/
+                            constraint_total:
+                                Round(
+                                    /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/
+                                    If(
+                                        c_size.Selected.Size = "All",
+                                        
+                                        IfError(
+                                            Average(
+                                                Filter(
+                                                    locDefaultGoalSetting,
+                                                    Line.Value = SCH_Line
+                                                ),
+                                                Constraint_Setting
+                                            ),
+                                            0
+                                        ),
+                                        
+                                        First(
+                                            Filter(
+                                                locDefaultGoalSetting,
+                                                Line.Value = SCH_Line
+                                            )
+                                        ).Constraint_Setting
+                                    ) *
+                                /*Collect Runtime Minutes From Production*/
+                                ((CountRows(Filter(collectCombined, line = SCH_Line, amount_built > 0)) * 60) +
+                                /*Collect Runtime Minues From Downtime*/
+                                Sum(Filter(collectCombined, line = SCH_Line, Not(reason = "Planned Downtime" || reason = "No Scheduled Work" || reason = "Engineering DT")), total))/60,
+                                    0
+                                ),
+
+                            /*Total sum of Units Built*/
+                            total:
+                                Sum(
+                                    Filter(
+                                        locDefaultProductionFilter,
+                                        line = SCH_Line
+                                    ),
+                                    amount_built + reject_cartridges + reject_units
+                                ),
+                            
+                            /*Sum of Good Units Built*/
+                            output:
+                                Sum(
+                                    Filter(
+                                        locDefaultProductionFilter,
+                                        line = SCH_Line
+                                    ),
+                                    amount_built
+                                ),
+                            
+                            /*Sum of Rejects*/
+                            rejects:
+                                Sum(
+                                    Filter(
+                                        locDefaultProductionFilter,
+                                        line = SCH_Line
+                                    ),
+                                    reject_cartridges + reject_units
+                                ),
+
+                            /*Sum of Downtime, in minutes*/
+                            downtime_total:
+                                Sum(
+                                    Filter(
+                                        locDefaultDowntimeFilter,
+                                        line = SCH_Line
+                                    ),
+                                    total
+                                ),
+                            
+                            /*Sum of planned downtime in minutes*/
+                            downtime_planned:
+                                Sum(
+                                    Filter(
+                                        locDefaultDowntimeFilter,
+                                        line = SCH_Line,
+                                        reason = "No Scheduled Work" || reason = "Engineering DT" || reason = "Planned Downtime"
+                                    ),
+                                    total
+                                ),
+                            
+                            runtime_hours:
+                                /*Collect Runtime Minutes From Production*/
+                                ((CountRows(Filter(collectCombined, line = SCH_Line, amount_built > 0)) * 60) +
+                                /*Collect Runtime Minues From Downtime*/
+                                Sum(Filter(collectCombined, line = SCH_Line, Not(reason = "Planned Downtime" || reason = "No Scheduled Work" || reason = "Engineering DT")), total))/60,
+                            
+                            runtime_total:
+                                (    
+                                    (count_of_days * If(c_shift.Selected.Value = "All", 1440, 480))
+                                ) / 60,
+                            
+
+                            /*Percentage of Overall Performance || OEE2 = Output / (Constraint * Runtime) * 100*/
+                            OEE2:
+                                IfError(
+                                    Round(
+                                        /*Output*/
+                                        Sum(
+                                            Filter(
+                                                locDefaultProductionFilter,
+                                                line = SCH_Line
+                                            ),
+                                            amount_built
+                                        ) /
+                                        (
+                                            /*Constraint*/
+                                            (
+                                                Round(
+                                                    /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/
+                                                    If(
+                                                        c_size.Selected.Size = "All",
+                                                        
+                                                        IfError(
+                                                            Average(
+                                                                Filter(
+                                                                    locDefaultGoalSetting,
+                                                                    Line.Value = SCH_Line
+                                                                ),
+                                                                Constraint_Setting
+                                                            ),
+                                                            0
+                                                        ),
+                                                        
+                                                        First(
+                                                            Filter(
+                                                                locDefaultGoalSetting,
+                                                                Line.Value = SCH_Line
+                                                            )
+                                                        ).Constraint_Setting
+                                                    ),
+                                                    0
+                                                )
+                                            ) *
+                                            /*Runtime Hours*/
+                                            (
+                                                /*Collect Runtime Minutes From Production*/
+                                                ((CountRows(Filter(collectCombined, line = SCH_Line, amount_built > 0)) * 60) +
+                                                /*Collect Runtime Minues From Downtime*/
+                                                Sum(Filter(collectCombined, line = SCH_Line, Not(reason = "Planned Downtime" || reason = "No Scheduled Work" || reason = "Engineering DT")), total))/60
+                                            )
+                                        ) * 100,
+                                        0
+                                    ),
+                                    0
+                                )
+                        }
+                    )
+                );
+
+                Set(varLoading,{Visible: true, Value: 75, Text: "Calculating OEE2"});
+                /*Collect overall OEE*/
+                Clear(collectOEE2);
+                Collect(
+                    collectOEE2,
+                    {
+                        output:
+                            Sum(
+                                locDefaultProductionFilter,
+                                amount_built
+                            ),
+                        
+                        constraint_average:
+                            Round(
+                                /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/
+                                If(
+                                    c_size.Selected.Size = "All",
+                                    
+                                    IfError(
+                                        Average(
+                                            locDefaultGoalSetting,
+                                            Constraint_Setting
+                                        ),
+                                        0
+                                    ),
+                                    
+                                    First(
+                                        locDefaultGoalSetting
+                                    ).Constraint_Setting
+                                ),
+                                0
+                            ),
+
+                        constraint_goal:
+                            Round(
+                                /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/
+                                If(
+                                    c_size.Selected.Size = "All",
+                                    
+                                    IfError(
+                                        Average(
+                                            locDefaultGoalSetting,
+                                            Constraint_Setting
+                                        ),
+                                        0
+                                    ),
+                                    
+                                    First(
+                                        locDefaultGoalSetting
+                                    ).Constraint_Setting
+                                ),
+                                0
+                            ) *
+                            /*Collect Runtime Minutes From Production*/
+                            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +
+                            /*Collect Runtime Minues From Downtime*/
+                            Sum(Filter(collectCombined, Not(reason = "Planned Downtime" || reason = "No Scheduled Work" || reason = "Engineering DT")), total))/60,
+
+                        runtime_hours_planned:
+                            /*Collect Runtime Minutes From Production*/
+                            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +
+                            /*Collect Runtime Minues From Downtime*/
+                            Sum(Filter(collectCombined, Not(reason = "Planned Downtime" || reason = "No Scheduled Work" || reason = "Engineering DT")), total))/60,
+                        
+                        runtime_hours:
+                            /*Collect Runtime Minutes From Production*/
+                            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +
+                            /*Collect Runtime Minues From Downtime*/
+                            Sum(collectCombined, total))/60,
+
+                        runtime_test:
+                            (    
+                                (count_of_days * 9 * 1440) - 
+                                Sum(
+                                    Filter(
+                                        locDefaultDowntimeFilter,
+                                        reason = "No Scheduled Work" || reason = "Engineering DT" || reason = "Planned Downtime"
+                                    ),
+                                    total
+                                )*1
+                            ) / 60,
+                        
+                        OEE1:
+                            IfError(
+                                Round(
+                                    /*Output*/
+                                    Sum(
+                                        locDefaultProductionFilter,
+                                        amount_built
+                                    ) /
+                                    (
+                                        /*Constraint*/
+                                        (
+                                            Round(
+                                                /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/
+                                                If(
+                                                    c_size.Selected.Size = "All",
+                                                    
+                                                    IfError(
+                                                        Average(
+                                                            locDefaultGoalSetting,
+                                                            Constraint_Setting
+                                                        ),
+                                                        0
+                                                    ),
+                                                    
+                                                    First(
+                                                        locDefaultGoalSetting
+                                                    ).Constraint_Setting
+                                                ),
+                                                0
+                                            )
+                                        ) *
+                                        /*Runtime Hours*/
+                                        (
+                                            /*Collect Runtime Minutes From Production*/
+                                            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +
+                                            /*Collect Runtime Minues From Downtime*/
+                                            Sum(collectCombined, total))/60
+                                        )
+                                    ) * 100,
+                                    0
+                                ),
+                                0
+                            ),
+
+                        TestOEE2:
+                            IfError(Sum(collectLineOEE, OEE2) / CountIf(collectLineOEE, OEE2 > 0),0),
+                        
+                        OEE2:
+                            IfError(
+                                Round(
+                                    /*Output*/
+                                    Sum(
+                                        locDefaultProductionFilter,
+                                        amount_built
+                                    ) /
+                                    (
+                                        /*Constraint*/
+                                        (
+                                            Round(
+                                                /*If a size is not selected, find the Average, otherwise find the size's constraint setting*/
+                                                If(
+                                                    c_size.Selected.Size = "All",
+                                                    
+                                                    IfError(
+                                                        Average(
+                                                            locDefaultGoalSetting,
+                                                            Constraint_Setting
+                                                        ),
+                                                        0
+                                                    ),
+                                                    
+                                                    First(
+                                                        locDefaultGoalSetting
+                                                    ).Constraint_Setting
+                                                ),
+                                                0
+                                            )
+                                        ) *
+                                        /*Runtime Hours*/
+                                        (
+                                            /*Collect Runtime Minutes From Production*/
+                                            ((CountRows(Filter(collectCombined, amount_built > 0)) * 60) +
+                                            /*Collect Runtime Minues From Downtime*/
+                                            Sum(Filter(collectCombined, Not(reason = "Planned Downtime" || reason = "No Scheduled Work" || reason = "Engineering DT")), total))/60
+                                        )
+                                    ) * 100,
+                                    0
+                                ),
+                                0
+                            )
+                    }
+                );
+
+                /*Garbage Collecting*/
+                Set(varLoading,{Visible: true, Value: 95, Text: "Finishing Up"});
+
+                /*End*/
+                Set(varLoading,{Visible: true, Value: 100, Text: "Completed"});
+                Set(varLoading,{Visible: false, Value: -1, Text: "Not Loading"});
               Text: ="update"
-              FillPortions: =1
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
               Visible: =false
+              X: =20
+              Y: =20
         - c_collect:
             Control: Classic/Button
             Properties:
               OnSelect: |-
                 =/*Start*/
-                UpdateContext({locLoading:{Visible: true, Value: 1, Text: "Loading"}});
+                Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
 
-                UpdateContext({locLoading:{Visible: true, Value: 5, Text: "Checking for updates"}});
+                Set(varLoading,{Visible: true, Value: 5, Text: "Checking for updates"});
                 /*Capture Local Date Selection*/
                 UpdateContext({
                     locEndDate: c_end_date.SelectedDate,
@@ -80,11 +562,11 @@
 
 
                 /*Collect Production*/
-                UpdateContext({locLoading:{Visible: true, Value: 10, Text: "Collecting Production Data"}});
+                Set(varLoading,{Visible: true, Value: 10, Text: "Collecting Production Data"});
                 If(varUpdateProduction,
                     If(
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,
-                        UpdateContext({locLoading:{Visible: true, Value: 60, Text: "Retrieving Production Data"}});
+                        Set(varLoading,{Visible: true, Value: 60, Text: "Retrieving Production Data"});
                         ClearCollect(collectProduction,
                             ForAll(
                                 Filter(Production,
@@ -113,7 +595,7 @@
                         ),
 
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 60, Text: "Parsing PowerAutomate Flow for Production Data"}});
+                        Set(varLoading,{Visible: true, Value: 60, Text: "Parsing PowerAutomate Flow for Production Data"});
                         ClearCollect(collectProduction,
                             ForAll(
                                 Table(
@@ -147,7 +629,7 @@
                         ),
 
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 25, Text: "Collecting Production Dataset 1"}});
+                        Set(varLoading,{Visible: true, Value: 25, Text: "Collecting Production Dataset 1"});
                         Collect(material_1,
                             Sort(
                                 Filter(Production,
@@ -161,7 +643,7 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 30, Text: "Collecting Production Dataset 2"}});
+                        Set(varLoading,{Visible: true, Value: 30, Text: "Collecting Production Dataset 2"});
                         Collect(material_2,
                             Sort(
                                 Filter(Production,
@@ -175,15 +657,15 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 40, Text: "Joining Production Data 1"}});
+                        Set(varLoading,{Visible: true, Value: 40, Text: "Joining Production Data 1"});
                         ClearCollect(fusion, material_1);
 
-                        UpdateContext({locLoading:{Visible: true, Value: 50, Text: "Joining Production Data 2"}});
+                        Set(varLoading,{Visible: true, Value: 50, Text: "Joining Production Data 2"});
                         Collect(fusion,
                             Filter(material_2, Not(ID in material_1.ID))
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 60, Text: "Collecting Joined Production Data"}});
+                        Set(varLoading,{Visible: true, Value: 60, Text: "Collecting Joined Production Data"});
                         ClearCollect(
                             collectProduction,
                             ForAll(
@@ -209,7 +691,7 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 65, Text: "Garbage Collection"}});
+                        Set(varLoading,{Visible: true, Value: 65, Text: "Garbage Collection"});
                         Clear(fusion);
                         Clear(material_1);
                         Clear(material_2);
@@ -217,11 +699,11 @@
                 );
 
                 /*Collect Downtime*/
-                UpdateContext({locLoading:{Visible: true, Value: 70, Text: "Collecting Downtime Data"}});
+                Set(varLoading,{Visible: true, Value: 70, Text: "Collecting Downtime Data"});
                 If(varUpdateDowntime,
                     If(
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,
-                        UpdateContext({locLoading:{Visible: true, Value: 95, Text: "Retrieving Downtime Data"}});
+                        Set(varLoading,{Visible: true, Value: 95, Text: "Retrieving Downtime Data"});
                         ClearCollect(collectDowntime,
                             ForAll(
                                 Filter(Downtime,
@@ -245,7 +727,7 @@
                         ),
 
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 95, Text: "Parsing PowerAutomate Flow for Downtime Data"}});
+                        Set(varLoading,{Visible: true, Value: 95, Text: "Parsing PowerAutomate Flow for Downtime Data"});
                         ClearCollect(collectDowntime,
                             ForAll(
                                 Table(
@@ -274,7 +756,7 @@
                         ),
 
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 75, Text: "Collecting Downtime Dataset 2"}});
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Collecting Downtime Dataset 2"});
                         Collect(material_1,
                             Sort(
                                 Filter(Downtime,
@@ -288,7 +770,7 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 80, Text: "Collecting Downtime Dataset 2"}});
+                        Set(varLoading,{Visible: true, Value: 80, Text: "Collecting Downtime Dataset 2"});
                         Collect(material_2,
                             Sort(
                                 Filter(Downtime,
@@ -302,15 +784,15 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 85, Text: "Joining Downtime Dataset 1"}});
+                        Set(varLoading,{Visible: true, Value: 85, Text: "Joining Downtime Dataset 1"});
                         ClearCollect(fusion, material_1);
 
-                        UpdateContext({locLoading:{Visible: true, Value: 90, Text: "Joining Downtime Dataset 2"}});
+                        Set(varLoading,{Visible: true, Value: 90, Text: "Joining Downtime Dataset 2"});
                         Collect(fusion,
                             Filter(material_2, Not(ID in material_1.ID))
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 95, Text: "Collecting Joined Downtime Data"}});
+                        Set(varLoading,{Visible: true, Value: 95, Text: "Collecting Joined Downtime Data"});
                         ClearCollect(
                             collectDowntime,
                             ForAll(
@@ -331,29 +813,28 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 98, Text: "Garbage Collection"}});
+                        Set(varLoading,{Visible: true, Value: 98, Text: "Garbage Collection"});
                         Clear(fusion);
                         Clear(material_1);
                         Clear(material_2);
                     )
                 );
 
-                UpdateContext({locLoading:{Visible: true, Value: 100, Text: "Finshing up"}});
+                Set(varLoading,{Visible: true, Value: 100, Text: "Finshing up"});
 
                 /*Update the UI Elements*/
                 Select(c_collect_lists);
               Text: ="collect"
-              FillPortions: =1
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
               Visible: =false
+              X: =20
+              Y: =20
         - c_collect_lists:
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =UpdateContext({locLoading:{Visible: true, Value: 1, Text: "Loading"}});
+                =Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
 
-                UpdateContext({locLoading:{Visible: true, Value: 33, Text: "Finding Product Sizes"}});
+                Set(varLoading,{Visible: true, Value: 33, Text: "Finding Product Sizes"});
                 /*Gather production size by line*/
                 ClearCollect(
                     collectTempProduction,
@@ -373,7 +854,7 @@
                     )
                 );
 
-                UpdateContext({locLoading:{Visible: true, Value: 66, Text: "Creating Product Size List"}});
+                Set(varLoading,{Visible: true, Value: 66, Text: "Creating Product Size List"});
                 /*Init size list collection*/
                 Clear(collectSizeList);
                 Collect(collectSizeList, {Size: "All", Line: []});
@@ -390,71 +871,62 @@
                 );
 
                 /*Clear for garbage collection*/
-                UpdateContext({locLoading:{Visible: true, Value: 90, Text: "Garbage Collection"}});
+                Set(varLoading,{Visible: true, Value: 90, Text: "Garbage Collection"});
 
                 Clear(collectTempProduction);
 
-                UpdateContext({locLoading:{Visible: true, Value: 95, Text: "Finishing Up"}});
+                Set(varLoading,{Visible: true, Value: 95, Text: "Finishing Up"});
 
                 Select(c_update);
               Text: ="collect lists"
-              FillPortions: =1
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
               Visible: =false
+              X: =20
+              Y: =20
         - c_logo:
             Control: Image
             Properties:
               Image: =LOGO_MSIG_SBlue_FIT_ALPHA
               FillPortions: =1
-              LayoutMinHeight: =10
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
               Width: =10
         - c_h_title:
-            Control: Text
+            Control: Label
             Properties:
-              Align: ='TextCanvas.Align'.Center
-              FontColor: =varColor5
-              Size: =24
-              Text: ="Encapsualtion Daily Management System"
-              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+              Text: ="Encapsualtion Daily Managmenet System"
+              Align: =Align.Center
+              Color: =varColor5
               FillPortions: =6
-              LayoutMinHeight: =8
-              LayoutMinWidth: =10
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 2
         - c_h_nav:
             Control: GroupContainer
             Variant: horizontalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              FillPortions: =0
               LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =locPadding
+              LayoutGap: =varPadding
               LayoutJustifyContent: =LayoutJustifyContent.Center
-              LayoutMinHeight: =10
+              LayoutMinHeight: =1
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
-              Width: =c_h_n_reload.Width * 3 + locPadding*4
+              Width: =c_h_n_reload.Width * 3 + varPadding * 4
             Children:
             - c_h_n_reload:
                 Control: Image
                 Properties:
-                  OnSelect: =Select(c_collect);
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140.25 140.25'><defs><style>.cls-1{fill:"& varHexAccent &";}</style></defs><path class='cls-1' d='M70.12.12a69.87,69.87,0,0,0-23.37,4l0,0a13.17,13.17,0,0,0,4.65,25.49,39.54,39.54,0,0,0,6.18-1.18l2.92-.71a44.45,44.45,0,0,1,20.73.61,5.79,5.79,0,0,1,2.63,1.38A4.24,4.24,0,0,1,85,31.24,4.86,4.86,0,0,1,85,35l-.76,2a1.35,1.35,0,0,1-1.86.75l-.81-.3A35.56,35.56,0,1,0,100.25,53L97,65.75a1.33,1.33,0,0,1-1.31,1.14,1.64,1.64,0,0,1-.37,0l-2.08-.54a4.83,4.83,0,0,1-3.1-2.16,4.77,4.77,0,0,1-.37-3.75l4.59-17.7a6.23,6.23,0,0,1,3.62-4.28c1.69-.79,2.45-1,4.92-.08l17,7.84a4.53,4.53,0,0,1,2.34,6.45l-.9,1.93a1.28,1.28,0,0,1-1.19.79,1.68,1.68,0,0,1-.73-.17l-11-5.12a44.13,44.13,0,0,1-29.41,64c-7.34,1.6-17.83,1-25.16-1.89A44.11,44.11,0,0,1,34.37,44.47c.31-.42,1.57-2.06,1.87-2.48A13.07,13.07,0,0,0,15,26.8c-.36.49-1.79,2.65-2.18,3.21A70,70,0,1,0,70.12.12Z'/></svg>
-
-
-
-                    ")
+                  OnSelect: =
+                  Image: =gblAppIcons.Reload
                   Height: =Parent.Height * 0.75
                   HoverBorderColor: =ColorFade(varColorYes, 20%)
                   HoverFill: =ColorFade(varColorAccent, 75%)
-                  LayoutMinHeight: =10
+                  LayoutMinHeight: =1
                   LayoutMinWidth: =10
                   RadiusBottomLeft: =Self.Width/2
                   RadiusBottomRight: =Self.Width/2
@@ -467,18 +939,11 @@
                 Control: Image
                 Properties:
                   OnSelect: =Navigate(Bugs)
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M80.07,33.73a24.48,24.48,0,1,0,24.48,24.48A24.51,24.51,0,0,0,80.07,33.73ZM65,47.65a1.45,1.45,0,0,1,1.7-1.16l5.62,1.06a8.34,8.34,0,0,1,7.46-4.65h.47a8.37,8.37,0,0,1,7.47,4.65l5.62-1.06a1.45,1.45,0,0,1,.54,2.85l-5.35,1a8.46,8.46,0,0,1,0,.87.85.85,0,0,1-.85.85H72.28a.85.85,0,0,1-.85-.85,6.35,6.35,0,0,1,0-.87l-5.35-1A1.45,1.45,0,0,1,65,47.65Zm28.88,19.7a1.45,1.45,0,0,1-.27,2.88,1.24,1.24,0,0,1-.27,0l-5.62-1.06a7.74,7.74,0,0,1-3.43,3.79c-1.88.82-6.8.8-8.67-.07a7.64,7.64,0,0,1-3.3-3.72L66.67,70.2a1.24,1.24,0,0,1-.27,0A1.46,1.46,0,0,1,65,69a1.44,1.44,0,0,1,1.16-1.69l5.35-1a6.35,6.35,0,0,1,0-.87v-5.3H66.16a1.45,1.45,0,1,1,0-2.9h5.27V56.06A1.09,1.09,0,0,1,72.52,55H87.46a1.09,1.09,0,0,1,1.09,1.09v1.21h5.32a1.45,1.45,0,0,1,0,2.9H88.55v5.3a8.46,8.46,0,0,1,0,.87Z'/><path class='cls-1' d='M69.91-.08a70,70,0,0,0-66,93.27c.13.38.7,1.8.82,2.12a15.3,15.3,0,0,0,25.62,5c.37-.4,2.29-2.41,2.29-2.41L47.45,83.05a2,2,0,0,1,2.92.12,38.81,38.81,0,0,0,6.27,6,2,2,0,0,1,.2,3L43.62,105.34s-3,2.72-3.65,3.29a16.13,16.13,0,0,0,5,26.69c.49.21,2.5.88,3,1.05A70,70,0,1,0,69.91-.08ZM80.07,92a33.81,33.81,0,1,1,33.81-33.81A33.85,33.85,0,0,1,80.07,92Z'/></svg>
-
-
-
-                    ")
+                  Image: =gblAppIcons.Bug
                   Height: =Parent.Height * 0.75
                   HoverBorderColor: =ColorFade(varColorYes, 20%)
                   HoverFill: =ColorFade(varColorAccent, 75%)
-                  LayoutMinHeight: =10
+                  LayoutMinHeight: =1
                   LayoutMinWidth: =10
                   RadiusBottomLeft: =Self.Width/2
                   RadiusBottomRight: =Self.Width/2
@@ -491,18 +956,11 @@
                 Control: Image
                 Properties:
                   OnSelect: =Navigate(Settings)
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M69.52,87.51a18,18,0,1,0,.11-36.06,18,18,0,1,0-.11,36.06'/><path class='cls-1' d='M139.42,64.6A64.36,64.36,0,0,0,131,36.05C119,15.24,101.24,2.84,77.23,0A66.63,66.63,0,0,0,37.54,7.27,70.36,70.36,0,0,0,5,42.45,68,68,0,0,0-.43,70.11,63.18,63.18,0,0,0,1.82,85.8c1,3.82,3.15,9.39,6,12.31A19.57,19.57,0,0,0,27,103.61c2.87-.81,9.71-3.83,6.85-10.42a1.66,1.66,0,0,1,0-1.31c1.44-2.11,3-4.21,4.59-6.18a1.52,1.52,0,0,0,.44-1.4l-1.47-3.54a1.5,1.5,0,0,0-1.29-.68c-2.5-.27-5.11-.65-7.61-1.11a1.51,1.51,0,0,1-.93-.93,38.11,38.11,0,0,1-.84-8.56,46.23,46.23,0,0,1,.84-8.55,1.48,1.48,0,0,1,.93-.93c2.5-.47,5.11-.84,7.61-1.12a1.48,1.48,0,0,0,1.29-.68l1.47-3.53a1.51,1.51,0,0,0-.44-1.4c-1.57-2-3.15-4.08-4.59-6.18a1.51,1.51,0,0,1,0-1.31,29.91,29.91,0,0,1,5.45-6.65,29.56,29.56,0,0,1,6.63-5.45,1.51,1.51,0,0,1,1.31,0c2.1,1.44,4.2,3,6.17,4.6a1.47,1.47,0,0,0,1.4.43l3.53-1.46A1.53,1.53,0,0,0,59,36c.27-2.5.65-5.11,1.11-7.62A1.53,1.53,0,0,1,61,27.4c1.48-.28,1.55-.84,8.54-.84s7.06.56,8.55.84a1.51,1.51,0,0,1,.92.93c.47,2.51.84,5.12,1.12,7.62a1.51,1.51,0,0,0,.68,1.3l3.53,1.46a1.46,1.46,0,0,0,1.39-.43c2-1.58,4.07-3.16,6.17-4.6a1.53,1.53,0,0,1,1.32,0c1.24.85,2.39,1.21,6.63,5.45s4.59,5.4,5.45,6.65a1.51,1.51,0,0,1,0,1.31c-1.44,2.1-3,4.21-4.6,6.18a1.5,1.5,0,0,0-.43,1.4l1.46,3.53a1.5,1.5,0,0,0,1.29.68c2.51.28,5.11.65,7.62,1.12a1.53,1.53,0,0,1,.93.93c.27,1.49.83,1.79.83,8.55s-.56,7.07-.83,8.56a1.56,1.56,0,0,1-.93.93c-2.51.46-5.11.84-7.62,1.11a1.53,1.53,0,0,0-1.29.68L100.3,84.3a1.51,1.51,0,0,0,.43,1.4c1.58,2,3.16,4.07,4.6,6.18a1.51,1.51,0,0,1,0,1.31,37.71,37.71,0,0,1-5.45,6.64,41.31,41.31,0,0,1-6.63,5.46,1.53,1.53,0,0,1-1.32,0c-2.1-1.45-4.2-3-6.17-4.6a1.5,1.5,0,0,0-1.39-.44l-3.53,1.47a1.48,1.48,0,0,0-.68,1.29c-.28,2.51-.65,5.12-1.12,7.63a1.54,1.54,0,0,1-.92.93,33.49,33.49,0,0,1-8.55.83,39.74,39.74,0,0,1-8.54-.83,1.56,1.56,0,0,1-.93-.93c-.46-2.51-.84-5.12-1.11-7.63a1.5,1.5,0,0,0-.68-1.29l-3.53-1.47a1.51,1.51,0,0,0-1.4.44c-2,1.57-4.07,3.15-6.17,4.6a1.5,1.5,0,0,1-1.31,0c-4-1.22-7.42-1.59-12.29,6.9-4.43,7.73-4,15.86,5.81,20.5a69.64,69.64,0,0,0,42.89,5.62,67.22,67.22,0,0,0,41-23.93c12-14.4,17.27-31.1,16.12-49.78'/></svg>
-
-
-
-                    ")
+                  Image: =gblAppIcons.Settings
                   Height: =Parent.Height * 0.75
                   HoverBorderColor: =ColorFade(varColorYes, 20%)
                   HoverFill: =ColorFade(varColorAccent, 75%)
-                  LayoutMinHeight: =10
+                  LayoutMinHeight: =1
                   LayoutMinWidth: =10
                   RadiusBottomLeft: =Self.Width/2
                   RadiusBottomRight: =Self.Width/2
@@ -511,13 +969,25 @@
                   Width: =Self.Height
                   X: =Parent.Width * 0.99 - Self.Width - c_h_n_bugs.Width - Parent.Width * 0.015
                   Y: =Parent.Height/2 - Self.Height/2
+            - c_h_n_user:
+                Control: Image
+                Properties:
+                  Image: |
+                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
     - c_body:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          FillPortions: =11
+          FillPortions: =15
           LayoutAlignItems: =LayoutAlignItems.Stretch
           LayoutMinHeight: =10
           LayoutMinWidth: =10
@@ -536,14 +1006,14 @@
               Fill: =varColor3
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
-              LayoutGap: =locPadding
+              LayoutGap: =varPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =locPadding
-              PaddingLeft: =locPadding
-              PaddingRight: =locPadding
-              PaddingTop: =locPadding
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
@@ -558,139 +1028,49 @@
                   VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
                   Weight: ='TextCanvas.Weight'.Semibold
                   FillPortions: =1
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
             - c_n_seperator:
                 Control: Rectangle
                 Properties:
                   Height: =1
-                  LayoutMinWidth: =10
-            - c_n_home:
-                Control: Classic/Button
+                  Width: =Parent.Width * 0.95
+            - c_n_gallery:
+                Control: Gallery
+                Variant: galleryVertical
                 Properties:
-                  OnSelect: =Navigate(Home);
-                  Text: ="Home"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Home", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - c_n_dor:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(DOR);
-                  Text: ="Daily Operations Report"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "DOR", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - c_n_outputs:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Outputs);
-                  Text: ="Outputs"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Outputs", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - c_n_downtime:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Downtime_Screen);
-                  Text: ="Downtime"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Downtime_View", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - c_n_hourly:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Hourly);
-                  Text: ="Hour by Hour"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Hourly", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - c_n_errors:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Errors);
-                  Text: ="Error Tracking"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Errors", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - c_n_oee:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(OEE);
-                  Text: ="OEE Analysis"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "OEE", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - c_n_catalog:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Catalog);
-                  Text: ="Catalog Analysis"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Catalog", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - c_n_trend:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Trend);
-                  Text: ="OEE Trend Analysis"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Trend", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
+                  Items: =collectNavigation
+                  DelayItemLoading: =true
+                  FillPortions: =13
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LoadingSpinner: =LoadingSpinner.Data
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: =IfError((Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount,0)
+                Children:
+                - c_n_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.ScreenName);
+                      Text: =ThisItem.Title
+                      Color: =varColor0
+                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =varColorAccent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight - varPadding
+                      Size: =Self.Width / 16
+                      Width: =Parent.TemplateWidth - Self.BorderThickness
+                      X: =Center(Parent.TemplateWidth, Self.Width)
+                      Y: =Center(Parent.TemplateHeight, Self.Height)
             - c_n_footer:
                 Control: GroupContainer
                 Variant: manualLayoutContainer
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.None
-                  FillPortions: =6
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
+                  FillPortions: =2
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
@@ -711,16 +1091,16 @@
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              FillPortions: =9
+              FillPortions: =11
               LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =locPadding
+              LayoutGap: =varPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =locPadding
-              PaddingLeft: =locPadding
-              PaddingRight: =locPadding
-              PaddingTop: =locPadding
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
@@ -734,14 +1114,14 @@
                   Fill: =varColor4
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =locPadding
+                  LayoutGap: =varPadding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
-                  PaddingBottom: =locPadding
-                  PaddingLeft: =locPadding
-                  PaddingRight: =locPadding
-                  PaddingTop: =locPadding
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
                 Children:
                 - c_start_date_title:
                     Control: Text
@@ -887,7 +1267,7 @@
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.None
                   FillPortions: =9
-                  LayoutGap: =locPadding/2
+                  LayoutGap: =varPadding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
@@ -956,7 +1336,7 @@
                           DropShadow: =DropShadow.None
                           FillPortions: =2
                           LayoutAlignItems: =LayoutAlignItems.Stretch
-                          LayoutGap: =locPadding/2
+                          LayoutGap: =varPadding/2
                           LayoutMinHeight: =10
                           LayoutMinWidth: =10
                           LayoutMode: =LayoutMode.Auto
@@ -1092,9 +1472,9 @@
                         Properties:
                           DropShadow: =DropShadow.None
                           Height: =Parent.TemplateHeight
-                          PaddingBottom: =locPadding
-                          PaddingLeft: =locPadding
-                          PaddingRight: =locPadding
+                          PaddingBottom: =varPadding
+                          PaddingLeft: =varPadding
+                          PaddingRight: =varPadding
                           RadiusBottomLeft: =0
                           RadiusBottomRight: =0
                           RadiusTopLeft: =0
@@ -1106,12 +1486,12 @@
                             Variant: verticalAutoLayoutContainer
                             Properties:
                               DropShadow: =DropShadow.Semilight
-                              Height: =Parent.Height - locPadding/2
+                              Height: =Parent.Height - varPadding/2
                               LayoutAlignItems: =LayoutAlignItems.Stretch
                               LayoutDirection: =LayoutDirection.Vertical
                               LayoutGap: =Parent.Width * 0.005
                               LayoutMode: =LayoutMode.Auto
-                              Width: =Parent.Width - locPadding/2
+                              Width: =Parent.Width - varPadding/2
                               X: =Center(Parent.Width,Self.Width)
                             Children:
                             - c_g_oee_line:
@@ -1177,7 +1557,7 @@
                                       AlignInContainer: =AlignInContainer.SetByContainer
                                       DropShadow: =DropShadow.None
                                       LayoutAlignItems: =LayoutAlignItems.Stretch
-                                      LayoutGap: =locPadding/2
+                                      LayoutGap: =varPadding/2
                                       LayoutMinHeight: =10
                                       LayoutMinWidth: =10
                                       LayoutMode: =LayoutMode.Auto
@@ -1295,7 +1675,7 @@
                                       AlignInContainer: =AlignInContainer.SetByContainer
                                       DropShadow: =DropShadow.None
                                       LayoutAlignItems: =LayoutAlignItems.Stretch
-                                      LayoutGap: =locPadding/2
+                                      LayoutGap: =varPadding/2
                                       LayoutMinHeight: =10
                                       LayoutMinWidth: =10
                                       LayoutMode: =LayoutMode.Auto
