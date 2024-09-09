@@ -1,0 +1,141 @@
+- d_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+      X: =
+    Children:
+    - d_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =varPadding
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - d_back:
+            Control: Image
+            Properties:
+              OnSelect: =Back()
+              Image: |-
+                ="data:image/svg+xml;utf8, " & EncodeUrl("
+
+                <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:"& varHexAccent &";}</style></defs><path class='cls-1' d='M136.37,86.88a12.62,12.62,0,0,0-9.07-9.27c-1-.27-8-.28-8-.28h-9.08v0H53.79L76.47,95.84c.74.6.89,1.22.33,1.9L74,101a7.83,7.83,0,0,1-11.85,1.07L33.44,78.63c-2.82-2.31-3.73-4.73-3.79-8.79-.06-3.72.81-6.19,3.79-8.83,1.61-1.44,28.71-23.44,28.71-23.44A7.83,7.83,0,0,1,74,38.64l2.8,3.3c.56.67.41,1.3-.33,1.9L53.79,62.37h56.38v0h11.6s5.29-.32,6.12-.58a12.6,12.6,0,0,0,8.23-15.83c-.27-.85-1.8-4.2-2.2-5.08A70,70,0,0,0,79.16.27,72.21,72.21,0,0,0,29.7,13,69.66,69.66,0,0,0-.12,69.8h0v.08A69.68,69.68,0,0,0,29.7,126.7a71.88,71.88,0,0,0,28.21,11.88A69.82,69.82,0,0,0,133.7,99c.25-.55,1.44-3.6,2.25-6.1A19.09,19.09,0,0,0,136.37,86.88Z'/></svg>
+
+                ")
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Width: =Self.Height
+        - d_logo:
+            Control: Image
+            Properties:
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              FillPortions: =1
+              LayoutMinHeight: =10
+              Width: =10
+        - d_h_title:
+            Control: Text
+            Properties:
+              Align: ='TextCanvas.Align'.Center
+              FontColor: =varColor5
+              Size: =24
+              Text: ="Accountability Suite"
+              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+              FillPortions: =6
+              LayoutMinHeight: =8
+              LayoutMinWidth: =10
+        - d_h_padding:
+            Control: GroupContainer
+            Variant: manualLayoutContainer
+            Properties:
+              FillPortions: =0
+              LayoutMinHeight: =1
+              Width: =d_logo.Width + d_back.Width - d_h_nav.Width
+        - d_h_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =d_h_n_bugs.Width + varPadding * 2
+            Children:
+            - d_h_n_bugs:
+                Control: Image
+                Properties:
+                  OnSelect: =Navigate(Bugs)
+                  Image: |-
+                    ="data:image/svg+xml;utf8, " & EncodeUrl("
+
+                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M80.07,33.73a24.48,24.48,0,1,0,24.48,24.48A24.51,24.51,0,0,0,80.07,33.73ZM65,47.65a1.45,1.45,0,0,1,1.7-1.16l5.62,1.06a8.34,8.34,0,0,1,7.46-4.65h.47a8.37,8.37,0,0,1,7.47,4.65l5.62-1.06a1.45,1.45,0,0,1,.54,2.85l-5.35,1a8.46,8.46,0,0,1,0,.87.85.85,0,0,1-.85.85H72.28a.85.85,0,0,1-.85-.85,6.35,6.35,0,0,1,0-.87l-5.35-1A1.45,1.45,0,0,1,65,47.65Zm28.88,19.7a1.45,1.45,0,0,1-.27,2.88,1.24,1.24,0,0,1-.27,0l-5.62-1.06a7.74,7.74,0,0,1-3.43,3.79c-1.88.82-6.8.8-8.67-.07a7.64,7.64,0,0,1-3.3-3.72L66.67,70.2a1.24,1.24,0,0,1-.27,0A1.46,1.46,0,0,1,65,69a1.44,1.44,0,0,1,1.16-1.69l5.35-1a6.35,6.35,0,0,1,0-.87v-5.3H66.16a1.45,1.45,0,1,1,0-2.9h5.27V56.06A1.09,1.09,0,0,1,72.52,55H87.46a1.09,1.09,0,0,1,1.09,1.09v1.21h5.32a1.45,1.45,0,0,1,0,2.9H88.55v5.3a8.46,8.46,0,0,1,0,.87Z'/><path class='cls-1' d='M69.91-.08a70,70,0,0,0-66,93.27c.13.38.7,1.8.82,2.12a15.3,15.3,0,0,0,25.62,5c.37-.4,2.29-2.41,2.29-2.41L47.45,83.05a2,2,0,0,1,2.92.12,38.81,38.81,0,0,0,6.27,6,2,2,0,0,1,.2,3L43.62,105.34s-3,2.72-3.65,3.29a16.13,16.13,0,0,0,5,26.69c.49.21,2.5.88,3,1.05A70,70,0,1,0,69.91-.08ZM80.07,92a33.81,33.81,0,1,1,33.81-33.81A33.85,33.85,0,0,1,80.07,92Z'/></svg>
+
+
+
+                    ")
+                  Height: =Parent.Height * 0.75
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Width: =Self.Height
+                  X: =Parent.Width * 0.99 - Self.Width
+                  Y: =Parent.Height/2 - Self.Height/2
+    - d_body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor3
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Center
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - d_demo:
+            Control: Video
+            Properties:
+              Media: ='~tmp92_Attatchment_Demo'
+              Fill: =varColor4
+              Height: =Parent.Height * 0.95
+              ImagePosition: =ImagePosition.Fit
+              Width: =Self.Height * 1.7777
+              X: =Parent.Width / 2 - Self.Width/2
+              Y: =Parent.Height / 2 - Self.Height/2
