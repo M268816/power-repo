@@ -15,6 +15,8 @@
 | V-Line Daily Management System for Production | v0.0.0 | TBD |
 | V-Line Daily LinkHub | v0.0.0 | TBD |
 
+**Version tracking only started after git integration*
+
 </div>
 
 ## PowerApps Packages

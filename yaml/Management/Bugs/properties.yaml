@@ -1,0 +1,6 @@
+Properties:
+  OnVisible: |-
+    =/*Init Local Variables*/
+    UpdateContext({
+        locPadding: Self.Width * 0.005
+        });
