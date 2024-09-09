@@ -20,8 +20,10 @@
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
           Fill: =varColor1
           LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =locPadding*2
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
@@ -29,126 +31,68 @@
           PaddingLeft: =locPadding
           PaddingRight: =locPadding
           PaddingTop: =locPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
         Children:
-        - o_collect:
-            Control: Classic/Button
+        - o_back:
+            Control: Image
             Properties:
               OnSelect: |-
-                =/*Start*/
-                UpdateContext({locLoading:{Visible: true, Value: 1, Text: "Loading"}});
-
-                /*Collect Production*/
-                UpdateContext({locLoading:{Visible: true, Value: 10, Text: "Collecting Production Data"}});
-
-                /*Collect Downtime*/
-                UpdateContext({locLoading:{Visible: true, Value: 20, Text: "Collecting Downtime Data"}});
-
-                /*Update*/
-                Select(o_update);
-              Text: ="collect"
-              FillPortions: =1
+                =Set(varShiftSelect, "Null");
+                Navigate(Login);
+              Image: =gblSVG.Back
+              AlignInContainer: =AlignInContainer.Stretch
+              HoverFill: =ColorFade(varColorAccent, 75%)
               LayoutMinHeight: =10
               LayoutMinWidth: =10
-              Visible: =false
-        - o_update:
-            Control: Classic/Button
-            Properties:
-              OnSelect: |
-                =
-
-                UpdateContext({locLoading:{Visible: true, Value: 30, Text: "Updating"}});
-                /*Update Code*/
-
-                UpdateContext({locLoading:{Visible: true, Value: 95, Text: "Finishing Up"}});
-                /*Garbage Collecting*/
-
-                /*End*/
-                UpdateContext({locLoading:{Visible: true, Value: 100, Text: "Completed"}});
-                UpdateContext({locLoading:{Visible: false, Value: -1, Text: "Not Loading"}});
-              Text: ="update"
-              FillPortions: =1
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              Visible: =false
+              PaddingRight: =
+              RadiusBottomLeft: =Self.Height / 2
+              RadiusBottomRight: =Self.Height / 2
+              RadiusTopLeft: =Self.Height / 2
+              RadiusTopRight: =Self.Height / 2
+              Width: =Self.Height
         - o_logo:
             Control: Image
             Properties:
               Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              LayoutMinHeight: =10
+              Width: =Self.Height * 3
+        - o_h_title:
+            Control: Label
+            Properties:
+              Text: ="Choose Operators"
+              Align: =Align.Center
+              Color: =varColor5
               FillPortions: =1
               LayoutMinHeight: =10
+              Size: =Self.Height / 3
               Width: =10
-        - o_h_title:
-            Control: Text
-            Properties:
-              Align: ='TextCanvas.Align'.Center
-              FontColor: =varColor5
-              Size: =Self.Height / 2.5
-              Text: ="Encapsualtion Daily Management System"
-              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
-              FillPortions: =6
-              LayoutMinHeight: =8
-              LayoutMinWidth: =10
-        - o_h_nav:
+        - o_h_padding:
             Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+            Variant: manualLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
               FillPortions: =0
-              LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =locPadding
-              LayoutJustifyContent: =LayoutJustifyContent.Center
               LayoutMinHeight: =10
               LayoutMinWidth: =10
-              LayoutMode: =LayoutMode.Auto
-              Width: =o_h_n_bugs.Width * 2 + locPadding * 3
-            Children:
-            - o_h_n_bugs:
-                Control: Image
-                Properties:
-                  OnSelect: =Navigate(Bugs);
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M80.07,33.73a24.48,24.48,0,1,0,24.48,24.48A24.51,24.51,0,0,0,80.07,33.73ZM65,47.65a1.45,1.45,0,0,1,1.7-1.16l5.62,1.06a8.34,8.34,0,0,1,7.46-4.65h.47a8.37,8.37,0,0,1,7.47,4.65l5.62-1.06a1.45,1.45,0,0,1,.54,2.85l-5.35,1a8.46,8.46,0,0,1,0,.87.85.85,0,0,1-.85.85H72.28a.85.85,0,0,1-.85-.85,6.35,6.35,0,0,1,0-.87l-5.35-1A1.45,1.45,0,0,1,65,47.65Zm28.88,19.7a1.45,1.45,0,0,1-.27,2.88,1.24,1.24,0,0,1-.27,0l-5.62-1.06a7.74,7.74,0,0,1-3.43,3.79c-1.88.82-6.8.8-8.67-.07a7.64,7.64,0,0,1-3.3-3.72L66.67,70.2a1.24,1.24,0,0,1-.27,0A1.46,1.46,0,0,1,65,69a1.44,1.44,0,0,1,1.16-1.69l5.35-1a6.35,6.35,0,0,1,0-.87v-5.3H66.16a1.45,1.45,0,1,1,0-2.9h5.27V56.06A1.09,1.09,0,0,1,72.52,55H87.46a1.09,1.09,0,0,1,1.09,1.09v1.21h5.32a1.45,1.45,0,0,1,0,2.9H88.55v5.3a8.46,8.46,0,0,1,0,.87Z'/><path class='cls-1' d='M69.91-.08a70,70,0,0,0-66,93.27c.13.38.7,1.8.82,2.12a15.3,15.3,0,0,0,25.62,5c.37-.4,2.29-2.41,2.29-2.41L47.45,83.05a2,2,0,0,1,2.92.12,38.81,38.81,0,0,0,6.27,6,2,2,0,0,1,.2,3L43.62,105.34s-3,2.72-3.65,3.29a16.13,16.13,0,0,0,5,26.69c.49.21,2.5.88,3,1.05A70,70,0,1,0,69.91-.08ZM80.07,92a33.81,33.81,0,1,1,33.81-33.81A33.85,33.85,0,0,1,80.07,92Z'/></svg>
-
-
-
-                    ")
-                  Height: =Parent.Height * 0.75
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Width: =Self.Height
-                  X: =Parent.Width * 0.99 - Self.Width
-                  Y: =Parent.Height/2 - Self.Height/2
-            - o_h_n_pallet:
-                Control: Image
-                Properties:
-                  OnSelect: |-
-                    =UpdateContext({locPopups: {Visible: true, Value: "pallet"}})
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:"&varHexAccent&";}</style></defs><path class='cls-1' d='M36.15,84a9.53,9.53,0,0,0-1,13.34,9.26,9.26,0,0,0,13.18,1,9.54,9.54,0,0,0,1-13.34A9.26,9.26,0,0,0,36.15,84Z'/><path class='cls-1' d='M86.37,61.08c1.91,5.26,6.85,7.82,11,5.72s6-8.07,4.14-13.33-6.85-7.83-11-5.72S84.47,55.82,86.37,61.08Z'/><path class='cls-1' d='M43.12,67c1.3,3.41,4.67,5,7.53,3.62s4.12-5.3,2.82-8.7-4.67-5-7.53-3.61S41.82,63.6,43.12,67Z'/><path class='cls-1' d='M82.68,92.15C87,95.43,93.8,94.33,97.88,89.7s3.91-11-.4-14.32S86.37,73.2,82.29,77.83,78.38,88.87,82.68,92.15Z'/><path class='cls-1' d='M87.23,41.49A6.79,6.79,0,0,0,89,31.93a7.07,7.07,0,0,0-9.79-1.39,6.79,6.79,0,0,0-1.78,9.56A7.09,7.09,0,0,0,87.23,41.49Z'/><path class='cls-1' d='M68.16,52.31A8.53,8.53,0,0,0,69.4,40.13a9,9,0,0,0-12.49-.63,8.52,8.52,0,0,0-1.23,12.17A9,9,0,0,0,68.16,52.31Z'/><path class='cls-1' d='M69.91-.08A70,70,0,0,0,5,96.07c.37.91,1.71,4.38,2.13,5.14A10.61,10.61,0,0,0,27,96.1c0-.34-.57-4.13-.74-4.93C18.6,54.49,82.1-9.68,106.94,41.73c19.2,47.45-37.31,90.26-39.68,64.64-.12-4,2.95-12-2-14.45C60,89.34,57,95.21,53.37,100.64c-.52.78-1.06,1.56-1.61,2.31-2.2,4.43-6.56,5.18-11,4.94-2.66-.14-6.14-2-7.48-2a10.67,10.67,0,0,0-8,17.75,44.36,44.36,0,0,0,3.94,3.24A70,70,0,1,0,69.91-.08Z'/></svg>
-
-
-
-                    ")
-                  Height: =Parent.Height * 0.75
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Width: =Self.Height
-                  X: =Parent.Width * 0.99 - Self.Width - o_h_n_bugs.Width - Parent.Width * 0.015
-                  Y: =Parent.Height/2 - Self.Height/2
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =o_back.Width + o_logo.Width
     - o_body:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          FillPortions: =9
+          FillPortions: =11
           LayoutAlignItems: =LayoutAlignItems.Center
           LayoutDirection: =LayoutDirection.Vertical
-          LayoutGap: =locPadding
+          LayoutGap: =locPadding * 5
           LayoutJustifyContent: =LayoutJustifyContent.Center
           LayoutMinHeight: =10
           LayoutMinWidth: =10
@@ -162,129 +106,254 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - o_b_title:
-            Control: Label
+        - o_form:
+            Control: GroupContainer
+            Variant: manualLayoutContainer
             Properties:
-              Text: ="Scan Barcode"
-              Align: =Align.Center
-              Font: =Font.Verdana
-              Height: =Parent.Height * 0.10
-              Italic: =true
-              Size: =Parent.Width / 42
-              Width: =Parent.Width * 0.5
-              X: =Parent.Width/2 - Self.Width/2
-              Y: =Parent.Height * 0.20
-        - o_b_input:
-            Control: Classic/TextInput
-            Properties:
-              OnChange: =Select(o_m_login);
-              OnSelect: =Set(varScanResult, "");
-              Default: =varScanResult
-              Align: =Align.Center
-              Height: =Parent.Height * 0.15
-              Mode: =TextMode.Password
-              RadiusBottomLeft: =8
-              RadiusBottomRight: =8
-              RadiusTopLeft: =8
-              RadiusTopRight: =8
-              Size: =Parent.Width / 42
-              Width: =Parent.Width * 0.35
-              X: =Parent.Width/2 - Self.Width/2
-              Y: =Parent.Height * 0.35
-        - o_m_scanner:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.Regular
+              Fill: =varColor4
+              FillPortions: =0
+              Height: =Parent.Height * 0.50
+              Width: =Parent.Width * 0.45
+              X: =Parent.Width / 2 - Self.Width / 2
+              Y: =Parent.Height / 3 - Self.Height / 2
+            Children:
+            - o_f_packager:
+                Control: Classic/ComboBox
+                Properties:
+                  DisplayFields: =["DisplayName"]
+                  Items: =Choices(Production.Runner)
+                  SearchFields: =["DisplayName"]
+                  SelectMultiple: =false
+                  BorderThickness: =1
+                  ChevronBackground: =varColor1
+                  ChevronFill: =varColorAccent
+                  Fill: =varColor5
+                  Font: =Font.Verdana
+                  Height: =o_f_runner_title.Height * 0.90
+                  PaddingBottom: =Self.Width * 0.01
+                  PaddingLeft: =Self.Width * 0.01
+                  PaddingRight: =Self.Width * 0.01
+                  PaddingTop: =Self.Width * 0.01
+                  Size: =Self.Height / 4
+                  Width: =Parent.Width * 0.98 - Self.X
+                  X: =o_f_packager_title.Width
+                  Y: =o_f_packager_title.Y
+            - o_f_packager_title:
+                Control: Label
+                Properties:
+                  Text: ="Packager:"
+                  Align: =Align.Right
+                  Font: =Font.Verdana
+                  Height: =o_f_middle_title.Height
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =Self.Width * 0.05
+                  PaddingTop: =0
+                  Size: =Self.Height / 4
+                  Width: =o_f_middle_title.Width
+                  X: =1-1
+                  Y: =o_f_bagger_title.Y + o_f_bagger_title.Height
+            - o_f_bagger:
+                Control: Classic/ComboBox
+                Properties:
+                  DisplayFields: =["DisplayName"]
+                  Items: =Choices(Production.Runner)
+                  SearchFields: =["DisplayName"]
+                  SelectMultiple: =false
+                  BorderThickness: =1
+                  ChevronBackground: =varColor1
+                  ChevronFill: =varColorAccent
+                  Fill: =varColor5
+                  Font: =Font.Verdana
+                  Height: =o_f_runner_title.Height * 0.90
+                  PaddingBottom: =Self.Width * 0.01
+                  PaddingLeft: =Self.Width * 0.01
+                  PaddingRight: =Self.Width * 0.01
+                  PaddingTop: =Self.Width * 0.01
+                  Size: =Self.Height / 4
+                  Visible: |-
+                    =Switch(
+                        varProductionLine,
+                        "SSC",
+                        false,
+                        "SSC2",
+                        false,
+                        true
+                    )
+                  Width: =Parent.Width * 0.98 - Self.X
+                  X: =o_f_bagger_title.Width
+                  Y: =o_f_bagger_title.Y
+            - o_f_bagger_title:
+                Control: Label
+                Properties:
+                  Text: ="Bagger:"
+                  Align: =Align.Right
+                  Font: =Font.Verdana
+                  Height: =o_f_middle_title.Height
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =Self.Width * 0.05
+                  PaddingTop: =0
+                  Size: =Self.Height / 4
+                  Visible: |-
+                    =Switch(
+                        varProductionLine,
+                        "SSC",
+                        false,
+                        "SSC2",
+                        false,
+                        true
+                    )
+                  Width: =o_f_middle_title.Width
+                  X: =1-1
+                  Y: =o_f_middle_title.Y + o_f_middle_title.Height
+            - o_f_middle:
+                Control: Classic/ComboBox
+                Properties:
+                  DisplayFields: =["DisplayName"]
+                  Items: =Choices(Production.Runner)
+                  SearchFields: =["DisplayName"]
+                  SelectMultiple: =false
+                  BorderThickness: =1
+                  ChevronBackground: =varColor1
+                  ChevronFill: =varColorAccent
+                  Fill: =varColor5
+                  Font: =Font.Verdana
+                  Height: =o_f_runner_title.Height * 0.90
+                  PaddingBottom: =Self.Width * 0.01
+                  PaddingLeft: =Self.Width * 0.01
+                  PaddingRight: =Self.Width * 0.01
+                  PaddingTop: =Self.Width * 0.01
+                  Size: =Self.Height / 4
+                  Visible: |-
+                    =Switch(
+                        varProductionLine,
+                        "XL3",
+                        true,
+                        "XL4",
+                        true,
+                        "XL5",
+                        true,
+                        false
+                    )
+                  Width: =Parent.Width * 0.98 - Self.X
+                  X: =o_f_middle_title.Width
+                  Y: =o_f_middle_title.Y
+            - o_f_middle_title:
+                Control: Label
+                Properties:
+                  Text: ="Middle:"
+                  Align: =Align.Right
+                  Font: =Font.Verdana
+                  Height: =o_f_runner_title.Height
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =Self.Width * 0.05
+                  PaddingTop: =0
+                  Size: =Self.Height / 4
+                  Visible: |-
+                    =Switch(
+                        varProductionLine,
+                        "XL3",
+                        true,
+                        "XL4",
+                        true,
+                        "XL5",
+                        true,
+                        false
+                    )
+                  Width: =o_f_runner_title.Width
+                  X: =1-1
+                  Y: =o_f_runner_title.Y + o_f_runner_title.Height
+            - o_f_runner:
+                Control: Classic/ComboBox
+                Properties:
+                  OnChange: =Set(varRunner, o_f_runner.SelectedItems);
+                  DisplayFields: =["DisplayName"]
+                  Items: =Choices(Production.Runner)
+                  SearchFields: =["DisplayName"]
+                  SelectMultiple: |-
+                    =If(
+                        varProductionLine = "XL5",
+                        true,
+                        false
+                    )
+                  BorderThickness: =1
+                  ChevronBackground: =varColor1
+                  ChevronFill: =varColorAccent
+                  ChevronHoverBackground: =ColorFade(varColor1, -20%)
+                  Fill: =varColor5
+                  Font: =Font.Verdana
+                  Height: =o_f_runner_title.Height * 0.90
+                  PaddingBottom: =Self.Width * 0.01
+                  PaddingLeft: =Self.Width * 0.01
+                  PaddingRight: =Self.Width * 0.01
+                  PaddingTop: =Self.Width * 0.01
+                  Size: =Self.Height / 4
+                  Width: =Parent.Width * 0.98 - Self.X
+                  X: =o_f_runner_title.X + o_f_runner_title.Width
+                  Y: =o_f_runner_title.Y
+            - o_f_runner_title:
+                Control: Label
+                Properties:
+                  Text: ="Runner:"
+                  Align: =Align.Right
+                  Font: =Font.Verdana
+                  Height: =((Parent.Height - Self.Y)/4) * 0.95
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =Self.Width * 0.05
+                  PaddingTop: =0
+                  Size: =Self.Height / 4
+                  Width: =Parent.Width * 0.25
+                  X: =1-1
+                  Y: =o_f_title.Y + o_f_title.Height + Parent.Height * 0.05
+            - o_f_title:
+                Control: Label
+                Properties:
+                  Text: '="Who is running " & varProductionLine & "?" '
+                  Align: =Align.Center
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =varColor2
+                  Font: =Font.Verdana
+                  Height: =Parent.Height * 0.15
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width
+                  X: =1-1
+                  Y: =1-1
+        - o_submit:
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =Set(varScanResult, "Null");
-                Set(varCamDisplay, DisplayMode.Edit);
-                Navigate(Scanner, ScreenTransition.CoverRight);
-              Text: ="Camera Scanner"
+                =Set(varRunner, o_f_runner.SelectedItems);
+                Set(varMiddle, o_f_middle.SelectedItems);
+                Set(varBagger, o_f_bagger.SelectedItems);
+                Set(varPackager, o_f_packager.SelectedItems);
+                Navigate(Hourly);
+              Text: ="Submit"
               Color: =varColor0
+              DisplayMode: |-
+                =If(
+                    Or(
+                        CountRows(varRunner) > 2,
+                        o_f_runner.Selected.DisplayName = Blank(),
+                        And( o_f_runner.Selected.DisplayName = o_f_middle.Selected.DisplayName, !IsBlank(o_f_middle.Selected.DisplayName)),
+                        And(o_f_runner.Selected.DisplayName = o_f_bagger.Selected.DisplayName, !IsBlank(o_f_bagger.Selected.DisplayName)),
+                        And(o_f_middle.Selected.DisplayName = o_f_bagger.Selected.DisplayName, !IsBlank(o_f_bagger.Selected.DisplayName)),
+                        And(o_f_runner.Selected.DisplayName = o_f_packager.Selected.DisplayName, !IsBlank(o_f_packager.Selected.DisplayName)),
+                        And(o_f_middle.Selected.DisplayName = o_f_packager.Selected.DisplayName, !IsBlank(o_f_packager.Selected.DisplayName)),
+                        And(o_f_bagger.Selected.DisplayName = o_f_packager.Selected.DisplayName, !IsBlank(o_f_packager.Selected.DisplayName))
+                        ),
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
               Fill: =varColorAccent
-              FocusedBorderColor: =ColorFade(Self.Fill, -75%)
               Font: =Font.Verdana
-              Height: =Parent.Height * 0.15
-              HoverColor: =varColor5
+              Height: =Self.Width * 0.25
+              HoverColor: =varColor0
               HoverFill: =ColorFade(Self.Fill, -30%)
-              RadiusBottomLeft: =8
-              RadiusBottomRight: =8
-              RadiusTopLeft: =8
-              RadiusTopRight: =8
-              Size: =Parent.Width / 62
-              Visible: |-
-                =//And(!locLoginSuccess, !locLoginFailed)
-                true
-              Width: =Parent.Width * 0.20
+              Width: =Parent.Width * 0.15
               X: =Parent.Width/2 - Self.Width/2
-              Y: =Parent.Height * 0.75
-        - o_m_login:
-            Control: Classic/Button
-            Properties:
-              OnSelect: |-
-                =Switch(
-                    o_b_input.Text,
-                    //----- SPECIAL LOGINS -----//
-                    "admin",
-                    Set(varDevVis, !varDevVis),
-                    //----- PASSWORD LOGINS FOR LINES -----//
-                    "qRRPB4PJ",
-                    Set(varProductionLine,  "XL1"),
-                    "d7vD!PbK",
-                    Set(varProductionLine,  "XL2"),
-                    "2%Qw&h^7",
-                    Set(varProductionLine,  "XL3"),
-                    "2i$QU4@g",
-                    Set(varProductionLine,  "XL4"),
-                    "TmfR$24R",
-                    Set(varProductionLine,  "XL5"),
-                    "t6%4eZc7",
-                    Set(varProductionLine,  "XLT"),
-                    "aHWd&8N3",
-                    Set(varProductionLine,  "XLT2"),
-                    "V3b#bp%r",
-                    Set(varProductionLine,  "XLT3"),
-                    "W2SBqN^R",
-                    Set(varProductionLine,  "SSC"),
-                    "^42a3GCQ",
-                    Set(varProductionLine,  "SSC2"),
-                    //----- DEFAULT -----//
-                    Set(varProductionLine, "Null")
-                    );
-
-                If(
-                    o_b_input.Text = "admin" || o_b_input.Text = "manage",
-                    Blank(),
-                    varProductionLine = "Null",
-                    UpdateContext({locPopups:{Visible: true, Value: "failed"}}),
-                    UpdateContext({locPopups:{Visible: true, Value: "success"}})
-                    );
-              Text: ="Login"
-              Color: =varColor0
-              Fill: =varColorAccent
-              FocusedBorderColor: =ColorFade(Self.Fill, -75%)
-              Font: =Font.Verdana
-              Height: =Parent.Height * 0.15
-              HoverColor: =varColor5
-              HoverFill: =ColorFade(Self.Fill, -30%)
-              RadiusBottomLeft: =8
-              RadiusBottomRight: =8
-              RadiusTopLeft: =8
-              RadiusTopRight: =8
-              Size: =Parent.Width / 62
-              Width: =Parent.Width * 0.20
-              X: =(Parent.Width/2) - (Self.Width/2)
-              Y: =Parent.Height * 0.55
-        - o_DEVMODE_PICKLINE:
-            Control: Classic/DropDown
-            Properties:
-              OnChange: "=If(\r\n    Not(Self.SelectedText.Value = \"Pick One\"),\r\n    Set(varProductionLine, Self.SelectedText.Value)\r\n    );\r\n    \r\nUpdateContext({locPopups:{Visible: true, Value: \"success\"}});\r\n\r\nReset(Self);"
-              OnSelect: =
-              Default: =0
-              Items: =["Jump to Line","XL1","XL2","XL3","XL4","XL5","XLT","XLT2","XLT3","SSC","SSC2"]
-              Height: =Parent.Height * 0.15
-              LayoutMinHeight: =10
-              Size: =Parent.Width / 58
-              Visible: =varDevVis
-              Width: =Parent.Width * 0.20
-              X: =Parent.Width - Self.Width
-              Y: =Parent.Height - Self.Height
+              Y: =o_form.Height + o_form.Y + Parent.Height * 0.10

@@ -1,0 +1,10 @@
+Properties:
+  OnHidden: |+
+    =
+  OnVisible: |-
+    =Reset(o_f_runner);
+    Reset(o_f_middle);
+    Reset(o_f_bagger);
+    Reset(o_f_packager);
+
+    UpdateContext({locPadding: Self.Width * 0.005});
