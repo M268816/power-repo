@@ -15,7 +15,7 @@
         Control: Image
         Properties:
           Image: |-
-            =If(varInit, loading_double,
+            =If(lethani, loading_double,
 
             "data:image/svg+xml;utf8, " & EncodeUrl("
 
