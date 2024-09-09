@@ -1,4 +1,4 @@
-- prod_loading:
+- h_loading:
     Control: GroupContainer
     Variant: manualLayoutContainer
     Properties:
@@ -12,13 +12,13 @@
       Visible: =locLoading.Visible
       Width: =Parent.Width
     Children:
-    - prod_l_image:
+    - h_l_image:
         Control: Image
         Properties:
           Image: =loading_double
           X: =Center(Parent.Width,Self.Width)
-          Y: =prod_l_progress.Y + prod_l_progress.Height
-    - prod_l_progress:
+          Y: =h_l_progress.Y + h_l_progress.Height
+    - h_l_progress:
         Control: Progress
         Properties:
           ProgressColor: ='Progress.ProgressColor'.Brand
@@ -29,13 +29,13 @@
           Width: =Parent.Width * 0.5
           X: =Center(Parent.Width,Self.Width)
           Y: =Center(Parent.Height,Self.Height)
-    - prod_l_text:
+    - h_l_text:
         Control: Text
         Properties:
           Align: ='TextCanvas.Align'.Center
           Size: =22
           Text: =locLoading.Text
-          Height: =prod_l_progress.Height
-          Width: =prod_l_progress.Width
-          X: =prod_l_progress.X
-          Y: =prod_l_progress.Y - Self.Height
+          Height: =h_l_progress.Height
+          Width: =h_l_progress.Width
+          X: =h_l_progress.X
+          Y: =h_l_progress.Y - Self.Height

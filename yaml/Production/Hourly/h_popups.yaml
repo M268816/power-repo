@@ -1,0 +1,252 @@
+- h_popups:
+    Control: GroupContainer
+    Variant: manualLayoutContainer
+    Properties:
+      BorderThickness: =3
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =locPopups.Visible
+      Width: =Parent.Width
+      X: =Parent.Width - Parent.Width
+      Y: =Parent.Height - Parent.Height
+    Children:
+    - h_p_error:
+        Control: GroupContainer
+        Variant: manualLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.Regular
+          Fill: =varColorNo
+          Height: =Parent.Height * 0.30
+          RadiusBottomLeft: =8
+          RadiusBottomRight: =8
+          RadiusTopLeft: =8
+          RadiusTopRight: =8
+          Visible: =locPopups.Value = "error"
+          Width: =Parent.Width* 0.40
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - h_p_e_text:
+            Control: Label
+            Properties:
+              Text: ="Please enter your lot and catalog information."
+              Align: =Align.Center
+              Color: =varColor5
+              Height: =Parent.Height * 0.40
+              Size: =Self.Height / 5
+              Width: =Parent.Width * 0.80
+              X: =Parent.Width/2 - Self.Width/2
+              Y: =Parent.Height * 0.10
+        - h_p_e_confirm:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Okay"
+              Color: =varColor0
+              Fill: =varColorAccent
+              Height: =Parent.Height * 0.20
+              HoverColor: =varColor0
+              HoverFill: =ColorFade(Self.Fill, -30%)
+              Size: =Self.Height / 3
+              Width: =Parent.Width * 0.20
+              X: =Parent.Width/2 - Self.Width/2
+              Y: =(Parent.Height / 4) * 3 - Self.Height/2
+    - h_p_change_ops:
+        Control: GroupContainer
+        Variant: manualLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.Regular
+          Fill: =varColor4
+          Height: =Parent.Height * 0.40
+          RadiusBottomLeft: =8
+          RadiusBottomRight: =8
+          RadiusTopLeft: =8
+          RadiusTopRight: =8
+          Visible: =locPopups.Value = "ops"
+          Width: =Parent.Width* 0.40
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - h_p_c_text:
+            Control: Label
+            Properties:
+              Text: |-
+                ="The system has detected it's time to change operators.
+
+                Please be sure you have properly changed operators if needed.
+
+                Thank you!"
+              Align: =Align.Center
+              Color: =varColor0
+              Height: =Parent.Height * 0.50
+              Size: =Self.Height / 12
+              Width: =Parent.Width * 0.80
+              X: =Parent.Width/2 - Self.Width/2
+              Y: =Parent.Height * 0.10
+        - h_p_c_return:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Cancel"
+              Color: =varColor0
+              Fill: =varColorAccent
+              Height: =Parent.Height * 0.20
+              HoverColor: =varColor0
+              HoverFill: =ColorFade(Self.Fill, -30%)
+              Size: =Self.Height / 4
+              Width: =Parent.Width * 0.20
+              X: =Parent.Width/2 - Self.Width/2
+              Y: =(Parent.Height / 4) * 3 - Self.Height/2
+        - h_p_c_change:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+
+                Navigate(Operators);
+              Text: |-
+                ="Change
+                Operators Now"
+              Color: =varColor0
+              Fill: =varColorAccent
+              Height: =Parent.Height * 0.20
+              HoverColor: =varColor0
+              HoverFill: =ColorFade(Self.Fill, -30%)
+              Size: =Self.Height / 5
+              Width: =Parent.Width * 0.30
+              X: =Parent.Width*0.20 - Self.Width/2
+              Y: =(Parent.Height / 4) * 3 - Self.Height/2
+        - h_p_c_continue:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+
+                Set(varUnitMode, FormMode.New);
+
+                Navigate(Units);
+              Text: ="Continue"
+              Color: =varColor0
+              Fill: =varColorAccent
+              Height: =Parent.Height * 0.20
+              HoverColor: =varColor0
+              HoverFill: =ColorFade(Self.Fill, -30%)
+              Size: =Self.Height / 4
+              Width: =Parent.Width * 0.20
+              X: =Parent.Width * 0.80 - Self.Width/2
+              Y: =(Parent.Height / 4) * 3 - Self.Height/2
+    - h_p_pallet:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          BorderColor: =RGBA(0,0,0,0)
+          Fill: =varColor4
+          Height: =Parent.Height * 0.30
+          LayoutAlignItems: =LayoutAlignItems.Center
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =locPadding*2
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap
+          PaddingRight: =Self.LayoutGap
+          PaddingTop: =Self.LayoutGap
+          Visible: =locPopups.Value = "pallet"
+          Width: =Parent.Width * 0.30
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - h_p_p_text:
+            Control: Label
+            Properties:
+              Text: ="Select a color theme."
+              Align: =Align.Center
+              Color: =Color.Black
+              Fill: =RGBA(0,0,0,0)
+              FillPortions: =1
+              Height: =Parent.Height * 0.40
+              LayoutMinHeight: =10
+              Size: =Self.Width / 24
+              Width: =Parent.Width * 0.75
+              X: =(Parent.Width/2) - (Self.Width/2)
+              Y: =(Parent.Height/3) - (Self.Height/2)
+        - h_p_p_theme:
+            Control: Classic/DropDown
+            Properties:
+              OnChange: |-
+                =If(
+                    /* Merck Blue */
+                    Self.SelectedText.Value = "Merck Blue",
+                    
+                    Set(varColor0, Color.Black);
+                    Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple
+                    Set(varColor2, RGBA(15, 105, 175, 1));      //Rich Blue
+                    Set(varColor3, RGBA(45, 190, 205, 1));      //Vibrant Cyan
+                    Set(varColor4, RGBA(255, 220, 185, 1));     //Sensitive Yellow
+                    Set(varColor5, Color.White);
+                    Set(varColorAccent, RGBA(255, 200, 50, 1)); //Vibrant Yellow
+                    Set(varColorYes, RGBA(20, 155, 95, 1));     //Rich Green
+                    Set(varColorNo, RGBA(230, 30, 80, 1));      //Rich Red
+                    Set(varHexRich, "#503291");
+                    Set(varHexAccent, "#FFC832");
+                    Set(varHexYes, "#149B5F");
+                    Set(varHexNo, "#E61E50");,
+
+                    /* Merck Green */
+                    Self.SelectedText.Value = "Merck Green",
+                    
+                    Set(varColor0, Color.Black);
+                    Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple
+                    Set(varColor2, RGBA(20, 155, 95, 1));       //Rich Green
+                    Set(varColor3, RGBA(180, 220, 150, 1));     //Sensitive Green
+                    Set(varColor4, RGBA(150, 215, 210, 1));     //Sansitive Blue
+                    Set(varColor5, Color.White);
+                    Set(varColorAccent, RGBA(165, 205, 80, 1)); //Vibrant Green
+                    Set(varColorYes, RGBA(15, 105, 175, 1));    //Rich Blue
+                    Set(varColorNo, RGBA(230, 30, 80, 1));      //Rich Red
+                    Set(varHexRich, "#503291");
+                    Set(varHexAccent, "#FFC832");
+                    Set(varHexYes, "#0F69AF");
+                    Set(varHexNo, "#E61E50");
+                )
+              Default: =""
+              Items: =["Merck Blue", "Merck Green"]
+              ChevronBackground: =varColor1
+              ChevronFill: =varColorAccent
+              ChevronHoverBackground: =ColorFade(varColor1, -20%)
+              Fill: =varColor5
+              FillPortions: =2
+              Height: =Parent.Height * 0.2
+              LayoutMinHeight: =10
+              Size: =Self.Width / 16
+              Width: =Parent.Width * 0.95
+              X: =Center(Parent.Width, Self.Width)
+              Y: =Center(Parent.Height, Self.Height)
+        - h_p_p_cancel:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =Set(varProductionLine, "Null");
+                Set(varScanResult, "");
+                UpdateContext({locPopups:{Visible: false, Value: Blank()}});
+              Text: ="Exit"
+              Color: =varColor5
+              Fill: =varColorNo
+              FillPortions: =1
+              FocusedBorderColor: =ColorFade(Self.Fill, -75%)
+              FontWeight: =FontWeight.Normal
+              Height: =Parent.Height * 0.25
+              HoverColor: =Self.Color
+              HoverFill: =ColorFade(Self.Fill, -20%)
+              LayoutMinHeight: =10
+              Size: =Self.Height / 3
+              Width: =Parent.Width * 0.75
+              X: =(Parent.Width/4)*3 - (Self.Width/2)
+              Y: =(Parent.Height/3)*2.5 - (Self.Height/2)
