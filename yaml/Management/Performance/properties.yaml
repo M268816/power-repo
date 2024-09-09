@@ -1,0 +1,11 @@
+Properties:
+  OnVisible: |-
+    =/*Init Local Variables*/
+    Set(varLoading, {Visible: true, Value: -1, Text: "Starting"});
+
+    /*Init Time Variables*/
+    Set(varNowDay, Today());
+    Set(varNowHour, Now());
+
+    /*Call the update button*/
+    Select(p_collect);

@@ -18,13 +18,14 @@
           DropShadow: =DropShadow.None
           Fill: =varColor1
           LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =locPadding
-          PaddingLeft: =locPadding
-          PaddingRight: =locPadding
-          PaddingTop: =locPadding
+          PaddingBottom: =varPadding
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
@@ -33,22 +34,185 @@
         - o_collect:
             Control: Classic/Button
             Properties:
-              OnSelect: "=/*Start*/\nUpdateContext({locLoading:{Visible: true, Value: 1, Text: \"Loading\"}});\n\n/*Update Dates Variables*/\nUpdateContext({\n    locEndDate: o_end_date.SelectedDate,\n    locStartDate: o_start_date.SelectedDate\n    \n});\n\n/*Check if collections need updating*/\nUpdateContext({locLoading:{Visible: true, Value: 5, Text: \"Checking for updates\"}});\nSet(varUpdateProduction,\n    Or(\n        Not(First(Sort(Production,ID,SortOrder.Descending)).ID = First(Sort(collectProduction,id,SortOrder.Descending)).id),\n        Not(varEndDate = locEndDate),\n        Not(varStartDate = locStartDate)\n    )\n);\n\n/*Set collection dates from selected local dates*/\nIf( Not(varEndDate = locEndDate), Set(varEndDate, locEndDate));\nIf( Not(varStartDate = locStartDate), Set(varStartDate, locStartDate));\n\n/*Collect Production*/\nUpdateContext({locLoading:{Visible: true, Value: 10, Text: \"Collecting Production Data\"}});\nIf(varUpdateProduction,\n    If(\n        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,\n        UpdateContext({locLoading:{Visible: true, Value: 75, Text: \"Retrieving Production Data\"}});\n        ClearCollect(collectProduction,\n            ForAll(\n                Filter(Production,\n                    Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),\n                    Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)\n                ),\n                {\n                    id: Value(ThisRecord.ID),\n                    shift: Text(ThisRecord.Shift_Letter),\n                    line: Text(ThisRecord.Line.Value),\n                    lot: Text(ThisRecord.Lot),\n                    catalog: Text(ThisRecord.Catalog),\n                    size: Text(ThisRecord.Size),\n                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),\n                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),\n                    goal: Value(ThisRecord.Hourly_Goal),\n                    amount_built: Value(ThisRecord.Amount_Built),\n                    unit_starting: Value(ThisRecord.Unit_Starting),\n                    unit_ending: Value(ThisRecord.Unit_Ending),\n                    reject_labels: Value(ThisRecord.Reject_Labels),\n                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),\n                    reject_units: Value(ThisRecord.Reject_Units),\n                    qa_units: Value(ThisRecord.QA_Units)\n                }\n            )\n        ),\n\n        DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,\n        UpdateContext({locLoading:{Visible: true, Value: 75, Text: \"Parsing PowerAutomate Flow\"}});\n        ClearCollect(collectProduction,\n            ForAll(\n                Table(\n                    ParseJSON(\n                        flow_get_units_range_v2.Run(\n                            Text(\"All\"),\n                            Text(DateAdd(varEndDate, 23,TimeUnit.Hours), \"yyyy-mm-dd\"),\n                            Text(DateAdd(varStartDate, -1, TimeUnit.Hours), \"yyyy-mm-dd\")\n                        ).output\n                    )\n                ),\n                {\n                    id: Value(Value._ID),\n                    shift: Text(Value._shift),\n                    line: Text(Value._line),\n                    lot: Text(Value._lot),\n                    catalog: Text(Value._catalog),\n                    size: Text(Value._size),\n                    hour_ending: DateTimeValue(Value._hour_ending),\n                    hour_starting: DateTimeValue(Value._hour_starting),\n                    goal: Value(Value._goal),\n                    amount_built: Value(Value._amount_built),\n                    unit_starting: Value(Value._unit_starting),\n                    unit_ending: Value(Value._unit_ending),\n                    reject_labels: Value(Value._reject_labels),\n                    reject_cartridges: Value(Value._reject_cartridges),\n                    reject_units: Value(Value._reject_units),\n                    qa_units: Value(Value._qa)\n                }\n            )\n        ),\n\n        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,\n        UpdateContext({locLoading:{Visible: true, Value: 20, Text: \"Collecting Dataset 1\"}});\n        Collect(material_1,\n            Sort(\n                Filter(Production,\n                    And(\n                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),\n                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        \n                    )\n                ),\n                Hour_Ending,\n                SortOrder.Ascending\n            )\n        );\n\n        UpdateContext({locLoading:{Visible: true, Value: 30, Text: \"Collecting Dataset 2\"}});\n        Collect(material_2,\n            Sort(\n                Filter(Production,\n                    And(\n                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),\n                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        \n                    )\n                ),\n                Hour_Ending,\n                SortOrder.Descending\n            )\n        );\n\n        UpdateContext({locLoading:{Visible: true, Value: 40, Text: \"Inserting Dataset 1\"}});\n        ClearCollect(fusion, material_1);\n\n        UpdateContext({locLoading:{Visible: true, Value: 50, Text: \"Inserting Dataset 2\"}});\n        Collect(fusion,\n            Filter(material_2, Not(ID in material_1.ID))\n        );\n\n        UpdateContext({locLoading:{Visible: true, Value: 75, Text: \"Collecting Production Data from Joined Data\"}});\n        ClearCollect(\n            collectProduction,\n            ForAll(\n                fusion,\n                {\n                    id: Value(ThisRecord.ID),\n                    shift: Text(ThisRecord.Shift_Letter),\n                    line: Text(ThisRecord.Line.Value),\n                    lot: Text(ThisRecord.Lot),\n                    catalog: Text(ThisRecord.Catalog),\n                    size: Text(ThisRecord.Size),\n                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),\n                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),\n                    goal: Value(ThisRecord.Hourly_Goal),\n                    amount_built: Value(ThisRecord.Amount_Built),\n                    unit_starting: Value(ThisRecord.Unit_Starting),\n                    unit_ending: Value(ThisRecord.Unit_Ending),\n                    reject_labels: Value(ThisRecord.Reject_Labels),\n                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),\n                    reject_units: Value(ThisRecord.Reject_Units),\n                    qa_units: Value(ThisRecord.QA_Units)\n                }\n            )\n        );\n\n        UpdateContext({locLoading:{Visible: true, Value: 80, Text: \"Garbage Collection\"}});\n        Clear(fusion);\n        Clear(material_1);\n        Clear(material_2);\n    )\n);\n\n/*Update*/\nUpdateContext({locLoading:{Visible: true, Value: 100, Text: \"Finishing Collection\"}});\nSelect(o_update);"
+              OnSelect: |-
+                =/*Start*/
+                Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
+
+                /*Update Dates Variables*/
+                UpdateContext({
+                    locEndDate: o_end_date.SelectedDate,
+                    locStartDate: o_start_date.SelectedDate
+                    
+                });
+
+                /*Check if collections need updating*/
+                Set(varLoading,{Visible: true, Value: 5, Text: "Checking for updates"});
+                Set(varUpdateProduction,
+                    Or(
+                        Not(First(Sort(Production,ID,SortOrder.Descending)).ID = First(Sort(collectProduction,id,SortOrder.Descending)).id),
+                        Not(varEndDate = locEndDate),
+                        Not(varStartDate = locStartDate)
+                    )
+                );
+
+                /*Set collection dates from selected local dates*/
+                If( Not(varEndDate = locEndDate), Set(varEndDate, locEndDate));
+                If( Not(varStartDate = locStartDate), Set(varStartDate, locStartDate));
+
+                /*Collect Production*/
+                Set(varLoading,{Visible: true, Value: 10, Text: "Collecting Production Data"});
+                If(varUpdateProduction,
+                    If(
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Retrieving Production Data"});
+                        ClearCollect(collectProduction,
+                            ForAll(
+                                Filter(Production,
+                                    Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                    Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)
+                                ),
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Lot),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    size: Text(ThisRecord.Size),
+                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                                    goal: Value(ThisRecord.Hourly_Goal),
+                                    amount_built: Value(ThisRecord.Amount_Built),
+                                    unit_starting: Value(ThisRecord.Unit_Starting),
+                                    unit_ending: Value(ThisRecord.Unit_Ending),
+                                    reject_labels: Value(ThisRecord.Reject_Labels),
+                                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),
+                                    reject_units: Value(ThisRecord.Reject_Units),
+                                    qa_units: Value(ThisRecord.QA_Units)
+                                }
+                            )
+                        ),
+
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Parsing PowerAutomate Flow"});
+                        ClearCollect(collectProduction,
+                            ForAll(
+                                Table(
+                                    ParseJSON(
+                                        flow_get_units_range_v2.Run(
+                                            Text("All"),
+                                            Text(DateAdd(varEndDate, 23,TimeUnit.Hours), "yyyy-mm-dd"),
+                                            Text(DateAdd(varStartDate, -1, TimeUnit.Hours), "yyyy-mm-dd")
+                                        ).output
+                                    )
+                                ),
+                                {
+                                    id: Value(Value._ID),
+                                    shift: Text(Value._shift),
+                                    line: Text(Value._line),
+                                    lot: Text(Value._lot),
+                                    catalog: Text(Value._catalog),
+                                    size: Text(Value._size),
+                                    hour_ending: DateTimeValue(Value._hour_ending),
+                                    hour_starting: DateTimeValue(Value._hour_starting),
+                                    goal: Value(Value._goal),
+                                    amount_built: Value(Value._amount_built),
+                                    unit_starting: Value(Value._unit_starting),
+                                    unit_ending: Value(Value._unit_ending),
+                                    reject_labels: Value(Value._reject_labels),
+                                    reject_cartridges: Value(Value._reject_cartridges),
+                                    reject_units: Value(Value._reject_units),
+                                    qa_units: Value(Value._qa)
+                                }
+                            )
+                        ),
+
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,
+                        Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Dataset 1"});
+                        Collect(material_1,
+                            Sort(
+                                Filter(Production,
+                                    And(
+                                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        
+                                    )
+                                ),
+                                Hour_Ending,
+                                SortOrder.Ascending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 30, Text: "Collecting Dataset 2"});
+                        Collect(material_2,
+                            Sort(
+                                Filter(Production,
+                                    And(
+                                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        
+                                    )
+                                ),
+                                Hour_Ending,
+                                SortOrder.Descending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 40, Text: "Inserting Dataset 1"});
+                        ClearCollect(fusion, material_1);
+
+                        Set(varLoading,{Visible: true, Value: 50, Text: "Inserting Dataset 2"});
+                        Collect(fusion,
+                            Filter(material_2, Not(ID in material_1.ID))
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Collecting Production Data from Joined Data"});
+                        ClearCollect(
+                            collectProduction,
+                            ForAll(
+                                fusion,
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Lot),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    size: Text(ThisRecord.Size),
+                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                                    goal: Value(ThisRecord.Hourly_Goal),
+                                    amount_built: Value(ThisRecord.Amount_Built),
+                                    unit_starting: Value(ThisRecord.Unit_Starting),
+                                    unit_ending: Value(ThisRecord.Unit_Ending),
+                                    reject_labels: Value(ThisRecord.Reject_Labels),
+                                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),
+                                    reject_units: Value(ThisRecord.Reject_Units),
+                                    qa_units: Value(ThisRecord.QA_Units)
+                                }
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 80, Text: "Garbage Collection"});
+                        Clear(fusion);
+                        Clear(material_1);
+                        Clear(material_2);
+                    )
+                );
+
+                /*Update*/
+                Set(varLoading,{Visible: true, Value: 100, Text: "Finishing Collection"});
+                Select(o_update);
               Text: ="collect"
-              FillPortions: =1
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
               Visible: =false
+              X: =20
+              Y: =20
         - o_update:
             Control: Classic/Button
             Properties:
               OnSelect: |-
                 =
                 /*Continued from o_collect*/
-                UpdateContext({locLoading:{Visible: true, Value: 10, Text: "Updating Values"}});
+                Set(varLoading,{Visible: true, Value: 10, Text: "Updating Values"});
 
                 /*Join and Create Output Table*/
-                UpdateContext({locLoading:{Visible: true, Value: 45, Text: "Collecting Output Data"}});
+                Set(varLoading,{Visible: true, Value: 45, Text: "Collecting Output Data"});
                 ClearCollect(
                     collectLocalOutputData,
                     ForAll(
@@ -76,7 +240,7 @@
                 );
 
                 /*Join and Create Rejects Table*/
-                UpdateContext({locLoading:{Visible: true, Value: 90, Text: "Collecting Reject Data"}});
+                Set(varLoading,{Visible: true, Value: 90, Text: "Collecting Reject Data"});
                 ClearCollect(
                     collectLocalRejectData,
                     ForAll(
@@ -104,70 +268,208 @@
                 );
 
                 /*Garbage Collecting*/
-                UpdateContext({locLoading:{Visible: true, Value: 95, Text: "Finishing Up"}});
+                Set(varLoading,{Visible: true, Value: 95, Text: "Finishing Up"});
 
 
                 /*End*/
-                UpdateContext({locLoading:{Visible: true, Value: 100, Text: "Completed"}});
-                UpdateContext({locLoading:{Visible: false, Value: -1, Text: "Not Loading"}});
+                Set(varLoading,{Visible: true, Value: 100, Text: "Completed"});
+                Set(varLoading,{Visible: false, Value: -1, Text: "Not Loading"});
               Text: ="update"
-              FillPortions: =1
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
               Visible: =false
+              X: =20
+              Y: =20
         - o_logo:
             Control: Image
             Properties:
               Image: =LOGO_MSIG_SBlue_FIT_ALPHA
               FillPortions: =1
-              LayoutMinHeight: =10
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
               Width: =10
         - o_h_title:
-            Control: Text
+            Control: Label
             Properties:
-              Align: ='TextCanvas.Align'.Center
-              FontColor: =varColor5
-              Size: =24
-              Text: ="Encapsualtion Daily Management System"
-              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+              Text: ="Encapsualtion Daily Managmenet System"
+              Align: =Align.Center
+              Color: =varColor5
               FillPortions: =6
-              LayoutMinHeight: =8
-              LayoutMinWidth: =10
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 2
         - o_h_nav:
             Control: GroupContainer
             Variant: horizontalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              FillPortions: =0
               LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =locPadding
+              LayoutGap: =varPadding
               LayoutJustifyContent: =LayoutJustifyContent.Center
-              LayoutMinHeight: =10
+              LayoutMinHeight: =1
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              RadiusBottomLeft: =-1
-              RadiusBottomRight: =-1
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
               RadiusTopLeft: =0
-              RadiusTopRight: =-1
-              Width: =o_h_n_reload.Width * 3 + locPadding * 4
+              RadiusTopRight: =0
+              Width: =o_h_n_reload.Width * 3 + varPadding * 4
             Children:
             - o_h_n_reload:
                 Control: Image
                 Properties:
-                  OnSelect: =Select(o_collect);
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
+                  OnSelect: |-
+                    =/*Start*/
+                    Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
 
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140.25 140.25'><defs><style>.cls-1{fill:"& varHexAccent &";}</style></defs><path class='cls-1' d='M70.12.12a69.87,69.87,0,0,0-23.37,4l0,0a13.17,13.17,0,0,0,4.65,25.49,39.54,39.54,0,0,0,6.18-1.18l2.92-.71a44.45,44.45,0,0,1,20.73.61,5.79,5.79,0,0,1,2.63,1.38A4.24,4.24,0,0,1,85,31.24,4.86,4.86,0,0,1,85,35l-.76,2a1.35,1.35,0,0,1-1.86.75l-.81-.3A35.56,35.56,0,1,0,100.25,53L97,65.75a1.33,1.33,0,0,1-1.31,1.14,1.64,1.64,0,0,1-.37,0l-2.08-.54a4.83,4.83,0,0,1-3.1-2.16,4.77,4.77,0,0,1-.37-3.75l4.59-17.7a6.23,6.23,0,0,1,3.62-4.28c1.69-.79,2.45-1,4.92-.08l17,7.84a4.53,4.53,0,0,1,2.34,6.45l-.9,1.93a1.28,1.28,0,0,1-1.19.79,1.68,1.68,0,0,1-.73-.17l-11-5.12a44.13,44.13,0,0,1-29.41,64c-7.34,1.6-17.83,1-25.16-1.89A44.11,44.11,0,0,1,34.37,44.47c.31-.42,1.57-2.06,1.87-2.48A13.07,13.07,0,0,0,15,26.8c-.36.49-1.79,2.65-2.18,3.21A70,70,0,1,0,70.12.12Z'/></svg>
+                    UpdateContext({
+                        locStartDate: o_start_date.SelectedDate,
+                        locEndDate: o_end_date.SelectedDate
+                    });
 
+                    /*Collect Production*/
+                    If(
+                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 10,
+                        Set(varLoading,{Visible: true, Value: 25, Text: "Collecting Production Data"});
+                        ClearCollect(collectProduction,
+                            ForAll(
+                                Filter(Production,
+                                    Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                    Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)
+                                ),
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Lot),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    size: Text(ThisRecord.Size),
+                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                                    goal: Value(ThisRecord.Hourly_Goal),
+                                    amount_built: Value(ThisRecord.Amount_Built),
+                                    unit_starting: Value(ThisRecord.Unit_Starting),
+                                    unit_ending: Value(ThisRecord.Unit_Ending),
+                                    reject_labels: Value(ThisRecord.Reject_Labels),
+                                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),
+                                    reject_units: Value(ThisRecord.Reject_Units),
+                                    qa_units: Value(ThisRecord.QA_Units)
+                                }
+                            )
+                        ),
 
+                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) > 20,
+                        Set(varLoading,{Visible: true, Value: 25, Text: "Parsing PowerAutomate Flow for Production Data"});
+                        ClearCollect(collectProduction,
+                            ForAll(
+                                Table(
+                                    ParseJSON(
+                                        flow_get_units_range_v2.Run(
+                                            Text("All"),
+                                            Text(DateAdd(locEndDate, 23,TimeUnit.Hours), "yyyy-mm-dd"),
+                                            Text(DateAdd(locStartDate, -1, TimeUnit.Hours), "yyyy-mm-dd")
+                                        ).output
+                                    )
+                                ),
+                                {
+                                    id: Value(Value._ID),
+                                    shift: Text(Value._shift),
+                                    line: Text(Value._line),
+                                    lot: Text(Value._lot),
+                                    catalog: Text(Value._catalog),
+                                    size: Text(Value._size),
+                                    hour_ending: DateTimeValue(Value._hour_ending),
+                                    hour_starting: DateTimeValue(Value._hour_starting),
+                                    goal: Value(Value._goal),
+                                    amount_built: Value(Value._amount_built),
+                                    unit_starting: Value(Value._unit_starting),
+                                    unit_ending: Value(Value._unit_ending),
+                                    reject_labels: Value(Value._reject_labels),
+                                    reject_cartridges: Value(Value._reject_cartridges),
+                                    reject_units: Value(Value._reject_units),
+                                    qa_units: Value(Value._qa)
+                                }
+                            )
+                        ),
 
-                    ")
-                  Height: =Parent.Height
+                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 20,
+                        Set(varLoading,{Visible: true, Value: 5, Text: "Collecting Production Dataset 1"});
+                        Collect(material_1,
+                            Sort(
+                                Filter(Production,
+                                    And(
+                                        Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours)
+                                    )
+                                ),
+                                Hour_Ending,
+                                SortOrder.Ascending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 10, Text: "Collecting Production Dataset 2"});
+                        Collect(material_2,
+                            Sort(
+                                Filter(Production,
+                                    And(
+                                        Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours)
+                                    )
+                                ),
+                                Hour_Ending,
+                                SortOrder.Descending
+                            )
+                        );
+
+                        
+                        Set(varLoading,{Visible: true, Value: 15, Text: "Joining Production Dataset 1"});
+                        ClearCollect(fusion, material_1);
+
+                        Set(varLoading,{Visible: true, Value: 20, Text: "Joining Production Dataset 2"});
+                        Collect(fusion,
+                            Filter(material_2, Not(ID in material_1.ID))
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 25, Text: "Collecting Joined Production Data"});
+                        ClearCollect(
+                            collectProduction,
+                            ForAll(
+                                fusion,
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Lot),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    size: Text(ThisRecord.Size),
+                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                                    goal: Value(ThisRecord.Hourly_Goal),
+                                    amount_built: Value(ThisRecord.Amount_Built),
+                                    unit_starting: Value(ThisRecord.Unit_Starting),
+                                    unit_ending: Value(ThisRecord.Unit_Ending),
+                                    reject_labels: Value(ThisRecord.Reject_Labels),
+                                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),
+                                    reject_units: Value(ThisRecord.Reject_Units),
+                                    qa_units: Value(ThisRecord.QA_Units)
+                                }
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 26, Text: "Garbage Collection"});
+                        Clear(fusion);
+                        Clear(material_1);
+                        Clear(material_2);
+                    );
+
+                    Set(varLoading,{Visible: true, Value: 52, Text: "Finshing up"});
+
+                    /*Update*/
+                    Select(o_update);
+                  Image: =gblAppIcons.Reload
+                  Height: =Parent.Height * 0.75
                   HoverBorderColor: =ColorFade(varColorYes, 20%)
                   HoverFill: =ColorFade(varColorAccent, 75%)
-                  LayoutMinHeight: =10
+                  LayoutMinHeight: =1
                   LayoutMinWidth: =10
                   RadiusBottomLeft: =Self.Width/2
                   RadiusBottomRight: =Self.Width/2
@@ -180,18 +482,11 @@
                 Control: Image
                 Properties:
                   OnSelect: =Navigate(Bugs)
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M80.07,33.73a24.48,24.48,0,1,0,24.48,24.48A24.51,24.51,0,0,0,80.07,33.73ZM65,47.65a1.45,1.45,0,0,1,1.7-1.16l5.62,1.06a8.34,8.34,0,0,1,7.46-4.65h.47a8.37,8.37,0,0,1,7.47,4.65l5.62-1.06a1.45,1.45,0,0,1,.54,2.85l-5.35,1a8.46,8.46,0,0,1,0,.87.85.85,0,0,1-.85.85H72.28a.85.85,0,0,1-.85-.85,6.35,6.35,0,0,1,0-.87l-5.35-1A1.45,1.45,0,0,1,65,47.65Zm28.88,19.7a1.45,1.45,0,0,1-.27,2.88,1.24,1.24,0,0,1-.27,0l-5.62-1.06a7.74,7.74,0,0,1-3.43,3.79c-1.88.82-6.8.8-8.67-.07a7.64,7.64,0,0,1-3.3-3.72L66.67,70.2a1.24,1.24,0,0,1-.27,0A1.46,1.46,0,0,1,65,69a1.44,1.44,0,0,1,1.16-1.69l5.35-1a6.35,6.35,0,0,1,0-.87v-5.3H66.16a1.45,1.45,0,1,1,0-2.9h5.27V56.06A1.09,1.09,0,0,1,72.52,55H87.46a1.09,1.09,0,0,1,1.09,1.09v1.21h5.32a1.45,1.45,0,0,1,0,2.9H88.55v5.3a8.46,8.46,0,0,1,0,.87Z'/><path class='cls-1' d='M69.91-.08a70,70,0,0,0-66,93.27c.13.38.7,1.8.82,2.12a15.3,15.3,0,0,0,25.62,5c.37-.4,2.29-2.41,2.29-2.41L47.45,83.05a2,2,0,0,1,2.92.12,38.81,38.81,0,0,0,6.27,6,2,2,0,0,1,.2,3L43.62,105.34s-3,2.72-3.65,3.29a16.13,16.13,0,0,0,5,26.69c.49.21,2.5.88,3,1.05A70,70,0,1,0,69.91-.08ZM80.07,92a33.81,33.81,0,1,1,33.81-33.81A33.85,33.85,0,0,1,80.07,92Z'/></svg>
-
-
-
-                    ")
-                  Height: =Parent.Height
+                  Image: =gblAppIcons.Bug
+                  Height: =Parent.Height * 0.75
                   HoverBorderColor: =ColorFade(varColorYes, 20%)
                   HoverFill: =ColorFade(varColorAccent, 75%)
-                  LayoutMinHeight: =10
+                  LayoutMinHeight: =1
                   LayoutMinWidth: =10
                   RadiusBottomLeft: =Self.Width/2
                   RadiusBottomRight: =Self.Width/2
@@ -204,18 +499,11 @@
                 Control: Image
                 Properties:
                   OnSelect: =Navigate(Settings)
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M69.52,87.51a18,18,0,1,0,.11-36.06,18,18,0,1,0-.11,36.06'/><path class='cls-1' d='M139.42,64.6A64.36,64.36,0,0,0,131,36.05C119,15.24,101.24,2.84,77.23,0A66.63,66.63,0,0,0,37.54,7.27,70.36,70.36,0,0,0,5,42.45,68,68,0,0,0-.43,70.11,63.18,63.18,0,0,0,1.82,85.8c1,3.82,3.15,9.39,6,12.31A19.57,19.57,0,0,0,27,103.61c2.87-.81,9.71-3.83,6.85-10.42a1.66,1.66,0,0,1,0-1.31c1.44-2.11,3-4.21,4.59-6.18a1.52,1.52,0,0,0,.44-1.4l-1.47-3.54a1.5,1.5,0,0,0-1.29-.68c-2.5-.27-5.11-.65-7.61-1.11a1.51,1.51,0,0,1-.93-.93,38.11,38.11,0,0,1-.84-8.56,46.23,46.23,0,0,1,.84-8.55,1.48,1.48,0,0,1,.93-.93c2.5-.47,5.11-.84,7.61-1.12a1.48,1.48,0,0,0,1.29-.68l1.47-3.53a1.51,1.51,0,0,0-.44-1.4c-1.57-2-3.15-4.08-4.59-6.18a1.51,1.51,0,0,1,0-1.31,29.91,29.91,0,0,1,5.45-6.65,29.56,29.56,0,0,1,6.63-5.45,1.51,1.51,0,0,1,1.31,0c2.1,1.44,4.2,3,6.17,4.6a1.47,1.47,0,0,0,1.4.43l3.53-1.46A1.53,1.53,0,0,0,59,36c.27-2.5.65-5.11,1.11-7.62A1.53,1.53,0,0,1,61,27.4c1.48-.28,1.55-.84,8.54-.84s7.06.56,8.55.84a1.51,1.51,0,0,1,.92.93c.47,2.51.84,5.12,1.12,7.62a1.51,1.51,0,0,0,.68,1.3l3.53,1.46a1.46,1.46,0,0,0,1.39-.43c2-1.58,4.07-3.16,6.17-4.6a1.53,1.53,0,0,1,1.32,0c1.24.85,2.39,1.21,6.63,5.45s4.59,5.4,5.45,6.65a1.51,1.51,0,0,1,0,1.31c-1.44,2.1-3,4.21-4.6,6.18a1.5,1.5,0,0,0-.43,1.4l1.46,3.53a1.5,1.5,0,0,0,1.29.68c2.51.28,5.11.65,7.62,1.12a1.53,1.53,0,0,1,.93.93c.27,1.49.83,1.79.83,8.55s-.56,7.07-.83,8.56a1.56,1.56,0,0,1-.93.93c-2.51.46-5.11.84-7.62,1.11a1.53,1.53,0,0,0-1.29.68L100.3,84.3a1.51,1.51,0,0,0,.43,1.4c1.58,2,3.16,4.07,4.6,6.18a1.51,1.51,0,0,1,0,1.31,37.71,37.71,0,0,1-5.45,6.64,41.31,41.31,0,0,1-6.63,5.46,1.53,1.53,0,0,1-1.32,0c-2.1-1.45-4.2-3-6.17-4.6a1.5,1.5,0,0,0-1.39-.44l-3.53,1.47a1.48,1.48,0,0,0-.68,1.29c-.28,2.51-.65,5.12-1.12,7.63a1.54,1.54,0,0,1-.92.93,33.49,33.49,0,0,1-8.55.83,39.74,39.74,0,0,1-8.54-.83,1.56,1.56,0,0,1-.93-.93c-.46-2.51-.84-5.12-1.11-7.63a1.5,1.5,0,0,0-.68-1.29l-3.53-1.47a1.51,1.51,0,0,0-1.4.44c-2,1.57-4.07,3.15-6.17,4.6a1.5,1.5,0,0,1-1.31,0c-4-1.22-7.42-1.59-12.29,6.9-4.43,7.73-4,15.86,5.81,20.5a69.64,69.64,0,0,0,42.89,5.62,67.22,67.22,0,0,0,41-23.93c12-14.4,17.27-31.1,16.12-49.78'/></svg>
-
-
-
-                    ")
-                  Height: =Parent.Height
+                  Image: =gblAppIcons.Settings
+                  Height: =Parent.Height * 0.75
                   HoverBorderColor: =ColorFade(varColorYes, 20%)
                   HoverFill: =ColorFade(varColorAccent, 75%)
-                  LayoutMinHeight: =10
+                  LayoutMinHeight: =1
                   LayoutMinWidth: =10
                   RadiusBottomLeft: =Self.Width/2
                   RadiusBottomRight: =Self.Width/2
@@ -224,12 +512,24 @@
                   Width: =Self.Height
                   X: =Parent.Width * 0.99 - Self.Width - o_h_n_bugs.Width - Parent.Width * 0.015
                   Y: =Parent.Height/2 - Self.Height/2
+            - o_h_n_user:
+                Control: Image
+                Properties:
+                  Image: |
+                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
     - o_body:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
-          FillPortions: =11
+          FillPortions: =15
           LayoutAlignItems: =LayoutAlignItems.Stretch
           LayoutMinHeight: =10
           LayoutMinWidth: =10
@@ -244,14 +544,14 @@
               Fill: =varColor3
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
-              LayoutGap: =locPadding
+              LayoutGap: =varPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =locPadding
-              PaddingLeft: =locPadding
-              PaddingRight: =locPadding
-              PaddingTop: =locPadding
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
@@ -266,139 +566,49 @@
                   VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
                   Weight: ='TextCanvas.Weight'.Semibold
                   FillPortions: =1
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
             - o_n_seperator:
                 Control: Rectangle
                 Properties:
                   Height: =1
-                  LayoutMinWidth: =10
-            - o_n_home:
-                Control: Classic/Button
+                  Width: =Parent.Width * 0.95
+            - o_n_gallery:
+                Control: Gallery
+                Variant: galleryVertical
                 Properties:
-                  OnSelect: =Navigate(Home);
-                  Text: ="Home"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Home", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - o_n_dor:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(DOR);
-                  Text: ="Daily Operations Report"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "DOR", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - o_n_outputs:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Outputs);
-                  Text: ="Outputs"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Outputs", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - o_n_downtime:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Downtime_Screen);
-                  Text: ="Downtime"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Downtime_View", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - o_n_hourly:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Hourly);
-                  Text: ="Hour by Hour"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Hourly", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - o_n_errors:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Errors);
-                  Text: ="Error Tracking"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Errors", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - o_n_oee:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(OEE);
-                  Text: ="OEE Analysis"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "OEE", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - o_n_catalog:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Catalog);
-                  Text: ="Catalog Analysis"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Catalog", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
-            - o_n_trend:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Trend);
-                  Text: ="OEE Trend Analysis"
-                  Color: =varColor0
-                  DisplayMode: =If(App.ActiveScreen.Name = "Trend", DisplayMode.Disabled, DisplayMode.Edit)
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Width / 16
+                  Items: =collectNavigation
+                  DelayItemLoading: =true
+                  FillPortions: =13
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LoadingSpinner: =LoadingSpinner.Data
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: =(Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount
+                Children:
+                - o_n_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.ScreenName);
+                      Text: =ThisItem.Title
+                      Color: =varColor0
+                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =varColorAccent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight - varPadding
+                      Size: =Self.Width / 16
+                      Width: =Parent.TemplateWidth - Self.BorderThickness
+                      X: =Center(Parent.TemplateWidth, Self.Width)
+                      Y: =Center(Parent.TemplateHeight, Self.Height)
             - o_n_footer:
                 Control: GroupContainer
                 Variant: manualLayoutContainer
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.None
-                  FillPortions: =6
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
+                  FillPortions: =2
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
@@ -418,16 +628,16 @@
             Variant: horizontalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
-              FillPortions: =9
+              FillPortions: =11
               LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =locPadding
+              LayoutGap: =varPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =locPadding
-              PaddingLeft: =locPadding
-              PaddingRight: =locPadding
-              PaddingTop: =locPadding
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
             Children:
             - o_controls:
                 Control: GroupContainer
@@ -437,14 +647,14 @@
                   Fill: =varColor4
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =locPadding
+                  LayoutGap: =varPadding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
-                  PaddingBottom: =locPadding
-                  PaddingLeft: =locPadding
-                  PaddingRight: =locPadding
-                  PaddingTop: =locPadding
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
                 Children:
                 - o_start_date_title:
                     Control: Text
@@ -556,14 +766,14 @@
                   DropShadow: =DropShadow.None
                   FillPortions: =9
                   LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutGap: =locPadding
+                  LayoutGap: =varPadding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
-                  PaddingBottom: =locPadding
-                  PaddingLeft: =locPadding
-                  PaddingRight: =locPadding
-                  PaddingTop: =locPadding
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
@@ -628,7 +838,26 @@
                         - o_o_t_daily_xlt:
                             Control: Label
                             Properties:
-                              Text: "=\"XLT: \" &\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        \r\n        /*find all XLT*/\r\n        \"XLT\" in line\r\n    ),\r\n    amount_built\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="XLT: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        
+                                        /*find all XLT*/
+                                        "XLT" in line
+                                    ),
+                                    amount_built
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
+
+                                & " / " &
+
+                                Text(Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XLT").int/5,0))
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -640,7 +869,27 @@
                         - o_o_t_daily_xl:
                             Control: Label
                             Properties:
-                              Text: "=\"XL: \" &\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        \r\n        /*Finding XL is more annoying use nots to filter out XLT*/\r\n        \"XL\" in line,\r\n        Not(\"XLT\" in line)\r\n    ),\r\n    amount_built\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="XL: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        
+                                        /*Finding XL is more annoying use nots to filter out XLT*/
+                                        "XL" in line,
+                                        Not("XLT" in line)
+                                    ),
+                                    amount_built
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
+
+                                & " / " &
+
+                                Text(Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XL").int/5,0))
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -652,7 +901,26 @@
                         - o_o_t_daily_ssc:
                             Control: Label
                             Properties:
-                              Text: "=\"SSC: \" &\r\n\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        \r\n        /*find all ssc*/\r\n        \"SSC\" in line\r\n    ),\r\n    amount_built\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="SSC: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        
+                                        /*find all ssc*/
+                                        "SSC" in line
+                                    ),
+                                    amount_built
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
+
+                                & " / " &
+
+                                Text(Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_SSC").int/5,0))
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -675,7 +943,31 @@
                         - o_o_t_shift_xlt:
                             Control: Label
                             Properties:
-                              Text: "=\"XLT: \" &\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        \r\n        /*find all XLT*/\r\n        \"XLT\" in line,\r\n        If(\r\n            o_shift.Selected.Value = \"All\",\r\n            shift = shift,\r\n            shift = o_shift.Selected.Value\r\n        )\r\n    ),\r\n    amount_built\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="XLT: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        
+                                        /*find all XLT*/
+                                        "XLT" in line,
+                                        If(
+                                            o_shift.Selected.Value = "All",
+                                            shift = shift,
+                                            shift = o_shift.Selected.Value
+                                        )
+                                    ),
+                                    amount_built
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
+
+                                & " / " &
+
+                                Text(Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XLT").int/5/3,0))
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -686,7 +978,34 @@
                         - o_o_t_shift_xl:
                             Control: Label
                             Properties:
-                              Text: "=\"XL: \" &\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n\r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n\r\n        /*Finding XL is more annoying use nots to filter out XLT*/\r\n        \r\n        \"XL\" in line,\r\n        Not(\"XLT\" in line),\r\n        \r\n        If(\r\n            o_shift.Selected.Value = \"All\",\r\n            shift = shift,\r\n            shift = o_shift.Selected.Value\r\n        )\r\n    ),\r\n    amount_built\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="XL: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+
+                                        /*Finding XL is more annoying use nots to filter out XLT*/
+                                        
+                                        "XL" in line,
+                                        Not("XLT" in line),
+                                        
+                                        If(
+                                            o_shift.Selected.Value = "All",
+                                            shift = shift,
+                                            shift = o_shift.Selected.Value
+                                        )
+                                    ),
+                                    amount_built
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
+
+                                & " / " &
+
+                                Text(Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XL").int/5/3,0))
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -717,6 +1036,10 @@
 
                                 /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
                                 ) * 1
+
+                                & " / " &
+
+                                Text(Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_SSC").int/5/3,0))
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -817,7 +1140,18 @@
                     - o_o_copy:
                         Control: Classic/Button
                         Properties:
-                          OnSelect: "=IfError(\r\n    \r\n    Copy(\r\n        Concat(\r\n            collectLocalOutputData,\r\n            If(IsBlankOrError(total), 0, total),\r\n            Char(9)\r\n        )\r\n    ),\r\n\r\n    /*New bug with teams, cannot copy so show error*/\r\n    Notify(\"Cannot copy data from new Teams, or other embeded tools. Please open this app in a web browser.\", NotificationType.Error)\r\n);\r\n"
+                          OnSelect: |-
+                            =IfError(  
+                                Copy(
+                                    Concat(
+                                        collectLocalOutputData,
+                                        If(IsBlankOrError(total), 0, total),
+                                        Char(9)
+                                    )
+                                ),
+                                /*New bug with teams, cannot copy so show error*/
+                                Notify("Cannot copy data from new Teams, or other embeded tools. Please open this app in a web browser.", NotificationType.Error)
+                            );
                           Text: ="Copy Outputs"
                           Color: =varColor0
                           Fill: =varColorAccent
@@ -886,7 +1220,21 @@
                         - o_r_t_daily_xlt:
                             Control: Label
                             Properties:
-                              Text: "=\"XLT: \" &\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        /*find all XLT*/\r\n        \"XLT\" in line\r\n    ),\r\n    reject_cartridges + reject_units\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="XLT: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        /*find all XLT*/
+                                        "XLT" in line
+                                    ),
+                                    reject_cartridges + reject_units
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -898,7 +1246,22 @@
                         - o_r_t_daily_xl:
                             Control: Label
                             Properties:
-                              Text: "=\"XL: \" &\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        /*Finding XL is more annoying use nots to filter out XLT*/\r\n        \"XL\" in line,\r\n        Not(\"XLT\" in line)\r\n    ),\r\n    reject_cartridges + reject_units\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="XL: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        /*Finding XL is more annoying use nots to filter out XLT*/
+                                        "XL" in line,
+                                        Not("XLT" in line)
+                                    ),
+                                    reject_cartridges + reject_units
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -910,7 +1273,20 @@
                         - o_r_t_daily_ssc:
                             Control: Label
                             Properties:
-                              Text: "=\"SSC: \" &\r\n\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        \"SSC\" in line\r\n    ),\r\n    reject_cartridges + reject_units\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="SSC: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        "SSC" in line
+                                    ),
+                                    reject_cartridges + reject_units
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -933,7 +1309,26 @@
                         - o_r_t_shift_xlt:
                             Control: Label
                             Properties:
-                              Text: "=\"XLT: \" &\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        /*find all XLT*/\r\n        \"XLT\" in line,\r\n        If(\r\n            o_shift.Selected.Value = \"All\",\r\n            shift = shift,\r\n            shift = o_shift.Selected.Value\r\n        )\r\n    ),\r\n    reject_cartridges + reject_units\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="XLT: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        /*find all XLT*/
+                                        "XLT" in line,
+                                        If(
+                                            o_shift.Selected.Value = "All",
+                                            shift = shift,
+                                            shift = o_shift.Selected.Value
+                                        )
+                                    ),
+                                    reject_cartridges + reject_units
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -944,7 +1339,29 @@
                         - o_r_t_shift_xl:
                             Control: Label
                             Properties:
-                              Text: "=\"XL: \" &\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        /*Finding XL is more annoying use nots to filter out XLT*/\r\n        \r\n        \"XL\" in line,\r\n        Not(\"XLT\" in line),\r\n        \r\n        If(\r\n            o_shift.Selected.Value = \"All\",\r\n            shift = shift,\r\n            shift = o_shift.Selected.Value\r\n        )\r\n    ),\r\n    reject_cartridges + reject_units\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="XL: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        /*Finding XL is more annoying use nots to filter out XLT*/
+                                        
+                                        "XL" in line,
+                                        Not("XLT" in line),
+                                        
+                                        If(
+                                            o_shift.Selected.Value = "All",
+                                            shift = shift,
+                                            shift = o_shift.Selected.Value
+                                        )
+                                    ),
+                                    reject_cartridges + reject_units
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
@@ -955,7 +1372,27 @@
                         - o_r_t_shift_ssc:
                             Control: Label
                             Properties:
-                              Text: "=\"SSC: \" &\r\n\r\nSum(\r\n    Filter(\r\n        collectProduction,\r\n        \r\n        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n        \r\n        /*find all ssc*/\r\n        \"SSC\" in line,\r\n        If(\r\n            o_shift.Selected.Value = \"All\",\r\n            shift = shift,\r\n            shift = o_shift.Selected.Value\r\n        )\r\n    ),\r\n    reject_cartridges + reject_units\r\n\r\n/*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/\r\n) * 1"
+                              Text: |-
+                                ="SSC: " &
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        
+                                        hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
+                                        hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                        
+                                        /*find all ssc*/
+                                        "SSC" in line,
+                                        If(
+                                            o_shift.Selected.Value = "All",
+                                            shift = shift,
+                                            shift = o_shift.Selected.Value
+                                        )
+                                    ),
+                                    reject_cartridges + reject_units
+
+                                /*Multiply by 1 to get Zero amounts when nothing is present in the data for the filtered lines*/
+                                ) * 1
                               Align: =Align.Center
                               Color: =varColor5
                               Font: =Font.Verdana
