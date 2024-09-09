@@ -39,3 +39,4 @@
           Width: =perf_l_progress.Width
           X: =perf_l_progress.X
           Y: =perf_l_progress.Y - Self.Height
+          

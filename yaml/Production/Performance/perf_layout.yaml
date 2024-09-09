@@ -15,8 +15,10 @@
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
           Fill: =varColor1
           LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =locPadding * 3
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
@@ -24,6 +26,10 @@
           PaddingLeft: =locPadding
           PaddingRight: =locPadding
           PaddingTop: =locPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
         Children:
         - perf_collect:
             Control: Classic/Button
@@ -32,284 +38,74 @@
                 =/*Start*/
                 UpdateContext({locLoading:{Visible: true, Value: 1, Text: "Loading"}});
 
-                /*Capture Local Date Selection*/
-                UpdateContext({
-                    locEndDate: varNowDay,
-                    locStartDate: varNowDay
-                });
+                Set(varNowDay, Today());
 
-                UpdateContext({locLoading:{Visible: true, Value: 10, Text: "Checking for Updates"}});
-                /*Check if collections need updating*/
-                /*THIS MIGHT BREAK BECASUE IT ONLY UPDATES AFTER A CHANGE IN THE DATABASE IDs*/
-                Set(varUpdateProduction,
-                    Not(First(Sort(Production,ID,SortOrder.Descending)).ID = First(Sort(collectProduction,id,SortOrder.Descending)).id)
-                );
-                Set(varUpdateDowntime,
-                    Not(First(Sort(Downtime,ID,SortOrder.Descending)).ID = First(Sort(collectDowntime,id,SortOrder.Descending)).id)
-                );
+                /*Delegated Collection - Downtime*/
+                UpdateContext({locLoading:{Visible: true, Value: 5, Text: "Collecting Downtime Data"}});
 
-                /*Collect Production*/
-                UpdateContext({locLoading:{Visible: true, Value: 15, Text: "Collecting Production Data"}});
-                If(varUpdateProduction,
-                    If(
-                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 14,
-                        UpdateContext({locLoading:{Visible: true, Value: 25, Text: "Retrieving Production Data"}});
-                        ClearCollect(collectProduction,
-                            ForAll(
-                                Filter(Production,
-                                    Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
-                                    Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)
-                                ),
-                                {
-                                    id: Value(ThisRecord.ID),
-                                    shift: Text(ThisRecord.Shift_Letter),
-                                    line: Text(ThisRecord.Line.Value),
-                                    lot: Text(ThisRecord.Lot),
-                                    catalog: Text(ThisRecord.Catalog),
-                                    size: Text(ThisRecord.Size),
-                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
-                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
-                                    goal: Value(ThisRecord.Hourly_Goal),
-                                    amount_built: Value(ThisRecord.Amount_Built),
-                                    unit_starting: Value(ThisRecord.Unit_Starting),
-                                    unit_ending: Value(ThisRecord.Unit_Ending),
-                                    reject_labels: Value(ThisRecord.Reject_Labels),
-                                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),
-                                    reject_units: Value(ThisRecord.Reject_Units),
-                                    qa_units: Value(ThisRecord.QA_Units)
-                                }
-                            )
-                        ),
-
-                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) > 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 25, Text: "Parsing PowerAutomate Flow for Production Data"}});
-                        ClearCollect(collectProduction,
-                            ForAll(
-                                Table(
-                                    ParseJSON(
-                                        flow_get_units_range_v2.Run(
-                                            Text("All"),
-                                            Text(DateAdd(locEndDate, 23,TimeUnit.Hours), "yyyy-mm-dd"),
-                                            Text(DateAdd(locStartDate, -1, TimeUnit.Hours), "yyyy-mm-dd")
-                                        ).output
-                                    )
-                                ),
-                                {
-                                    id: Value(Value._ID),
-                                    shift: Text(Value._shift),
-                                    line: Text(Value._line),
-                                    lot: Text(Value._lot),
-                                    catalog: Text(Value._catalog),
-                                    size: Text(Value._size),
-                                    hour_ending: DateTimeValue(Value._hour_ending),
-                                    hour_starting: DateTimeValue(Value._hour_starting),
-                                    goal: Value(Value._goal),
-                                    amount_built: Value(Value._amount_built),
-                                    unit_starting: Value(Value._unit_starting),
-                                    unit_ending: Value(Value._unit_ending),
-                                    reject_labels: Value(Value._reject_labels),
-                                    reject_cartridges: Value(Value._reject_cartridges),
-                                    reject_units: Value(Value._reject_units),
-                                    qa_units: Value(Value._qa)
-                                }
-                            )
-                        ),
-
-                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 18, Text: "Collecting Production Dataset 1"}});
-                        Collect(material_1,
-                            Sort(
-                                Filter(Production,
-                                    And(
-                                        Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
-                                        Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)                        
-                                    )
-                                ),
-                                Hour_Ending,
-                                SortOrder.Ascending
-                            )
-                        );
-
-                        UpdateContext({locLoading:{Visible: true, Value: 20, Text: "Collecting Production Dataset 2"}});
-                        Collect(material_2,
-                            Sort(
-                                Filter(Production,
-                                    And(
-                                        Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
-                                        Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)                        
-                                    )
-                                ),
-                                Hour_Ending,
-                                SortOrder.Descending
-                            )
-                        );
-
-                        UpdateContext({locLoading:{Visible: true, Value: 22, Text: "Joining Production Dataset 1"}});
-                        ClearCollect(fusion, material_1);
-
-                        UpdateContext({locLoading:{Visible: true, Value: 24, Text: "Joining Production Dataset 2"}});
-                        Collect(fusion,
-                            Filter(material_2, Not(ID in material_1.ID))
-                        );
-
-                        UpdateContext({locLoading:{Visible: true, Value: 25, Text: "Collecting Joined Production Data"}});
-                        ClearCollect(
-                            collectProduction,
-                            ForAll(
-                                fusion,
-                                {
-                                    id: Value(ThisRecord.ID),
-                                    shift: Text(ThisRecord.Shift_Letter),
-                                    line: Text(ThisRecord.Line.Value),
-                                    lot: Text(ThisRecord.Lot),
-                                    catalog: Text(ThisRecord.Catalog),
-                                    size: Text(ThisRecord.Size),
-                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
-                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
-                                    goal: Value(ThisRecord.Hourly_Goal),
-                                    amount_built: Value(ThisRecord.Amount_Built),
-                                    unit_starting: Value(ThisRecord.Unit_Starting),
-                                    unit_ending: Value(ThisRecord.Unit_Ending),
-                                    reject_labels: Value(ThisRecord.Reject_Labels),
-                                    reject_cartridges: Value(ThisRecord.Reject_Cartridges),
-                                    reject_units: Value(ThisRecord.Reject_Units),
-                                    qa_units: Value(ThisRecord.QA_Units)
-                                }
-                            )
-                        );
-
-                        UpdateContext({locLoading:{Visible: true, Value: 25, Text: "Garbage Collection"}});
-                        Clear(fusion);
-                        Clear(material_1);
-                        Clear(material_2);
+                Clear(collectDowntime);
+                ForAll(
+                    Filter(Downtime,
+                        Ended <= DateAdd(varNowDay, 23, TimeUnit.Hours),
+                        Started >= DateAdd(varNowDay, -1, TimeUnit.Hours),
+                        Line.Value = varProductionLine
+                    ),
+                    Collect(collectDowntime,
+                        {
+                            ID: ThisRecord.ID,
+                            Line: ThisRecord.Line.Value,
+                            Lot: ThisRecord.Lot,
+                            Catalog: ThisRecord.Catalog,
+                            Started: ThisRecord.Started,
+                            Ended: ThisRecord.Ended,
+                            Reason: ThisRecord.Reason.Value,
+                            Total_Downtime: Value(ThisRecord.Total_Downtime),
+                            Comments: ThisRecord.Comments,
+                            Shift_Letter: ThisRecord.Shift_Letter,
+                            Edit_Person: ThisRecord.Edit_Person,
+                            Edit_Reason: ThisRecord.Edit_Reason,
+                            Size: ThisRecord.Size
+                        }
                     )
                 );
 
-                /*Collect Downtime*/
-                UpdateContext({locLoading:{Visible: true, Value: 30, Text: "Collecting Downtime Data"}});
-                If(varUpdateDowntime,
-                    If(
-                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 14,
-                        UpdateContext({locLoading:{Visible: true, Value: 50, Text: "Retrieving Downtime Data"}});
-                        ClearCollect(collectDowntime,
-                            ForAll(
-                                Filter(Downtime,
-                                    Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),
-                                    Started >= DateAdd(locStartDate, -1, TimeUnit.Hours)
-                                ),
-                                {
-                                    id: Value(ThisRecord.ID),
-                                    shift: Text(ThisRecord.Shift_Letter),
-                                    line: Text(ThisRecord.Line.Value),
-                                    lot: Text(ThisRecord.Lot),
-                                    catalog: Text(ThisRecord.Catalog),
-                                    size: Text(ThisRecord.Size),
-                                    started: DateTimeValue(ThisRecord.Started),
-                                    ended: DateTimeValue(ThisRecord.Ended),
-                                    reason: Text(ThisRecord.Reason.Value),
-                                    total: Value(ThisRecord.Total_Downtime),
-                                    comments: Text(ThisRecord.Comments)
-                                }
-                            )
-                        ),
+                /*Delegated Collection - Production*/
+                UpdateContext({locLoading:{Visible: true, Value: 10, Text: "Collecting Production Data"}});
 
-                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) > 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 50, Text: "Parsing PowerAutomate Flow for Downtime Data"}});
-                        ClearCollect(collectDowntime,
-                            ForAll(
-                                Table(
-                                    ParseJSON(
-                                        flow_get_downtime_range_v2.Run(
-                                            Text("All"),
-                                            Text(DateAdd(locEndDate, 23,TimeUnit.Hours), "yyyy-mm-dd"),
-                                            Text(DateAdd(locStartDate, -1, TimeUnit.Hours), "yyyy-mm-dd")
-                                        ).output
-                                    )
-                                ),
-                                {
-                                    id: Value(Value._ID),
-                                    shift: Text(Value._shift),
-                                    line: Text(Value._line),
-                                    lot: Text(Value._lot),
-                                    catalog: Text(Value._catalog),
-                                    size: Text(Value._size),
-                                    started: DateTimeValue(Value._started),
-                                    ended: DateTimeValue(Value._ended),
-                                    reason: Text(Value._reason),
-                                    total: Value(Value._total),
-                                    comments: Text(Value._comments)
-                                }
-                            )
-                        ),
-
-                        DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 42, Text: "Collecting Downtime Dataset 1"}});
-                        Collect(material_1,
-                            Sort(
-                                Filter(Downtime,
-                                    And(
-                                        Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),
-                                        Started >= DateAdd(locStartDate, -1, TimeUnit.Hours)
-                                    )
-                                ),
-                                Ended,
-                                SortOrder.Ascending
-                            )
-                        );
-
-                        UpdateContext({locLoading:{Visible: true, Value: 44, Text: "Collecting Downtime Dataset 2"}});
-                        Collect(material_2,
-                            Sort(
-                                Filter(Downtime,
-                                    And(
-                                        Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),
-                                        Started >= DateAdd(locStartDate, -1, TimeUnit.Hours)                        
-                                    )
-                                ),
-                                Ended,
-                                SortOrder.Descending
-                            )
-                        );
-
-                        UpdateContext({locLoading:{Visible: true, Value: 46, Text: "Joining Downtime Dataset 1"}});
-                        ClearCollect(fusion, material_1);
-
-                        UpdateContext({locLoading:{Visible: true, Value: 48, Text: "Joining Downtime Dataset 2"}});
-                        Collect(fusion,
-                            Filter(material_2, Not(ID in material_1.ID))
-                        );
-
-                        UpdateContext({locLoading:{Visible: true, Value: 50, Text: "Collecting Joined Downtime Data"}});
-                        ClearCollect(
-                            collectDowntime,
-                            ForAll(
-                                fusion,
-                                {
-                                    id: Value(ThisRecord.ID),
-                                    shift: Text(ThisRecord.Shift_Letter),
-                                    line: Text(ThisRecord.Line.Value),
-                                    lot: Text(ThisRecord.Lot),
-                                    catalog: Text(ThisRecord.Catalog),
-                                    size: Text(ThisRecord.Size),
-                                    started: DateTimeValue(ThisRecord.Started),
-                                    ended: DateTimeValue(ThisRecord.Ended),
-                                    reason: Text(ThisRecord.Reason.Value),
-                                    total: Value(ThisRecord.Total_Downtime),
-                                    comments: Text(ThisRecord.Comments)
-                                }
-                            )
-                        );
-
-                        UpdateContext({locLoading:{Visible: true, Value: 50, Text: "Garbage Collection"}});
-                        Clear(fusion);
-                        Clear(material_1);
-                        Clear(material_2);
+                    
+                Clear(collectProduction);
+                ForAll(
+                    Filter(Production,
+                        Hour_Ending <= DateAdd(varNowDay, 23, TimeUnit.Hours),
+                        Hour_Starting >= DateAdd(varNowDay, -1, TimeUnit.Hours),
+                        Line.Value = varProductionLine
+                    ),
+                    Collect(collectProduction,
+                        {
+                            ID: ThisRecord.ID,
+                            Lot: ThisRecord.Lot,
+                            Catalog: ThisRecord.Catalog,
+                            Line: ThisRecord.Line.Value,
+                            Hour_Starting: ThisRecord.Hour_Starting,
+                            Hour_Ending: ThisRecord.Hour_Ending,
+                            Unit_Starting: ThisRecord.Unit_Starting,
+                            Unit_Ending: ThisRecord.Unit_Ending,
+                            Amount_Built: Round(Value(ThisRecord.Amount_Built),0),
+                            Hourly_Goal: ThisRecord.Hourly_Goal,
+                            QA_Units: ThisRecord.QA_Units,
+                            Reject_Labels: ThisRecord.Reject_Labels,
+                            Reject_Units: ThisRecord.Reject_Units,
+                            Reject_Cartridges: ThisRecord.Reject_Cartridges,
+                            Quality: ThisRecord.Quality,
+                            Safety: ThisRecord.Safety,
+                            Shift_Letter: ThisRecord.Shift_Letter,
+                            Edit_Person: ThisRecord.Edit_Person,
+                            Edit_Reason: ThisRecord.Edit_Reason,
+                            Size: ThisRecord.Size
+                        }
                     )
                 );
 
-                UpdateContext({locLoading:{Visible: false, Value: 50, Text: "Finshing Data Collection"}});
-
-                /*Update the UI Elements*/
                 Select(perf_update);
               Text: ="collect"
               FillPortions: =1
@@ -320,505 +116,1031 @@
         - perf_update:
             Control: Classic/Button
             Properties:
-              OnSelect: "=/*Start*/\r\nUpdateContext({locLoading:{Visible: true, Value: 55, Text: \"Creating Default Filters\"}});\r\n\r\n/*Set the default filter for production*/\r\nUpdateContext({locDefaultProductionFilter:\r\n    Filter(collectProduction,\r\n        And(\r\n            hour_starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n            hour_ending <= DateAdd(locEndDate, 23, TimeUnit.Hours)\r\n        ),\r\n        line = varProductionLine\r\n    )\r\n});\r\n\r\n/*Set the default filter for downtime*/\r\nUpdateContext({locDefaultDowntimeFilter:\r\n    Filter(collectDowntime,\r\n        And(\r\n            started >= DateAdd(DateValue(locStartDate), -1, TimeUnit.Hours),\r\n            ended <= DateAdd(DateValue(locEndDate), 23, TimeUnit.Hours)\r\n        ),\r\n        line = varProductionLine\r\n    )\r\n});\r\n\r\n/*Collect Top Downtime*/\r\nUpdateContext({locLoading:{Visible: true, Value: 60, Text: \"Processing Top Downtime Reasons\"}});\r\n/*For this line, for all downtime reasons, collect the total sum of downtime, if downtime is greater than 0, add to collectTopDowntime*/\r\nClear(collectTopDowntime);\r\nForAll(collectDowntimeReasons,\r\n    With({thisReason: ThisRecord.Downtime_Reason},\r\n        If(\r\n            Sum(\r\n                Filter(locDefaultDowntimeFilter,\r\n                    reason = thisReason\r\n                ),\r\n                total\r\n            ) > 0,\r\n            Collect(collectTopDowntime,\r\n                {\r\n                    Line: varProductionLine,\r\n                    \r\n                    Downtime_Reason: thisReason,\r\n\r\n                    Downtime_Total: \r\n                        Sum(\r\n                            Filter(locDefaultDowntimeFilter,\r\n                                reason = thisReason\r\n                            ),\r\n                            total\r\n                        ),\r\n                    \r\n                    Comments:\r\n                        Concat(Filter(locDefaultDowntimeFilter,reason = thisReason), comments, \"...\")\r\n                }\r\n\r\n            )\r\n        )\r\n    )\r\n);\r\n\r\nUpdateContext({locLoading:{Visible: true, Value: 65, Text: \"Creating Pareto Chart Data\"}});\r\n/*Collect data for pareto chart*/\r\nClear(collectPareto);\r\nForAll(\r\n    /*For downtime in collectTopDowntime, collect to collectPareto*/\r\n    Sort(\r\n        Filter(collectTopDowntime,\r\n            And(\r\n                Not(Downtime_Reason = \"No Scheduled Work\"),\r\n                Not(Downtime_Reason = \"Engineering DT\"),\r\n                Not(Downtime_Reason = \"Planned Downtime\")\r\n            )\r\n        ),\r\n        Downtime_Total,\r\n        SortOrder.Descending\r\n    ),\r\n    Collect(collectPareto,\r\n        {\r\n            id: CountRows(collectPareto)+1,\r\n            \r\n            /*Debugging value*/\r\n            id_lookup: LookUp(collectPareto, id = CountRows(collectPareto)).id,\r\n            \r\n            reason: Downtime_Reason,\r\n\r\n            total: ThisRecord.Downtime_Total,\r\n\r\n            sum: Sum(collectTopDowntime,Downtime_Total),\r\n            \r\n            freq:\r\n                /*frequency = This record's downtime / sum of total downtime */\r\n                Round(\r\n                    ThisRecord.Downtime_Total /\r\n                    Sum(\r\n                        Filter(collectTopDowntime,\r\n                            And(\r\n                                Not(Downtime_Reason = \"No Scheduled Work\"),\r\n                                Not(Downtime_Reason = \"Engineering DT\"),\r\n                                Not(Downtime_Reason = \"Planned Downtime\")\r\n                            )\r\n                        ),\r\n                        Downtime_Total\r\n                    ) * 100,0\r\n                ),\r\n\r\n            cumulative:\r\n                /*cumulative percentage = (this record's downtime / sum of total downtime) + the last record's cumulative percentage */\r\n                Round(\r\n                    ThisRecord.Downtime_Total / \r\n                    Sum(\r\n                        Filter(collectTopDowntime,\r\n                            And(\r\n                                Not(Downtime_Reason = \"No Scheduled Work\"),\r\n                                Not(Downtime_Reason = \"Engineering DT\"),\r\n                                Not(Downtime_Reason = \"Planned Downtime\")\r\n                            )\r\n                        ),\r\n                        Downtime_Total\r\n                    ) * 100,0\r\n                ) + \r\n                If(\r\n                    CountRows(collectPareto) >= 1,\r\n                    LookUp(collectPareto, id = CountRows(collectPareto)).cumulative,\r\n                    0\r\n                )\r\n        }\r\n    )\r\n);\r\n\r\nUpdateContext({locLoading:{Visible: true, Value: 70, Text: \"Combining Databases\"}});\r\n/*Combine databases to find runtime*/\r\nClear(collectCombinedData);\r\n/*Insert Production Data*/\r\nClearCollect(collectCombinedData,\r\n    locDefaultProductionFilter\r\n);\r\n/*For all downtime entries that fall outside of production entries, Insert Downtime Data*/\r\nForAll(\r\n    locDefaultDowntimeFilter,\r\n    With(\r\n        {\r\n            thisDowntime: ThisRecord\r\n        },\r\n        If(\r\n            CountRows(\r\n                Filter(\r\n                    locDefaultProductionFilter,\r\n                    (hour_starting <= thisDowntime.started && hour_ending > thisDowntime.started) || \r\n                    (hour_starting < thisDowntime.ended && hour_ending >= thisDowntime.ended) ||\r\n                    (hour_starting >= thisDowntime.started && hour_ending <= thisDowntime.ended)\r\n                    )) = 0,\r\n            Collect(collectCombinedData, thisDowntime)\r\n        )\r\n    )\r\n);\r\n\r\nUpdateContext({locLoading:{Visible: true, Value: 75, Text: \"Gathering OEE2 Data\"}});\r\n/*For each catalog, for this line, for this shift, collect output, constraint, and runtime*/\r\nClear(collectOEE2Data);\r\nWith(\r\n    {\r\n        theseCatalogs:\r\n            [\"51\", \"02\", \"03\", \"04\", \"05\", \"10\", \"015\", \"003\", \"006\", \"1F\", \"1H\", \"1S\", \"1T\", \"1Z\", \"2F\", \"2H\", \"2S\", \"2T\", \"2Z\", \"3F\", \"3H\", \"3S\", \"3T\", \"3Z\"],\r\n        \r\n        thisShift:\r\n            If(\r\n                varShiftSelect = \"A Shift\",\r\n                \"A\",\r\n                varShiftSelect = \"B Shift\",\r\n                \"B\",\r\n                \"C\"\r\n            )\r\n    },\r\n    ForAll(theseCatalogs,\r\n        With({thisCatalog: ThisRecord.Value},\r\n            If(\r\n                Sum(\r\n                    Filter(locDefaultProductionFilter,\r\n                        size = thisCatalog,\r\n                        shift = thisShift\r\n                    ),\r\n                    amount_built\r\n                ) > 0,\r\n            \r\n                Collect(collectOEE2Data,\r\n                    {\r\n                        shift: thisShift,\r\n                        \r\n                        line: varProductionLine,\r\n                        \r\n                        catalog: thisCatalog,\r\n                            \r\n                        output:\r\n                            Sum(\r\n                                Filter(locDefaultProductionFilter,\r\n                                    size = thisCatalog,\r\n                                    shift = thisShift\r\n                                ),\r\n                                amount_built\r\n                            ),\r\n                        \r\n                            \r\n                        total:\r\n                            Sum(\r\n                                Filter(locDefaultProductionFilter,\r\n                                    size = thisCatalog,\r\n                                    shift = thisShift\r\n                                ),\r\n                                amount_built + reject_cartridges + reject_units\r\n                            ),\r\n\r\n                        goal:\r\n                            Sum(\r\n                                Filter(locDefaultProductionFilter,\r\n                                    size = thisCatalog,\r\n                                    shift = thisShift\r\n                                ),\r\n                                goal\r\n                            ),\r\n                        \r\n                        runtime:\r\n                            (\r\n                                /*Collect Runtime Minutes From Production*/\r\n                                (CountRows(\r\n                                    Filter(collectCombinedData,\r\n                                        amount_built > 0,\r\n                                        size = thisCatalog,\r\n                                        shift = thisShift\r\n                                    )\r\n                                ) * 60) +\r\n                                /*Collect Runtime Minues From Downtime*/\r\n                                Sum(\r\n                                    Filter(collectCombinedData,\r\n                                        size = thisCatalog,\r\n                                        shift = thisShift,\r\n                                        Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")\r\n                                    ),\r\n                                    total\r\n                                )\r\n                            )/60,\r\n                    \r\n                        constraint_goal:\r\n                            /*Constraint *  Runtime*/\r\n                            /*Constraint*/\r\n                                IfError(\r\n                                    Average(\r\n                                        Filter(Goal_Settings,\r\n                                            Line.Value = varProductionLine,\r\n                                            Size.Value = thisCatalog,\r\n                                            Constraint_Setting > 0\r\n                                        ), Constraint_Setting\r\n                                    ),\r\n                                    0\r\n                                )*\r\n                            /* Runtime */\r\n                                (\r\n                                    /*Collect Runtime Minutes From Production*/\r\n                                    (CountRows(\r\n                                        Filter(collectCombinedData,\r\n                                            amount_built > 0,\r\n                                            size = thisCatalog,\r\n                                            shift = thisShift\r\n                                        )\r\n                                    ) * 60) +\r\n                                    /*Collect Runtime Minues From Downtime*/\r\n                                    Sum(\r\n                                        Filter(collectCombinedData,\r\n                                            size = thisCatalog,\r\n                                            shift = thisShift,\r\n                                            Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")\r\n                                        ),\r\n                                        total\r\n                                    )\r\n                                ) / 60\r\n                    }\r\n                )\r\n            )\r\n        )\r\n    )\r\n);\r\n\r\nUpdateContext({locLoading:{Visible: true, Value: 90, Text: \"Collecting OEE2\"}});\r\n/*Collect OEE2*/\r\nClear(collectOEE);\r\nCollect(collectOEE,\r\n    {\r\n\r\n        OEE2:\r\n            IfError(\r\n                Round(\r\n                    Sum(\r\n                        Filter(collectOEE2Data, output > 0),\r\n                        output\r\n                    ) /\r\n                    Sum(\r\n                        Filter(collectOEE2Data, output > 0),\r\n                        constraint_goal\r\n                    ) * 100,\r\n                    2\r\n                ),\r\n                0\r\n            ),\r\n        /*output percent * yield percent * downtime percent*/  \r\n        performance:\r\n            Round(\r\n                (\r\n                    (IfError(\r\n                        Sum(\r\n                            Filter(collectOEE2Data, output > 0),\r\n                            output\r\n                        ) /\r\n                        Sum(\r\n                            Filter(collectOEE2Data, output > 0),\r\n                            goal\r\n                        ),\r\n                        0\r\n                    )) * \r\n                    (IfError(\r\n                        Sum(\r\n                            Filter(collectOEE2Data, output > 0),\r\n                            output\r\n                        ) /\r\n                        Sum(\r\n                            Filter(collectOEE2Data, output > 0),\r\n                            total\r\n                        ),\r\n                        0\r\n                    )) *\r\n                    (IfError(\r\n                            (480-Sum(\r\n                                Filter(locDefaultDowntimeFilter, shift = If(varShiftSelect = \"A Shift\", \"A\", varShiftSelect = \"B Shift\", \"B\", \"C\")),\r\n                                total\r\n                            )) /\r\n                            480,\r\n                        0\r\n                    ))\r\n                ) * 100,\r\n                0\r\n            ),\r\n\r\n        /*total build / daily goal*/\r\n        output_percent:\r\n            IfError(\r\n                Round(\r\n                    Sum(\r\n                        Filter(collectOEE2Data, output > 0),\r\n                        output\r\n                    ) /\r\n                    Sum(\r\n                        Filter(collectOEE2Data, output > 0),\r\n                        goal\r\n                    ) * 100,\r\n                    2\r\n                ),\r\n                0\r\n            ),\r\n\r\n        /*good built/ total built*/\r\n        yield:\r\n            IfError(\r\n                Round(\r\n                    Sum(\r\n                        Filter(collectOEE2Data, output > 0),\r\n                        output\r\n                    ) /\r\n                    Sum(\r\n                        Filter(collectOEE2Data, output > 0),\r\n                        total\r\n                    ) * 100,\r\n                    2\r\n                ),\r\n                0\r\n            ),\r\n\r\n        /*uptime / 480*/\r\n        downtime_percent:\r\n            IfError(\r\n                Round(\r\n                    Sum(\r\n                        Filter(locDefaultDowntimeFilter, shift = If(varShiftSelect = \"A Shift\", \"A\", varShiftSelect = \"B Shift\", \"B\", \"C\")),\r\n                        total\r\n                    ) /\r\n                    480 * 100,\r\n                    2\r\n                ),\r\n                0\r\n            ),\r\n\r\n        output:\r\n            IfError(\r\n                Sum(\r\n                    Filter(collectOEE2Data,\r\n                        output > 0\r\n                    ),\r\n                    output\r\n                ),\r\n                0\r\n            ),\r\n\r\n        total:\r\n            IfError(\r\n                Sum(\r\n                    Filter(collectOEE2Data,\r\n                        output > 0\r\n                    ),\r\n                    total\r\n                ),\r\n                0\r\n            ),\r\n\r\n        constraint_goal:\r\n            IfError(\r\n                Sum(\r\n                    Filter(collectOEE2Data,\r\n                        output > 0\r\n                    ),\r\n                    constraint_goal\r\n                ),\r\n                0\r\n            ),\r\n        \r\n        daily_goal:\r\n            IfError(\r\n                Sum(\r\n                    Filter(collectOEE2Data,\r\n                        output > 0\r\n                    ),\r\n                    goal\r\n                ),\r\n                0\r\n            ),\r\n        \r\n        downtime:\r\n            Sum(\r\n                /*Filter(locDefaultDowntimeFilter,\r\n                    reason = \"No Scheduled Work\" || reason = \"Engineering DT\" || reason = \"Planned Downtime\"\r\n                ),*/\r\n                Filter(locDefaultDowntimeFilter, shift = If(varShiftSelect = \"A Shift\", \"A\", varShiftSelect = \"B Shift\", \"B\", \"C\")),\r\n                total\r\n            )\r\n\r\n    }\r\n);\r\n\r\n\r\n/*Garbage collection\r\nUpdateContext({locLoading:{Visible: true, Value: 95, Text: \"Finishing Up\"}});\r\nUpdateContext({\r\n    locDefaultProductionFilter: Blank(),\r\n    locDefaultDowntimeFilter: Blank()\r\n});\r\n\r\nClear(collectCombinedData);\r\nClear(collectOEE2Data);*/\r\n\r\n/*End*/\r\nUpdateContext({locLoading:{Visible: true, Value: 100, Text: \"Completed\"}});\r\nUpdateContext({locLoading:{Visible: false, Value: -1, Text: \"Not Loading\"}});"
+              OnSelect: |-
+                =/*Start*/
+                UpdateContext({locLoading:{Visible: true, Value: 20, Text: "Creating Default Filters"}});
+
+                /*Set the default filter for production*/
+                UpdateContext({locDefaultProductionFilter:
+                    Filter(collectProduction,
+                        And(
+                            Hour_Starting >= DateAdd(varNowDay, -1, TimeUnit.Hours),
+                            Hour_Ending <= DateAdd(varNowDay, 23, TimeUnit.Hours)
+                        ),
+                        Line = varProductionLine
+                    )
+                });
+
+                /*Set the default filter for downtime*/
+                UpdateContext({locDefaultDowntimeFilter:
+                    Filter(collectDowntime,
+                        And(
+                            Started >= DateAdd(DateValue(varNowDay), -1, TimeUnit.Hours),
+                            Ended <= DateAdd(DateValue(varNowDay), 23, TimeUnit.Hours)
+                        ),
+                        Line = varProductionLine
+                    )
+                });
+
+                /*Collect Top Downtime*/
+                UpdateContext({locLoading:{Visible: true, Value: 30, Text: "Processing Top Downtime Reasons"}});
+                /*For this Line, for all downtime reasons, collect the Total_Downtime sum of downtime, if downtime is greater than 0, add to collectTopDowntime*/
+                Clear(collectTopDowntime);
+                ForAll(collectDowntimeReasons,
+                    With({thisReason: ThisRecord.Downtime_Reason},
+                        If(
+                            Sum(
+                                Filter(locDefaultDowntimeFilter,
+                                    Reason = thisReason
+                                ),
+                                Total_Downtime
+                            ) > 0,
+                            Collect(collectTopDowntime,
+                                {
+                                    Line: varProductionLine,
+                                    
+                                    Downtime_Reason: thisReason,
+
+                                    Downtime_Total: 
+                                        Sum(
+                                            Filter(locDefaultDowntimeFilter,
+                                                Reason = thisReason
+                                            ),
+                                            Total_Downtime
+                                        ),
+                                    
+                                    Comments:
+                                        Concat(Filter(locDefaultDowntimeFilter,Reason = thisReason), Comments, "...")
+                                }
+
+                            )
+                        )
+                    )
+                );
+
+                UpdateContext({locLoading:{Visible: true, Value: 40, Text: "Creating Pareto Chart Data"}});
+                /*Collect data for pareto chart*/
+                Clear(collectPareto);
+                ForAll(
+                    /*For downtime in collectTopDowntime, collect to collectPareto*/
+                    Sort(
+                        Filter(collectTopDowntime,
+                            And(
+                                Not(Downtime_Reason = "No Scheduled Work"),
+                                Not(Downtime_Reason = "Engineering DT"),
+                                Not(Downtime_Reason = "Planned Downtime")
+                            )
+                        ),
+                        Downtime_Total,
+                        SortOrder.Descending
+                    ),
+                    Collect(collectPareto,
+                        {
+                            id: CountRows(collectPareto)+1,
+                            
+                            /*Debugging value*/
+                            id_lookup: LookUp(collectPareto, id = CountRows(collectPareto)).id,
+                            
+                            reason: Downtime_Reason,
+
+                            total: ThisRecord.Downtime_Total,
+
+                            sum: Sum(collectTopDowntime,Downtime_Total),
+                            
+                            freq:
+                                /*frequency = This record's downtime / sum of Total_Downtime downtime */
+                                Round(
+                                    ThisRecord.Downtime_Total /
+                                    Sum(
+                                        Filter(collectTopDowntime,
+                                            And(
+                                                Not(Downtime_Reason = "No Scheduled Work"),
+                                                Not(Downtime_Reason = "Engineering DT"),
+                                                Not(Downtime_Reason = "Planned Downtime")
+                                            )
+                                        ),
+                                        Downtime_Total
+                                    ) * 100,0
+                                ),
+
+                            cumulative:
+                                /*cumulative percentage = (this record's downtime / sum of Total_Downtime downtime) + the last record's cumulative percentage */
+                                Round(
+                                    ThisRecord.Downtime_Total / 
+                                    Sum(
+                                        Filter(collectTopDowntime,
+                                            And(
+                                                Not(Downtime_Reason = "No Scheduled Work"),
+                                                Not(Downtime_Reason = "Engineering DT"),
+                                                Not(Downtime_Reason = "Planned Downtime")
+                                            )
+                                        ),
+                                        Downtime_Total
+                                    ) * 100,0
+                                ) + 
+                                If(
+                                    CountRows(collectPareto) >= 1,
+                                    LookUp(collectPareto, id = CountRows(collectPareto)).cumulative,
+                                    0
+                                )
+                        }
+                    )
+                );
+
+                UpdateContext({locLoading:{Visible: true, Value: 50, Text: "Combining Databases"}});
+                /*Combine databases to find runtime*/
+                Clear(collectCombinedData);
+                /*Insert Production Data*/
+                ClearCollect(collectCombinedData,
+                    locDefaultProductionFilter
+                );
+                /*For all downtime entries that fall outside of production entries, Insert Downtime Data*/
+                ForAll(
+                    locDefaultDowntimeFilter,
+                    With(
+                        {
+                            thisDowntime: ThisRecord
+                        },
+                        If(
+                            CountRows(
+                                Filter(
+                                    locDefaultProductionFilter,
+                                    (Hour_Starting <= thisDowntime.Started && Hour_Ending > thisDowntime.Started) || 
+                                    (Hour_Starting < thisDowntime.Ended && Hour_Ending >= thisDowntime.Ended) ||
+                                    (Hour_Starting >= thisDowntime.Started && Hour_Ending <= thisDowntime.Ended)
+                                    )) = 0,
+                            Collect(collectCombinedData, thisDowntime)
+                        )
+                    )
+                );
+
+                UpdateContext({locLoading:{Visible: true, Value: 60, Text: "Gathering Performance Data"}});
+                /*For each catalog, for this Line, for this Shift_Letter, collect output, constraint, and runtime*/
+                Clear(collectPerformanceData);
+                With(
+                    {
+                        theseCatalogs:
+                            ["51", "02", "03", "04", "05", "10", "015", "003", "006", "1F", "1H", "1S", "1T", "1Z", "2F", "2H", "2S", "2T", "2Z", "3F", "3H", "3S", "3T", "3Z"],
+                        
+                        thisShift:
+                            If(
+                                varShiftSelect = "A Shift",
+                                "A",
+                                varShiftSelect = "B Shift",
+                                "B",
+                                "C"
+                            )
+                    },
+                    ForAll(theseCatalogs,
+                        With({thisCatalog: ThisRecord.Value},
+                            If(
+                                Sum(
+                                    Filter(locDefaultProductionFilter,
+                                        Size = thisCatalog,
+                                        Shift_Letter = thisShift
+                                    ),
+                                    Amount_Built
+                                ) > 0,
+                            
+                                Collect(collectPerformanceData,
+                                    {
+                                        Shift_Letter: thisShift,
+                                        
+                                        Line: varProductionLine,
+                                        
+                                        catalog: thisCatalog,
+                                            
+                                        output:
+                                            Sum(
+                                                Filter(locDefaultProductionFilter,
+                                                    Size = thisCatalog,
+                                                    Shift_Letter = thisShift
+                                                ),
+                                                Amount_Built
+                                            ),
+                                        
+                                            
+                                        Total_Downtime:
+                                            Sum(
+                                                Filter(locDefaultProductionFilter,
+                                                    Size = thisCatalog,
+                                                    Shift_Letter = thisShift
+                                                ),
+                                                Amount_Built + Reject_Cartridges + Reject_Units
+                                            ),
+
+                                        goal:
+                                            Sum(
+                                                Filter(locDefaultProductionFilter,
+                                                    Size = thisCatalog,
+                                                    Shift_Letter = thisShift
+                                                ),
+                                                Hourly_Goal
+                                            ),
+                                        
+                                        runtime:
+                                            (
+                                                /*Collect Runtime Minutes From Production*/
+                                                (CountRows(
+                                                    Filter(collectCombinedData,
+                                                        Amount_Built > 0,
+                                                        Size = thisCatalog,
+                                                        Shift_Letter = thisShift
+                                                    )
+                                                ) * 60) +
+                                                /*Collect Runtime Minues From Downtime*/
+                                                Sum(
+                                                    Filter(collectCombinedData,
+                                                        Size = thisCatalog,
+                                                        Shift_Letter = thisShift,
+                                                        Not(Reason = "Planned Downtime" || Reason = "No Scheduled Work" || Reason = "Engineering DT")
+                                                    ),
+                                                    Total_Downtime
+                                                )
+                                            )/60,
+                                    
+                                        constraint_goal:
+                                            /*Constraint *  Runtime*/
+                                            /*Constraint*/
+                                                IfError(
+                                                    Average(
+                                                        Filter(Goal_Settings,
+                                                            Line.Value = varProductionLine,
+                                                            Size.Value = thisCatalog,
+                                                            Constraint_Setting > 0
+                                                        ), Constraint_Setting
+                                                    ),
+                                                    0
+                                                )*
+                                            /* Runtime */
+                                                (
+                                                    /*Collect Runtime Minutes From Production*/
+                                                    (CountRows(
+                                                        Filter(collectCombinedData,
+                                                            Amount_Built > 0,
+                                                            Size = thisCatalog,
+                                                            Shift_Letter = thisShift
+                                                        )
+                                                    ) * 60) +
+                                                    /*Collect Runtime Minues From Downtime*/
+                                                    Sum(
+                                                        Filter(collectCombinedData,
+                                                            Size = thisCatalog,
+                                                            Shift_Letter = thisShift,
+                                                            Not(Reason = "Planned Downtime" || Reason = "No Scheduled Work" || Reason = "Engineering DT")
+                                                        ),
+                                                        Total_Downtime
+                                                    )
+                                                ) / 60
+                                    }
+                                )
+                            )
+                        )
+                    )
+                );
+
+                UpdateContext({locLoading:{Visible: true, Value: 70, Text: "Collecting Performance Metrics"}});
+                /*Collect OEE2*/
+                Clear(collectPerformance);
+                Collect(collectPerformance,
+                    {
+                        /*output percent * yield percent * downtime percent*/  
+                        performance:
+                            Round(
+                                (
+                                    (IfError(
+                                        Sum(
+                                            Filter(collectPerformanceData, output > 0),
+                                            output
+                                        ) /
+                                        Sum(
+                                            Filter(collectPerformanceData, output > 0),
+                                            goal
+                                        ),
+                                        0
+                                    )) * 
+                                    (IfError(
+                                        Sum(
+                                            Filter(collectPerformanceData, output > 0),
+                                            output
+                                        ) /
+                                        Sum(
+                                            Filter(collectPerformanceData, output > 0),
+                                            Total_Downtime
+                                        ),
+                                        0
+                                    )) *
+                                    (IfError(
+                                            (480-Sum(
+                                                Filter(locDefaultDowntimeFilter, Shift_Letter = If(varShiftSelect = "A Shift", "A", varShiftSelect = "B Shift", "B", "C")),
+                                                Total_Downtime
+                                            )) /
+                                            480,
+                                        0
+                                    ))
+                                ) * 100,
+                                0
+                            ),
+
+                        /*Total_Downtime build / daily goal*/
+                        output_percent:
+                            IfError(
+                                Round(
+                                    Sum(
+                                        Filter(collectPerformanceData, output > 0),
+                                        output
+                                    ) /
+                                    Sum(
+                                        Filter(collectPerformanceData, output > 0),
+                                        goal
+                                    ) * 100,
+                                    2
+                                ),
+                                0
+                            ),
+
+                        /*good built/ Total_Downtime built*/
+                        yield:
+                            IfError(
+                                Round(
+                                    Sum(
+                                        Filter(collectPerformanceData, output > 0),
+                                        output
+                                    ) /
+                                    Sum(
+                                        Filter(collectPerformanceData, output > 0),
+                                        Total_Downtime
+                                    ) * 100,
+                                    2
+                                ),
+                                0
+                            ),
+
+                        /*uptime / 480*/
+                        downtime_percent:
+                            IfError(
+                                Round(
+                                    Sum(
+                                        Filter(locDefaultDowntimeFilter, Shift_Letter = If(varShiftSelect = "A Shift", "A", varShiftSelect = "B Shift", "B", "C")),
+                                        Total_Downtime
+                                    ) /
+                                    480 * 100,
+                                    2
+                                ),
+                                0
+                            ),
+
+                        output:
+                            IfError(
+                                Sum(
+                                    Filter(collectPerformanceData,
+                                        output > 0
+                                    ),
+                                    output
+                                ),
+                                0
+                            ),
+
+                        Total_Downtime:
+                            IfError(
+                                Sum(
+                                    Filter(collectPerformanceData,
+                                        output > 0
+                                    ),
+                                    Total_Downtime
+                                ),
+                                0
+                            ),
+
+                        constraint_goal:
+                            IfError(
+                                Sum(
+                                    Filter(collectPerformanceData,
+                                        output > 0
+                                    ),
+                                    constraint_goal
+                                ),
+                                0
+                            ),
+                        
+                        daily_goal:
+                            IfError(
+                                Sum(
+                                    Filter(collectPerformanceData,
+                                        output > 0
+                                    ),
+                                    goal
+                                ),
+                                0
+                            ),
+                        
+                        downtime:
+                            Sum(
+                                /*Filter(locDefaultDowntimeFilter,
+                                    Reason = "No Scheduled Work" || Reason = "Engineering DT" || Reason = "Planned Downtime"
+                                ),*/
+                                Filter(locDefaultDowntimeFilter, Shift_Letter = If(varShiftSelect = "A Shift", "A", varShiftSelect = "B Shift", "B", "C")),
+                                Total_Downtime
+                            )
+
+                    }
+                );
+
+                UpdateContext({locLoading:{Visible: true, Value: 80, Text: "Collecting OEE2"}});
+                /*Collect OEE2*/
+                Clear(collectOEEData);
+                With(
+                    {
+                        theseCatalogs:
+                            ["51", "02", "03", "04", "05", "10", "015", "003", "006", "1F", "1H", "1S", "1T", "1Z", "2F", "2H", "2S", "2T", "2Z", "3F", "3H", "3S", "3T", "3Z"]
+                    },
+                    ForAll(theseCatalogs,
+                        With({thisCatalog: ThisRecord.Value},
+                            If(
+                                Sum(
+                                    Filter(locDefaultProductionFilter,
+                                        Size = thisCatalog
+                                    ),
+                                    Amount_Built
+                                ) > 0,
+                                Collect(collectOEEData,
+                                    {
+
+                                        output:
+                                            Sum(
+                                                Filter(locDefaultProductionFilter,
+                                                    Size = thisCatalog
+                                                ),
+                                                Amount_Built
+                                            ),
+                                        
+                                        constraint_goal:
+                                            /*Constraint *  Runtime*/
+                                            /*Constraint*/
+                                                IfError(
+                                                    Average(
+                                                        Filter(Goal_Settings,
+                                                            Line.Value = varProductionLine,
+                                                            Size.Value = thisCatalog,
+                                                            Constraint_Setting > 0
+                                                        ), Constraint_Setting
+                                                    ),
+                                                    0
+                                                )*
+                                            /* Runtime */
+                                                (
+                                                    /*Collect Runtime Minutes From Production*/
+                                                    (CountRows(
+                                                        Filter(collectCombinedData,
+                                                            Amount_Built > 0,
+                                                            Size = thisCatalog
+                                                        )
+                                                    ) * 60) +
+                                                    /*Collect Runtime Minues From Downtime*/
+                                                    Sum(
+                                                        Filter(collectCombinedData,
+                                                            Size = thisCatalog,
+                                                            Not(Reason = "Planned Downtime" || Reason = "No Scheduled Work" || Reason = "Engineering DT")
+                                                        ),
+                                                        Total_Downtime
+                                                    )
+                                                ) / 60
+                                    }
+                                )
+                            )
+                        )
+                    )
+                );
+
+                ClearCollect(collectOEE,
+                    {
+                        OEE2:
+                            IfError(
+                                Round(
+                                    Sum(collectOEEData, output) /
+                                    Sum(collectOEEData, constraint_goal) *
+                                    100,
+                                    0
+                                ),
+                                0
+                            ),
+                        
+                        output:
+                            IfError(
+                                Round(
+                                    Sum(collectOEEData, output),
+                                    0
+                                ),
+                                0
+                            ),
+
+                        constraint_goal:
+                            IfError(
+                                Round(
+                                    Sum(collectOEEData, constraint_goal),
+                                    0
+                                ),
+                                0
+                            )
+                    }
+                );
+
+                /*Garbage collection
+                UpdateContext({locLoading:{Visible: true, Value: 95, Text: "Finishing Up"}});
+                UpdateContext({
+                    locDefaultProductionFilter: Blank(),
+                    locDefaultDowntimeFilter: Blank()
+                });
+
+                Clear(collectCombinedData);
+                Clear(collectPerformanceData);*/
+
+                /*End*/
+                UpdateContext({locLoading:{Visible: true, Value: 100, Text: "Completed"}});
+                UpdateContext({locLoading:{Visible: false, Value: -1, Text: "Not Loading"}});
               Text: ="update"
               FillPortions: =1
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Visible: =false
+        - perf_exit:
+            Control: Image
+            Properties:
+              OnSelect: =Back()
+              Image: =gblSVG.Back
+              HoverFill: =ColorFade(varColorAccent, 75%)
+              LayoutMinHeight: =10
+              RadiusBottomLeft: =Self.Height / 2
+              RadiusBottomRight: =Self.Height / 2
+              RadiusTopLeft: =Self.Height / 2
+              RadiusTopRight: =Self.Height / 2
+              Width: =Self.Height
         - perf_logo:
             Control: Image
             Properties:
               Image: =LOGO_MSIG_SBlue_FIT_ALPHA
-              FillPortions: =1
               LayoutMinHeight: =10
-              Width: =10
-        - perf_exit:
-            Control: Classic/Icon
-            Variant: ChevronLeft
-            Properties:
-              OnSelect: =Navigate(Production_View);
-              Color: =varColorAccent
-              Height: =Parent.Height * 0.75
-              Icon: =Icon.ChevronLeft
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              Width: =Self.Height
-              Y: =Parent.Height/2 - Self.Height/2
-        - perf_exit_title:
+              Width: =Self.Height * 3
+        - perf_h_title:
             Control: Label
             Properties:
-              OnSelect: =Select(perf_exit)
-              Text: |-
-                ="Go
-                Back"
-              Color: =varColorAccent
-              Font: =Font.Verdana
-              Height: =perf_exit.Height
+              Text: = varProductionLine & " OEE2 and Performance Analysis"
+              Align: =Align.Center
+              Color: =varColor5
+              FillPortions: =1
               LayoutMinHeight: =10
               LayoutMinWidth: =10
-              Size: =Self.Width / 9
-              Width: =Parent.Width * 0.08
-              X: =perf_exit.X + perf_exit.Width
-              Y: =perf_exit.Y
-        - perf_h_title:
-            Control: Text
-            Properties:
-              Align: ='TextCanvas.Align'.Center
-              FontColor: =varColor5
-              Size: =24
-              Text: = varProductionLine & " Daily Management System"
-              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
-              FillPortions: =6
-              LayoutMinHeight: =8
-              LayoutMinWidth: =10
+              Size: =Self.Height / 3
         - perf_h_padding:
             Control: GroupContainer
             Variant: manualLayoutContainer
             Properties:
+              DropShadow: =DropShadow.None
+              FillPortions: =0
               LayoutMinHeight: =10
-              LayoutMinWidth: =perf_logo.Width + perf_exit.Width + perf_exit_title.Width
+              LayoutMinWidth: =perf_logo.Width + perf_exit.Width
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =perf_exit.Width + perf_logo.Width
     - perf_body:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
           FillPortions: =11
           LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
         Children:
-        - perf_main:
+        - perf_section_0:
             Control: GroupContainer
             Variant: horizontalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
               LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
               LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap/2
+              PaddingLeft: =Self.LayoutGap
+              PaddingRight: =Self.LayoutGap
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =Parent.Width * 0.95
             Children:
-            - perf_section_0:
+            - perf_oee_parent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                Children:
+                - perf_oee_title:
+                    Control: Label
+                    Properties:
+                      Text: =varProductionLine & " OEE2"
+                      Align: =Align.Center
+                      Fill: =varColor4
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - perf_oee:
+                    Control: Image
+                    Properties:
+                      Image: |-
+                        ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                        EncodeUrl(
+                            "{
+                                type: 'radialGauge',
+                                data: {
+                                datasets: [{
+                                    data: ["& First(collectOEE).OEE2 &"],
+                                    backgroundColor: getGradientFillHelper('horizontal', ['blue','blue','blue','red','red','red']),
+                                }]
+                                },
+                                options: {
+                                domain: [0, "& If(First(collectOEE).OEE2 > 100, First(collectOEE).OEE2, 100) &"],
+                                trackColor: 'white', 
+                                centerPercentage: 90,
+                                centerArea: {
+                                    text: (val) => val + '%',
+                                    fontColor: 'black'
+                                },
+                                }
+                            }"
+                        )
+                      FillPortions: =4
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - perf_oee_output:
+                    Control: Label
+                    Properties:
+                      Text: =First(collectOEE).output & " built units / " & First(collectOEE).constraint_goal  & " constraint goal"
+                      Align: =Align.Center
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+            - perf_performance_parent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                Children:
+                - perf_performance_title:
+                    Control: Label
+                    Properties:
+                      Text: =varProductionLine & " " & varShiftSelect & " Performance"
+                      Align: =Align.Center
+                      Fill: =varColor4
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - perf_performance:
+                    Control: Image
+                    Properties:
+                      Image: |-
+                        ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                        EncodeUrl(
+                            "{
+                                type: 'radialGauge',
+                                data: {
+                                datasets: [{
+                                    data: ["& First(collectPerformance).performance &"],
+                                    backgroundColor: getGradientFillHelper('horizontal', ['blue','blue','blue','red','red','red']),
+                                }]
+                                },
+                                options: {
+                                domain: [0,"& If(First(collectPerformance).performance > 100, First(collectPerformance).performance, 100) &"],
+                                trackColor: 'white', 
+                                centerPercentage: 90,
+                                centerArea: {
+                                    text: (val) => val + '%',
+                                    fontColor: 'black'
+                                },
+                                }
+                            }"
+                        )
+                      FillPortions: =4
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+            - perf_data_parent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  FillPortions: =2
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                Children:
+                - perf_output_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Output"
+                      Align: =Align.Center
+                      Fill: =varColor4
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - perf_output:
+                    Control: Label
+                    Properties:
+                      Text: =First(collectPerformance).output_percent & "% - " &  First(collectPerformance).output & " built units / " & First(collectPerformance).daily_goal  & " daily goal"
+                      Align: =Align.Center
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - perf_yield_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Yield"
+                      Align: =Align.Center
+                      Fill: =varColor4
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - perf_yield:
+                    Control: Label
+                    Properties:
+                      Text: =First(collectPerformance).yield & "% - " & First(collectPerformance).output & " good units / "& First(collectPerformance).Total_Downtime &" total units"
+                      Align: =Align.Center
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - perf_downtime_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Downtime"
+                      Align: =Align.Center
+                      Fill: =varColor4
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - perf_downtime:
+                    Control: Label
+                    Properties:
+                      Text: =First(collectPerformance).downtime_percent & "% - " & First(collectPerformance).downtime & " minutes / 480 minutes"
+                      Align: =Align.Center
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+        - perf_section_1:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =1.5
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap
+              PaddingRight: =Self.LayoutGap
+              PaddingTop: =Self.LayoutGap/2
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =Parent.Width * 0.95
+            Children:
+            - perf_pareto_parent:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.None
-                  FillPortions: =9
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
                 Children:
-                - perf_section_1:
-                    Control: GroupContainer
-                    Variant: horizontalAutoLayoutContainer
+                - perf_pareto_title:
+                    Control: Label
                     Properties:
-                      AlignInContainer: =AlignInContainer.SetByContainer
-                      DropShadow: =DropShadow.None
-                      LayoutAlignItems: =LayoutAlignItems.Stretch
-                      LayoutGap: =locPadding
-                      LayoutMinHeight: =1
-                      LayoutMinWidth: =1
-                      LayoutMode: =LayoutMode.Auto
-                      PaddingBottom: =Self.LayoutGap
-                      PaddingLeft: =Self.LayoutGap
-                      PaddingRight: =Self.LayoutGap
-                      PaddingTop: =Self.LayoutGap
-                      RadiusBottomLeft: =0
-                      RadiusBottomRight: =0
-                      RadiusTopLeft: =0
-                      RadiusTopRight: =0
-                      Width: =Parent.Width * 0.95
-                    Children:
-                    - perf_oee_parent:
-                        Control: GroupContainer
-                        Variant: verticalAutoLayoutContainer
-                        Properties:
-                          LayoutAlignItems: =LayoutAlignItems.Stretch
-                          LayoutDirection: =LayoutDirection.Vertical
-                          LayoutMinHeight: =10
-                          LayoutMinWidth: =10
-                          LayoutMode: =LayoutMode.Auto
-                        Children:
-                        - perf_oee_title:
-                            Control: Label
-                            Properties:
-                              Text: =varProductionLine & " OEE2"
-                              Align: =Align.Center
-                              Fill: =varColor4
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 3
-                        - perf_oee:
-                            Control: Image
-                            Properties:
-                              Image: |-
-                                ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
-                                EncodeUrl(
-                                    "{
-                                        type: 'radialGauge',
-                                        data: {
-                                        datasets: [{
-                                            data: ["& LookUp(collectOEE, true=true).OEE2 &"],
-                                            backgroundColor: getGradientFillHelper('horizontal', ['blue','blue','blue','red','red','red']),
-                                        }]
-                                        },
-                                        options: {
-                                        domain: [0, 100],
-                                        trackColor: 'white', 
-                                        centerPercentage: 90,
-                                        centerArea: {
-                                            text: (val) => val + '%',
-                                            fontColor: 'black'
-                                        },
-                                        }
-                                    }"
-                                )
-                              FillPortions: =4
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                        - perf_oee_output:
-                            Control: Label
-                            Properties:
-                              Text: =LookUp(collectOEE, true=true).output & " built units / " & LookUp(collectOEE, true=true).constraint_goal  & " constraint goal"
-                              Align: =Align.Center
-                              Fill: =RGBA(0,0,0,0)
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 4
-                    - perf_performance_parent:
-                        Control: GroupContainer
-                        Variant: verticalAutoLayoutContainer
-                        Properties:
-                          LayoutAlignItems: =LayoutAlignItems.Stretch
-                          LayoutDirection: =LayoutDirection.Vertical
-                          LayoutMinHeight: =10
-                          LayoutMinWidth: =10
-                          LayoutMode: =LayoutMode.Auto
-                        Children:
-                        - perf_performance_title:
-                            Control: Label
-                            Properties:
-                              Text: =varProductionLine & " " & varShiftSelect & " Performance"
-                              Align: =Align.Center
-                              Fill: =varColor4
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 3
-                        - perf_performance:
-                            Control: Image
-                            Properties:
-                              Image: |-
-                                ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
-                                EncodeUrl(
-                                    "{
-                                        type: 'radialGauge',
-                                        data: {
-                                        datasets: [{
-                                            data: ["& LookUp(collectOEE, true=true).performance &"],
-                                            backgroundColor: getGradientFillHelper('horizontal', ['blue','blue','blue','red','red','red']),
-                                        }]
-                                        },
-                                        options: {
-                                        domain: [0, 100],
-                                        trackColor: 'white', 
-                                        centerPercentage: 90,
-                                        centerArea: {
-                                            text: (val) => val + '%',
-                                            fontColor: 'black'
-                                        },
-                                        }
-                                    }"
-                                )
-                              FillPortions: =4
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                    - perf_data_parent:
-                        Control: GroupContainer
-                        Variant: verticalAutoLayoutContainer
-                        Properties:
-                          FillPortions: =2
-                          LayoutAlignItems: =LayoutAlignItems.Stretch
-                          LayoutDirection: =LayoutDirection.Vertical
-                          LayoutMinHeight: =10
-                          LayoutMinWidth: =10
-                          LayoutMode: =LayoutMode.Auto
-                        Children:
-                        - perf_output_title:
-                            Control: Label
-                            Properties:
-                              Text: ="Output"
-                              Align: =Align.Center
-                              Fill: =varColor4
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 3
-                        - perf_output:
-                            Control: Label
-                            Properties:
-                              Text: =LookUp(collectOEE, true=true).output_percent & "% - " &  LookUp(collectOEE, true=true).output & " built units / " & LookUp(collectOEE, true=true).daily_goal  & " daily goal"
-                              Align: =Align.Center
-                              Fill: =RGBA(0,0,0,0)
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 4
-                        - perf_yield_title:
-                            Control: Label
-                            Properties:
-                              Text: ="Yield"
-                              Align: =Align.Center
-                              Fill: =varColor4
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 3
-                        - perf_yield:
-                            Control: Label
-                            Properties:
-                              Text: =LookUp(collectOEE, true=true).yield & "% - " & LookUp(collectOEE, true=true).output & " good units / "& LookUp(collectOEE, true=true).total &" total units"
-                              Align: =Align.Center
-                              Fill: =RGBA(0,0,0,0)
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 4
-                        - perf_downtime_title:
-                            Control: Label
-                            Properties:
-                              Text: ="Downtime"
-                              Align: =Align.Center
-                              Fill: =varColor4
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 3
-                        - perf_downtime:
-                            Control: Label
-                            Properties:
-                              Text: =LookUp(collectOEE, true=true).downtime_percent & "% - " & LookUp(collectOEE, true=true).downtime & " minutes / 480 minutes"
-                              Align: =Align.Center
-                              Fill: =RGBA(0,0,0,0)
-                              FillPortions: =1
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                              Size: =Self.Height / 4
-                - perf_section_2:
-                    Control: GroupContainer
-                    Variant: horizontalAutoLayoutContainer
+                      Text: ="Downtime Pareto Chart"
+                      Align: =Align.Center
+                      Fill: =varColor4
+                      FillPortions: =1
+                      Size: =Self.Height / 3
+                - perf_pareto:
+                    Control: Image
                     Properties:
-                      AlignInContainer: =AlignInContainer.SetByContainer
-                      FillPortions: =1.5
-                      LayoutAlignItems: =LayoutAlignItems.Stretch
-                      LayoutGap: =locPadding
-                      LayoutMinHeight: =1
-                      LayoutMinWidth: =1
-                      LayoutMode: =LayoutMode.Auto
-                      PaddingBottom: =Self.LayoutGap
-                      PaddingLeft: =Self.LayoutGap
-                      PaddingRight: =Self.LayoutGap
-                      PaddingTop: =Self.LayoutGap
-                      Width: =Parent.Width * 0.95
-                    Children:
-                    - perf_pareto_parent:
-                        Control: GroupContainer
-                        Variant: verticalAutoLayoutContainer
-                        Properties:
-                          AlignInContainer: =AlignInContainer.SetByContainer
-                          LayoutAlignItems: =LayoutAlignItems.Stretch
-                          LayoutDirection: =LayoutDirection.Vertical
-                          LayoutMode: =LayoutMode.Auto
-                        Children:
-                        - perf_pareto_title:
-                            Control: Label
-                            Properties:
-                              Text: ="Downtime Pareto Chart"
-                              Align: =Align.Center
-                              Fill: =varColor4
-                              FillPortions: =1
-                              Size: =Self.Height / 3
-                        - perf_pareto:
-                            Control: Image
-                            Properties:
-                              Image: |-
-                                ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
-                                EncodeUrl("
-                                {
-                                  type: 'bar',
-                                  data: {
-                                    labels: " & Concatenate("['", Concat(Sort(collectTopDowntime, Downtime_Total, SortOrder.Descending), ThisRecord.Downtime_Reason, "', '"), "']") & ",
-                                    datasets: [{
-                                      label: 'Frequency',
-                                      data: " & Concatenate("['", Concat(Sort(collectTopDowntime, Downtime_Total, SortOrder.Descending), ThisRecord.Downtime_Total, "', '"), "']") & ",
-                                      backgroundColor: 'rgba(0, 123, 255, 0.7)'
-                                    }, {
-                                      label: 'Cumulative Percentage',
-                                      data: " & Concatenate("['", Concat(Sort(collectPareto, freq, SortOrder.Descending), ThisRecord.cumulative, "', '"), "']") & ",
-                                      type: 'line',
-                                      borderColor: 'red',
-                                      fill: false,
-                                      yAxisID: 'right-y-axis' // Assign to the right Y-axis
-                                    }]
-                                  },
-                                  options: {
-                                    scales: {
-                                      yAxes: [{
-                                        id: 'left-y-axis',
-                                        type: 'linear',
-                                        position: 'left',
-                                        ticks: {
-                                          beginAtZero: true
-                                        }
-                                      }, {
-                                        id: 'right-y-axis',
+                      Image: |-
+                        ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
+                        EncodeUrl("
+                        {
+                          type: 'bar',
+                          data: {
+                            labels: " & Concatenate("['", Concat(Sort(collectTopDowntime, Downtime_Total, SortOrder.Descending), ThisRecord.Downtime_Reason, "', '"), "']") & ",
+                            datasets: [{
+                              label: 'Frequency',
+                              data: " & Concatenate("['", Concat(Sort(collectTopDowntime, Downtime_Total, SortOrder.Descending), ThisRecord.Downtime_Total, "', '"), "']") & ",
+                              backgroundColor: 'rgba(0, 123, 255, 0.7)'
+                            }, {
+                              label: 'Cumulative Percentage',
+                              data: " & Concatenate("['", Concat(Sort(collectPareto, freq, SortOrder.Descending), ThisRecord.cumulative, "', '"), "']") & ",
+                              type: 'line',
+                              borderColor: 'red',
+                              fill: false,
+                              yAxisID: 'right-y-axis' // Assign to the right Y-axis
+                            }]
+                          },
+                          options: {
+                            scales: {
+                              yAxes: [{
+                                id: 'left-y-axis',
+                                type: 'linear',
+                                position: 'left',
+                                ticks: {
+                                  beginAtZero: true
+                                }
+                              }, {
+                                id: 'right-y-axis',
+                                type: 'linear',
+                                position: 'right',
+                                ticks: {
+                                  beginAtZero: true,
+                                  max: 100,
+                                  stepSize: 20,
+                                  callback: function(value, index, values) {
+                                    return value + '%';
+                                  }
+                                },
+                                gridLines: { 
+                                  drawOnChartArea: false
+                                }
+                              }]
+                            },
+                            tooltips: {
+                              mode: 'index',
+                              intersect: false
+                            },
+                            annotation: {
+                              annotations: [{
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'right-y-axis',
+                                value: 80,
+                                borderColor: 'red',
+                                borderWidth: 2,
+                                label: {
+                                  enabled: true,
+                                  position: 'right',
+                                  content: '80% Threshold'
+                                }
+                              },
+                              {
+                                type: 'line',
+                                mode: 'vertical',
+                                scaleID: 'x-axis-0',
+                                value: ["& First(Sort(Filter(collectPareto, cumulative >= 80), freq, SortOrder.Descending)).id-1 &"],
+                                borderColor: 'green',
+                                borderWidth: 2,
+                                label: {
+                                  enabled: true,
+                                  content: '80% Volume',
+                                  position: 'top',
+                                  backgroundColor: 'rgba(72, 72, 192, 0.5)'
+                                }
+                              }]
+                            }
+                          }
+                        }")
+                      FillPortions: =5
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+            - perf_trend_parent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                Children:
+                - perf_trend_title:
+                    Control: Label
+                    Properties:
+                      Text: =varProductionLine & " OEE Trend"
+                      Align: =Align.Center
+                      Fill: =varColor4
+                      FillPortions: =1
+                      Size: =Self.Height / 3
+                - perf_trend:
+                    Control: Image
+                    Properties:
+                      Image: |+
+                        ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
+                        EncodeUrl("
+
+                        {
+                            type: 'line',
+                            data: {
+                                labels:"& Concatenate( "[", Concat(Sort(Filter(Target_Analysis, OEE2 >= 0, Week >= 17, Line.Value = varProductionLine),Week,SortOrder.Ascending), Week, "," ), "]") &",
+                                datasets: [
+                                    {
+                                        label: 'Week',
+                                        backgroundColor: '#FFC832',
+                                        borderColor: '#503291',
+                                        data: "& Concatenate( "[", Concat(Sort(Filter(Target_Analysis, OEE2 >= 0, Week >= 17, Line.Value = varProductionLine),Week,SortOrder.Ascending), OEE2, "," ), "]") &",
+                                        fill: false
+                                    }
+                                ]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        id: 'y-axis-0',
                                         type: 'linear',
                                         position: 'right',
                                         ticks: {
-                                          beginAtZero: true,
-                                          max: 100,
-                                          stepSize: 20,
-                                          callback: function(value, index, values) {
-                                            return value + '%';
-                                          }
-                                        },
-                                        gridLines: { 
-                                          drawOnChartArea: false
+                                            beginAtZero: true,
+                                            min: "& First(Sort(Filter(Target_Analysis, OEE2 >= 0, Week >= 17, Line.Value = varProductionLine),OEE2,SortOrder.Ascending)).OEE2 - 5 &",
+                                            max: "& Last(Sort(Filter(Target_Analysis, OEE2 >= 0, Week >= 17, Line.Value = varProductionLine),OEE2,SortOrder.Ascending)).OEE2 + 5 &",
+                                            stepSize: 5
                                         }
-                                      }]
-                                    },
-                                    tooltips: {
-                                      mode: 'index',
-                                      intersect: false
-                                    },
-                                    annotation: {
-                                      annotations: [{
+                                    }]
+                                },
+                                plugins: {
+                                    datalabels: {
+                                        color: '#000000',
+                                        font: {size: 16},
+                                        anchor: 'end',
+                                        align: 'top',
+                                        formatter: function(value, context) {
+                                            return value + '%'; // Customize label text
+                                        }
+                                    }
+                                },
+                                annotation: {
+                                    annotations: [{
                                         type: 'line',
                                         mode: 'horizontal',
-                                        scaleID: 'right-y-axis',
-                                        value: 80,
+                                        scaleID: 'y-axis-0',
+                                        value:"&
+                                            Switch(varProductionLine,
+                                                "SSC", 55,
+                                                "SSC2", 55,
+                                                "XL1", 59,
+                                                "XL2", 59,
+                                                "XL3", 59,
+                                                "XL4", 59,
+                                                "XL5", 59,
+                                                "XLT", 61,
+                                                "XLT2", 61,
+                                                59
+                                            )
+                                        &",
                                         borderColor: 'red',
                                         borderWidth: 2,
+                                        borderDash: [5,5],
                                         label: {
-                                          enabled: true,
-                                          position: 'right',
-                                          content: '80% Threshold'
+                                            enabled: true,
+                                            position: 'left',
+                                            content: '59% Threshold'
                                         }
-                                      },
-                                      {
-                                        type: 'line',
-                                        mode: 'vertical',
-                                        scaleID: 'x-axis-0',
-                                        value: ["& First(Sort(Filter(collectPareto, cumulative >= 80), freq, SortOrder.Descending)).id-1 &"],
-                                        borderColor: 'green',
-                                        borderWidth: 2,
-                                        label: {
-                                          enabled: true,
-                                          content: '80% Volume',
-                                          position: 'top',
-                                          backgroundColor: 'rgba(72, 72, 192, 0.5)'
-                                        }
-                                      }]
-                                    }
-                                  }
-                                }")
-                              FillPortions: =5
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
-                    - perf_trend_parent:
-                        Control: GroupContainer
-                        Variant: verticalAutoLayoutContainer
-                        Properties:
-                          AlignInContainer: =AlignInContainer.SetByContainer
-                          LayoutAlignItems: =LayoutAlignItems.Stretch
-                          LayoutDirection: =LayoutDirection.Vertical
-                          LayoutMode: =LayoutMode.Auto
-                        Children:
-                        - perf_trend_title:
-                            Control: Label
-                            Properties:
-                              Text: =varProductionLine & " OEE Trend"
-                              Align: =Align.Center
-                              Fill: =varColor4
-                              FillPortions: =1
-                              Size: =Self.Height / 3
-                        - perf_trend:
-                            Control: Image
-                            Properties:
-                              Image: |+
-                                ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
-                                EncodeUrl("
-
-                                {
-                                    type: 'line',
-                                    data: {
-                                        labels:"& Concatenate( "[", Concat(Sort(Filter(Target_Analysis, OEE2 >= 0, Week >= 17, Line.Value = varProductionLine),Week,SortOrder.Ascending), Week, "," ), "]") &",
-                                        datasets: [
-                                            {
-                                                label: 'Week',
-                                                backgroundColor: '#FFC832',
-                                                borderColor: '#503291',
-                                                data: "& Concatenate( "[", Concat(Sort(Filter(Target_Analysis, OEE2 >= 0, Week >= 17, Line.Value = varProductionLine),Week,SortOrder.Ascending), OEE2, "," ), "]") &",
-                                                fill: false
-                                            }
-                                        ]
-                                    },
-                                    options: {
-                                        scales: {
-                                            yAxes: [{
-                                                id: 'y-axis-0',
-                                                type: 'linear',
-                                                position: 'right',
-                                                ticks: {
-                                                    beginAtZero: true,
-                                                    min: "& First(Sort(Filter(Target_Analysis, OEE2 >= 0, Week >= 17, Line.Value = varProductionLine),OEE2,SortOrder.Ascending)).OEE2 - 5 &",
-                                                    max: "& Last(Sort(Filter(Target_Analysis, OEE2 >= 0, Week >= 17, Line.Value = varProductionLine),OEE2,SortOrder.Ascending)).OEE2 + 5 &",
-                                                    stepSize: 5
-                                                }
-                                            }]
-                                        },
-                                        plugins: {
-                                            datalabels: {
-                                                color: '#000000',
-                                                font: {size: 16},
-                                                anchor: 'end',
-                                                align: 'top',
-                                                formatter: function(value, context) {
-                                                    return value + '%'; // Customize label text
-                                                }
-                                            }
-                                        },
-                                        annotation: {
-                                            annotations: [{
-                                                type: 'line',
-                                                mode: 'horizontal',
-                                                scaleID: 'y-axis-0',
-                                                value: 59,
-                                                borderColor: 'red',
-                                                borderWidth: 2,
-                                                borderDash: [5,5],
-                                                label: {
-                                                    enabled: true,
-                                                    position: 'left',
-                                                    content: '59% Threshold'
-                                                }
-                                            }]
-                                        }
-                                    }
+                                    }]
                                 }
+                            }
+                        }
 
-                                ")
-                              FillPortions: =5
-                              LayoutMinHeight: =10
-                              LayoutMinWidth: =10
+                        ")
+                      FillPortions: =5
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10

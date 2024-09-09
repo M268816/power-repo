@@ -1,0 +1,7 @@
+Properties:
+  OnVisible: |-
+    =UpdateContext({locPadding: Self.Width * 0.005});
+
+    Set(varNowDay, Today());
+
+    Select(perf_collect);
