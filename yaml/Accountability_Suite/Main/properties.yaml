@@ -1,0 +1,4 @@
+Properties:
+  OnVisible: |-
+    =Set(varNow, Now());
+    Set(varToday, Today());
