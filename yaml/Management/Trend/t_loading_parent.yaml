@@ -1,4 +1,4 @@
-- c_loading_parent:
+- t_loading_parent:
     Control: GroupContainer
     Variant: manualLayoutContainer
     Properties:
@@ -7,7 +7,7 @@
       Visible: =varLoading.Visible
       Width: =Parent.Width
     Children:
-    - c_loading:
+    - t_loading:
         Control: GroupContainer
         Variant: verticalAutoLayoutContainer
         Properties:
@@ -31,7 +31,7 @@
           X: =Center(Parent.Width,Self.Width)
           Y: =Center(Parent.Height,Self.Height)
         Children:
-        - c_l_text:
+        - t_l_text:
             Control: Label
             Properties:
               Text: =varLoading.Text
@@ -40,7 +40,7 @@
               LayoutMinHeight: =1
               Size: =Self.Height / 8
               Width: =Parent.Width * 0.8
-        - c_l_progress:
+        - t_l_progress:
             Control: Progress
             Properties:
               Indeterminate: =varLoading.Value = -1
@@ -48,7 +48,7 @@
               FillPortions: =1
               LayoutMinHeight: =1
               Width: =Parent.Width * 0.8
-        - c_l_icon:
+        - t_l_icon:
             Control: Image
             Properties:
               Image: =gblAppIcons.Warning
