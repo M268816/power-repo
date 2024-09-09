@@ -35,49 +35,12 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - v_back:
-            Control: Image
-            Properties:
-              OnSelect: |-
-                =ResetForm(v_form);
-                Back();
-              Image: |-
-                ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:"&varHexAccent&";}</style></defs><path class='cls-1' d='M136.37,86.88a12.62,12.62,0,0,0-9.07-9.27c-1-.27-8-.28-8-.28h-9.08v0H53.79L76.47,95.84c.74.6.89,1.22.33,1.9L74,101a7.83,7.83,0,0,1-11.85,1.07L33.44,78.63c-2.82-2.31-3.73-4.73-3.79-8.79-.06-3.72.81-6.19,3.79-8.83,1.61-1.44,28.71-23.44,28.71-23.44A7.83,7.83,0,0,1,74,38.64l2.8,3.3c.56.67.41,1.3-.33,1.9L53.79,62.37h56.38v0h11.6s5.29-.32,6.12-.58a12.6,12.6,0,0,0,8.23-15.83c-.27-.85-1.8-4.2-2.2-5.08A70,70,0,0,0,79.16.27,72.21,72.21,0,0,0,29.7,13,69.66,69.66,0,0,0-.12,69.8h0v.08A69.68,69.68,0,0,0,29.7,126.7a71.88,71.88,0,0,0,28.21,11.88A69.82,69.82,0,0,0,133.7,99c.25-.55,1.44-3.6,2.25-6.1A19.09,19.09,0,0,0,136.37,86.88Z'/></svg>
-
-
-
-                ")
-              Height: =Parent.Height * 0.75
-              HoverBorderColor: =ColorFade(varColorYes, 20%)
-              HoverFill: =ColorFade(varColorAccent, 75%)
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              RadiusBottomLeft: =Self.Width/2
-              RadiusBottomRight: =Self.Width/2
-              RadiusTopLeft: =Self.Width/2
-              RadiusTopRight: =Self.Width/2
-              Width: =Self.Height
-              X: =Parent.Width * 0.99 - Self.Width
-              Y: =Parent.Height/2 - Self.Height/2
-        - v_h_title:
-            Control: Text
-            Properties:
-              Align: ='TextCanvas.Align'.Center
-              FontColor: =varColor5
-              Size: =24
-              Text: ="Verify DOR E.O.D. Submission"
-              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
-              FillPortions: =6
-              LayoutMinHeight: =8
-              LayoutMinWidth: =10
         - v_collect:
             Control: Classic/Button
             Properties:
               OnSelect: |-
                 =/*Start*/
-                UpdateContext({locLoading:{Visible: true, Value: 1, Text: "Loading"}});
+                Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
 
                 /*Capture Local Date Selection*/
                 UpdateContext({
@@ -85,7 +48,7 @@
                     locStartDate: varDORDate
                 });
 
-                UpdateContext({locLoading:{Visible: true, Value: 5, Text: "Checking for Updates"}});
+                Set(varLoading,{Visible: true, Value: 5, Text: "Checking for Updates"});
                 /*Check if collections need updating*/
                 Set(varUpdateProduction,
                     Or(
@@ -108,11 +71,11 @@
 
 
                 /*Collect Production*/
-                UpdateContext({locLoading:{Visible: true, Value: 10, Text: "Collecting Production Data"}});
+                Set(varLoading,{Visible: true, Value: 10, Text: "Collecting Production Data"});
                 If(varUpdateProduction,
                     If(
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,
-                        UpdateContext({locLoading:{Visible: true, Value: 40, Text: "Retrieving Production Data"}});
+                        Set(varLoading,{Visible: true, Value: 40, Text: "Retrieving Production Data"});
                         ClearCollect(collectProduction,
                             ForAll(
                                 Filter(Production,
@@ -141,7 +104,7 @@
                         ),
 
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 40, Text: "Parsing PowerAutomate Flow for Production Data"}});
+                        Set(varLoading,{Visible: true, Value: 40, Text: "Parsing PowerAutomate Flow for Production Data"});
                         ClearCollect(collectProduction,
                             ForAll(
                                 Table(
@@ -175,7 +138,7 @@
                         ),
 
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 15, Text: "Collecting Production Dataset 1"}});
+                        Set(varLoading,{Visible: true, Value: 15, Text: "Collecting Production Dataset 1"});
                         Collect(material_1,
                             Sort(
                                 Filter(Production,
@@ -189,7 +152,7 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 20, Text: "Collecting Production Dataset 2"}});
+                        Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Production Dataset 2"});
                         Collect(material_2,
                             Sort(
                                 Filter(Production,
@@ -203,15 +166,15 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 25, Text: "Joining Production Dataset 1"}});
+                        Set(varLoading,{Visible: true, Value: 25, Text: "Joining Production Dataset 1"});
                         ClearCollect(fusion, material_1);
 
-                        UpdateContext({locLoading:{Visible: true, Value: 30, Text: "Joining Production Dataset 2"}});
+                        Set(varLoading,{Visible: true, Value: 30, Text: "Joining Production Dataset 2"});
                         Collect(fusion,
                             Filter(material_2, Not(ID in material_1.ID))
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 35, Text: "Collecting Joined Production Data"}});
+                        Set(varLoading,{Visible: true, Value: 35, Text: "Collecting Joined Production Data"});
                         ClearCollect(
                             collectProduction,
                             ForAll(
@@ -237,7 +200,7 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 40, Text: "Garbage Collection"}});
+                        Set(varLoading,{Visible: true, Value: 40, Text: "Garbage Collection"});
                         Clear(fusion);
                         Clear(material_1);
                         Clear(material_2);
@@ -245,11 +208,11 @@
                 );
 
                 /*Collect Downtime*/
-                UpdateContext({locLoading:{Visible: true, Value: 45, Text: "Collecting Downtime Data"}});
+                Set(varLoading,{Visible: true, Value: 45, Text: "Collecting Downtime Data"});
                 If(varUpdateDowntime,
                     If(
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,
-                        UpdateContext({locLoading:{Visible: true, Value: 75, Text: "Retrieving Downtime Data"}});
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Retrieving Downtime Data"});
                         ClearCollect(collectDowntime,
                             ForAll(
                                 Filter(Downtime,
@@ -273,7 +236,7 @@
                         ),
 
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 75, Text: "Parsing PowerAutomate Flow for Downtime Data"}});
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Parsing PowerAutomate Flow for Downtime Data"});
                         ClearCollect(collectDowntime,
                             ForAll(
                                 Table(
@@ -302,7 +265,7 @@
                         ),
 
                         DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,
-                        UpdateContext({locLoading:{Visible: true, Value: 50, Text: "Collecting Downtime Dataset 1"}});
+                        Set(varLoading,{Visible: true, Value: 50, Text: "Collecting Downtime Dataset 1"});
                         Collect(material_1,
                             Sort(
                                 Filter(Downtime,
@@ -316,7 +279,7 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 55, Text: "Collecting Downtime Dataset 2"}});
+                        Set(varLoading,{Visible: true, Value: 55, Text: "Collecting Downtime Dataset 2"});
                         Collect(material_2,
                             Sort(
                                 Filter(Downtime,
@@ -330,15 +293,15 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 60, Text: "Joining Downtime Dataset 1"}});
+                        Set(varLoading,{Visible: true, Value: 60, Text: "Joining Downtime Dataset 1"});
                         ClearCollect(fusion, material_1);
 
-                        UpdateContext({locLoading:{Visible: true, Value: 65, Text: "Joining Downtime Dataset 2"}});
+                        Set(varLoading,{Visible: true, Value: 65, Text: "Joining Downtime Dataset 2"});
                         Collect(fusion,
                             Filter(material_2, Not(ID in material_1.ID))
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 70, Text: "Collecting Joined Downtime Data"}});
+                        Set(varLoading,{Visible: true, Value: 70, Text: "Collecting Joined Downtime Data"});
                         ClearCollect(
                             collectDowntime,
                             ForAll(
@@ -359,7 +322,7 @@
                             )
                         );
 
-                        UpdateContext({locLoading:{Visible: true, Value: 75, Text: "Garbage Collection"}});
+                        Set(varLoading,{Visible: true, Value: 75, Text: "Garbage Collection"});
                         Clear(fusion);
                         Clear(material_1);
                         Clear(material_2);
@@ -378,11 +341,11 @@
             Properties:
               OnSelect: |-
                 =/*Start*/
-                UpdateContext({locLoading:{Visible: true, Value: 80, Text: "Updating"}});
+                Set(varLoading,{Visible: true, Value: 80, Text: "Updating"});
 
 
                 /*Set the default filter for production*/
-                UpdateContext({locLoading:{Visible: true, Value: 85, Text: "Creating Default Filters"}});
+                Set(varLoading,{Visible: true, Value: 85, Text: "Creating Default Filters"});
                 UpdateContext({locDefaultProductionFilter:
                     Filter(collectProduction,
                         And(
@@ -406,7 +369,7 @@
 
 
                 /*Collect Line OEE2*/
-                UpdateContext({locLoading:{Visible: true, Value: 90, Text: "Calculating Line Data"}});
+                Set(varLoading,{Visible: true, Value: 90, Text: "Calculating Line Data"});
                 Clear(collectLineOEE);
                 ForAll(collectLineSchema,
                     Collect(collectLineOEE,
@@ -442,7 +405,7 @@
                 );
 
                 /*Garbage collection*/
-                UpdateContext({locLoading:{Visible: true, Value: 95, Text: "Finishing Up"}});
+                Set(varLoading,{Visible: true, Value: 95, Text: "Finishing Up"});
 
                 UpdateContext({
                     locDefaultProductionFilter: Blank(),
@@ -453,20 +416,49 @@
                 Clear(collectOEE2Data);
 
                 /*End*/
-                UpdateContext({locLoading:{Visible: true, Value: 100, Text: "Completed"}});
-                UpdateContext({locLoading:{Visible: false, Value: -1, Text: "Not Loading"}});
+                Set(varLoading,{Visible: true, Value: 100, Text: "Completed"});
+                Set(varLoading,{Visible: false, Value: -1, Text: "Not Loading"});
               Text: ="update"
               FillPortions: =1
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Visible: =false
+        - v_back:
+            Control: Image
+            Properties:
+              OnSelect: |-
+                =ResetForm(v_form);
+                Back();
+              Image: =gblAppIcons.Back
+              Height: =Parent.Height * 0.75
+              HoverBorderColor: =ColorFade(varColorYes, 20%)
+              HoverFill: =ColorFade(varColorAccent, 75%)
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              RadiusBottomLeft: =Self.Width/2
+              RadiusBottomRight: =Self.Width/2
+              RadiusTopLeft: =Self.Width/2
+              RadiusTopRight: =Self.Width/2
+              Width: =Self.Height
+              X: =Parent.Width * 0.99 - Self.Width
+              Y: =Parent.Height/2 - Self.Height/2
+        - v_title:
+            Control: Label
+            Properties:
+              Text: ="Verify End of Day Submission"
+              Align: =Align.Center
+              Color: =varColor5
+              FillPortions: =6
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 2
     - v_body:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          FillPortions: =11
+          FillPortions: =15
           LayoutAlignItems: =LayoutAlignItems.Stretch
           LayoutMinHeight: =10
           LayoutMinWidth: =10
@@ -1804,59 +1796,6 @@
                               Width: =Parent.Width - 48
                               X: =24
                               Y: =10
-                    - Is_Verified_DataCard1:
-                        Control: TypedDataCard
-                        Variant: fluentV9ToggleEditCard
-                        Properties:
-                          DataField: ="Is_Verified"
-                          Default: =ThisItem.Is_Verified
-                          DisplayName: ="Check off to confirm and approve verification of this informaiton."
-                          Required: =true
-                          Update: =DataCardValue43.Checked
-                          DisplayMode: =Parent.DisplayMode
-                          Height: =Parent.Height / 9
-                          Width: =Parent.Width
-                          Y: =21
-                        Children:
-                        - StarVisible47:
-                            Control: Text
-                            Properties:
-                              Align: ='TextCanvas.Align'.Center
-                              Text: ="*"
-                              Height: =30
-                              Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
-                              Width: =30
-                              Y: =DataCardKey47.Y
-                        - ErrorMessage47:
-                            Control: Text
-                            Properties:
-                              Text: =Parent.Error
-                              Height: =30
-                              Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
-                              Width: =Parent.Width - 48
-                              X: =24
-                              Y: =DataCardValue43.Y + DataCardValue43.Height
-                        - DataCardValue43:
-                            Control: Toggle
-                            Properties:
-                              AccessibleLabel: =If(Parent.Required, Substitute("{0}. Required.", "{0}", Parent.DisplayName), Parent.DisplayName)
-                              Checked: =Parent.Default
-                              Label: =""
-                              DisplayMode: =Parent.DisplayMode
-                              Height: =32
-                              Width: =Parent.Width - 48
-                              X: =24
-                              Y: =DataCardKey47.Y + DataCardKey47.Height + 4
-                        - DataCardKey47:
-                            Control: Text
-                            Properties:
-                              Text: =Parent.DisplayName
-                              Weight: ='TextCanvas.Weight'.Semibold
-                              Wrap: =false
-                              Height: =22
-                              Width: =Parent.Width - 48
-                              X: =24
-                              Y: =10
                     - Tie_Off_DataCard1:
                         Control: TypedDataCard
                         Variant: fluentV9TextualEditCard
@@ -1869,7 +1808,7 @@
                           DisplayMode: =Parent.DisplayMode
                           Height: =Parent.Height / 4
                           Width: =Parent.Width
-                          Y: =22
+                          Y: =21
                         Children:
                         - StarVisible48:
                             Control: Text
@@ -1912,6 +1851,58 @@
                               Width: =Parent.Width - 48
                               X: =24
                               Y: =10
+                    - Is_Verified_DataCard1:
+                        Control: TypedDataCard
+                        Variant: fluentV9ToggleEditCard
+                        Properties:
+                          DataField: ="Is_Verified"
+                          Default: =ThisItem.Is_Verified
+                          DisplayName: ="Check this off to confirm data verification."
+                          Required: =true
+                          Update: =CheckboxCanvas1.Checked
+                          DisplayMode: =Parent.DisplayMode
+                          Height: =70
+                          Width: =522
+                          Y: =22
+                        Children:
+                        - CheckboxCanvas1:
+                            Control: CheckBox
+                            Properties:
+                              AccessibleLabel: =If(Parent.Required, Substitute("{0}. Required.", "{0}", Parent.DisplayName), Parent.DisplayName)
+                              Checked: =Parent.Default
+                              Label: =If(Self.Checked, "Verified", " Not Verifed")
+                              DisplayMode: =Parent.DisplayMode
+                              Width: =Parent.Width - 48
+                              X: =24
+                              Y: =DataCardKey47.Y + DataCardKey47.Height + 4
+                        - StarVisible47:
+                            Control: Text
+                            Properties:
+                              Align: ='TextCanvas.Align'.Center
+                              Text: ="*"
+                              Height: =30
+                              Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                              Width: =30
+                              Y: =DataCardKey47.Y
+                        - ErrorMessage47:
+                            Control: Text
+                            Properties:
+                              Text: =Parent.Error
+                              Height: =30
+                              Visible: =And(!IsBlank(Parent.Error), Parent.DisplayMode=DisplayMode.Edit)
+                              Width: =Parent.Width - 48
+                              X: =24
+                              Y: =CheckboxCanvas1.Y + CheckboxCanvas1.Height
+                        - DataCardKey47:
+                            Control: Text
+                            Properties:
+                              Text: =Parent.DisplayName
+                              Weight: ='TextCanvas.Weight'.Semibold
+                              Wrap: =false
+                              Height: =22
+                              Width: =Parent.Width - 48
+                              X: =24
+                              Y: =10
             - v_section_2:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
@@ -1937,7 +1928,11 @@
                 - v_submit:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: =SubmitForm(v_form);
+                      OnSelect: |-
+                        =If(CheckboxCanvas1.Checked,
+                            SubmitForm(v_form);,
+                            Notify("Please confirm verification. Thank you!", NotificationType.Warning);
+                        );
                       Text: ="Submit end of day report"
                       AlignInContainer: =AlignInContainer.Center
                       Color: =varColor5

@@ -1,0 +1,6 @@
+OnVisible: |-
+  =Set(varLoading, {Visible: true, Value: 0, Text: "Starting"});
+
+  Set(varDORDate, dor_date.SelectedDate);
+
+  Select(dor_collect);

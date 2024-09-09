@@ -216,7 +216,7 @@ With(
 );
 ```
 
-The constraint setting is collected through a database that holds all constraint data per catalog.
+The constraint setting is collected through a database that holds all constraint data per catalog. This is collected using an average bacause you can select multiple lines using the controls. Selecting a single line will return the exact amount, while selecting "Only SSCs" will return an average.
 
 ``` cs
 constraint_setting:
@@ -440,9 +440,9 @@ OEE2:
 
 The other data collected in the intial algorithm is used to display the data on the OEE Analysis screen.
 
-## Collecting All OEE2 Data
+## Collecting All/Overall OEE2 Data
 
-Collecting the OEE data works in a simmilar fashion, but without the need to distinguish between each shift. The biggest difference in this algorithm is that it collects much more "display" data. Data that is pushed to the screen to verify the final OEE2 percentage.
+Collecting the OEE data works in a simmilar fashion, but without the need to distinguish between each shift. The biggest difference in this algorithm is that it collects much more "display" data. This extra data is pushed to the screen to verify the final OEE2 percentage.
 
 ``` cs
 /*Gather OEE Data*/
@@ -728,4 +728,14 @@ With(
         }
     )
 );
+```
+
+This algoritm collects all constraint data for evey line and catalog, so when gathering the overall OEE it *DOES NOT* average out the constraint data. This makes the overall OEE2 algorithm the most accurate way to display OEE2.
+
+```cs
+constraint_setting:
+    IfError(
+        First(Filter(Goal_Settings, Line.Value = thisLine, Size.Value = thisCatalog)).Constraint_Setting,
+        0
+    ),
 ```
