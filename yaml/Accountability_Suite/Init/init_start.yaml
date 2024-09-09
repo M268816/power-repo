@@ -1,0 +1,245 @@
+- init_start:
+    Control: Classic/Button
+    Properties:
+      OnSelect: |-
+        =Set(varLoading, {Visible: false, Value: 5, Text: "Setting Color Theme"});
+        Set(varPadding, App.ActiveScreen.Width * 0.005);
+        Set(varNow, Now());
+        Set(varToday, Today());
+
+        Set(varColor0, Color.Black);
+        Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple
+        Set(varColor2, RGBA(15, 105, 175, 1));      //Rich Blue
+        Set(varColor3, RGBA(45, 190, 205, 1));      //Vibrant Cyan
+        Set(varColor4, RGBA(255, 220, 185, 1));     //Sensitive Yellow
+        Set(varColor5, Color.White);
+        Set(varColorAccent, RGBA(255, 200, 50, 1)); //Vibrant Yellow
+        Set(varColorYes, RGBA(20, 155, 95, 1));     //Rich Green
+        Set(varColorNo, RGBA(230, 30, 80, 1));      //Rich Red
+        Set(varHexRich, "#503291");
+        Set(varHexAccent, "#FFC832");
+        Set(varHexYes, "#149B5F");
+        Set(varHexNo, "#E61E50");
+
+        /*Collection Init*/
+        Set(varLoading, {Visible: true, Value: 10, Text: "Setting Catalog Types"});
+        ClearCollect(
+            collectPlugDatabase,
+            
+            { catalog: "KGEPA05TT1", type: "Standard"},
+            { catalog: "KGEPA05HH1", type: "Standard"},
+            { catalog: "KGEPA05TH1", type: "Standard"},
+            { catalog: "KGEPA05TB1", type: "Standard"},
+            { catalog: "KHGEA05TT1", type: "Standard"},
+            { catalog: "KHGEA05HH1", type: "Standard"},
+            { catalog: "KHGEA05TH1", type: "Standard"},
+            { catalog: "KHGEA05TB1", type: "Standard"},
+            { catalog: "KHVEA05TT1", type: "Standard"},
+            { catalog: "KHVEA05HH1", type: "Standard"},
+            { catalog: "KHVEA05TH1", type: "Standard"},
+            { catalog: "KHVEA05TB1", type: "Standard"},
+            { catalog: "KVEPA05TT1", type: "Standard"},
+            { catalog: "KVEPA05HH1", type: "Standard"},
+            { catalog: "KVEPA05TH1", type: "Standard"},
+            { catalog: "KVEPA05TB1", type: "Standard"},
+            { catalog: "KPGEA05HH1", type: "Standard"},
+            { catalog: "KPGEA05TB1", type: "Standard"},
+            { catalog: "KPGEA05TH1", type: "Standard"},
+            { catalog: "KPGEA05TT1", type: "Standard"},
+            { catalog: "KPGEA10HH1", type: "Standard"},
+            { catalog: "KPGEA10TB1", type: "Standard"},
+            { catalog: "KPGEA10TH1", type: "Standard"},
+            { catalog: "KPGEA10TT1", type: "Standard"},
+            { catalog: "KVGLA10TT1", type: "Standard"},
+            { catalog: "KVGLA10HH1", type: "Standard"},
+            { catalog: "KVGLA10FF1", type: "Standard"},
+            { catalog: "KVGLA10TH1", type: "Standard"},
+            { catalog: "KVVLA10TT1", type: "Standard"},
+            { catalog: "KVVLA10HH1", type: "Standard"},
+            { catalog: "KVVLA10FF1", type: "Standard"},
+            { catalog: "KVHLA10TT1", type: "Standard"},
+            { catalog: "KVHLA10HH1", type: "Standard"},
+            { catalog: "KVHLA10FF1", type: "Standard"},
+            { catalog: "KPHLA10TT1", type: "Standard"},
+            { catalog: "KPHLA10HH1", type: "Standard"},
+            { catalog: "KPHLA10FF1", type: "Standard"},
+            { catalog: "KVSSA10TT1", type: "Standard"},
+            { catalog: "KVSSA10HH1", type: "Standard"},
+            { catalog: "KVSSA10FF1", type: "Standard"},
+            { catalog: "KVSCA10TT1", type: "Standard"},
+            { catalog: "KVSCA10HH1", type: "Standard"},
+            { catalog: "KVSCA10FF1", type: "Standard"},
+            { catalog: "KVSXA10TT1", type: "Standard"},
+            { catalog: "KVSXA10HH1", type: "Standard"},
+            { catalog: "KVSXA10FF1", type: "Standard"},
+            { catalog: "KV03A10TT1", type: "Standard"},
+            { catalog: "KV03A10HH1", type: "Standard"},
+            { catalog: "KV03A10FF1", type: "Standard"},
+            { catalog: "KV06A10TT1", type: "Standard"},
+            { catalog: "KV06A10HH1", type: "Standard"},
+            { catalog: "KV06A10FF1", type: "Standard"},
+            { catalog: "KV19A10TT1", type: "Standard"},
+            { catalog: "KV19A10HH1", type: "Standard"},
+            { catalog: "KV19A10FF1", type: "Standard"},
+            { catalog: "KVGBA10TT1", type: "Standard"},
+            { catalog: "KVGBA10HH1", type: "Standard"},
+            { catalog: "KVGBA10FF1", type: "Standard"},
+            { catalog: "KHGLA10TT1", type: "Standard"},
+            { catalog: "KHGLA10HH1", type: "Standard"},
+            { catalog: "KHGLA10FF1", type: "Standard"},
+            { catalog: "KHGLA10TH1", type: "Standard"},
+            { catalog: "KHGEA10TT1", type: "Standard"},
+            { catalog: "KHGEA10HH1", type: "Standard"},
+            { catalog: "KHGEA10TH1", type: "Standard"},
+            { catalog: "KHGEA10TB1", type: "Standard"},
+            { catalog: "KGEPA10TT1", type: "Standard"},
+            { catalog: "KGEPA10HH1", type: "Standard"},
+            { catalog: "KGEPA10TH1", type: "Standard"},
+            { catalog: "KGEPA10TB1", type: "Standard"},
+            { catalog: "KZRVA10TT1", type: "Standard"},
+            { catalog: "KZRVA10TH1", type: "Standard"},
+            { catalog: "KVPVA10TT1", type: "Standard"},
+            { catalog: "KVPVA10HH1", type: "Standard"},
+            { catalog: "KVPVA10TH1", type: "Standard"},
+            { catalog: "KHVEA10TT1", type: "Standard"},
+            { catalog: "KHVEA10HH1", type: "Standard"},
+            { catalog: "KHVEA10TH1", type: "Standard"},
+            { catalog: "KHVEA10TB1", type: "Standard"},
+            { catalog: "KVEPA10TT1", type: "Standard"},
+            { catalog: "KVEPA10HH1", type: "Standard"},
+            { catalog: "KVEPA10TH1", type: "Standard"},
+            { catalog: "KVEPA10TB1", type: "Standard"},
+
+            { catalog: "KHPSG10TT1", type: "Gamma"},
+            { catalog: "KHPSG10HH1", type: "Gamma"},
+            { catalog: "KHPSG10TH1", type: "Gamma"},
+            { catalog: "KHPSG10TB1", type: "Gamma"},
+            { catalog: "KHPSS10TT1", type: "Gamma"},
+            { catalog: "KHPSS10HH1", type: "Gamma"},
+            { catalog: "KHPSS10TH1", type: "Gamma"},
+            { catalog: "KHPSS10TB1", type: "Gamma"},
+            { catalog: "KPHLG10TT1", type: "Gamma"},
+            { catalog: "KPHLG10HH1", type: "Gamma"},
+            { catalog: "KPHLG10TH1", type: "Gamma"},
+            { catalog: "KPHLG10FF1", type: "Gamma"},
+            { catalog: "KPHLS10TT1", type: "Gamma"},
+            { catalog: "KPHLS10HH1", type: "Gamma"},
+            { catalog: "KPHLS10TH1", type: "Gamma"},
+            { catalog: "KPHLS10FF1", type: "Gamma"},
+            { catalog: "KPGEG10HH1", type: "Gamma"},
+            { catalog: "KPGEG10TB1", type: "Gamma"},
+            { catalog: "KPGEG10TH1", type: "Gamma"},
+            { catalog: "KPGEG10TT1", type: "Gamma"},
+            { catalog: "KPGES10HH1", type: "Gamma"},
+            { catalog: "KPGES10TB1", type: "Gamma"},
+            { catalog: "KPGES10TH1", type: "Gamma"},
+            { catalog: "KPGES10TT1", type: "Gamma"},
+            { catalog: "KVGLG10TT1", type: "Gamma"},
+            { catalog: "KVGLG10HH1", type: "Gamma"},
+            { catalog: "KVGLG10FF1", type: "Gamma"},
+            { catalog: "KVGLG10TH1", type: "Gamma"},
+            { catalog: "KVGLG10FH1", type: "Gamma"},
+            { catalog: "KVVLG10TT1", type: "Gamma"},
+            { catalog: "KVVLG10HH1", type: "Gamma"},
+            { catalog: "KVVLG10FF1", type: "Gamma"},
+            { catalog: "KVVLG10TH1", type: "Gamma"},
+            { catalog: "KVVLG10FH1", type: "Gamma"},
+            { catalog: "KVGLS10TT1", type: "Gamma"},
+            { catalog: "KVGLS10HH1", type: "Gamma"},
+            { catalog: "KVGLS10FF1", type: "Gamma"},
+            { catalog: "KVGLS10TH1", type: "Gamma"},
+            { catalog: "KVGLS10FH1", type: "Gamma"},
+            { catalog: "KVVLS10TT1", type: "Gamma"},
+            { catalog: "KVVLS10HH1", type: "Gamma"},
+            { catalog: "KVVLS10FF1", type: "Gamma"},
+            { catalog: "KVVLS10TH1", type: "Gamma"},
+            { catalog: "KVVLS10FH1", type: "Gamma"},
+            { catalog: "KHGEG10TT1", type: "Gamma"},
+            { catalog: "KHGEG10HH1", type: "Gamma"},
+            { catalog: "KHGEG10TH1", type: "Gamma"},
+            { catalog: "KHGEG10TB1", type: "Gamma"},
+            { catalog: "KHGES10TT1", type: "Gamma"},
+            { catalog: "KHGES10HH1", type: "Gamma"},
+            { catalog: "KHGES10TH1", type: "Gamma"},
+            { catalog: "KHGES10TB1", type: "Gamma"},
+            { catalog: "KGEPG10TT1", type: "Gamma"},
+            { catalog: "KGEPG10HH1", type: "Gamma"},
+            { catalog: "KGEPG10TH1", type: "Gamma"},
+            { catalog: "KGEPG10TB1", type: "Gamma"},
+            { catalog: "KGEPS10TT1", type: "Gamma"},
+            { catalog: "KGEPS10HH1", type: "Gamma"},
+            { catalog: "KGEPS10TH1", type: "Gamma"},
+            { catalog: "KGEPS10TB1", type: "Gamma"},
+            { catalog: "KHVEG10TT1", type: "Gamma"},
+            { catalog: "KHVEG10HH1", type: "Gamma"},
+            { catalog: "KHVEG10TH1", type: "Gamma"},
+            { catalog: "KHVEG10TB1", type: "Gamma"},
+            { catalog: "KHVES10TT1", type: "Gamma"},
+            { catalog: "KHVES10HH1", type: "Gamma"},
+            { catalog: "KHVES10TH1", type: "Gamma"},
+            { catalog: "KHVES10TB1", type: "Gamma"},
+            { catalog: "KVEPG10TT1", type: "Gamma"},
+            { catalog: "KVEPG10HH1", type: "Gamma"},
+            { catalog: "KVEPG10TH1", type: "Gamma"},
+            { catalog: "KVEPG10TB1", type: "Gamma"},
+            { catalog: "KVEPS10TT1", type: "Gamma"},
+            { catalog: "KVEPS10HH1", type: "Gamma"},
+            { catalog: "KVEPS10TH1", type: "Gamma"},
+            { catalog: "KVEPS10TB1", type: "Gamma"},
+            { catalog: "KHGLG10TT1", type: "Gamma"},
+            { catalog: "KHGLG10HH1", type: "Gamma"},
+            { catalog: "KHGLG10FF1", type: "Gamma"},
+            { catalog: "KHGLG10TH1", type: "Gamma"},
+            { catalog: "KHGLG10FH1", type: "Gamma"},
+            { catalog: "KHGLS10TT1", type: "Gamma"},
+            { catalog: "KHGLS10HH1", type: "Gamma"},
+            { catalog: "KHGLS10FF1", type: "Gamma"},
+            { catalog: "KHGLS10TH1", type: "Gamma"},
+            { catalog: "KHGLS10FH1", type: "Gamma"}
+          )
+        Set(varLoading, {Visible: true, Value: 20, Text: "Building Mailing List"});
+        ClearCollect(
+            collectMailingList,
+            /* Admins */
+            {_person: "Raymond Comeau", _email: "raymond.comeau@milliporesigma.com", _send: true},
+            
+            /* Supervisors */
+            {_person: "Timothy Boyle", _email: "timothy.boyle@milliporesigma.com", _send: false},
+            {_person: "Mal Baker", _email: "mal.baker@milliporesigma.com", _send: false},
+            {_person: "Anthony Cesolini", _email: "anthony.cesolini@milliporesigma.com", _send: false},
+            
+            /* Expeditors */
+            {_person: "Amanda Bergeron", _email: "amanda.bergeron@milliporesigma.com", _send: true},
+            {_person: "Heidi Brooks", _email: "heidi.brooks@milliporesigma.com", _send: true},
+            {_person: "Tamara Stewart", _email: "tamara.stewart@milliporesigma.com", _send: true},
+            
+            /* Leads */
+            {_person: "James LeBlanc", _email: "james.leblanc@milliporesigma.com", _send: true},
+            {_person: "Brett Gretter", _email: "brett.gretter@milliporesigma.com", _send: true},
+            {_person: "Carol Starcher", _email: "carol.starcher@milliporesigma.com", _send: true},
+            
+            /* Backup Leads */
+            {_person: "Riley Thompson", _email: "leighton.thompson@milliporesigma.com", _send: true},
+            {_person: "Kalee Lang", _email: "kalee.lang@milliporesigma.com", _send: true},
+            {_person: "Leah Dumais", _email: "leah.dumais@milliporesigma.com", _send: true},
+            
+            /* Accountability */
+            {_person: "Anne Pelkey", _email: "anne.pelkey@milliporesigma.com", _send: true},
+            {_person: "Victoria White", _email: "victoria.white@milliporesigma.com", _send: true},
+            {_person: "Susan Cummings", _email: "susan.cummings@milliporesigma.com", _send: true},
+            {_person: "Lisa Miller", _email: "lisa.miller@milliporesigma.com", _send: true},
+            {_person: "Waylon Somero", _email: "waylon.somero@milliporesigma.com", _send: true},
+            {_person: "Jennifer Clark Maldonado", _email: "jennifer.clark-maldonado@emdmillipore.com", _send: true},
+            {_person: "Charlene Wheeler", _email: "charlene.wheeler@milliporesigma.com", _send: true},
+            
+            /* Other */
+            {_person: "Lea Devlin", _email: "lea.devlin@milliporesigma.com", _send: true}
+        );
+
+        Set(varLoading, {Visible: true, Value: 95, Text: "Finishing Up"});
+        Set(varLoading, {Visible: false, Value: -1, Text: "Not Loading"});
+        Navigate(Main);
+      Text: ="INIT"
+      Height: =100
+      Visible: =false
+      Width: =100
