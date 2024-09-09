@@ -1,9 +1,0 @@
-- mh_update:
-    Control: Classic/Button
-    Properties:
-      OnSelect: |-
-        =UpdateContext({locLoading: false});
-      Text: ="update"
-      Height: =Parent.Height * 0.05
-      Visible: =false
-      Width: =Parent.Width * 0.10
