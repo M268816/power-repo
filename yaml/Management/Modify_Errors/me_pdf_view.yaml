@@ -1,0 +1,10 @@
+- me_pdf_view:
+    Control: PDFViewer
+    Properties:
+      OnStateChange: =
+      Document: =First(e_gallery.Selected.Attachments).Value
+      Height: =me_b_preview.Height
+      ShowControls: =true
+      Width: =me_b_preview.Width
+      X: =me_b_preview.X
+      Y: =me_b_preview.Y + me_body.Y

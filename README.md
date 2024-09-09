@@ -1,4 +1,17 @@
-# MilliporeSigma Encapsulation Applications
+# MilliporeSigma Encapsulation Applications 
+
+| Application        | Version           | Status          |
+| ------------------ |:-----------------:| ---------------:|
+| Encapsualtion Accountability Suite | v1.0.0 | Released |
+| Encapsulation Daily Management System for Displays | v0.1.0 | WIP |
+| Encapsulation Daily Management System for Management | v1.0.0 | Released |
+| Encapsulation Daily Managmenet System for Production | v1.0.0 | Released |
+| Encapsulation Digital SOPs | v0.1.0 | TBD |
+| Encapsulation LinkHub | v1.0.0 | Released |
+| Scheduling Suite | v0.1.0 | TBD |
+| V-Line Daily Management System for Management | v0.1.0 | WIP |
+| V-Line Daily Management System for Production | v0.0.0 | TBD |
+| V-Line Daily LinkHub | v0.0.0 | TBD |
 
 ## PowerApps Packages
 

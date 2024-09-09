@@ -1,5 +1,6 @@
 {
     "name": "encapsulation-powerapps",
+    "description": "The encapsulation workcenter powerapps application repository.",
     "version": "1.0.0",
     "author": {
         "name": "Raymond Comeau",

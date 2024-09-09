@@ -1,0 +1,15 @@
+Properties:
+  OnVisible: |-
+    =/*Init Local Variables*/
+    UpdateContext({
+        locPopup: false,
+        locShowAllDowntime: false,
+        locExpandUnits: false
+        });
+
+    /*Init Time Variables*/
+    Set(varNowDay, Today());
+    Set(varNowHour, Hour(Now()));
+
+    /*Call the update button*/
+    Select(hr_collect);
