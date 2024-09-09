@@ -1,0 +1,1 @@
+This screen is notorious for breaking because of the web barcode scanner, its best to just create a whole new screen using the main.yaml.
