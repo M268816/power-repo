@@ -10,9 +10,9 @@ Performance = (Total Widgets / (Runtime - Downtime)) / Ideal Cycle Time
 Quality = Good Widgets / Total Widgets
 
 ## Millipore OEE1/OEE2 Calculations 
-> OEE1 = Output / (Ideal Output * Total Runtime)
+> OEE1 = Good Widgets / (Ideal Output * Total Runtime)
 
-> OEE2 = Output / (Ideal Output * Planned Runtime)
+> OEE2 = Good Widgets / (Ideal Output * Planned Runtime)
 
 The ideal output is the constraint speed for each line, the slowest process of any line. For most XL lines this is the Uson Tester.
 
@@ -36,7 +36,7 @@ Ideal Output - 46.9 units/hr
 
 ### Millipore OEE2
 
-> OEE2 = Output / (Ideal Output * Planned Runtime)
+> OEE2 = Good Widgets / (Ideal Output * Planned Runtime)
 
 > OEE2 = 256 / (46.9 * 7)
 
