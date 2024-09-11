@@ -24,15 +24,15 @@ Here's an example of line production numbers broken down between both algorithms
 
 ### Baseline metrics for a single shift, on a single line
 
-Line - XL1 - 5 inch units
-Good Units - 256
-Total Units - 300
-Runtime - 8 Hours
-Unplanned Downtime - 0.5 Hours for mechanical issues
-Planned Downtime - 1 Hour for a scheduled P.M
-Total Available Time - 8 Hours
-Output - 39.3846 units/hr
-Ideal Output - 46.9
+Line - XL1 - 5 inch units  
+Good Units - 256  
+Total Units - 300  
+Runtime - 8 Hours  
+Unplanned Downtime - 0.5 Hours for mechanical issues  
+Planned Downtime - 1 Hour for a scheduled P.M  
+Total Available Time - 8 Hours  
+Output - 39.3846 units/hr  
+Ideal Output - 46.9  
 
 ### Millipore OEE2
 
@@ -65,7 +65,7 @@ Quality = Good Widgets / Total Widgets
 There is a 19.76% difference between the calculation that Millipore is basing its data analysis on and the industry standard process. For efficiency analysis, this means we are misrepresenting our own data and potentially ignoring or downplaying possible problems within our processes because the OEE% are so agreeable. For outside parties who may only know of the standard OEE process, if we try and share this data within our own industry, other industry leaders, customers, or competitors, we are misrepresenting our efficiency and therefore the capacity of our processes.
 
 
-## OEE2 Algorithm Breakdown.
+# OEE2 Algorithm Breakdown.
 
 The algorithm we use to gather and calculate OEE2 uses the same premise as the LSPS OEE2 calculation but needed to be adapted to consider the ideal output constraint variances from each catalog and line. So, as a line switches products, we need to also change the constraint for the specific catalogs that run.
 
