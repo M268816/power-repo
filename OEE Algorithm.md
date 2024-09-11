@@ -10,9 +10,9 @@ Performance = (Total Widgets / (Runtime - Downtime)) / Ideal Cycle Time
 Quality = Good Widgets / Total Widgets
 
 ## Millipore OEE1/OEE2 Calculations 
-> OEE1 = Good Widgets / (Ideal Output * Total Runtime)
+> OEE1 = Total Widgets / (Ideal Output * Total Runtime)
 
-> OEE2 = Good Widgets / (Ideal Output * Planned Runtime)
+> OEE2 = Total Widgets / (Ideal Output * Planned Runtime)
 
 The ideal output is the constraint speed for each line, the slowest process of any line. For most XL lines this is the Uson Tester.
 
@@ -25,8 +25,8 @@ Here's an example of line production numbers broken down between both algorithms
 ### Baseline metrics for a single shift, on a single line
 
 Line - XL1 - 5 inch units  
-Good Units - 256  
-Total Units - 300  
+Good Units - 225  
+Total Units - 256  
 Runtime - 8 Hours  
 Unplanned Downtime - 0.5 Hours for mechanical issues  
 Planned Downtime - 1 Hour for a scheduled P.M  
@@ -36,7 +36,7 @@ Ideal Output - 46.9 units/hr
 
 ### Millipore OEE2
 
-> OEE2 = Good Widgets / (Ideal Output * Planned Runtime)
+> OEE2 = Total Widgets / (Ideal Output * Planned Runtime)
 
 > OEE2 = 256 / (46.9 * 7)
 
@@ -54,15 +54,15 @@ Performance = (Total Widgets / (Runtime - Downtime)) / Ideal Cycle Time
 
 Quality = Good Widgets / Total Widgets
 
-> Q = 256 / 300
+> Q = 225 / 256
 
-> OEE = 0.8125 * 0.8397 * 0.8533
+> OEE = 0.8125 * 0.8397 * 0.8789
 
-> OEE = 58.22%
+> OEE = 59.96%
 
 ### Conclusion
 
-There is a 19.76% difference between the calculation that Millipore is basing its data analysis on and the industry standard process. For efficiency analysis, this means we are misrepresenting our own data and potentially ignoring or downplaying possible problems within our processes because the OEE% are so agreeable. For outside parties who may only know of the standard OEE process, if we try and share this data within our own industry, other industry leaders, customers, or competitors, we are misrepresenting our efficiency and therefore the capacity of our processes.
+There is a 18.02% difference between the calculation that Millipore is basing its data analysis on and the industry standard process. For efficiency analysis, this means we are misrepresenting our own data and potentially ignoring or downplaying possible problems within our processes because the OEE% are so agreeable. For outside parties who may only know of the standard OEE process, if we try and share this data within our own industry, other industry leaders, customers, or competitors, we are misrepresenting our efficiency and therefore the capacity of our processes.
 
 
 # OEE2 Algorithm Breakdown.
