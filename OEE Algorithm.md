@@ -32,7 +32,7 @@ Unplanned Downtime - 0.5 Hours for mechanical issues
 Planned Downtime - 1 Hour for a scheduled P.M  
 Total Available Time - 8 Hours  
 Output - 39.3846 units/hr  
-Ideal Output - 46.9  
+Ideal Output - 46.9 units/hr  
 
 ### Millipore OEE2
 
