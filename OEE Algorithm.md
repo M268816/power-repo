@@ -1,21 +1,68 @@
 # OEE2 Algorithm
 
 ## Preferred OEE
-> OEE = Quality * Performance * Availability
+> OEE = Availability * Performance * Quality 
+
+Availability = (Runtime - Downtime) / Total Time
+
+Performance = (Total Widgets / (Runtime - Downtime)) / Ideal Cycle Time
 
 Quality = Good Widgets / Total Widgets
-
-Performance = Widget Output / Ideal Widget Output
-
-Availability = Runtime - Downtime / Total Time
-
 
 ## Millipore OEE1/OEE2 Calculations 
 > OEE1 = Output / (Ideal Output * Total Runtime)
 
 > OEE2 = Output / (Ideal Output * Planned Runtime)
 
-The ideal output is the constraint speed for each line, the slowest process of any line. For most XL lines this is the Uson Tester. 
+The ideal output is the constraint speed for each line, the slowest process of any line. For most XL lines this is the Uson Tester.
+
+## The authenticity issues.
+
+I see a problem with displaying the Millipore OEE2 algorithm as a competitive and comparable data from the standard OEE model. I feel this is misdirecting our customers and our own data analysis by artificially inflating the OEE percentages. This is because the OEE2 method simplifies the process of the algorithm to only include a performance metric, not taking into account lost availability and quality.
+
+Here's an example of line production numbers broken down between both algorithms. Let’s say XL1 is planned to run a full shift, with a planned PM and a half hour worth of mechanical issues. According to our downtime code splits, Planned Preventive Maintenance are covered under OEE1 as planned downtime, and mechanical issues are covered under OEE2 as an unplanned downtime event.
+
+### Baseline metrics for a single shift, on a single line
+
+Line - XL1 - 5 inch units
+Good Units - 256
+Total Units - 300
+Runtime - 8 Hours
+Unplanned Downtime - 0.5 Hours for mechanical issues
+Planned Downtime - 1 Hour for a scheduled P.M
+Total Available Time - 8 Hours
+Output - 39.3846 units/hr
+Ideal Output - 46.9
+
+### Millipore OEE2
+
+> OEE2 = Output / (Ideal Output * Planned Runtime)
+
+> OEE2 = 256 / (46.9 * 7)
+
+> OEE2 = 77.98%
+
+### Standard OEE
+
+Availability = (Runtime - Downtime) / Total Time
+
+> A = (7 - 0.5) / 8
+
+Performance = (Total Widgets / (Runtime - Downtime)) / Ideal Cycle Time
+
+> P = (256 / (7 - 0.5)) / 46.9
+
+Quality = Good Widgets / Total Widgets
+
+> Q = 256 / 300
+
+> OEE = 0.8125 * 0.8397 * 0.8533
+
+> OEE = 58.22%
+
+### Conclusion
+
+There is a 19.76% difference between the calculation that Millipore is basing its data analysis on and the industry standard process. For efficiency analysis, this means we are misrepresenting our own data and potentially ignoring or downplaying possible problems within our processes because the OEE% are so agreeable. For outside parties who may only know of the standard OEE process, if we try and share this data within our own industry, other industry leaders, customers, or competitors, we are misrepresenting our efficiency and therefore the capacity of our processes.
 
 
 ## OEE2 Algorithm Breakdown.
