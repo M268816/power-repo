@@ -1,0 +1,39 @@
+- m_error:
+    Control: GroupContainer
+    Variant: manualLayoutContainer
+    Properties:
+      Fill: =RGBA(0, 0, 0, .5)
+      Height: =Parent.Height
+      Visible: =locError
+      Width: =Parent.Width
+    Children:
+    - m_e_text:
+        Control: Label
+        Properties:
+          Text: ="Input Error Detected. Be sure all fields are populated."
+          Align: =Align.Center
+          BorderColor: =Color.Red
+          BorderThickness: =5
+          Fill: =Color.AntiqueWhite
+          Font: =Font.'Courier New'
+          Height: =Parent.Height * 0.40
+          Size: =Parent.Width / 62
+          Width: =Parent.Width * 0.50
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/3 - Self.Height/2
+    - m_e_cancel:
+        Control: Classic/Icon
+        Variant: Cancel
+        Properties:
+          OnSelect: |-
+            =UpdateContext({locError: !locError});
+          BorderColor: |+
+            =Color.Red
+          BorderThickness: =5
+          Color: =Color.Red
+          Fill: =Color.AntiqueWhite
+          Height: =Parent.Height * 0.15
+          Icon: =Icon.Cancel
+          Width: =Self.Height
+          X: =m_e_text.X + m_e_text.Width/2 - Self.Width/2
+          Y: =m_e_text.Y + m_e_text.Height + Parent.Height * 0.05

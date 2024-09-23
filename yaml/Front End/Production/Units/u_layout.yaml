@@ -1,0 +1,1939 @@
+- u_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+      X: =
+    Children:
+    - u_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =locPadding*2
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =locPadding
+          PaddingLeft: =locPadding
+          PaddingRight: =locPadding
+          PaddingTop: =locPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - u_collect:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =/*Set Shift*/
+                If(
+                    Hour(Now()) >= 23,
+                    Set(varShiftSelect, "C Shift"),
+                    Hour(Now()) >= 15,
+                    Set(varShiftSelect, "B Shift"),
+                    Hour(Now()) >= 7,
+                    Set(varShiftSelect, "A Shift"),
+                    Set(varShiftSelect, "C Shift")
+                );
+
+                /*Delegated Collection - Production*/
+                Clear(collectProduction);
+                ForAll(
+                    Filter(Production,
+                        Hour_Ending <= DateAdd(varNowDay, 23, TimeUnit.Hours),
+                        Hour_Starting >= DateAdd(varNowDay, -1, TimeUnit.Hours),
+                        Line.Value = varProductionLine
+                    ),
+                    Collect(collectProduction,
+                        {
+                            ID: ThisRecord.ID,
+                            Lot: ThisRecord.Lot,
+                            Catalog: ThisRecord.Catalog,
+                            Line: ThisRecord.Line.Value,
+                            Hour_Starting: ThisRecord.Hour_Starting,
+                            Hour_Ending: ThisRecord.Hour_Ending,
+                            Unit_Starting: ThisRecord.Unit_Starting,
+                            Unit_Ending: ThisRecord.Unit_Ending,
+                            Amount_Built: Round(Value(ThisRecord.Amount_Built),0),
+                            Hourly_Goal: ThisRecord.Hourly_Goal,
+                            QA_Units: ThisRecord.QA_Units,
+                            Reject_Labels: ThisRecord.Reject_Labels,
+                            Reject_Units: ThisRecord.Reject_Units,
+                            Reject_Cartridges: ThisRecord.Reject_Cartridges,
+                            Quality: ThisRecord.Quality,
+                            Safety: ThisRecord.Safety,
+                            Shift_Letter: ThisRecord.Shift_Letter,
+                            Edit_Person: ThisRecord.Edit_Person,
+                            Edit_Reason: ThisRecord.Edit_Reason
+                        }
+                    )
+                );
+
+                Navigate(Hourly);
+              Text: ="collect"
+              Visible: =false
+        - u_back:
+            Control: Image
+            Properties:
+              OnSelect: =Back()
+              Image: =gblSVG.Back
+              Height: =Parent.Height * 0.75
+              HoverFill: =ColorFade(varColorAccent, 75%)
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              RadiusBottomLeft: =Self.Height / 2
+              RadiusBottomRight: =Self.Height / 2
+              RadiusTopLeft: =Self.Height / 2
+              RadiusTopRight: =Self.Height / 2
+              Width: =Self.Height
+              X: =Parent.Width * 0.99 - Self.Width - u_cancel.Width - Parent.Width * 0.015
+              Y: =Parent.Height/2 - Self.Height/2
+        - u_logo:
+            Control: Image
+            Properties:
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              LayoutMinHeight: =10
+              Width: =Self.Height * 3
+        - u_h_title:
+            Control: Label
+            Properties:
+              Text: ="Encapsulation Digital Daily Management System"
+              Align: =Align.Center
+              Color: =varColor5
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - u_h_padding:
+            Control: GroupContainer
+            Variant: manualLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              FillPortions: =0
+              LayoutMinHeight: =10
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =u_logo.Width + u_back.Width - u_submit.Width - u_cancel.Width - u_delete.Width
+        - u_submit:
+            Control: Image
+            Properties:
+              OnSelect: "=UpdateContext({\r\n    locSelectedEndTime:\r\n    DateTime(\r\n        Year(DateValue4.SelectedDate),\r\n        Month(DateValue4.SelectedDate),\r\n        Day(DateValue4.SelectedDate),\r\n        If(u_f_end_AMPM.Selected.Value = \"PM\", 12, 0) + Mod(Value(HourValue4.SelectedText.Value), 12),\r\n        Value(MinuteValue4.SelectedText.Value),\r\n        0\r\n    ),\r\n    locSelectedStartTime:\r\n        DateTime(\r\n            Year(DateValue3.SelectedDate),\r\n            Month(DateValue3.SelectedDate),\r\n            Day(DateValue3.SelectedDate),\r\n            If(u_f_start_AMPM.Selected.Value = \"PM\", 12, 0) + Mod(Value(HourValue3.SelectedText.Value), 12),\r\n            Value(MinuteValue3.SelectedText.Value),\r\n            0\r\n        )\r\n});\r\n\r\n/*Check for overlapping Time*/\r\nClear(hackFoundTime);\r\n\r\n/*Super Hacknied time check*/\r\nForAll(Filter(collectDowntime, Line = varProductionLine),\r\n    /*Of the selected times are...*/\r\n    If(\r\n        Or(\r\n            /*... between recorded times*/\r\n            And(\r\n                locSelectedStartTime >= DateTimeValue(Started),\r\n\r\n                locSelectedStartTime < TimeValue(Ended)\r\n            ),\r\n            /*Or the end time is between the recorded start and end time */\r\n            And(\r\n                locSelectedEndTime > DateTimeValue(Started),\r\n                \r\n                locSelectedEndTime <= DateTimeValue(Ended)\r\n            ),\r\n            /*Or the selected start time is between the recorded start and end time*/\r\n            And(\r\n                locSelectedStartTime >= DateTimeValue(Started),\r\n                \r\n                locSelectedStartTime < DateTimeValue(Ended)\r\n            ),\r\n            /*Or the selected times are encompassing a recorded time*/\r\n            And(\r\n                locSelectedStartTime < DateTimeValue(Started),\r\n                \r\n                locSelectedEndTime >  DateTimeValue(Ended)\r\n            )\r\n        ),\r\n        \r\n        Collect(hackFoundTime, {set: true}),\r\n        \r\n        Collect(hackFoundTime, {set: false})\r\n    )\r\n);\r\n\r\n/*If anything in the hack is true then return true and set the variable*/\r\nIf(true in hackFoundTime, Set(varFoundTime, true), Set(varFoundTime, false));\r\n\r\n/*Check for entry errors*/\r\nIf(\r\n    /*If in edit mode editor person and reason are needed*/\r\n    And(u_form.Mode = FormMode.Edit, Or(DataCardValue28.Selected.DisplayName=Blank(), DataCardValue29.Text = \"\")),\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value: \"editor\"}});,\r\n\r\n    /*Hour ended must be later than hour started*/\r\n    locSelectedEndTime <= locSelectedStartTime,\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value: \"time\"}});,\r\n\r\n    /*If Quality or Safety not Selected, show error*/\r\n    Or(Radio1.Selected.Value = Blank(), Radio2.Selected.Value = Blank()),\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value: \"radio\"}});,\r\n\r\n    /*If times selected span more than 1 hour*/\r\n    DateDiff(\r\n        locSelectedStartTime,\r\n        locSelectedEndTime,\r\n        TimeUnit.Hours\r\n    ) > 1,\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value: \"timespan\"}});,\r\n    \r\n    /*If the ending number is less than the starting number*/\r\n    Value(DataCardValue19.Text) < Value(DataCardValue18.Text),\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value:\"unit\"}});,\r\n        \r\n    /*If the sum of rejects and QAs, exceeds the sum of obtained units*/\r\n    Sum(Value(DataCardValue21.Text), Value(DataCardValue22.Text), Value(DataCardValue20.Text))\r\n    > Sum(Value(DataCardValue19.Text), -Value(DataCardValue18.Text), 1),\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value: \"sum\"}});,\r\n    \r\n    /*If the start and end times already exist, aka duplicate entry*/\r\n    And(\r\n        u_form.Mode = FormMode.New,\r\n        !IsBlank(\r\n            LookUp(collectProduction,\r\n                DateTimeValue(Hour_Starting) = locSelectedStartTime\r\n            )\r\n        ),\r\n        !IsBlank(\r\n            LookUp(collectProduction,\r\n                DateTimeValue(Hour_Ending) = locSelectedEndTime\r\n            )\r\n        )\r\n    ),\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value: \"dupe\"}});,\r\n\r\n    /*\r\n        If youre submitting a new entry,\r\n        the hack check does not find a downtime reason,\r\n        and the actual units built is less than the labor hour goal\r\n    */\r\n    And(\r\n        varFoundTime = false,\r\n        u_form.Mode = FormMode.New,\r\n        (Value(DataCardValue19.Text) - Value(DataCardValue18.Text) + 1) - Sum(Value(DataCardValue20.Text),Value(DataCardValue21.Text),Value(DataCardValue22.Text))\r\n        < varGoalsPerLaborHours\r\n    ),\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value: \"goal\"}});,\r\n    \r\n    /*If the last hour has no entry*/\r\n    IsBlank(\r\n        LookUp(collectProduction,\r\n            DateTimeValue(Hour_Ending) = DateTimeValue(DateAdd(locSelectedEndTime, -1, TimeUnit.Hours))\r\n        )\r\n    ),\r\n    /*Show the error*/\r\n    UpdateContext({locPopups: {Visible: true, Value: \"missing\"}});,\r\n\r\n    /*Otherwise, clear the popup errors and submit the form*/\r\n    UpdateContext({locPopups: {Visible: false, Value: Blank()}});\r\n    SubmitForm(u_form);\r\n      \r\n);"
+              Image: =gblSVG.Submit
+              Height: =Parent.Height * 0.75
+              HoverFill: =varColorYes
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              RadiusBottomLeft: =Self.Height / 2
+              RadiusBottomRight: =Self.Height / 2
+              RadiusTopLeft: =Self.Height / 2
+              RadiusTopRight: =Self.Height / 2
+              Width: =Self.Height
+              X: =Parent.Width * 0.99 - Self.Width - u_cancel.Width - Parent.Width * 0.015
+              Y: =Parent.Height/2 - Self.Height/2
+        - u_cancel:
+            Control: Image
+            Properties:
+              OnSelect: =ResetForm(u_form);
+              Image: =gblSVG.Cancel
+              Height: =Parent.Height * 0.75
+              HoverFill: =varColorNo
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              RadiusBottomLeft: =Self.Height / 2
+              RadiusBottomRight: =Self.Height / 2
+              RadiusTopLeft: =Self.Height / 2
+              RadiusTopRight: =Self.Height / 2
+              Width: =Self.Height
+              X: =Parent.Width * 0.99 - Self.Width
+              Y: =Parent.Height/2 - Self.Height/2
+        - u_delete:
+            Control: Image
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: true, Value: "delete"}})
+              Image: =gblSVG.Delete
+              Height: =Parent.Height * 0.75
+              HoverFill: =varColor3
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              RadiusBottomLeft: =Self.Height / 2
+              RadiusBottomRight: =Self.Height / 2
+              RadiusTopLeft: =Self.Height / 2
+              RadiusTopRight: =Self.Height / 2
+              Visible: =u_form.Mode = FormMode.Edit
+              Width: =Self.Height
+              X: =Parent.Width * 0.99 - Self.Width - u_cancel.Width - Parent.Width * 0.015
+              Y: =Parent.Height/2 - Self.Height/2
+    - u_body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Center
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - u_form:
+            Control: Form
+            Layout: vertical
+            Properties:
+              OnSuccess: |-
+                =Notify("Submission Success",NotificationType.Success);
+                If(
+                    varForceDowntime,
+                        Set(varLast, u_form.LastSubmit);
+                        ResetForm(u_form);
+                        Navigate(Downtime_Screen);
+                        Set(varForceDowntime, false);,
+
+                        ResetForm(u_form);
+                        If(u_form.Mode = FormMode.Edit, Select(u_collect), Navigate(Hourly));
+                )
+              DataSource: =Production
+              DefaultMode: =varUnitMode
+              Item: |-
+                =If(
+                    u_form.Mode = FormMode.Edit,
+                    LookUp(Production, varSelectedUnitID = ID)
+                    )
+              Fill: =If(u_form.Mode = FormMode.Edit, varColor4, varColor5)
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+            Children:
+            - Line_DataCard2:
+                Control: TypedDataCard
+                Variant: comboBoxEditCard
+                Properties:
+                  DataField: ="Line"
+                  Default: =If(u_form.Mode = FormMode.Edit, ThisItem.Line, LookUp(Choices([@Production].Line), Value = varProductionLine))
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Line)
+                  Required: =true
+                  Update: =DataCardValue17.Selected
+                  DisplayMode: =DisplayMode.View
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                Children:
+                - DataCardValue17_Label:
+                    Control: Label
+                    Properties:
+                      Text: =Text(DataCardValue17.Selected.Value)
+                      Align: =Align.Center
+                      Height: =Parent.Height * 0.5
+                      Size: =Self.Height / 3
+                      Width: =Len(Self.Text) * Self.Size * 1.5
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey18.Height+ DataCardKey18.Y
+                - StarVisible18:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey18.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey18.Y
+                - ErrorMessage18:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue17.Y
+                - DataCardValue17:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DefaultSelectedItems: =Parent.Default
+                      DisplayFields: =["Value"]
+                      IsSearchable: =false
+                      Items: =Choices([@Production].Line)
+                      SearchFields: =["Value"]
+                      SelectMultiple: =false
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height * 0.4
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Size: =Self.Height / 2
+                      Visible: =false
+                      Width: =Len(Self.Selected.Value) * Self.Size
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey18.Y + DataCardKey18.Height + 5
+                - DataCardKey18:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Catalog_DataCard2:
+                Control: TypedDataCard
+                Variant: textualEditCard
+                Properties:
+                  DataField: ="Catalog"
+                  Default: =If(u_form.Mode = FormMode.Edit, ThisItem.Catalog, varCatalog)
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Catalog)
+                  MaxLength: =DataSourceInfo([@Production], DataSourceInfo.MaxLength, Catalog)
+                  Required: =true
+                  Update: =DataCardValue15.Text
+                  DisplayMode: =If(u_form.Mode = FormMode.Edit, DisplayMode.Edit, DisplayMode.View)
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  X: =1
+                Children:
+                - ErrorMessage16:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue15.Y
+                - DataCardValue15:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      MaxLength: =Parent.MaxLength
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height * 0.5
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Len(Self.Text) * Self.Size
+                      X: =Center(Parent.Width, Self.Width)
+                      Y: =DataCardKey16.Y + DataCardKey16.Height + 5
+                - DataCardKey16:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Lot_DataCard2:
+                Control: TypedDataCard
+                Variant: textualEditCard
+                Properties:
+                  DataField: ="Title"
+                  Default: =If(u_form.Mode = FormMode.Edit, ThisItem.Lot, varLot)
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Lot)
+                  MaxLength: =DataSourceInfo([@Production], DataSourceInfo.MaxLength, Lot)
+                  Required: =true
+                  Update: =DataCardValue13.Text
+                  DisplayMode: =If(u_form.Mode = FormMode.Edit, DisplayMode.Edit, DisplayMode.View)
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  X: =2
+                Children:
+                - ErrorMessage10:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue13.Y
+                - DataCardValue13:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      MaxLength: =Parent.MaxLength
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height * 0.5
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height/ 3
+                      Width: =Len(Self.Text) * Self.Size
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey5.Y + DataCardKey5.Height + 5
+                - DataCardKey5:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Unit_Starting_DataCard1:
+                Control: TypedDataCard
+                Variant: numberEditCard
+                Properties:
+                  DataField: ="Unit_Starting"
+                  Default: =If(u_form.Mode = FormMode.Edit, ThisItem.Unit_Starting, First(Sort(Filter(Production, Line.Value = varProductionLine), ID, SortOrder.Descending)).Unit_Ending + 1)
+                  DisplayName: ="Starting Unit Number"
+                  Required: =true
+                  Update: =Value(DataCardValue18.Text)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  Y: =1
+                Children:
+                - ErrorMessage22:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue18.Y
+                - DataCardValue18:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      Tooltip: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Format: =TextFormat.Number
+                      Height: =Parent.Height * 0.5
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Self.Size * 8
+                      X: =Center(Parent.Width, Self.Width)
+                      Y: =DataCardKey22.Y + DataCardKey22.Height + 5
+                - DataCardKey22:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Unit_Ending_DataCard1:
+                Control: TypedDataCard
+                Variant: numberEditCard
+                Properties:
+                  DataField: ="Unit_Ending"
+                  Default: =ThisItem.Unit_Ending
+                  DisplayName: ="Ending Unit Number"
+                  Required: =true
+                  Update: =Value(DataCardValue19.Text)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  X: =1
+                  Y: =1
+                Children:
+                - ErrorMessage23:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue19.Y
+                - DataCardValue19:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      Tooltip: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Format: =TextFormat.Number
+                      Height: =Parent.Height * 0.5
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Self.Size * 8
+                      X: =Center(Parent.Width, Self.Width)
+                      Y: =DataCardKey23.Y + DataCardKey23.Height + 5
+                - DataCardKey23:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - QA_Units_DataCard1:
+                Control: TypedDataCard
+                Variant: numberEditCard
+                Properties:
+                  DataField: ="QA_Units"
+                  Default: =ThisItem.QA_Units
+                  DisplayName: ="QA Units"
+                  Required: =true
+                  Update: =Value(DataCardValue20.Text)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  X: =2
+                  Y: =1
+                Children:
+                - ErrorMessage24:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue20.Y
+                - DataCardValue20:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      Tooltip: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Format: =TextFormat.Number
+                      Height: =Parent.Height * 0.5
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height/3
+                      Width: =Self.Size * 8
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey24.Y + DataCardKey24.Height + 5
+                - DataCardKey24:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Reject_Labels_DataCard1:
+                Control: TypedDataCard
+                Variant: numberEditCard
+                Properties:
+                  DataField: ="Reject_Labels"
+                  Default: =ThisItem.Reject_Labels
+                  DisplayName: ="Reject Labels"
+                  Required: =true
+                  Update: =Value(DataCardValue21.Text)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  Y: =2
+                Children:
+                - ErrorMessage25:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue21.Y
+                - DataCardValue21:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      Tooltip: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Format: =TextFormat.Number
+                      Height: =Parent.Height * 0.5
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Self.Size * 8
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey25.Y + DataCardKey25.Height + 5
+                - DataCardKey25:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Reject_Units_DataCard1:
+                Control: TypedDataCard
+                Variant: numberEditCard
+                Properties:
+                  DataField: ="Reject_Units"
+                  Default: =ThisItem.Reject_Units
+                  DisplayName: ="Reject Units"
+                  Required: =true
+                  Update: =Value(DataCardValue22.Text)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  X: =1
+                  Y: =2
+                Children:
+                - ErrorMessage26:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue22.Y
+                - DataCardValue22:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      Tooltip: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Format: =TextFormat.Number
+                      Height: =Parent.Height * 0.5
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Self.Size * 8
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey26.Y + DataCardKey26.Height + 5
+                - DataCardKey26:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Reject_Cartridges_DataCard1:
+                Control: TypedDataCard
+                Variant: numberEditCard
+                Properties:
+                  DataField: ="Reject_Cartridges"
+                  Default: =ThisItem.Reject_Cartridges
+                  DisplayName: ="Reject Cartridges"
+                  Required: =true
+                  Update: =Value(DataCardValue23.Text)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  X: =2
+                  Y: =2
+                Children:
+                - ErrorMessage27:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue23.Y
+                - DataCardValue23:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      Tooltip: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Format: =TextFormat.Number
+                      Height: =Parent.Height * 0.5
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Self.Size * 8
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey27.Y + DataCardKey27.Height + 5
+                - DataCardKey27:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Hour_Starting_DataCard1:
+                Control: TypedDataCard
+                Variant: dateTimeEditCard
+                Properties:
+                  DataField: ="Hour_Starting"
+                  Default: |-
+                    =If(
+                        u_form.Mode = FormMode.Edit,
+                        ThisItem.Hour_Starting,
+                        Switch(
+                            varShiftSelect,
+                            "A Shift", DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),7,0,0),
+                            "B Shift", DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),4,0,0),
+                            "C Shift", DateTime(Year(locNowDay),Month(locNowDay),Day(DateAdd(locNowDay,-1,TimeUnit.Days)),23,0,0),
+                            DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),0,0,0)
+                        )
+                    )
+                  DisplayName: ="Starting Hour"
+                  Required: =true
+                  Update: |-
+                    =DateValue3.SelectedDate + 
+                    Time(
+                        If(u_f_start_AMPM.Selected.Value = "PM", 
+                            12, 
+                            0
+                        ) 
+                        + Mod(Value(HourValue3.Selected.Value), 
+                            12
+                        ), 
+                        Value(MinuteValue3.Selected.Value),
+                       0
+                    )
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 2
+                  Y: =4
+                Children:
+                - u_f_start_AMPM:
+                    Control: Classic/DropDown
+                    Properties:
+                      Default: "=Switch(\r\n    varShiftSelect,\r\n    \"A Shift\",\r\n    Switch(\r\n        Value(HourValue3.SelectedText.Value),\r\n        1, \"PM\",\r\n        2, \"PM\",\r\n        3, \"PM\",\r\n        12, \"PM\",\r\n        \"AM\"\r\n    ),\r\n        \r\n    \"B Shift\",\r\n    Switch(\r\n        Value(HourValue3.SelectedText.Value),\r\n        12, \"AM\",\r\n        \"PM\"\r\n    ),\r\n    \r\n    \"C Shift\",\r\n    Switch(\r\n        Value(HourValue3.SelectedText.Value),\r\n        11, \"PM\",\r\n        \"AM\"\r\n    )\r\n)"
+                      Items: =["AM", "PM"]
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =DisplayMode.View
+                      Fill: =If(u_form.Mode = FormMode.Edit, varColor4, RGBA(255, 255, 255, 1))
+                      Height: =HourValue3.Height
+                      PaddingBottom: =5
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      PaddingRight: =5
+                      PaddingTop: =5
+                      Size: =DateValue3.Size
+                      Width: =HourValue3.Width
+                      X: =MinuteValue3.X + MinuteValue3.Width + Separator3.Width
+                      Y: =HourValue3.Y
+                - ErrorMessage20:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: '=HourValue3.Y '
+                - MinuteValue3:
+                    Control: Classic/DropDown
+                    Properties:
+                      Default: =Text(Minute(Parent.Default),"00")
+                      Items: =["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"]
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =DisplayMode.View
+                      Fill: =If(u_form.Mode = FormMode.Edit, varColor4, RGBA(255, 255, 255, 1))
+                      Height: =HourValue3.Height
+                      PaddingBottom: =5
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      PaddingRight: =5
+                      PaddingTop: =5
+                      Size: =DateValue3.Size
+                      Width: =HourValue3.Width/1.5
+                      X: =HourValue3.X + HourValue3.Width + Separator3.Width
+                      Y: =HourValue3.Y
+                - Separator3:
+                    Control: Label
+                    Properties:
+                      Text: =":"
+                      Align: =Align.Center
+                      FontWeight: =FontWeight.Bold
+                      Height: =HourValue3.Height
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Size: =DateValue3.Size
+                      Width: =Self.Size
+                      Wrap: =false
+                      X: =HourValue3.X + HourValue3.Width
+                      Y: =HourValue3.Y
+                - HourValue3:
+                    Control: Classic/DropDown
+                    Properties:
+                      Default: |-
+                        =If(Value(HourValue4.SelectedText.Value) = 1,
+                            "12",
+                            Text(
+                                Value(HourValue4.SelectedText.Value) - 1,
+                                "00"
+                            )   
+                        )
+                      Items: |-
+                        =Switch(
+                            varShiftSelect,
+                            "A Shift",
+                            ["07","08","09","10","11","12","01","02"],
+                            "B Shift",
+                            ["03","04","05","06","07","08","09","10"],
+                            "C Shift",
+                            ["11","12","01","02","03","04","05","06"],
+                            ["01","02","03","04","05","06","07","08","09","10","11","12"]
+                        )
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =DisplayMode.View
+                      Fill: =If(u_form.Mode = FormMode.Edit, varColor4, RGBA(255, 255, 255, 1))
+                      Height: =DateValue3.Height
+                      PaddingBottom: =5
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      PaddingRight: =5
+                      PaddingTop: =5
+                      Size: =DateValue3.Size
+                      Width: =DateValue3.Width / 2
+                      X: =DateValue3.X + DateValue3.Width + 10
+                      Y: =DateValue3.Y
+                - DateValue3:
+                    Control: Classic/DatePicker
+                    Properties:
+                      DefaultDate: |-
+                        =If(
+                            u_form.Mode = FormMode.Edit,
+                            Parent.Default,
+                            Switch(
+                                varShiftSelect,
+                                "C Shift",
+                                If(
+                                    HourValue3.SelectedText.Value = "11",
+                                    DateAdd(locNowDay, -1, TimeUnit.Days),
+                                    locNowDay
+                                ),
+                                locNowDay
+                            )
+                        )
+                      EndYear: =Year(Today())+100
+                      StartYear: =1899
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =DisplayMode.View
+                      Fill: =If(u_form.Mode = FormMode.Edit, varColor4, RGBA(255, 255, 255, 1))
+                      Height: =Parent.Height * 0.4
+                      IsEditable: =true
+                      PaddingBottom: =0
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Size: =Self.Height / 2
+                      Width: =Len(Self.SelectedDate) * Self.Size
+                      X: =Center(Parent.Width,Self.Width+HourValue3.Width+Separator3.Width+MinuteValue3.Width+u_f_start_AMPM.Width)
+                      Y: =DataCardKey20.Y + DataCardKey20.Height + 5
+                - DataCardKey20:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Hour_Ending_DataCard1:
+                Control: TypedDataCard
+                Variant: dateTimeEditCard
+                Properties:
+                  DataField: ="Hour_Ending"
+                  Default: |-
+                    =If(
+                        u_form.Mode = FormMode.Edit,
+                        ThisItem.Hour_Ending,
+                        DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),Hour(locNow),0,0)
+                    )
+                  DisplayName: ="Ending Hour"
+                  Required: =true
+                  Update: |-
+                    =DateValue4.SelectedDate + 
+                    Time(
+                        If(u_f_end_AMPM.Selected.Value = "PM", 
+                            12, 
+                            0
+                        ) 
+                        + Mod(Value(HourValue4.Selected.Value), 
+                            12
+                        ), 
+                        Value(MinuteValue4.Selected.Value),
+                       0
+                    )
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 2
+                  X: =Hour_Starting_DataCard1.Width
+                  Y: =4
+                Children:
+                - DataCardKey21:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: |-
+                        =//App.Theme.Colors.Darker30
+                        varColor1
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
+                      Wrap: =false
+                - u_f_end_AMPM:
+                    Control: Classic/DropDown
+                    Properties:
+                      Default: "=If(\r\n    /*If editing the form*/\r\n    u_form.Mode = FormMode.Edit,\r\n    /*Use the default time*/\r\n    If(Hour(Parent.Default) < 12, \"AM\", \"PM\"),\r\n    /*Otherwise check the selected time per varShiftSelect and change*/\r\n    Switch(\r\n        varShiftSelect,\r\n        \"A Shift\",\r\n        Switch(\r\n            Value(HourValue4.SelectedText.Value),\r\n            1, \"PM\",\r\n            2, \"PM\",\r\n            3, \"PM\",\r\n            12, \"PM\",\r\n            \"AM\"\r\n        ),\r\n            \r\n        \"B Shift\",\r\n        Switch(\r\n            Value(HourValue4.SelectedText.Value),\r\n            12, \"AM\",\r\n            \"PM\"\r\n        ),\r\n        \r\n        \"C Shift\",\r\n        Switch(\r\n            Value(HourValue4.SelectedText.Value),\r\n            11, \"PM\",\r\n            \"AM\"\r\n        )\r\n    )\r\n)"
+                      Items: =["AM", "PM"]
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =DisplayMode.View
+                      Fill: =If(u_form.Mode = FormMode.Edit, varColor4, RGBA(255, 255, 255, 1))
+                      Height: =HourValue4.Height
+                      PaddingBottom: =5
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      PaddingRight: =5
+                      PaddingTop: =5
+                      Size: =DateValue4.Size
+                      Width: =HourValue4.Width
+                      X: =MinuteValue4.X + MinuteValue4.Width + Separator4.Width
+                      Y: =HourValue4.Y
+                - ErrorMessage21:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =HourValue4.Y
+                - MinuteValue4:
+                    Control: Classic/DropDown
+                    Properties:
+                      Default: =Text(Minute(Parent.Default),"00")
+                      Items: =["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"]
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =DisplayMode.View
+                      Fill: =If(u_form.Mode = FormMode.Edit, varColor4, RGBA(255, 255, 255, 1))
+                      Height: =HourValue4.Height
+                      PaddingBottom: =5
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      PaddingRight: =5
+                      PaddingTop: =5
+                      Size: =DateValue4.Size
+                      Width: =HourValue4.Width/1.5
+                      X: =HourValue4.X + HourValue4.Width + Separator4.Width
+                      Y: =HourValue4.Y
+                - Separator4:
+                    Control: Label
+                    Properties:
+                      Text: =":"
+                      Align: =Align.Center
+                      FontWeight: =FontWeight.Bold
+                      Height: =HourValue4.Height
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Size: =DateValue4.Size
+                      Width: =Self.Size
+                      Wrap: =false
+                      X: =HourValue4.X + HourValue4.Width
+                      Y: =HourValue4.Y
+                - HourValue4:
+                    Control: Classic/DropDown
+                    Properties:
+                      Default: =Text(If(Mod(Hour(Parent.Default), 12) = 0, 12, Mod(Hour(Parent.Default), 12)),"00")
+                      Items: |-
+                        =Switch(
+                            varShiftSelect,
+                            "A Shift",
+                            ["08","09","10","11","12","01","02","03"],
+                            "B Shift",
+                            ["04","05","06","07","08","09","10","11"],
+                            "C Shift",
+                            ["12","01","02","03","04","05","06","07"],
+                            ["01","02","03","04","05","06","07","08","09","10","11","12"]
+                        )
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =DateValue4.Height
+                      PaddingBottom: =5
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      PaddingRight: =5
+                      PaddingTop: =5
+                      Size: =DateValue4.Size
+                      Width: =DateValue4.Width / 2
+                      X: =DateValue4.X + DateValue4.Width + 10
+                      Y: =DateValue4.Y
+                - DateValue4:
+                    Control: Classic/DatePicker
+                    Properties:
+                      DefaultDate: |-
+                        =If(
+                            u_form.Mode = FormMode.Edit,
+                            Parent.Default,
+                            Switch(
+                                varShiftSelect,
+                                "C Shift",
+                                If(
+                                    HourValue4.SelectedText.Value = "11",
+                                    DateAdd(locNowDay, -1, TimeUnit.Days),
+                                    locNowDay
+                                ),
+                                locNowDay
+                            )
+                        )
+                      EndYear: =Year(Today())+100
+                      StartYear: =1899
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =DisplayMode.View
+                      Fill: =If(u_form.Mode = FormMode.Edit, varColor4, RGBA(255, 255, 255, 1))
+                      Height: =Parent.Height * 0.4
+                      IsEditable: =true
+                      PaddingBottom: =0
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Size: =Self.Height / 2
+                      Width: =Len(Self.SelectedDate) * Self.Size
+                      X: =Center(Parent.Width,Self.Width+HourValue4.Width+Separator4.Width+MinuteValue4.Width+u_f_start_AMPM.Width)
+                      Y: =DataCardKey21.Y + DataCardKey21.Height + 5
+            - Runner_DataCard1:
+                Control: TypedDataCard
+                Variant: comboBoxMultiSelectEditCard
+                Properties:
+                  DataField: ="Runner"
+                  Default: "=If(u_form.Mode = FormMode.Edit,\r\n    ThisItem.Runner,\r\n    If(varProductionLine = \"XL5\",\r\n    [\r\n        {\r\n            DisplayName: First(varRunner).DisplayName,\r\n            Claims: \"i:0#.f|membership|\" & First(varRunner).Email\r\n        },\r\n        {\r\n            DisplayName: Last(varRunner).DisplayName,\r\n            Claims: \"i:0#.f|membership|\" & Last(varRunner).Email\r\n        }\r\n    ],\r\n    {\r\n        DisplayName: First(varRunner).DisplayName,\r\n        Claims: \"i:0#.f|membership|\" & First(varRunner).Email\r\n    }\r\n    \r\n    )\r\n    \r\n)"
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Runner)
+                  Required: =true
+                  Update: =DataCardValue24.SelectedItems
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Visible: =false
+                  Width: =Parent.Width / 3
+                  Y: =8
+                Children:
+                - StarVisible28:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey28.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey28.Y
+                - ErrorMessage28:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue24.Y + DataCardValue24.Height
+                - DataCardValue24:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DefaultSelectedItems: =FirstN(Parent.Default,2)
+                      DisplayFields: =["DisplayName","Email","Picture"]
+                      Items: =Choices([@Production].Runner)
+                      SearchFields: =["DisplayName"]
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey28.Y + DataCardKey28.Height + 5
+                - DataCardKey28:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =34
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+                      Y: =10
+            - Quality_DataCard1:
+                Control: TypedDataCard
+                Variant: toggleEditCard
+                Properties:
+                  DataField: ="Quality"
+                  Default: =ThisItem.Quality
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Quality)
+                  Update: =If(Radio1.Selected.Value = "Yes", true, false)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  Y: =3
+                Children:
+                - Radio1:
+                    Control: Classic/Radio
+                    Properties:
+                      Default: =If(u_form.Mode = FormMode.Edit, If(ThisItem.Quality, "Yes", "No"))
+                      Items: =["Yes", "No"]
+                      Align: =Align.Center
+                      Height: =Parent.Height * 0.5
+                      Layout: =Layout.Horizontal
+                      PaddingBottom: =0
+                      PaddingTop: =0
+                      RadioSize: =Self.Height
+                      Size: =Self.Height / 3
+                      Width: =Self.RadioSize * 5
+                      X: =Center(Parent.Width, Self.Width)
+                      Y: =DataCardKey35.Y + DataCardKey35.Height
+                - StarVisible35:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey35.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey35.Y
+                - ErrorMessage35:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey35.Y
+                - DataCardKey35:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Safety_DataCard1:
+                Control: TypedDataCard
+                Variant: toggleEditCard
+                Properties:
+                  DataField: ="Safety"
+                  Default: =ThisItem.Safety
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Safety)
+                  Update: =If(Radio2.Selected.Value = "Yes", true, false)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  X: =1
+                  Y: =3
+                Children:
+                - Radio2:
+                    Control: Classic/Radio
+                    Properties:
+                      Default: =If(u_form.Mode = FormMode.Edit, If(ThisItem.Safety, "Yes", "No"))
+                      Items: =["Yes", "No"]
+                      Align: =Align.Center
+                      Height: =Parent.Height * 0.5
+                      Layout: =Layout.Horizontal
+                      PaddingBottom: =0
+                      PaddingTop: =0
+                      RadioSize: =Self.Height
+                      Size: =Self.Height / 3
+                      Width: =Self.RadioSize * 5
+                      X: =Center(Parent.Width, Self.Width)
+                      Y: =DataCardKey36.Y + DataCardKey36.Height
+                - StarVisible36:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey36.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey36.Y
+                - ErrorMessage36:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Size: =Self.Height / 3
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey36.Y
+                - DataCardKey36:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Training_DataCard1:
+                Control: TypedDataCard
+                Variant: toggleEditCard
+                Properties:
+                  DataField: ="Training"
+                  Default: =If(u_form.Mode = FormMode.Edit, ThisItem.Training, Blank())
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Training)
+                  Update: =Checkbox1.Value
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Width: =Parent.Width / 3
+                  X: =2
+                  Y: =3
+                Children:
+                - Checkbox1:
+                    Control: Classic/CheckBox
+                    Properties:
+                      Default: =ThisItem.Training
+                      Text: =Blank()
+                      CheckboxSize: =Self.Height
+                      Height: =Parent.Height * 0.5
+                      Width: =Self.CheckboxSize
+                      X: =Center(Parent.Width, Self.Width)
+                      Y: =DataCardKey37.Y + DataCardKey37.Height
+                - StarVisible37:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey37.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey37.Y
+                - ErrorMessage37:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Size: =Self.Height / 3
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey37.Y
+                - DataCardKey37:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Edit_Persou_DataCard2:
+                Control: TypedDataCard
+                Variant: comboBoxEditCard
+                Properties:
+                  DataField: ="Edit_Person"
+                  Default: =ThisItem.Edit_Person
+                  DisplayName: ="Editor"
+                  Update: =DataCardValue28.Selected
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Visible: =u_form.Mode = FormMode.Edit
+                  Width: =450
+                  WidthFit: =true
+                  Y: =6
+                Children:
+                - StarVisible32:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey32.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey32.Y
+                - ErrorMessage32:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue28.Y
+                - DataCardValue28:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DefaultSelectedItems: =Parent.Default
+                      DisplayFields: =["DisplayName","Email","Picture"]
+                      Items: =Choices([@Production].Edit_Person)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: =false
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height * 0.4
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Size: =Self.Height/3
+                      Width: =Min(Max(Self.Size*20, Len(Self.Selected.DisplayName) * Self.Size), Self.Size * 40)
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey32.Y + DataCardKey32.Height
+                - DataCardKey32:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Edit_Reasou_DataCard2:
+                Control: TypedDataCard
+                Variant: textualEditCard
+                Properties:
+                  DataField: ="Edit_Reason"
+                  Default: =ThisItem.Edit_Reason
+                  DisplayName: ="Reason for the edit"
+                  MaxLength: =DataSourceInfo([@Production], DataSourceInfo.MaxLength, Edit_Reason)
+                  Update: =DataCardValue29.Text
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Visible: =u_form.Mode = FormMode.Edit
+                  Width: =450
+                  WidthFit: =true
+                  X: =1
+                  Y: =6
+                Children:
+                - StarVisible33:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey33.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey33.Y
+                - ErrorMessage33:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardValue29.Y
+                - DataCardValue29:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      MaxLength: =Parent.MaxLength
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      EnableSpellCheck: =true
+                      Height: =Parent.Height * 0.4
+                      Mode: =TextMode.MultiLine
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width * 0.90
+                      X: =Center(Parent.Width,Self.Width)
+                      Y: =DataCardKey33.Y + DataCardKey33.Height
+                - DataCardKey33:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =Parent.Height * 0.4
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+            - Hourly_Goal_DataCard1:
+                Control: TypedDataCard
+                Variant: numberEditCard
+                Properties:
+                  DataField: ="Hourly_Goal"
+                  Default: =If(u_form.Mode = FormMode.Edit, ThisItem.Hourly_Goal, varGoalsPerLaborHours)
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Hourly_Goal)
+                  Update: =Value(DataCardValue30.Text)
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Visible: =false
+                  Width: =Parent.Width / 3
+                  X: =2
+                  Y: =6
+                Children:
+                - StarVisible34:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey34.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey34.Y
+                - ErrorMessage34:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue30.Y + DataCardValue30.Height
+                - DataCardValue30:
+                    Control: Classic/TextInput
+                    Properties:
+                      Default: =Parent.Default
+                      DelayOutput: =true
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      Format: =TextFormat.Number
+                      PaddingLeft: =5
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey34.Y + DataCardKey34.Height + 5
+                - DataCardKey34:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =34
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+                      Y: =10
+            - Middle_DataCard1:
+                Control: TypedDataCard
+                Variant: comboBoxEditCard
+                Properties:
+                  DataField: ="Middle"
+                  Default: |-
+                    =If(u_form.Mode = FormMode.Edit,
+                        ThisItem.Middle,
+                        If(CountRows(varMiddle) >= 0,
+                            ThisItem.Middle,
+                            {
+                                DisplayName: First(varMiddle).DisplayName,
+                                Claims: "i:0#.f|membership|" & First(varMiddle).Email
+                            }
+                        )
+                    )
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Middle)
+                  Update: =DataCardValue25.Selected
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Visible: =false
+                  Width: =Parent.Width / 3
+                  Y: =7
+                Children:
+                - StarVisible29:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey29.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey29.Y
+                - ErrorMessage29:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue25.Y + DataCardValue25.Height
+                - DataCardValue25:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DefaultSelectedItems: =Parent.Default
+                      DisplayFields: =["DisplayName","Email","Picture"]
+                      Items: =Choices([@Production].Middle)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: =false
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey29.Y + DataCardKey29.Height + 5
+                - DataCardKey29:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =34
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+                      Y: =10
+            - Bagger_DataCard1:
+                Control: TypedDataCard
+                Variant: comboBoxEditCard
+                Properties:
+                  DataField: ="Bagger"
+                  Default: |-
+                    =If(u_form.Mode = FormMode.Edit,
+                        ThisItem.Middle,
+                        If(CountRows(varBagger) >= 0,
+                            ThisItem.Middle,
+                            {
+                                DisplayName: First(varBagger).DisplayName,
+                                Claims: "i:0#.f|membership|" & First(varBagger).Email
+                            }
+                        )
+                    )
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Bagger)
+                  Update: =DataCardValue26.Selected
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Visible: =false
+                  Width: =Parent.Width / 3
+                  X: =1
+                  Y: =7
+                Children:
+                - StarVisible30:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey30.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey30.Y
+                - ErrorMessage30:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue26.Y + DataCardValue26.Height
+                - DataCardValue26:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DefaultSelectedItems: =Parent.Default
+                      DisplayFields: =["DisplayName","Email","Picture"]
+                      Items: =Choices([@Production].Bagger)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: =false
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey30.Y + DataCardKey30.Height + 5
+                - DataCardKey30:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =34
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+                      Y: =10
+            - Packager_DataCard1:
+                Control: TypedDataCard
+                Variant: comboBoxEditCard
+                Properties:
+                  DataField: ="Packager"
+                  Default: |-
+                    =If(u_form.Mode = FormMode.Edit,
+                        ThisItem.Middle,
+                        If(CountRows(varPackager) >= 0,
+                            ThisItem.Middle,
+                            {
+                                DisplayName: First(varPackager).DisplayName,
+                                Claims: "i:0#.f|membership|" & First(varPackager).Email
+                            }
+                        )
+                    )
+                  DisplayName: =DataSourceInfo([@Production],DataSourceInfo.DisplayName,Packager)
+                  Update: =DataCardValue27.Selected
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =If(Parent.Mode = FormMode.Edit, Parent.Height / 6, Parent.Height / 5)
+                  Visible: =false
+                  Width: =Parent.Width / 3
+                  X: =2
+                  Y: =7
+                Children:
+                - StarVisible31:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =DataCardKey31.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey31.Y
+                - ErrorMessage31:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =RGBA(168, 0, 0, 1)
+                      FontWeight: =FontWeight.Semibold
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue27.Y + DataCardValue27.Height
+                - DataCardValue27:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DefaultSelectedItems: =Parent.Default
+                      DisplayFields: =["DisplayName","Email","Picture"]
+                      Items: =Choices([@Production].Packager)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: =false
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey31.Y + DataCardKey31.Height + 5
+                - DataCardKey31:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      AutoHeight: =true
+                      BorderColor: =RGBA(0, 0, 0, 1)
+                      Color: =App.Theme.Colors.Darker30
+                      Height: =34
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+                      Y: =10

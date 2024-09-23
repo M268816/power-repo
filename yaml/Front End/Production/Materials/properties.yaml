@@ -1,0 +1,8 @@
+Properties:
+  OnVisible: |-
+    =UpdateContext({
+        locPadding: Self.Width * 0.005,
+        locError: false
+        });
+
+    Select(m_update);

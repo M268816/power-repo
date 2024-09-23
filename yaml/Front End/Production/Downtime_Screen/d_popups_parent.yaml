@@ -1,0 +1,483 @@
+- d_popups_parent:
+    Control: GroupContainer
+    Variant: manualLayoutContainer
+    Properties:
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      Visible: =locPopups.Visible
+      Width: =Parent.Width
+      X: =1-1
+      Y: =1-1
+    Children:
+    - d_error_editor:
+        Control: GroupContainer
+        Variant: manualLayoutContainer
+        Properties:
+          BorderColor: =Color.Red
+          BorderThickness: =3
+          DropShadow: =DropShadow.Regular
+          Fill: =varColor4
+          Height: =Parent.Height / 2
+          RadiusBottomLeft: =8
+          RadiusBottomRight: =8
+          RadiusTopLeft: =8
+          RadiusTopRight: =8
+          Visible: =locPopups.Value = "editor"
+          Width: =Parent.Width / 3
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - d_e_e_confirm:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Okay"
+              Color: =varColor0
+              Fill: =varColorAccent
+              Height: =Parent.Height / 8
+              HoverFill: =ColorFade(Self.Fill, -20%)
+              Width: =Parent.Width / 3
+              X: =Parent.Width / 2 - Self.Width / 2
+              Y: =d_e_e_text.Height
+        - d_e_e_text:
+            Control: Label
+            Properties:
+              Text: ="Editing an entry requires records of the editor and the reason."
+              Align: =Align.Center
+              Height: =Parent.Height / 1.5
+              Size: =Parent.Width / 22
+              Width: =Parent.Width
+              X: =1-1
+              Y: =1-1
+    - d_error_time:
+        Control: GroupContainer
+        Variant: manualLayoutContainer
+        Properties:
+          BorderColor: =Color.Red
+          BorderThickness: =3
+          DropShadow: =DropShadow.Regular
+          Fill: =varColor4
+          Height: =Parent.Height / 2
+          RadiusBottomLeft: =8
+          RadiusBottomRight: =8
+          RadiusTopLeft: =8
+          RadiusTopRight: =8
+          Visible: =locPopups.Value = "time"
+          Width: =Parent.Width / 3
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - d_e_t_confirm:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Okay"
+              Color: =varColor0
+              Fill: =varColorAccent
+              Height: =Parent.Height / 8
+              HoverFill: =ColorFade(Self.Fill, -20%)
+              Width: =Parent.Width / 3
+              X: =Parent.Width / 2 - Self.Width / 2
+              Y: =d_e_t_text.Height
+        - d_e_t_text:
+            Control: Label
+            Properties:
+              Text: ="Ending time must be later than starting time."
+              Align: =Align.Center
+              Height: =Parent.Height / 1.5
+              Size: =Parent.Width / 22
+              Width: =Parent.Width
+              X: =1-1
+              Y: =1-1
+    - d_error_sum:
+        Control: GroupContainer
+        Variant: manualLayoutContainer
+        Properties:
+          BorderColor: =Color.Red
+          BorderThickness: =3
+          DropShadow: =DropShadow.Regular
+          Fill: =varColor4
+          Height: =Parent.Height / 2
+          RadiusBottomLeft: =8
+          RadiusBottomRight: =8
+          RadiusTopLeft: =8
+          RadiusTopRight: =8
+          Visible: =locPopups.Value = "sum"
+          Width: =Parent.Width / 3
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - d_e_s_confirm:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Okay"
+              Color: =varColor0
+              Fill: =varColorAccent
+              Height: =Parent.Height / 8
+              HoverFill: =ColorFade(Self.Fill, -20%)
+              Width: =Parent.Width / 3
+              X: =Parent.Width / 2 - Self.Width / 2
+              Y: =d_e_s_text.Height
+        - d_e_s_text:
+            Control: Label
+            Properties:
+              Text: ="Downtime selected exceeds 60 minutes for a defiend hour slot. Make sure you do not have over-lapping downtime occurances."
+              Align: =Align.Center
+              Height: =Parent.Height / 1.5
+              Size: =Parent.Width / 22
+              Width: =Parent.Width
+              X: =1-1
+              Y: =1-1
+    - d_error_overlap:
+        Control: GroupContainer
+        Variant: manualLayoutContainer
+        Properties:
+          BorderColor: =Color.Red
+          BorderThickness: =3
+          DropShadow: =DropShadow.Regular
+          Fill: =varColor4
+          Height: =Parent.Height / 2
+          RadiusBottomLeft: =8
+          RadiusBottomRight: =8
+          RadiusTopLeft: =8
+          RadiusTopRight: =8
+          Visible: =locPopups.Value = "overlap"
+          Width: =Parent.Width / 3
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - d_e_o_confirm:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Okay"
+              Color: =varColor0
+              Fill: =varColorAccent
+              Height: =Parent.Height / 8
+              HoverFill: =ColorFade(Self.Fill, -20%)
+              Width: =Parent.Width / 3
+              X: =Parent.Width / 2 - Self.Width / 2
+              Y: =d_e_o_text.Height
+        - d_e_o_text:
+            Control: Label
+            Properties:
+              Text: ="Either your starting time, or ending time, overlaps with previously entered downtime. Please do not overlap downtime reasons."
+              Align: =Align.Center
+              Height: =Parent.Height / 1.5
+              Size: =Parent.Width / 22
+              Width: =Parent.Width
+              X: =1-1
+              Y: =1-1
+    - d_error_delete:
+        Control: GroupContainer
+        Variant: manualLayoutContainer
+        Properties:
+          BorderColor: =Color.Red
+          BorderThickness: =3
+          DropShadow: =DropShadow.Regular
+          Fill: =varColor4
+          Height: =Parent.Height / 2
+          RadiusBottomLeft: =8
+          RadiusBottomRight: =8
+          RadiusTopLeft: =8
+          RadiusTopRight: =8
+          Visible: =locPopups.Value = "delete"
+          Width: =Parent.Width / 3
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - d_e_d_submit:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =RemoveIf(Downtime, ID = varDowntimeID);
+                RemoveIf(collectDowntime, ID = varDowntimeID);
+                ResetForm(d_m_form);
+                Reset(d_e_d_input);
+                UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                Navigate(Hourly);
+              Text: ="Delete"
+              Color: =varColor0
+              DisplayMode: =If(d_e_d_input.Text = Text(Year(Today())), DisplayMode.Edit, DisplayMode.Disabled)
+              Fill: =varColorAccent
+              Height: =Parent.Height / 8
+              HoverFill: =ColorFade(Self.Fill, -20%)
+              Width: =Parent.Width / 3
+              X: =Parent.Width / 2 + Parent.Width * 0.02
+              Y: =d_e_d_input.Height + d_e_d_input.Y + Parent.Width * 0.02
+        - d_e_d_cancel:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =Reset(d_e_d_input);
+                UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Cancel"
+              Color: =varColor5
+              Fill: =varColorNo
+              Height: =Parent.Height / 8
+              HoverFill: =ColorFade(Self.Fill, -20%)
+              Width: =Parent.Width / 3
+              X: =Parent.Width / 2 - Self.Width - Parent.Width * 0.02
+              Y: =d_e_d_input.Height + d_e_d_input.Y + Parent.Width * 0.02
+        - d_e_d_text:
+            Control: Label
+            Properties:
+              Text: |-
+                ="You are about to permanently delete this record.
+                Please enter the password to continue."
+              Align: =Align.Center
+              Height: =Parent.Height * 0.50
+              Size: =Parent.Width / 22
+              Width: =Parent.Width
+              X: =1-1
+              Y: =1-1
+        - d_e_d_input:
+            Control: Classic/TextInput
+            Properties:
+              Default: =Blank()
+              Align: =Align.Center
+              Mode: =TextMode.Password
+              Size: =Self.Width / 16
+              Width: =Parent.Width/2
+              X: =Parent.Width/2 - Self.Width/2
+              Y: =d_e_d_text.Y + d_e_d_text.Height + Parent.Width * 0.02
+    - d_help_reasons:
+        Control: GroupContainer
+        Variant: manualLayoutContainer
+        Properties:
+          BorderColor: =varColor1
+          BorderThickness: =3
+          DropShadow: =DropShadow.Regular
+          Fill: =varColor5
+          Height: =Parent.Height * 0.80
+          RadiusBottomLeft: =8
+          RadiusBottomRight: =8
+          RadiusTopLeft: =8
+          RadiusTopRight: =8
+          Visible: =locPopups.Value = "help"
+          Width: =Parent.Width * 0.60
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height/2 - Self.Height/2
+        Children:
+        - d_h_r_gallery:
+            Control: Gallery
+            Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+            Properties:
+              Items: |-
+                =[
+                    {
+                        reason: "2 Lots Awaiting Lot Release",
+                        description: "When the line is stopped and awaiting the lot release TWI."
+                    },
+                    {
+                        reason: "Accountability",
+                        description: "Any in process accountability issue."
+                    },
+                    {
+                        reason: "Bagger",
+                        description: "Any issues with the bagging machine."
+                    },
+                    {
+                        reason: "Break Not Covered",
+                        description: "No coverage on the bonder during break times."
+                    },
+                    {
+                        reason: "Data Entry",
+                        description: "Time lost due to operator data entries (Reject Database, Data Management System, etc.)"
+                    },
+                    {
+                        reason: "Engineering DT",
+                        description: "When the engineering team has use of the line. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "Engineering Verifications",
+                        description: "Time loss due to verifications/changes/improvements by engineering that cause slower run speeds. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "Equipment Adjustments",
+                        description: "Time lost due to equipment parameter adjustemnts. (NOT MAINTENTANCE)"
+                    },
+                    {
+                        reason: "Huddle/Stop Work/Flow down",
+                        description: "The shift start huddle and flow down events that cause all work to stop on the line."
+                    },
+                    {
+                        reason: "Leak Master",
+                        description: "Performing the leak master calibration at openeing and any issues associated with the leak master."
+                    },
+                    {
+                        reason: "Lot Changeover",
+                        description: "Opening and closing lots with no other issues."
+                    },
+                    {
+                        reason: "Melt Checks",
+                        description: "Performing melt checks on lot opening and any issues associated with melt checks."
+                    },
+                    {
+                        reason: "No Scheduled Work",
+                        description: "Time lost due to no work orders released to the floor to keep planned staffed lines running (or completed weekly plan early). Also Includes Waiting on Labels and Materials WITHIN 48 hour lead time."
+                    },
+                    {
+                        reason: "Other",
+                        description: "Avoid using this reason if at all possible. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "Planned Downtime",
+                        description: "When the line is planned to be down. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "Plug Bonder",
+                        description: "Any issues with running or setting up the plug bonder."
+                    },
+                    {
+                        reason: "Preventive Maintenance - Planned",
+                        description: "When the line is down for any PMs being performed. Planned in advance with OPS. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "Preventive Maintenance - Unplanned",
+                        description: "When the line is down for any PMs being performed. Unplanned in advance with OPS."
+                    },
+                    {
+                        reason: "QA Sample Build",
+                        description: "Building QA samples. Reserved for SSC QA sample builds, XLT LALs, and XLT RTS samples."
+                    },
+                    {
+                        reason: "Quality Issue",
+                        description: "Any issues with material or process quality that results in lost time."
+                    },
+                    {
+                        reason: "Rework",
+                        description: "Time lost due to bagging or packaging usse that requires line time to rectify."
+                    },
+                    {
+                        reason: "Safety/EMRT",
+                        description: "Daily stretches, a safety training or issues, or EMRT call."
+                    },
+                    {
+                        reason: "Scrap",
+                        description: "Time lost due to producing out of specification parts."
+                    },
+                    {
+                        reason: "Shift Change",
+                        description: "Time lost due to shift handover activities (i.e., paperwork, material accountability, counting labels, etc.) "
+                    },
+                    {
+                        reason: "Short Staffed Over Target",
+                        description: "When the line has scheduled work, but is down due to no available staff to run it. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "Short Staffed Under Target",
+                        description: "Time lost due a line running, but understaffed, causing slower line speed. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "Spider Bonder",
+                        description: "Any issues with running or setting up the XLT spider bonder."
+                    },
+                    {
+                        reason: "SSC Bonder",
+                        description: "Any issues with running or setting up the SSC bonder."
+                    },
+                    {
+                        reason: "Training",
+                        description: "Training or trainer's meetings that stop the line."
+                    },
+                    {
+                        reason: "Uson Tester",
+                        description: "Any issues with running or setting up the Uson tester."
+                    },
+                    {
+                        reason: "Vibe Welder",
+                        description: "Any issues with running or setting up the Vibe welder."
+                    },
+                    {
+                        reason: "Waiting For Parts",
+                        description: "Time lost due to material component shortage past the agreed 48 hours service level agreement. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "Waiting for Mechanic",
+                        description: "Waiting on a mechanic and the line has stopped running."
+                    },
+                    {
+                        reason: "Waiting on Labels",
+                        description: "Time lost due to label shortage past the agreed 48 hours service level agreement. - MANAGEMENT USE ONLY."
+                    },
+                    {
+                        reason: "XL Bonder",
+                        description: "Any issues with running or setting up the XL bonder."
+                    },
+                    {
+                        reason: "XLT Bonder",
+                        description: "Any issues with running or setting up the XLT bonder."
+                    }
+                ]
+              DelayItemLoading: =true
+              Height: =Parent.Height - Self.Y
+              Layout: =Layout.Vertical
+              LoadingSpinner: =LoadingSpinner.Data
+              TemplatePadding: =0
+              TemplateSize: =Parent.Height / 10
+              Width: =Parent.Width
+              Y: =d_h_r_banner.Height + d_h_r_banner.Y
+            Children:
+            - d_h_r_g_reason:
+                Control: Label
+                Properties:
+                  OnSelect: =Select(Parent)
+                  Text: =ThisItem.reason
+                  Color: =varColor1
+                  Height: =Self.Size * 1.8
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =12
+                  VerticalAlign: =VerticalAlign.Top
+                  Width: =Parent.TemplateWidth - 173
+                  X: =Parent.TemplateWidth * 0.02
+                  Y: =Parent.TemplateHeight * 0.05
+            - d_h_r_g_description:
+                Control: Label
+                Properties:
+                  OnSelect: =Select(Parent)
+                  Text: =ThisItem.description
+                  Color: =varColor0
+                  Height: =Parent.TemplateHeight - Self.Y - d_h_r_g_seperator.Height
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =10
+                  VerticalAlign: =VerticalAlign.Top
+                  Width: =Parent.TemplateWidth * 0.95 - Self.X
+                  X: =Parent.TemplateWidth * 0.05
+                  Y: =d_h_r_g_reason.Y + d_h_r_g_reason.Height
+            - d_h_r_g_seperator:
+                Control: Rectangle
+                Properties:
+                  Fill: =varColorYes
+                  Height: =Parent.TemplateHeight * 0.05
+                  Width: =Parent.TemplateWidth
+                  Y: =Parent.TemplateHeight - Self.Height
+        - d_h_r_banner:
+            Control: Rectangle
+            Properties:
+              Fill: =varColor4
+              Height: =d_h_r_close.Y * 2 + d_h_r_close.Height
+              Width: =Parent.Width
+        - d_h_r_close:
+            Control: Classic/Icon
+            Variant: CancelBadge
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Color: =varColorNo
+              Height: =Parent.Height * 0.075
+              Icon: =Icon.CancelBadge
+              Width: =Self.Height
+              X: =Parent.Width-Self.Width - Parent.Width *0.01
+              Y: =Parent.Width * 0.005

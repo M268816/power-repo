@@ -1,0 +1,8 @@
+Properties:
+  OnVisible: |-
+    =UpdateContext({locCamSwitch: false});
+
+    If(IsBlankOrError(s_barcode_reader.Text) = false,
+        UpdateContext({locCamSwitch: true})
+        )
+  Fill: =Color.AntiqueWhite

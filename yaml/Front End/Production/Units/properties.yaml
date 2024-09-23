@@ -1,0 +1,8 @@
+Properties:
+  OnVisible: |-
+    =UpdateContext({
+        locPadding: Self.Width * 0.005,
+        locPopups: {Visible: false, Value: Blank()},
+        locNowDay: Today(),
+        locNow: Now()
+    });
