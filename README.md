@@ -11,7 +11,7 @@
 | Encapsulation Digital SOPs | v0.1.0 | TBD |
 | Encapsulation LinkHub | v1.0.0 | Released |
 | Front End Daily Management System for Management | v0.0.0 | TBD |
-| Front End Daily Managmenet System for Production | v0.0.0 | TBD |
+| Front End Daily Managmenet System for Production | v0.1.0 | TBD |
 | Scheduling Suite | v0.1.0 | TBD |
 | V-Line Daily Management System for Management | v0.1.0 | WIP |
 | V-Line Daily Management System for Production | v0.0.0 | TBD |
