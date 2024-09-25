@@ -18,7 +18,7 @@ The ideal output is the constraint speed for each line, the slowest process of a
 
 ## The authenticity issues.
 
-I see a problem with displaying the Millipore OEE2 algorithm as a competitive and comparable data from the standard OEE model. I feel this is misdirecting our customers and our own data analysis by artificially inflating the OEE percentages. This is because the OEE2 method simplifies the process of the algorithm to only include a performance metric, not taking into account lost availability and quality.
+I see a problem with displaying the Millipore OEE2 algorithm as a competitive and comparable data from the standard OEE model. I feel this is misdirecting our data analysis by artificially inflating the OEE percentages. This is because the OEE2 method simplifies the process of the algorithm to only include a performance metric, not taking into account lost availability and quality.
 
 Here's an example of line production numbers broken down between both algorithms. Let’s say XL1 is planned to run a full shift, with a planned PM and a half hour worth of mechanical issues. According to our downtime code splits, Planned Preventive Maintenance are covered under OEE1 as planned downtime, and mechanical issues are covered under OEE2 as an unplanned downtime event.
 
@@ -62,7 +62,7 @@ Quality = Good Widgets / Total Widgets
 
 ### Conclusion
 
-There is a 18.02% difference between the calculation that Millipore is basing its data analysis on and the industry standard process. For efficiency analysis, this means we are misrepresenting our own data and potentially ignoring or downplaying possible problems within our processes because the OEE% are so agreeable. For outside parties who may only know of the standard OEE process, if we try and share this data within our own industry, other industry leaders, customers, or competitors, we are misrepresenting our efficiency and therefore the capacity of our processes.
+There is a 18.02% difference between the calculation that Millipore is basing its data analysis on and the industry standard process. For efficiency analysis, this means we are misrepresenting our own data and potentially ignoring or downplaying possible problems within our processes because the OEE% are so agreeable. For outside parties who may only know of the standard OEE process, if we try and share this data within our own industry, other industry leaders, or competitors, we are misrepresenting our efficiency and therefore the capacity of our processes.
 
 
 # OEE2 Algorithm Breakdown.
