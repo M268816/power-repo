@@ -15,25 +15,6 @@ ClearCollect(collectNotifyTimes,
     { line: ["SSC","SSC2"], hour: [8, 16, 23]}
 );
 
-Problems with this new projected workload
-    I dont want to dissmiss chad's work, or create more inputs for operators.
-        but Integrating chad's databases into powerapps is not plug and play,
-        and comes with challeneges that i've never had to face.
-    This means that integrating chad's databases will take more resources
-        this includes research, money and time,
-        research because i need to find fixed, workarounds, proper connections for the databases.
-        money becasue the best option i found is dataverse, which means premium
-        liceses and connectors.
-        extending the deadline dependant on how the integration goes
-    porting my current powerapps knowlege for front end is fine with my current title and position
-        but if we go in this direction, keeping chad's databases, i need to convay that
-        becasue of the amount of work it would take to research the connections and refactor my current codebase,
-        i dont feel comfortable continuing just as a tech op
-        and i think i should be compensated fairly for my work.
-        i currently make $24 an hour where starting hourly for a powerapp dev is double, $45-$60/hr
-        if this cannot be done, i already have a full git repo of the work
-        i've already done, and i can hand it off to someone who
-
 Access does not directly connect to powerapps
     best case,
         keeping current data practices
@@ -52,15 +33,21 @@ Access does not directly connect to powerapps
 
 
 downtime csv to sharepoint transfer
+    csv can be transferred but no live updates?
+        relocate csv to s-account onedrive.
+        use flow to pull data once an hour into sharepoint list
+        csv too large for powerautomate 100,000 item limit
+        becasue of csv format cannot filter for pulling in smaller range
+            create filtered list in excel that pulls data from csv.
+                no excel automation for 1 hr increments viable
+        use python program to pull only relevant data from csv
+            new output.py file lives in onedrive
+            powerautomate flow pulls from filtered csv.
+            both the python program and flow can fire once per hour to obtain data for the sharepoint list
+        r drive test needed for python program
+            program must be running on an always live server/computer
+            program is very small, no performance lag detected.
 
-csv can be transferred but no live updates
-
-    relocate csv to s-account onedrive.
-    use flow to pull data once an hour into sharepoint list
-    csv too large for powerautomate 100,000 item limit
-    becasue of csv format cannot filter for pulling in smaller range
-        create filtered lsit in excel that pulls data from csv.
-            no excel automation for 1 hr increments viable
 
 push data to sharepoint list or dataverse table instead of csv?
     requires access and connection
