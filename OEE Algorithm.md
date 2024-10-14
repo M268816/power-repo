@@ -1,6 +1,6 @@
 # OEE2 Algorithm
 
-## Preferred OEE
+## Standard "Toyota Model" OEE
 > OEE = Availability * Performance * Quality 
 
 Availability = (Runtime - Downtime) / Total Time

@@ -5,13 +5,15 @@ import logging
 import os
 from datetime import datetime
 
-# Update This to be able to pick the start date to full from.
-DEFAULT_DATE_FILTER = pd.to_datetime('01 01 2020 12:00AM')
+# Update This to be able to pick the start date to pull from.
+DEFAULT_DATE_FILTER = datetime.today().strftime("%A %B %d %Y")
+# DEFAULT_DATE_FILTER = '01 01 2020' # TEST DATE REMOVE FOR PROD
+ISO_DATE_FILTER = pd.to_datetime(DEFAULT_DATE_FILTER)
 
 UPDATE_TIME = 3600 # One Hour = 3600 secconds.
-LOG_DATE = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+LOG_DATE = datetime.now().strftime("%Y-%m-%d")
 
-os.makedirs('logs', exist_ok=True)
+os.makedirs('./logs', exist_ok=True)
 
 logging.basicConfig(
     filename=f'logs/service_log_{LOG_DATE}.txt',
@@ -29,10 +31,29 @@ def flet(page: ft.page):
     page.title = 'CSV Filter Service for PowerApps'
     page.bgcolor = ft.colors.CYAN_100
     page.padding = ft.padding.all(5)
-    page.window.height = 420
-    page.window.min_height = 420
-    page.window.width = 1100
-    page.window.min_width = 1100
+    page.window.height = 470
+    page.window.min_height = 470
+    page.window.width = 1050
+    page.window.min_width = 1050
+    page.theme = ft.Theme(
+        scrollbar_theme=ft.ScrollbarTheme(
+            track_color={
+                ft.MaterialState.HOVERED: ft.colors.AMBER,
+                ft.MaterialState.DEFAULT: ft.colors.TRANSPARENT,
+            },
+            track_visibility=False,
+            track_border_color=ft.colors.AMBER,
+            thumb_visibility=False,
+            thumb_color={
+                ft.MaterialState.HOVERED: ft.colors.BLUE_700,
+                ft.MaterialState.DEFAULT: ft.colors.GREY_700,
+            },
+            thickness=8,
+            radius=8,
+            main_axis_margin=8,
+            cross_axis_margin=8,
+        )
+    )
 
     # Init Variables
     service_running=False
@@ -66,7 +87,7 @@ def flet(page: ft.page):
         src='https://lottie.host/be52cd2e-c0c7-47c0-adaa-43e15f5a4696/KzdSRVd2Vi.json',
         background_loading=True,
         fit=ft.ImageFit.CONTAIN,
-        height=100,
+        height=75,
     )
     
     def lottie_update():
@@ -81,6 +102,7 @@ def flet(page: ft.page):
         lottie.update()
 
     # File Selection Control
+    # Select Input File
     selected_files = ft.Text()
     selected_file_path = None
     def pick_file_result(e: ft.FilePickerResultEvent):
@@ -89,29 +111,49 @@ def flet(page: ft.page):
         selected_files.value = (
             ', '.join(map(lambda f: f.name, e.files)) if e.files else 'Cancelled!'
         )
-        selected_file_path = e.files[0].path
+        if e.files is not None:
+            selected_file_path = e.files[0].path
         selected_files.update()
     pick_file_dialog = ft.FilePicker(on_result=pick_file_result)
     page.overlay.append(pick_file_dialog)
-    
+
+    # Select Output Folder
+    selected_folder = ft.Text()
+    selected_folder_path = None
+    def pick_folder_result(e: ft.FilePickerResultEvent):
+        nonlocal selected_folder
+        nonlocal selected_folder_path
+        split_path = e.path.split('\\')
+        small_path = split_path[-1]
+        selected_folder.value = (
+            small_path if e.path else 'Cancelled!'
+        )
+        if e.path is not None:
+            selected_folder_path = e.path
+        selected_folder.update()
+    pick_folder_dialog = ft.FilePicker(on_result=pick_folder_result)
+    page.overlay.append(pick_folder_dialog)
+
     def process_file(e=None):
         nonlocal service_sleeping
-                
+        
         service_sleeping = False
         lottie_update()
         
         execute_time_start = time.time()
         
-        # Get CSV from input.
-        csv_file = pd.read_csv(selected_file_path)
-        # Convert DateTime column to iso datetime format
-        csv_file[' DateTime'] = pd.to_datetime(csv_file[' DateTime'])
-        # Specify a datetime to start the filter
-        datefilter = DEFAULT_DATE_FILTER
-        # Filter the input csv by dates later than the datefiter
-        filtered_file = csv_file[csv_file[' DateTime'] >= datefilter]
-        filtered_file.to_csv('output.csv', index=False)
-        # Return the filtered file content
+        # Process the CSV
+        try:
+            csv_file = pd.read_csv(selected_file_path) # Get CSV from input.
+            try:
+                csv_file[' DateTime'] = pd.to_datetime(csv_file[' DateTime'])
+            except:
+                log_function('INVALID DATE FOUND', 0) # Convert DateTime column to iso datetime format
+            datefilter = ISO_DATE_FILTER # Specify a datetime to start the filter
+            filtered_file = csv_file[csv_file[' DateTime'] >= datefilter] # Filter the input csv by dates later than the datefiter
+            filtered_file.to_csv(selected_folder_path + '\\output.csv', index=False) # Return the filtered file content
+        except:
+            log_function('INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED', 0)
         
         execute_time_end = time.time()
         execute_time = int((execute_time_end - execute_time_start)*1000)
@@ -149,10 +191,37 @@ def flet(page: ft.page):
         content=ft.Column(
             controls=[
                 lottie,
-                ft.ElevatedButton('Pick the input file.', on_click=lambda _: pick_file_dialog.pick_files(allow_multiple=False, allowed_extensions=['csv'])),
+                ft.TextField(
+                    value=DEFAULT_DATE_FILTER,label='Date Filter',
+                    read_only=True,
+                    text_size=12,
+                ),
+                ft.ElevatedButton(
+                    text='Input file.',
+                    icon=ft.icons.FILE_OPEN,
+                    icon_color=ft.colors.BLUE_400,
+                    on_click=lambda _: pick_file_dialog.pick_files(allow_multiple=False, allowed_extensions=['csv'])
+                ),
                 selected_files,
-                ft.ElevatedButton('Start Service', on_click=main_service),
-                ft.ElevatedButton('Stop Service', on_click=close_service),
+                ft.ElevatedButton(
+                    text='Output Location',
+                    icon=ft.icons.FOLDER,
+                    icon_color=ft.colors.AMBER_300,
+                    on_click=lambda _: pick_folder_dialog.get_directory_path(),
+                ),
+                selected_folder,
+                ft.ElevatedButton(
+                    text='Start Service',
+                    icon=ft.icons.PLAY_ARROW,
+                    icon_color=ft.colors.GREEN_400,
+                    on_click=main_service
+                ),
+                ft.ElevatedButton(
+                    text='Stop Service',
+                    icon=ft.icons.STOP,
+                    icon_color=ft.colors.RED_400,
+                    on_click=close_service
+                ),
             ],
             expand=True,
             alignment=ft.MainAxisAlignment.CENTER,
@@ -171,6 +240,7 @@ def flet(page: ft.page):
             ],
             expand=True,
             scroll=ft.ScrollMode.AUTO,
+            auto_scroll=True,
             alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.MainAxisAlignment.CENTER
         ),

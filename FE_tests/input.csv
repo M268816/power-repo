@@ -32,3 +32,4 @@ ID, DateTime, Shift, Downtime Minutes, Downtime Reason, Comments
 31,Fri Dec 04 2020 22:28:00,Z,111,Short Stop,Test
 32,Fri Dec 04 2020 22:28:00,Z,112,Short Stop,TEST
 33,Fri Dec 04 2020 22:28:00,Z,113,Short Stop,TEST3
+34,BAD DATE,Q1Q2Q3,A1B2C3,HELLO.WORLD,BREAK_TEST
