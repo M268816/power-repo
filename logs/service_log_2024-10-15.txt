@@ -1,0 +1,36 @@
+[10-15-2024 12:04:58 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 12:04:58 PM] Starting up TCP server on localhost:49767
+[10-15-2024 12:04:58 PM] Flet app has started...
+[10-15-2024 12:04:58 PM] App session started
+[10-15-2024 12:05:46 PM] csv process: Completed in 721ms
+[10-15-2024 12:13:59 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 12:13:59 PM] Starting up TCP server on localhost:49767
+[10-15-2024 12:13:59 PM] Flet app has started...
+[10-15-2024 12:14:01 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 12:14:01 PM] Starting up TCP server on localhost:49767
+[10-15-2024 12:14:01 PM] Flet app has started...
+[10-15-2024 12:14:02 PM] App session started
+[10-15-2024 12:14:16 PM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 12:14:16 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 12:14:16 PM] csv process: Completed in 194ms
+[10-15-2024 12:14:16 PM] Next runtime in: 2743.: Completed in 0ms
+[10-15-2024 12:17:42 PM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 12:17:42 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 12:17:42 PM] csv process: Completed in 180ms
+[10-15-2024 12:17:42 PM] Next runtime in: 2537.: Completed in 0ms
+[10-15-2024 12:17:52 PM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 12:17:52 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 12:17:52 PM] csv process: Completed in 221ms
+[10-15-2024 12:17:52 PM] Next runtime in: 2527.: Completed in 0ms
+[10-15-2024 12:18:11 PM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 12:18:11 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 12:18:11 PM] csv process: Completed in 529ms
+[10-15-2024 12:18:11 PM] Next runtime in: 2508.: Completed in 0ms
+[10-15-2024 12:19:38 PM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 12:19:38 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 12:19:38 PM] csv process: Completed in 391ms
+[10-15-2024 12:19:38 PM] Next runtime in: 2421.: Completed in 0ms
+[10-15-2024 12:20:34 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 12:20:34 PM] Starting up TCP server on localhost:49767
+[10-15-2024 12:20:34 PM] Flet app has started...
+[10-15-2024 12:20:34 PM] App session started

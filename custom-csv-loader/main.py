@@ -6,8 +6,8 @@ import os
 from datetime import datetime
 
 # Update This to be able to pick the start date to pull from.
-# DEFAULT_DATE_FILTER = datetime.today().strftime("%A %B %d %Y")
-DEFAULT_DATE_FILTER = '01 OCT 2024' # TEST DATE REMOVE FOR PROD
+DEFAULT_DATE_FILTER = datetime.today().strftime("%A %B %d %Y")
+# DEFAULT_DATE_FILTER = '01 JAN 2024' # TEST DATE REMOVE FOR PROD
 ISO_DATE_FILTER = pd.to_datetime(DEFAULT_DATE_FILTER)
 
 UPDATE_TIME = 3600 # One Hour = 3600 secconds.
@@ -114,7 +114,6 @@ def main(page: ft.page):
         if e.files is not None:
             for i in e.files:
                 selected_file_paths.append(i.path)
-        print(selected_file_paths)
         selected_files.update()
     pick_file_dialog = ft.FilePicker(on_result=pick_file_result)
     page.overlay.append(pick_file_dialog)
@@ -136,25 +135,29 @@ def main(page: ft.page):
     pick_folder_dialog = ft.FilePicker(on_result=pick_folder_result)
     page.overlay.append(pick_folder_dialog)
 
+    # Process the csv files
     def process_file(e=None):
         nonlocal service_sleeping
-        
         service_sleeping = False
         lottie_update()
         
         execute_time_start = time.time()
         
-        # Process the CSVs
+        # Pull all data from each selected csv
         dataframes = []
         for i in selected_file_paths:
             temp_read = pd.read_csv(i)
+            # Capture pleater line from csv file name
+            split_path = i.split('\\')
+            small_path = split_path[-1]
+            split_file = small_path.split('_')
+            pleater = split_file[0]
+            # Add Pleater line to output
+            temp_read['Pleater'] = pleater
             dataframes.append(temp_read)
-
+        # Create single file from all dataframes
         csv_file = pd.concat(dataframes, ignore_index=True)
-        # csv_file = pd.read_csv(selected_file_paths) # Get CSV from input.
-        print(csv_file)
-        # csv_file = csv_file.drop(csv_file.index[-1])
-
+   
         try:
             try:
                 csv_file[' DateTime'] = pd.to_datetime(csv_file[' DateTime'])
@@ -185,6 +188,14 @@ def main(page: ft.page):
         log_function('Service Closed', 0)
         update_logs()
 
+    def find_sleep_time():
+        start_time = datetime.now()
+        end_time = datetime(year=datetime.now().year, month=datetime.now().month, day=datetime.now().day, hour=datetime.now().hour+1)
+        sleep_time = abs((end_time-start_time).seconds)
+        log_function(f'Next runtime in: {sleep_time}', 0)
+        update_logs()
+        return sleep_time
+    
     def main_service(e=None):
         nonlocal service_running
         if selected_file_paths == None:
@@ -195,7 +206,8 @@ def main(page: ft.page):
         button_controls.update()
         while service_running:
             process_file()
-            time.sleep(UPDATE_TIME)
+            sleep_time = find_sleep_time()
+            time.sleep(sleep_time)
 
     # Button Controls
     button_controls = ft.Container(
@@ -206,6 +218,7 @@ def main(page: ft.page):
                     value=DEFAULT_DATE_FILTER,label='Date Filter',
                     read_only=True,
                     text_size=12,
+                    dense=True,
                 ),
                 ft.ElevatedButton(
                     text='Input files',

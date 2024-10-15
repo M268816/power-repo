@@ -1,304 +1,40 @@
-[10-15-2024 08:17:51 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:17:51 AM] Starting up TCP server on localhost:56645
-[10-15-2024 08:17:51 AM] Flet app has started...
-[10-15-2024 08:17:52 AM] App session started
-[10-15-2024 08:22:27 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:22:27 AM] Starting up TCP server on localhost:57173
-[10-15-2024 08:22:27 AM] Flet app has started...
-[10-15-2024 08:22:27 AM] App session started
-[10-15-2024 08:22:54 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:22:54 AM] Starting up TCP server on localhost:57173
-[10-15-2024 08:22:54 AM] Flet app has started...
-[10-15-2024 08:22:54 AM] App session started
-[10-15-2024 08:23:13 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:23:13 AM] Starting up TCP server on localhost:57173
-[10-15-2024 08:23:13 AM] Flet app has started...
-[10-15-2024 08:23:13 AM] App session started
-[10-15-2024 08:23:17 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:23:17 AM] Starting up TCP server on localhost:57238
-[10-15-2024 08:23:17 AM] Flet app has started...
-[10-15-2024 08:23:17 AM] App session started
-[10-15-2024 08:26:14 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:26:14 AM] Starting up TCP server on localhost:57351
-[10-15-2024 08:26:14 AM] Flet app has started...
-[10-15-2024 08:26:14 AM] App session started
-[10-15-2024 08:29:24 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:29:24 AM] Starting up TCP server on localhost:57351
-[10-15-2024 08:29:24 AM] Flet app has started...
-[10-15-2024 08:29:25 AM] App session started
-[10-15-2024 08:30:06 AM] Future exception was never retrieved
-future: <Future finished exception=ValueError("Invalid file path or buffer object type: <class 'list'>")>
-Traceback (most recent call last):
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
-    result = self.fn(*self.args, **self.kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\flet_core\page.py", line 944, in wrapper
-    handler(*args)
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 192, in main_service
-    process_file()
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 148, in process_file
-    csv_file = pd.read_csv(selected_file_paths) # Get CSV from input.
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\io\parsers\readers.py", line 1026, in read_csv
-    return _read(filepath_or_buffer, kwds)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\io\parsers\readers.py", line 620, in _read
-    parser = TextFileReader(filepath_or_buffer, **kwds)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\io\parsers\readers.py", line 1620, in __init__
-    self._engine = self._make_engine(f, self.engine)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\io\parsers\readers.py", line 1895, in _make_engine
-    raise ValueError(msg)
-ValueError: Invalid file path or buffer object type: <class 'list'>
-[10-15-2024 08:30:21 AM] Service Closed: Completed in 0ms
-[10-15-2024 08:43:53 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:43:53 AM] Starting up TCP server on localhost:57351
-[10-15-2024 08:43:53 AM] Flet app has started...
-[10-15-2024 08:43:54 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:43:54 AM] Starting up TCP server on localhost:57351
-[10-15-2024 08:43:54 AM] Flet app has started...
-[10-15-2024 08:44:07 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:44:07 AM] Starting up TCP server on localhost:58056
-[10-15-2024 08:44:07 AM] Flet app has started...
-[10-15-2024 08:44:07 AM] App session started
-[10-15-2024 08:44:17 AM] Future exception was never retrieved
-future: <Future finished exception=TypeError("DataFrame.join() missing 1 required positional argument: 'self'")>
-Traceback (most recent call last):
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
-    result = self.fn(*self.args, **self.kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\flet_core\page.py", line 944, in wrapper
-    handler(*args)
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 195, in main_service
-    process_file()
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 151, in process_file
-    csv_file.join(other=temp_read)
-TypeError: DataFrame.join() missing 1 required positional argument: 'self'
-[10-15-2024 08:44:24 AM] Service Closed: Completed in 0ms
-[10-15-2024 08:45:08 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:45:08 AM] Starting up TCP server on localhost:58056
-[10-15-2024 08:45:08 AM] Flet app has started...
-[10-15-2024 08:45:10 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:45:10 AM] Starting up TCP server on localhost:58056
-[10-15-2024 08:45:10 AM] Flet app has started...
-[10-15-2024 08:45:10 AM] App session started
-[10-15-2024 08:45:21 AM] Service Closed: Completed in 0ms
-[10-15-2024 08:45:35 AM] Future exception was never retrieved
-future: <Future finished exception=TypeError("Can only merge Series or DataFrame objects, a <class 'type'> was passed")>
-Traceback (most recent call last):
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
-    result = self.fn(*self.args, **self.kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\flet_core\page.py", line 944, in wrapper
-    handler(*args)
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 195, in main_service
-    process_file()
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 151, in process_file
-    csv_file.join(self=csv_file, other=temp_read)
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\frame.py", line 10757, in join
-    return merge(
-           ^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\reshape\merge.py", line 152, in merge
-    left_df = _validate_operand(left)
-              ^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\reshape\merge.py", line 2692, in _validate_operand
-    raise TypeError(
-TypeError: Can only merge Series or DataFrame objects, a <class 'type'> was passed
-[10-15-2024 08:45:40 AM] Service Closed: Completed in 0ms
-[10-15-2024 08:47:11 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:47:11 AM] Starting up TCP server on localhost:58056
-[10-15-2024 08:47:11 AM] Flet app has started...
-[10-15-2024 08:47:15 AM] App session started
-[10-15-2024 08:47:21 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:47:21 AM] Starting up TCP server on localhost:58169
-[10-15-2024 08:47:21 AM] Flet app has started...
-[10-15-2024 08:47:21 AM] App session started
-[10-15-2024 08:47:33 AM] Future exception was never retrieved
-future: <Future finished exception=TypeError("Can only merge Series or DataFrame objects, a <class 'type'> was passed")>
-Traceback (most recent call last):
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
-    result = self.fn(*self.args, **self.kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\flet_core\page.py", line 944, in wrapper
-    handler(*args)
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 196, in main_service
-    process_file()
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 152, in process_file
-    csv_file.join(self=csv_file, other=temp_read)
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\frame.py", line 10757, in join
-    return merge(
-           ^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\reshape\merge.py", line 152, in merge
-    left_df = _validate_operand(left)
-              ^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\reshape\merge.py", line 2692, in _validate_operand
-    raise TypeError(
-TypeError: Can only merge Series or DataFrame objects, a <class 'type'> was passed
-[10-15-2024 08:47:36 AM] Service Closed: Completed in 0ms
-[10-15-2024 08:55:08 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:55:08 AM] Starting up TCP server on localhost:58370
-[10-15-2024 08:55:08 AM] Flet app has started...
-[10-15-2024 08:55:09 AM] App session started
-[10-15-2024 08:56:07 AM] Future exception was never retrieved
-future: <Future finished exception=TypeError("Can only merge Series or DataFrame objects, a <class 'type'> was passed")>
-Traceback (most recent call last):
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
-    result = self.fn(*self.args, **self.kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\flet_core\page.py", line 944, in wrapper
-    handler(*args)
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 196, in main_service
-    process_file()
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 152, in process_file
-    csv_file.join(self=csv_file, other=temp_read)
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\frame.py", line 10757, in join
-    return merge(
-           ^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\reshape\merge.py", line 152, in merge
-    left_df = _validate_operand(left)
-              ^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\reshape\merge.py", line 2692, in _validate_operand
-    raise TypeError(
-TypeError: Can only merge Series or DataFrame objects, a <class 'type'> was passed
-[10-15-2024 08:56:16 AM] Service Closed: Completed in 0ms
-[10-15-2024 08:56:37 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:56:37 AM] Starting up TCP server on localhost:58370
-[10-15-2024 08:56:37 AM] Flet app has started...
-[10-15-2024 08:56:37 AM] App session started
-[10-15-2024 08:56:44 AM] Future exception was never retrieved
-future: <Future finished exception=TypeError("argument of type 'method' is not iterable")>
-Traceback (most recent call last):
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
-    result = self.fn(*self.args, **self.kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\flet_core\page.py", line 944, in wrapper
-    handler(*args)
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 199, in main_service
-    process_file()
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 154, in process_file
-    csv_file = csv_file.to_csv(csv_file, index=False)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\util\_decorators.py", line 333, in wrapper
-    return func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\generic.py", line 3967, in to_csv
-    return DataFrameRenderer(formatter).to_csv(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\io\formats\format.py", line 1014, in to_csv
-    csv_formatter.save()
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\io\formats\csvs.py", line 251, in save
-    with get_handle(
-         ^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\io\common.py", line 719, in get_handle
-    if _is_binary_mode(path_or_buf, mode) and "b" not in mode:
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\io\common.py", line 1181, in _is_binary_mode
-    return isinstance(handle, _get_binary_io_classes()) or "b" in getattr(
-                                                           ^^^^^^^^^^^^^^^
-TypeError: argument of type 'method' is not iterable
-[10-15-2024 08:57:00 AM] Service Closed: Completed in 0ms
-[10-15-2024 08:58:00 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 08:58:00 AM] Starting up TCP server on localhost:58370
-[10-15-2024 08:58:00 AM] Flet app has started...
-[10-15-2024 08:58:01 AM] App session started
-[10-15-2024 08:58:08 AM] Future exception was never retrieved
-future: <Future finished exception=AttributeError("'NoneType' object has no attribute 'split'")>
-Traceback (most recent call last):
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
-    result = self.fn(*self.args, **self.kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\M268816\AppData\Local\Programs\Python\Python312\Lib\site-packages\flet_core\page.py", line 944, in wrapper
-    handler(*args)
-  File "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\csv_filter.py", line 128, in pick_folder_result
-    split_path = e.path.split('\\')
-                 ^^^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'split'
-[10-15-2024 08:58:17 AM] INVALID DATE FOUND: Completed in 0ms
-[10-15-2024 08:58:17 AM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
-[10-15-2024 08:58:17 AM] csv process: Completed in 275ms
-[10-15-2024 08:58:36 AM] INVALID DATE FOUND: Completed in 0ms
-[10-15-2024 08:58:36 AM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
-[10-15-2024 08:58:36 AM] csv process: Completed in 208ms
-[10-15-2024 09:01:19 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:01:19 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:01:19 AM] Flet app has started...
-[10-15-2024 09:01:22 AM] App session started
-[10-15-2024 09:01:30 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:01:30 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:01:30 AM] Flet app has started...
-[10-15-2024 09:01:30 AM] App session started
-[10-15-2024 09:01:49 AM] csv process: Completed in 598ms
-[10-15-2024 09:04:11 AM] Service Closed: Completed in 0ms
-[10-15-2024 09:05:16 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:05:16 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:05:16 AM] Flet app has started...
-[10-15-2024 09:05:18 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:05:18 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:05:18 AM] Flet app has started...
-[10-15-2024 09:05:21 AM] App session started
-[10-15-2024 09:05:29 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:05:29 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:05:29 AM] Flet app has started...
-[10-15-2024 09:05:29 AM] App session started
-[10-15-2024 09:05:34 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:05:34 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:05:34 AM] Flet app has started...
-[10-15-2024 09:05:34 AM] App session started
-[10-15-2024 09:05:43 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:05:43 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:05:43 AM] Flet app has started...
-[10-15-2024 09:05:43 AM] App session started
-[10-15-2024 09:07:30 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:07:30 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:07:30 AM] Flet app has started...
-[10-15-2024 09:07:30 AM] App session started
-[10-15-2024 09:08:48 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:08:48 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:08:48 AM] Flet app has started...
-[10-15-2024 09:08:48 AM] App session started
-[10-15-2024 09:08:49 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:08:49 AM] Starting up TCP server on localhost:58370
-[10-15-2024 09:08:49 AM] Flet app has started...
-[10-15-2024 09:08:49 AM] App session started
-[10-15-2024 09:10:03 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:10:03 AM] Starting up TCP server on localhost:58915
-[10-15-2024 09:10:03 AM] Flet app has started...
-[10-15-2024 09:10:03 AM] App session started
-[10-15-2024 09:10:46 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:10:46 AM] Starting up TCP server on localhost:58915
-[10-15-2024 09:10:46 AM] Flet app has started...
-[10-15-2024 09:10:48 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:10:48 AM] Starting up TCP server on localhost:58915
-[10-15-2024 09:10:48 AM] Flet app has started...
-[10-15-2024 09:10:48 AM] App session started
-[10-15-2024 09:10:53 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:10:53 AM] Starting up TCP server on localhost:58915
-[10-15-2024 09:10:54 AM] Flet app has started...
-[10-15-2024 09:10:54 AM] App session started
-[10-15-2024 09:10:55 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:10:55 AM] Starting up TCP server on localhost:58915
-[10-15-2024 09:10:55 AM] Flet app has started...
-[10-15-2024 09:10:56 AM] App session started
-[10-15-2024 09:11:03 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:11:03 AM] Starting up TCP server on localhost:58915
-[10-15-2024 09:11:03 AM] Flet app has started...
-[10-15-2024 09:11:04 AM] App session started
-[10-15-2024 09:12:56 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:12:56 AM] Starting up TCP server on localhost:58915
-[10-15-2024 09:12:56 AM] Flet app has started...
-[10-15-2024 09:12:58 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:12:58 AM] Starting up TCP server on localhost:58915
-[10-15-2024 09:12:58 AM] Flet app has started...
-[10-15-2024 09:13:08 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:13:08 AM] Starting up TCP server on localhost:59017
-[10-15-2024 09:13:08 AM] Flet app has started...
-[10-15-2024 09:13:09 AM] App session started
-[10-15-2024 09:15:36 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:15:36 AM] Starting up TCP server on localhost:59017
-[10-15-2024 09:15:36 AM] Flet app has started...
-[10-15-2024 09:15:36 AM] App session started
-[10-15-2024 09:22:15 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 09:22:15 AM] Starting up TCP server on localhost:59017
-[10-15-2024 09:22:15 AM] Flet app has started...
-[10-15-2024 09:22:15 AM] App session started
+[10-15-2024 11:48:32 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 11:48:32 AM] Starting up TCP server on localhost:65349
+[10-15-2024 11:48:32 AM] Flet app has started...
+[10-15-2024 11:48:32 AM] App session started
+[10-15-2024 11:48:45 AM] csv process: Completed in 435ms
+[10-15-2024 11:49:06 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 11:49:06 AM] Starting up TCP server on localhost:65349
+[10-15-2024 11:49:06 AM] Flet app has started...
+[10-15-2024 11:49:06 AM] App session started
+[10-15-2024 11:49:19 AM] csv process: Completed in 413ms
+[10-15-2024 11:51:27 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 11:51:27 AM] Starting up TCP server on localhost:65349
+[10-15-2024 11:51:27 AM] Flet app has started...
+[10-15-2024 11:51:27 AM] App session started
+[10-15-2024 11:51:29 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 11:51:29 AM] Starting up TCP server on localhost:65349
+[10-15-2024 11:51:29 AM] Flet app has started...
+[10-15-2024 11:51:30 AM] App session started
+[10-15-2024 11:52:11 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 11:52:11 AM] Starting up TCP server on localhost:65349
+[10-15-2024 11:52:11 AM] Flet app has started...
+[10-15-2024 11:52:12 AM] App session started
+[10-15-2024 11:54:22 AM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 11:54:22 AM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 11:54:22 AM] csv process: Completed in 1288ms
+[10-15-2024 11:57:06 AM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 11:57:06 AM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 11:57:06 AM] csv process: Completed in 1486ms
+[10-15-2024 11:59:08 AM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 11:59:08 AM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 11:59:08 AM] csv process: Completed in 1622ms
+[10-15-2024 12:00:01 PM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 12:00:01 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 12:00:01 PM] csv process: Completed in 2174ms
+[10-15-2024 12:00:02 PM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 12:00:02 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 12:00:02 PM] csv process: Completed in 3148ms
+[10-15-2024 12:00:03 PM] INVALID DATE FOUND: Completed in 0ms
+[10-15-2024 12:00:03 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
+[10-15-2024 12:00:03 PM] csv process: Completed in 3803ms
