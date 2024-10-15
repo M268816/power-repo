@@ -136,6 +136,7 @@ def main(page: ft.page):
         nonlocal service_sleeping
         service_sleeping = False
         lottie_update()
+        csv_file = None
         
         execute_time_start = time.time()
         
@@ -179,7 +180,7 @@ def main(page: ft.page):
         
         execute_time_end = time.time()
         execute_time = int((execute_time_end - execute_time_start)*1000)
-        log_function('csv process', execute_time)
+        log_function('CSV File Processing', execute_time)
         service_sleeping=True
         lottie_update()
         update_logs()

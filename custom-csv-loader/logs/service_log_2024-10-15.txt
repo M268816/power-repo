@@ -1,85 +1,18 @@
-[10-15-2024 11:48:32 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 11:48:32 AM] Starting up TCP server on localhost:65349
-[10-15-2024 11:48:32 AM] Flet app has started...
-[10-15-2024 11:48:32 AM] App session started
-[10-15-2024 11:48:45 AM] csv process: Completed in 435ms
-[10-15-2024 11:49:06 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 11:49:06 AM] Starting up TCP server on localhost:65349
-[10-15-2024 11:49:06 AM] Flet app has started...
-[10-15-2024 11:49:06 AM] App session started
-[10-15-2024 11:49:19 AM] csv process: Completed in 413ms
-[10-15-2024 11:51:27 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 11:51:27 AM] Starting up TCP server on localhost:65349
-[10-15-2024 11:51:27 AM] Flet app has started...
-[10-15-2024 11:51:27 AM] App session started
-[10-15-2024 11:51:29 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 11:51:29 AM] Starting up TCP server on localhost:65349
-[10-15-2024 11:51:29 AM] Flet app has started...
-[10-15-2024 11:51:30 AM] App session started
-[10-15-2024 11:52:11 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 11:52:11 AM] Starting up TCP server on localhost:65349
-[10-15-2024 11:52:11 AM] Flet app has started...
-[10-15-2024 11:52:12 AM] App session started
-[10-15-2024 11:54:22 AM] INVALID DATE FOUND: Completed in 0ms
-[10-15-2024 11:54:22 AM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
-[10-15-2024 11:54:22 AM] csv process: Completed in 1288ms
-[10-15-2024 11:57:06 AM] INVALID DATE FOUND: Completed in 0ms
-[10-15-2024 11:57:06 AM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
-[10-15-2024 11:57:06 AM] csv process: Completed in 1486ms
-[10-15-2024 11:59:08 AM] INVALID DATE FOUND: Completed in 0ms
-[10-15-2024 11:59:08 AM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
-[10-15-2024 11:59:08 AM] csv process: Completed in 1622ms
-[10-15-2024 12:00:01 PM] INVALID DATE FOUND: Completed in 0ms
-[10-15-2024 12:00:01 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
-[10-15-2024 12:00:01 PM] csv process: Completed in 2174ms
-[10-15-2024 12:00:02 PM] INVALID DATE FOUND: Completed in 0ms
-[10-15-2024 12:00:02 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
-[10-15-2024 12:00:02 PM] csv process: Completed in 3148ms
-[10-15-2024 12:00:03 PM] INVALID DATE FOUND: Completed in 0ms
-[10-15-2024 12:00:03 PM] INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED: Completed in 0ms
-[10-15-2024 12:00:03 PM] csv process: Completed in 3803ms
-[10-15-2024 01:54:55 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 01:54:55 PM] Starting up TCP server on localhost:53289
-[10-15-2024 01:54:55 PM] Flet app has started...
-[10-15-2024 01:54:56 PM] App session started
-[10-15-2024 01:55:18 PM] csv process: Completed in 969ms
-[10-15-2024 01:55:18 PM] Next runtime in: 5.0 minutes: Completed in 0ms
-[10-15-2024 01:56:27 PM] csv process: Completed in 1293ms
-[10-15-2024 01:56:27 PM] Next runtime in: 4.0 minutes: Completed in 0ms
-[10-15-2024 02:00:01 PM] csv process: Completed in 2155ms
-[10-15-2024 02:00:01 PM] Next runtime in: 60.0 minutes: Completed in 0ms
-[10-15-2024 02:00:03 PM] csv process: Completed in 3795ms
-[10-15-2024 02:00:03 PM] Next runtime in: 60.0 minutes: Completed in 0ms
-[10-15-2024 02:05:42 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:05:42 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:05:42 PM] Flet app has started...
-[10-15-2024 02:05:42 PM] App session started
-[10-15-2024 02:11:57 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:11:57 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:11:57 PM] Flet app has started...
-[10-15-2024 02:11:59 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:11:59 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:11:59 PM] Flet app has started...
-[10-15-2024 02:11:59 PM] App session started
-[10-15-2024 02:12:33 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:12:33 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:12:33 PM] Flet app has started...
-[10-15-2024 02:12:33 PM] App session started
-[10-15-2024 02:16:08 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:16:08 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:16:08 PM] Flet app has started...
-[10-15-2024 02:16:08 PM] App session started
-[10-15-2024 02:16:10 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:16:10 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:16:10 PM] Flet app has started...
-[10-15-2024 02:16:10 PM] App session started
-[10-15-2024 02:19:36 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:19:36 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:19:37 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:19:37 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:19:37 PM] Flet app has started...
-[10-15-2024 02:19:37 PM] App session started
-[10-15-2024 02:20:44 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
-[10-15-2024 02:20:44 PM] Starting up TCP server on localhost:53289
-[10-15-2024 02:20:44 PM] Flet app has started...
-[10-15-2024 02:20:45 PM] App session started
+[10-15-2024 02:25:17 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 02:25:17 PM] Starting up TCP server on localhost:54478
+[10-15-2024 02:25:17 PM] Flet app has started...
+[10-15-2024 02:25:17 PM] App session started
+[10-15-2024 02:27:23 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 02:27:23 PM] Starting up TCP server on localhost:54573
+[10-15-2024 02:27:23 PM] Flet app has started...
+[10-15-2024 02:27:24 PM] App session started
+[10-15-2024 02:27:47 PM] csv process: Completed in 2195ms
+[10-15-2024 02:27:47 PM] Next runtime in: 32.0 minutes: Completed in 0ms
+[10-15-2024 02:28:34 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\custom-csv-loader\assets
+[10-15-2024 02:28:34 PM] Starting up TCP server on localhost:54573
+[10-15-2024 02:28:34 PM] Flet app has started...
+[10-15-2024 02:28:34 PM] App session started
+[10-15-2024 02:29:06 PM] CSV File Processing: Completed in 2192ms
+[10-15-2024 02:29:06 PM] Next runtime in: 31.0 minutes: Completed in 0ms
+[10-15-2024 02:29:48 PM] CSV File Processing: Completed in 2375ms
+[10-15-2024 02:29:49 PM] Next runtime in: 30.0 minutes: Completed in 0ms

@@ -27,10 +27,22 @@ Because of all the limitations that power suite data limits are imposing, I sugg
 
 Manual entry for all data would be expandable, but auto collection through flows and custom apps at this time seem unobtainbale.
 
-
+CSV files have invalid formatting and need to be cleaned
+    check to see if these items are okayto remove from the file
+    YZ - extra header
+    RS - extra header
+    JK - item 19113
+    LM - line 16067, 16905,
+    PQ - line 10349, 14543, 10840, 45300, 45301, 45260 thru 45280, 38396, 56001, 35618, 37603,
+    RS - 14683
+    WX - 6544, 6545, 7595
 
 
 # Todo
+!!!ERROR!!!
+    Pulling data into the sharepoint list by CSV_ID will have overlaps from each pleater file
+    change flow logic to check for CSV_ID AND Pleater Asset
+
 Move csv raspi data push to onedrive location
     run small python program to pull most recent data from raspi
     run a flow to pull csv data from python output to sharepoint
