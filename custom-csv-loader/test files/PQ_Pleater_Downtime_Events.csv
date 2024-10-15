@@ -10346,7 +10346,6 @@ ID, DateTime, Shift, Downtime Minutes, Downtime Reason, Comments
 10345,Sat May 15 2021 09:18:42,D,7.68,Roll Change,
 10346,Sat May 15 2021 09:49:20,D,2.84,Short Stop,null
 10347,Sat May 15 2021 10:00:22,D,6.75,Roll Change,2 ON P-SIDE 
-1 ON -Q SIDE
 10348,Sat May 15 2021 10:03:12,D,2,Short Stop,null
 10349,Sat May 15 2021 10:12:38,D,4.34,Slitter Issues,null
 10350,Sat May 15 2021 10:13:48,D,1.09,Short Stop,null
@@ -10838,7 +10837,6 @@ ID, DateTime, Shift, Downtime Minutes, Downtime Reason, Comments
 10836,Thu May 20 2021 23:43:33,C,4.42,Roll Change,Q SIDE
 10837,Thu May 20 2021 23:45:13,C,1.5,Short Stop,null
 10838,Thu May 20 2021 23:47:58,C,2.67,,P SIDE STILL A QUATER OF A ROLL OF BOTTOM SUPPORT LEFT AND PLEATER KEEPS SHUTTING OFF JUST 
-CHANGING ROLL NOW
 10839,Fri May 21 2021 00:12:31,C,3.01,Slitter Issues,null
 10840,Fri May 21 2021 00:21:02,C,2.57,,P SIDE
 10841,Fri May 21 2021 00:40:39,C,10.84,Slitter Issues,null
@@ -14541,7 +14539,6 @@ CHANGING ROLL NOW
 14538,Wed Jul 28 2021 12:04:50,A,3.34,Roll Change,null
 14539,Wed Jul 28 2021 12:26:28,A,8.27,Roll Change,null
 14540,Wed Jul 28 2021 13:06:40,A,1.75,,cutters sharpen wi
-hile doing roll change
 14541,Wed Jul 28 2021 13:17:22,A,6.26,Roll Change,null
 14542,Wed Jul 28 2021 13:26:38,A,2.42,Short Stop,null
 14543,Wed Jul 28 2021 13:44:45,A,5.01,Roll Change,null
@@ -35619,7 +35616,6 @@ hile doing roll change
 35616,Fri Sep 16 2022 17:58:16,D,1.34,Short Stop,null
 35617,Fri Sep 16 2022 18:17:24,D,4.3,Roll Change,null
 35618,Fri Sep 16 2022 19:25:59,E,45.51,Shift Change,WAITING FOR 20 PARTS TO GET TESTED FROM LAST SHIFT
-BOTH SIDES
 35619,Fri Sep 16 2022 19:30:12,E,1.67,Short Stop,null
 35620,Fri Sep 16 2022 20:24:24,E,8.24,Roll Change,null
 35621,Fri Sep 16 2022 20:44:11,E,15.25,Planned Downtime,STRETCH BREAK
@@ -37605,7 +37601,6 @@ BOTH SIDES
 37601,Mon Oct 17 2022 03:07:34,E,1.77,Short Stop,null
 37602,Mon Oct 17 2022 03:09:05,E,1.33,Short Stop,null
 37603,Mon Oct 17 2022 03:20:22,E,11.12,Pleater (Mechanical),still working on the L5 unwind due to 
-pressure loss
 37604,Mon Oct 17 2022 03:24:20,E,3.86,Pleater (Mechanical),null
 37605,Mon Oct 17 2022 03:26:01,E,1.5,Short Stop,null
 37606,Mon Oct 17 2022 03:28:38,E,2.44,Short Stop,null
@@ -38397,7 +38392,6 @@ pressure loss
 38392,Thu Oct 27 2022 08:15:31,A,1.85,Short Stop,null
 38393,Thu Oct 27 2022 08:19:14,A,1.34,Short Stop,null
 38394,Thu Oct 27 2022 09:08:12,A,48.63,Lot Changeover,TAPE CHANGE AT LOT C
-CHANGE
 38395,Thu Oct 27 2022 09:11:09,A,2.01,Short Stop,null
 38396,Thu Oct 27 2022 09:12:55,A,1.59,Short Stop,null
 38397,Thu Oct 27 2022 09:16:02,A,2.18,Short Stop,null
@@ -39834,7 +39828,7 @@ CHANGE
 39828,Sun Nov 20 2022 16:33:21,D,3.53,Roll Change,null
 39829,Sun Nov 20 2022 16:49:16,D,2.26,Short Stop,null
 39830,Sun Nov 20 2022 16:58:22,D,2.69,Short Stop,null
-39831,Sun Nov 20 2022 19:34:42,E,138.87,Planned Downtime,+ Endcapper backed up
+39831,Sun Nov 20 2022 19:34:42,E,138.87,Planned Downtime,#NAME?
 39832,Sun Nov 20 2022 20:06:22,E,20.37,Not Entered,null
 39833,Sun Nov 20 2022 20:47:05,E,17.43,Not Entered,null
 39834,Sun Nov 20 2022 21:35:17,E,7.83,Not Entered,null
@@ -45264,20 +45258,12 @@ CHANGE
 45258,Sun Feb 19 2023 20:41:52,E,13.4,Planned Downtime,stretches
 45259,Sun Feb 19 2023 20:52:39,E,2.09,Short Stop,null
 45260,Sun Feb 19 2023 21:10:56,E,7.65,Staffing,2 people 
-3rd person on break 
-4th person went home
 45261,Sun Feb 19 2023 21:27:47,E,1.85,Short Stop,null
 45262,Sun Feb 19 2023 21:40:36,E,12.47,Staffing,again staffing 2 people
-3rd on break 
-4th went home
 45263,Sun Feb 19 2023 21:53:24,E,4.36,Roll Change,
 45264,Sun Feb 19 2023 21:56:11,E,1.6,Short Stop,null
 45265,Sun Feb 19 2023 22:05:27,E,3.77,Staffing,again staffing 2 people
-3rd on break 
-4th went home
 45266,Sun Feb 19 2023 22:23:24,E,9.17,Staffing,again staffing 2 people
-3rd on break 
-4th went home
 45267,Sun Feb 19 2023 22:25:25,E,0.91,Short Stop,null
 45268,Sun Feb 19 2023 22:43:03,E,10.03,Seamer Issues,tape changes on both Q side seamers
 45269,Sun Feb 19 2023 22:58:03,E,0.05,Short Stop,null
@@ -45286,8 +45272,6 @@ CHANGE
 45272,Sun Feb 19 2023 23:43:54,E,5.13,Roll Change,null
 45273,Mon Feb 20 2023 00:19:57,E,27.37,Staffing,null
 45274,Mon Feb 20 2023 00:44:09,E,11.8,Staffing,again staffing 2 people
-3rd on break 
-4th went home
 45275,Mon Feb 20 2023 01:03:31,E,1.68,Short Stop,null
 45276,Mon Feb 20 2023 01:12:47,E,2.68,,
 45277,Mon Feb 20 2023 01:41:22,E,2.19,,
@@ -45301,8 +45285,6 @@ CHANGE
 45285,Mon Feb 20 2023 03:44:24,E,0.92,Short Stop,null
 45286,Mon Feb 20 2023 03:54:55,E,3.6,Roll Change,null
 45287,Mon Feb 20 2023 04:22:43,E,24.24,Staffing,again staffing 2 people
-3rd on break 
-4th went home
 45288,Mon Feb 20 2023 04:50:22,E,13.96,Roll Change,null
 45289,Mon Feb 20 2023 05:07:33,E,11.37,Roll Change,null
 45290,Mon Feb 20 2023 05:13:32,E,5.56,Roll Change,null
@@ -56014,7 +55996,6 @@ CHANGE
 55996,Tue Dec 05 2023 15:24:50,A,2.68,Short Stop,null
 55997,Tue Dec 05 2023 15:32:56,A,5.04,Roll Change,null
 55998,Tue Dec 05 2023 15:35:17,A,1.5,,HEPP HAS RIPPED FROM SPLICE.
-OPERATORS KEEP SPLICING
 55999,Tue Dec 05 2023 16:04:28,A,11.58,Roll Change,null
 56000,Tue Dec 05 2023 16:13:34,A,3.28,Roll Change,null
 56001,Tue Dec 05 2023 16:17:07,A,2.19,Short Stop,null

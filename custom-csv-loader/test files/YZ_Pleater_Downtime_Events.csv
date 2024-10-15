@@ -1,5 +1,4 @@
 ID, DateTime, Shift, Downtime Minutes, Downtime Reason, Comments
-1, DateTime, Shift,0, Downtime Reason, Comments
 23786,Sat Jan 01 2022 06:58:00,D,479.94,Did Not Run,null
 23787,Sat Jan 01 2022 07:24:20,D,26.28,Not Entered,null
 23788,Sat Jan 01 2022 07:41:47,D,4.75,Not Entered,null

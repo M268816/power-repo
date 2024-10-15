@@ -19112,7 +19112,6 @@ ID, DateTime, Shift, Downtime Minutes, Downtime Reason, Comments
 19111,Tue Nov 09 2021 07:30:17,A,0.08,Short Stop,null
 19112,Tue Nov 09 2021 07:37:38,A,0.83,Short Stop,null
 19113,Tue Nov 09 2021 08:13:28,A,23.72,Pleater (Mechanical),FIFE SENSOR
-IS LOOSE. NEEDS TO BE TIGHTENED.
 19114,Tue Nov 09 2021 08:19:08,A,0.24,Short Stop,null
 19115,Tue Nov 09 2021 08:21:48,A,0.16,Short Stop,null
 19116,Tue Nov 09 2021 08:26:39,A,0.17,Short Stop,null
@@ -36282,7 +36281,7 @@ IS LOOSE. NEEDS TO BE TIGHTENED.
 36280,Sat Aug 13 2022 23:03:24,E,0.16,Short Stop,null
 36281,Sun Aug 14 2022 01:16:16,E,131.86,Lot Changeover,null
 36282,Sun Aug 14 2022 01:22:02,E,2.33,Short Stop,null
-36283,Sun Aug 14 2022 01:24:52,E,2.74,,+Flow down
+36283,Sun Aug 14 2022 01:24:52,E,2.74,,#NAME?
 36284,Sun Aug 14 2022 01:26:17,E,0.82,,
 36285,Sun Aug 14 2022 01:30:39,E,1.17,Short Stop,null
 36286,Sun Aug 14 2022 01:32:14,E,1.25,Short Stop,null
@@ -36730,7 +36729,7 @@ IS LOOSE. NEEDS TO BE TIGHTENED.
 36728,Fri Aug 19 2022 18:48:24,E,10.26,Pleater (Mechanical),null
 36729,Fri Aug 19 2022 18:49:24,E,0.66,Short Stop,null
 36730,Fri Aug 19 2022 18:54:15,E,4.24,Pleater (Mechanical),null
-36731,Fri Aug 19 2022 19:14:29,E,19.99,Shift Change,+Mechanics working on pleater at start of shift
+36731,Fri Aug 19 2022 19:14:29,E,19.99,Shift Change,#NAME?
 36732,Fri Aug 19 2022 19:15:09,E,0.58,Short Stop,null
 36733,Fri Aug 19 2022 19:16:19,E,1.09,Short Stop,null
 36734,Fri Aug 19 2022 19:24:15,E,7.75,Pleater (Mechanical),MECHANICS REPLACING CONTROL BOX FOR SLITTERS ON j-SIDE. DOWN AT START OF SHIFT
@@ -48464,7 +48463,7 @@ IS LOOSE. NEEDS TO BE TIGHTENED.
 48462,Sun Apr 02 2023 05:27:16,E,0.5,Short Stop,null
 48463,Sun Apr 02 2023 05:48:58,E,5.75,Endcapper Issues,null
 48464,Sun Apr 02 2023 06:03:55,E,1.49,Short Stop,null
-48465,Sun Apr 02 2023 06:58:00,D,47.98,Shift Change,+Endcapper backed up
+48465,Sun Apr 02 2023 06:58:00,D,47.98,Shift Change,#NAME?
 48466,Sun Apr 02 2023 07:11:11,D,13.12,Shift Change,null
 48467,Sun Apr 02 2023 07:21:02,D,8.93,Shift Change,null
 48468,Sun Apr 02 2023 07:28:22,D,7.25,Shift Change,null
@@ -50022,7 +50021,7 @@ IS LOOSE. NEEDS TO BE TIGHTENED.
 50020,Sun Apr 30 2023 04:08:05,E,8.59,Planned Downtime,null
 50021,Sun Apr 30 2023 04:15:16,E,0.91,Short Stop,null
 50022,Sun Apr 30 2023 06:08:32,E,3,Short Stop,null
-50023,Sun Apr 30 2023 06:58:00,D,43.61,Shift Change,+seamer malfunction
+50023,Sun Apr 30 2023 06:58:00,D,43.61,Shift Change,#NAME?
 50024,Sun Apr 30 2023 07:17:38,D,19.57,Shift Change,null
 50025,Sun Apr 30 2023 07:49:54,D,31.27,Pleater Blade Maint.,null
 50026,Sun Apr 30 2023 08:17:47,D,2.66,Short Stop,null
@@ -50266,7 +50265,7 @@ IS LOOSE. NEEDS TO BE TIGHTENED.
 50264,Sat May 06 2023 05:34:48,E,8.42,Staffing,null
 50265,Sat May 06 2023 05:42:39,E,0.57,Short Stop,null
 50266,Sat May 06 2023 05:59:56,E,10.42,Staffing,null
-50267,Sat May 06 2023 06:58:00,D,38.03,Shift Change,+ENDCAPPER BACKUP
+50267,Sat May 06 2023 06:58:00,D,38.03,Shift Change,#NAME?
 50268,Sat May 06 2023 07:20:13,D,22.14,Shift Change,null
 50269,Sat May 06 2023 07:37:39,D,16.26,Pleater Blade Maint.,null
 50270,Sat May 06 2023 07:41:49,D,4,Roll Change,null
@@ -51547,7 +51546,7 @@ IS LOOSE. NEEDS TO BE TIGHTENED.
 51545,Mon Jun 05 2023 03:51:08,E,0.07,Short Stop,null
 51546,Mon Jun 05 2023 04:03:59,E,7.58,Planned Downtime,null
 51547,Mon Jun 05 2023 04:04:19,E,0.15,Short Stop,null
-51548,Mon Jun 05 2023 06:38:00,E,152.18,Shift Change,+Pleater health check
+51548,Mon Jun 05 2023 06:38:00,E,152.18,Shift Change,#NAME?
 51549,Mon Jun 05 2023 14:42:33,A,484.5,Did Not Run,null
 51550,Mon Jun 05 2023 14:47:29,A,4.83,Not Entered,null
 51551,Mon Jun 05 2023 14:59:25,A,11.52,Not Entered,null

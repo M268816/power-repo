@@ -6541,8 +6541,6 @@ ID, DateTime, Shift, Downtime Minutes, Downtime Reason, Comments
 6540,Sun Feb 07 2021 06:58:03,E,0,Short Stop,null
 6541,Sun Feb 07 2021 07:04:47,D,6.7,Pleater Backed Up,null
 6542,Sun Feb 07 2021 07:26:37,D,9.07,Roll Change,ROLL CHANGE ON X SIDE
-
-SUPPORT CHANGE ON W SIDE
 6543,Sun Feb 07 2021 07:36:01,D,3.09,,
 6544,Sun Feb 07 2021 07:51:59,D,2.77,,"One person cutting and endcapping, another went to the bathroom"
 6545,Sun Feb 07 2021 07:59:32,D,0.92,Short Stop,null
@@ -7594,7 +7592,6 @@ SUPPORT CHANGE ON W SIDE
 7591,Fri Feb 19 2021 19:39:33,B,1.83,Short Stop,null
 7592,Fri Feb 19 2021 19:42:19,B,0.49,Short Stop,null
 7593,Fri Feb 19 2021 20:27:28,B,25.84,Pleater Mechanical or Blade Maint.,WAITING FOR MECHANICS.
-FLAGGING ISSUES ON W SIDE.
 7594,Fri Feb 19 2021 20:33:01,B,4.52,Short Stop,null
 7595,Fri Feb 19 2021 20:33:26,B,0.24,Short Stop,null
 7596,Fri Feb 19 2021 20:50:18,B,3.34,Short Stop,null

@@ -3,13 +3,11 @@ import pandas as pd
 import time
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
-# Update This to be able to pick the start date to pull from.
-DEFAULT_DATE_FILTER = datetime.today().strftime("%A %B %d %Y")
 # DEFAULT_DATE_FILTER = '01 JAN 2024' # TEST DATE REMOVE FOR PROD
+DEFAULT_DATE_FILTER = datetime.today().strftime("%A %B %d %Y")
 ISO_DATE_FILTER = pd.to_datetime(DEFAULT_DATE_FILTER)
-
 UPDATE_TIME = 3600 # One Hour = 3600 secconds.
 LOG_DATE = datetime.now().strftime("%Y-%m-%d")
 
@@ -59,11 +57,10 @@ def main(page: ft.page):
     service_running=False
     service_sleeping=False
     
-    # Main Methods
-    # Log Control
+    # Log Flet Control
     log_text = ft.Text(value='', color=ft.colors.AMBER_400)
 
-    # Lottie Control
+    # Lottie Flet Control
     lottie_sleep = ft.Lottie(
         src='https://lottie.host/cb5a5101-3607-465f-ab76-a98a33aaaed4/ba1gXPDyl2.json',
         background_loading=True,
@@ -101,7 +98,6 @@ def main(page: ft.page):
             lottie.src = lottie_stopped.src
         lottie.update()
 
-    # File Selection Control
     # Select Input File
     selected_files = ft.Text()
     selected_file_paths = []
@@ -146,7 +142,16 @@ def main(page: ft.page):
         # Pull all data from each selected csv
         dataframes = []
         for i in selected_file_paths:
-            temp_read = pd.read_csv(i)
+            temp_read = pd.read_csv(i,
+                dtype={
+                    'ID': int,
+                    ' DateTime': object,
+                    ' Shift': object,
+                    ' Downtime': float,
+                    ' Downtime Reason': object,
+                    ' Comments': object
+                }
+            )
             # Capture pleater line from csv file name
             split_path = i.split('\\')
             small_path = split_path[-1]
@@ -158,11 +163,14 @@ def main(page: ft.page):
         # Create single file from all dataframes
         csv_file = pd.concat(dataframes, ignore_index=True)
    
+        # Try: applying the datetime type to the ' Datetime' column
         try:
-            try:
-                csv_file[' DateTime'] = pd.to_datetime(csv_file[' DateTime'])
-            except:
-                log_function('INVALID DATE FOUND', 0) # Convert DateTime column to iso datetime format
+            csv_file[' DateTime'] = pd.to_datetime(csv_file[' DateTime'])
+        except:
+            log_function('INVALID DATE FOUND', 0) # Convert DateTime column to iso datetime format
+        
+        # Try: Filtering dates by the date filter
+        try:
             datefilter = ISO_DATE_FILTER # Specify a datetime to start the filter
             filtered_file = csv_file[csv_file[' DateTime'] >= datefilter] # Filter the input csv by dates later than the datefiter
             filtered_file.to_csv(selected_folder_path + '\\output.csv', index=False) # Return the filtered file content
@@ -172,7 +180,6 @@ def main(page: ft.page):
         execute_time_end = time.time()
         execute_time = int((execute_time_end - execute_time_start)*1000)
         log_function('csv process', execute_time)
-        
         service_sleeping=True
         lottie_update()
         update_logs()
@@ -184,17 +191,19 @@ def main(page: ft.page):
     
     def close_service(e):
         nonlocal service_running
+        nonlocal service_sleeping
         service_running = False
+        service_sleeping = False
         log_function('Service Closed', 0)
         update_logs()
 
     def find_sleep_time():
         start_time = datetime.now()
-        end_time = datetime(year=datetime.now().year, month=datetime.now().month, day=datetime.now().day, hour=datetime.now().hour+1)
-        sleep_time = abs((end_time-start_time).seconds)
-        log_function(f'Next runtime in: {sleep_time}', 0)
+        end_time = (start_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+        sleep_time = (end_time-start_time).total_seconds()
+        log_function(f'Next runtime in: {round(sleep_time/60, 0)} minutes', 0)
         update_logs()
-        return sleep_time
+        return sleep_time if start_time.minute != 0 else 3600
     
     def main_service(e=None):
         nonlocal service_running
