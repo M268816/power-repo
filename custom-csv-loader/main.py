@@ -5,8 +5,8 @@ import logging
 import os
 from datetime import datetime, timedelta
 
-# DEFAULT_DATE_FILTER = '01 JAN 2024' # TEST DATE REMOVE FOR PROD
-DEFAULT_DATE_FILTER = datetime.today().strftime("%A %B %d %Y")
+DEFAULT_DATE_FILTER = '01 JAN 2024' # TEST DATE REMOVE FOR PROD
+# DEFAULT_DATE_FILTER = datetime.today().strftime("%A %B %d %Y")
 ISO_DATE_FILTER = pd.to_datetime(DEFAULT_DATE_FILTER)
 UPDATE_TIME = 3600 # One Hour = 3600 secconds.
 LOG_DATE = datetime.now().strftime("%Y-%m-%d")
@@ -24,15 +24,19 @@ def log_function(func_name, duration_ms):
     log_message = f'{func_name}: Completed in {duration_ms}ms'
     logging.info(log_message)
 
+def log_generic(generic_msg:str):
+    log_msg = f'[GENERIC] {generic_msg}'
+    logging.info(log_msg)
+
 def main(page: ft.page):
     # Format Window
     page.title = 'CSV Filter Service for PowerApps'
     page.bgcolor = ft.colors.CYAN_100
     page.padding = ft.padding.all(5)
-    page.window.height = 470
-    page.window.min_height = 470
-    page.window.width = 1050
-    page.window.min_width = 1050
+    page.window.height = 550
+    page.window.min_height = 550
+    page.window.width = 1100
+    page.window.min_width = 1100
     page.theme = ft.Theme(
         scrollbar_theme=ft.ScrollbarTheme(
             track_color={
@@ -60,7 +64,7 @@ def main(page: ft.page):
     # Log Flet Control
     log_text = ft.Text(value='', color=ft.colors.AMBER_400)
 
-    # Lottie Flet Control
+    # Lottie Flet Control, local files broken in flet, must use lottie.host
     lottie_sleep = ft.Lottie(
         src='https://lottie.host/cb5a5101-3607-465f-ab76-a98a33aaaed4/ba1gXPDyl2.json',
         background_loading=True,
@@ -104,13 +108,20 @@ def main(page: ft.page):
     def pick_file_result(e: ft.FilePickerResultEvent):
         nonlocal selected_files
         nonlocal selected_file_paths
+        if e.files == None:    
+            selected_files = None
+            selected_file_paths = None
+
         selected_files.value = (
             ', '.join(map(lambda f: f.name, e.files)) if e.files else 'Cancelled!'
         )
+        
         if e.files is not None:
             for i in e.files:
                 selected_file_paths.append(i.path)
+        
         selected_files.update()
+    
     pick_file_dialog = ft.FilePicker(on_result=pick_file_result)
     page.overlay.append(pick_file_dialog)
 
@@ -145,22 +156,35 @@ def main(page: ft.page):
         for i in selected_file_paths:
             temp_read = pd.read_csv(i,
                 dtype={
-                    'ID': int,
-                    ' DateTime': object,
-                    ' Shift': object,
+                    'ID': str,
+                    ' DateTime': str,
+                    ' Shift': str,
                     ' Downtime': float,
-                    ' Downtime Reason': object,
-                    ' Comments': object
+                    ' Downtime Reason': str,
+                    ' Comments': str
                 }
             )
+            
+            # Check row validity through ID column
+            temp_read['ID_is_numeric'] = pd.to_numeric(temp_read['ID'], errors='coerce').notnull() # Add bool column to check validity
+            temp_read = temp_read[temp_read['ID_is_numeric']] # Return a dataframe where validity column is true
+            temp_read = temp_read.drop('ID_is_numeric', axis=1) # Remove the extra column
+
+            # Check row validity though datetime column
+            temp_read['Datetime_is_datetime'] = pd.to_datetime(temp_read[' DateTime'], errors='coerce').notnull()
+            temp_read = temp_read[temp_read['Datetime_is_datetime']]
+            temp_read = temp_read.drop('Datetime_is_datetime', axis=1)
+            
             # Capture pleater line from csv file name
             split_path = i.split('\\')
             small_path = split_path[-1]
             split_file = small_path.split('_')
             pleater = split_file[0]
+            
             # Add Pleater line to output
             temp_read['Pleater'] = pleater
             dataframes.append(temp_read)
+        
         # Create single file from all dataframes
         csv_file = pd.concat(dataframes, ignore_index=True)
    
@@ -168,15 +192,19 @@ def main(page: ft.page):
         try:
             csv_file[' DateTime'] = pd.to_datetime(csv_file[' DateTime'])
         except:
-            log_function('INVALID DATE FOUND', 0) # Convert DateTime column to iso datetime format
+            log_generic('INVALID DATE FOUND') # Convert DateTime column to iso datetime format
         
         # Try: Filtering dates by the date filter
         try:
             datefilter = ISO_DATE_FILTER # Specify a datetime to start the filter
             filtered_file = csv_file[csv_file[' DateTime'] >= datefilter] # Filter the input csv by dates later than the datefiter
+        except:
+            log_generic('INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED')
+
+        try:
             filtered_file.to_csv(selected_folder_path + '\\output.csv', index=False) # Return the filtered file content
         except:
-            log_function('INVALID FORMATS FOUND IN INPUT CSV FILE. PROCESS ABORTED', 0)
+            log_generic('File could not be written! Is the output file opened?')
         
         execute_time_end = time.time()
         execute_time = int((execute_time_end - execute_time_start)*1000)
@@ -196,54 +224,60 @@ def main(page: ft.page):
         service_running = False
         service_sleeping = False
         log_function('Service Closed', 0)
+        lottie_update()
+        button_controls.update()
         update_logs()
 
     def find_sleep_time():
         start_time = datetime.now()
         end_time = (start_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
         sleep_time = (end_time-start_time).total_seconds()
-        log_function(f'Next runtime in: {round(sleep_time/60, 0)} minutes', 0)
+        log_generic(f'Next runtime in: {round(sleep_time/60, 0)} minutes')
         update_logs()
         return sleep_time if start_time.minute != 0 else 3600
     
     def main_service(e=None):
         nonlocal service_running
+        
         if selected_file_paths == None:
-            log_function('No file selected, service not started', 0)
+            log_generic('No file selected, service not started')
             update_logs()
+            service_running = False
         else:
             service_running = True
-        button_controls.update()
+        
         while service_running:
             process_file()
             sleep_time = find_sleep_time()
             time.sleep(sleep_time)
+        
+        button_controls.update()
 
     # Button Controls
     button_controls = ft.Container(
         content=ft.Column(
             controls=[
                 lottie,
-                ft.TextField(
-                    value=DEFAULT_DATE_FILTER,label='Date Filter',
-                    read_only=True,
-                    text_size=12,
-                    dense=True,
-                ),
+                #ft.TextField(
+                #    value=DEFAULT_DATE_FILTER,label='Date Filter',
+                #    read_only=True,
+                #    text_size=12,
+                #    dense=True,
+                #),
                 ft.ElevatedButton(
                     text='Input files',
                     icon=ft.icons.FILE_OPEN,
                     icon_color=ft.colors.BLUE_400,
                     on_click=lambda _: pick_file_dialog.pick_files(allow_multiple=True, allowed_extensions=['csv'])
                 ),
-                selected_files,
+                # selected_files,
                 ft.ElevatedButton(
                     text='Output Location',
                     icon=ft.icons.FOLDER,
                     icon_color=ft.colors.AMBER_300,
                     on_click=lambda _: pick_folder_dialog.get_directory_path(),
                 ),
-                selected_folder,
+                # selected_folder,
                 ft.ElevatedButton(
                     text='Start Service',
                     icon=ft.icons.PLAY_ARROW,
@@ -266,7 +300,7 @@ def main(page: ft.page):
         padding=ft.padding.all(10)
     )
 
-    # Log File
+    # Log file Control
     log_controls = ft.Container(
         content=ft.Column(
             controls=[
@@ -313,6 +347,7 @@ def main(page: ft.page):
         expand=True,
         padding= ft.padding.all(1)
     )
+    
     page.add(main_window)
 
 if __name__ == '__main__':
