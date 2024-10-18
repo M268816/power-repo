@@ -1,4 +1,8 @@
 # Notes
+
+Collect all data form Master Roll #
+
+
 PROBLEM! I received an email with this warning on 15-OCT
 Your flow has used more than 80% of its Power Platform Requests (https://aka.ms/pa-ppr) limit in the past 24 hours. The performance is currently not impacted as it is below limits. But if the usage grows, further actions may be throttled or slowed down. Power Platform Requests used: 8197, Power Platform Requests transition limit: 10000.
 
@@ -18,27 +22,13 @@ Bad news, free plans will not be enough to capture all CRUD api calls for power 
 
 # Todo
 Pleater Downtime collection does not contain lot info
-    incorperation into my current OEE2 formulas will need refactoring
+    incorporation into my current OEE2 formulas will need refactoring
 
 Move csv raspi data push to onedrive location
 
 Connect csv flow to perm location
 
-!!! Database transfer errors !!!
-Access db Roll_data columns need to be successfully transferred to sharepoint list
-    sharepoint connections to and from a migrated database would work without conflict
-    access db form pointers need to update to connected sharepoint db instead of roll_data db
-    !!!
-    New tables and connections work well, exporting and linking old tables are broken
-        tried to circumvent by createing an empty table with the proper headers then exporting old data into new table
-            new table failed to pull in old data. Linked table is considered read-only. cannot change read-only attribute
-                2 attempts to move data over,
-                20k record chunk ran for 10 minutes then crashed, ~1k itmes pulled in
-                2k record chunk ran for 15 mins then crashed. ~1k items pulled in
-    !!!
-    Tried instead to migrate only 2024 access records to Davaverse, transfer errors and desktop app crashed, out of resources errors.
-
-    @@@ ONLY NEED TO PULL DATA FOR OEE CALC, USE QUERY TO PULL RELAVENT DATA, CONNECT TO SP LiST, USE 2ND LIST TO STORE CALCULATIONS?
+ONLY NEED TO PULL DATA FOR OEE CALC, USE QUERY TO PULL RELEVANT DATA, CONNECT TO SP LiST, USE 2ND LIST TO STORE CALCULATIONS?
 
 
 https://support.microsoft.com/en-us/office/get-started-migrate-access-data-to-dataverse-013c8bab-7737-46ca-ad2e-892bbf26287d

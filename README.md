@@ -4,15 +4,15 @@
 
 | Application        | Version           | Status          |
 | ------------------ |:-----------------:| ---------------:|
-| Encapsualtion Accountability Suite | v1.0.0 | Released |
+| Encapsulation Accountability Suite | v1.0.0 | Released |
 | Encapsulation Daily Management System for Displays | v0.1.0 | WIP |
 | Encapsulation Daily Management System for Management | v1.0.0 | Released |
-| Encapsulation Daily Managmenet System for Production | v1.0.0 | Released |
+| Encapsulation Daily Management System for Production | v1.0.0 | Released |
 | Encapsulation Digital SOPs | v0.1.0 | TBD |
 | Encapsulation LinkHub | v1.0.0 | Released |
 | Front End CSV Filter Service | v0.1.0 | WIP |
 | Front End Daily Management System for Management | v0.1.0 | WIP |
-| Front End Daily Managmenet System for Production | v0.1.0 | DROPPED |
+| Front End Daily Management System for Production | v0.1.0 | DROPPED |
 | Scheduling Suite | v0.1.0 | TBD |
 | V-Line Daily Management System for Management | v0.1.0 | WIP |
 | V-Line Daily Management System for Production | v0.0.0 | TBD |
@@ -23,11 +23,11 @@
 
 ## PowerApps Packages
 
-The PowerApps packages included in the repo are full backups that can be used with the PowerApps importer to create a new app from the backup. Each package will be disignated with the simple name of the application using either; LinkHub, Display, Accountability, Management, or Production and the backup date/time.
+The PowerApps packages included in the repo are full backups that can be used with the PowerApps importer to create a new app from the backup. Each package will be designated with the simple name of the application using either; LinkHub, Display, Accountability, Management, or Production and the backup date/time.
 
 ## YAML Repository
 
-The YAML repo for all of the PowerApp applications for the MilliporeSigma Encapsulation workcenter can be used to quickly change and update various controls within the PowerApps.
+The YAML repo for all of the PowerApp applications for the MilliporeSigma Encapsulation work center can be used to quickly change and update various controls within the PowerApps.
 
 ### Using the YAML files for PowerApps
 

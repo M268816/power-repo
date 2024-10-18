@@ -69,7 +69,7 @@ There is a 18.02% difference between the calculation that Millipore is basing it
 
 The algorithm we use to gather and calculate OEE2 uses the same premise as the LSPS OEE2 calculation but needed to be adapted to consider the ideal output constraint variances from each catalog and line. So, as a line switches products, we need to also change the constraint for the specific catalogs that run.
 
-To adjust for this, the ideal output is calculated for each catalog run on the line. For example, if we run a 10-inch product for 3 hours at 40 units per hour, and a 3-inch product for 4 hours at a 30 units per hour and 1 hour of planned downtime. We multiply the 3 hours of 10-inch by 40, the 4 hours of 3-inch by 30, sum them, then parse them through the OEE2 calculation afterard. The single hour of planned downtime is not added, as we only need the total planned runtime. Let’s also say the total output was only 100 units that shift as well.
+To adjust for this, the ideal output is calculated for each catalog run on the line. For example, if we run a 10-inch product for 3 hours at 40 units per hour, and a 3-inch product for 4 hours at a 30 units per hour and 1 hour of planned downtime. We multiply the 3 hours of 10-inch by 40, the 4 hours of 3-inch by 30, sum them, then parse them through the OEE2 calculation afterward. The single hour of planned downtime is not added, as we only need the total planned runtime. Let’s also say the total output was only 100 units that shift as well.
 
 > OEE2 = 100 / ((3\*40)+(4\*30))
 
@@ -81,15 +81,15 @@ Let's say that the last hour of the shift was planned runtime, that extra hour w
 
 > OEE2 = 0.3703 or 37.03%
 
-This first step described above is added to a "constraint goal" array that will be used in the calculation to represent the Ideal Ouput multiplied by Planned Runtime.
+This first step described above is added to a "constraint goal" array that will be used in the calculation to represent the Ideal Output multiplied by Planned Runtime.
 
 > OEE2 = Output / **(Ideal Output \* Planned Runtime)**
 
 > OEE2 = Output / ***Constraint Goal***
 
-Each "constraint goal" is added together like we did above before returning the percantage from the total output.
+Each "constraint goal" is added together like we did above before returning the percentage from the total output.
 
-This relies on the filters given to the instructions for data collection beforehand. This means you can return a percentile of a single line, for a single day; or every line for months. Because of this constraint agnostic behaviour, the data *should* be extreamly reliable.
+This relies on the filters given to the instructions for data collection beforehand. This means you can return a percentile of a single line, for a single day; or every line for months. Because of this constraint agnostic behavior, the data *should* be extremely reliable.
 
 The problem with this method is the data collection itself. It relies on an operator facing data entry method with only volunteer verification of the data from leads.
 
@@ -263,7 +263,7 @@ With(
 );
 ```
 
-The constraint setting is collected through a database that holds all constraint data per catalog. This is collected using an average bacause you can select multiple lines using the controls. Selecting a single line will return the exact amount, while selecting "Only SSCs" will return an average.
+The constraint setting is collected through a database that holds all constraint data per catalog. This is collected using an average because you can select multiple lines using the controls. Selecting a single line will return the exact amount, while selecting "Only SSCs" will return an average.
 
 ``` cs
 constraint_setting:
@@ -324,7 +324,7 @@ runtime:
     )/60,
 ```
 
-We then find a constraint goal to simplify the alrogithm while calculating OEE2. Within the OEE2 calculation this is determined to be the the Ideal Ouput multiplied by the Planned Runtime. And the following acts as the same calculation.
+We then find a constraint goal to simplify the algorithm while calculating OEE2. Within the OEE2 calculation this is determined to be the the Ideal Output multiplied by the Planned Runtime. And the following acts as the same calculation.
 
 ```cs
 constraint_goal:
@@ -485,11 +485,11 @@ OEE2:
     ),
 ```
 
-The other data collected in the intial algorithm is used to display the data on the OEE Analysis screen.
+The other data collected in the initial algorithm is used to display the data on the OEE Analysis screen.
 
 ## Collecting All/Overall OEE2 Data
 
-Collecting the OEE data works in a simmilar fashion, but without the need to distinguish between each shift. The biggest difference in this algorithm is that it collects much more "display" data. This extra data is pushed to the screen to verify the final OEE2 percentage.
+Collecting the OEE data works in a similar fashion, but without the need to distinguish between each shift. The biggest difference in this algorithm is that it collects much more "display" data. This extra data is pushed to the screen to verify the final OEE2 percentage.
 
 ``` cs
 /*Gather OEE Data*/
@@ -777,7 +777,7 @@ With(
 );
 ```
 
-This algoritm collects all constraint data for evey line and catalog, so when gathering the overall OEE it *DOES NOT* average out the constraint data. This makes the overall OEE2 algorithm the most accurate way to display OEE2.
+This algorithm collects all constraint data for every line and catalog, so when gathering the overall OEE it *DOES NOT* average out the constraint data. This makes the overall OEE2 algorithm the most accurate way to display OEE2.
 
 ```cs
 constraint_setting:

@@ -120,7 +120,7 @@ def main(page: ft.page):
             for i in e.files:
                 selected_file_paths.append(i.path)
         
-        selected_files.update()
+        # selected_files.update()
     
     pick_file_dialog = ft.FilePicker(on_result=pick_file_result)
     page.overlay.append(pick_file_dialog)
@@ -138,7 +138,7 @@ def main(page: ft.page):
         )
         if e.path is not None:
             selected_folder_path = e.path
-        selected_folder.update()
+        # selected_folder.update()
     pick_folder_dialog = ft.FilePicker(on_result=pick_folder_result)
     page.overlay.append(pick_folder_dialog)
 
