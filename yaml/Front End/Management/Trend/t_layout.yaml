@@ -1,0 +1,495 @@
+- t_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+      X: =
+    Children:
+    - t_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =varPadding
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - t_collect:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =/*Start*/
+                Set(varLoading, {Visible: true, Value: 1, Text: "Gathering Dates"});
+
+                /*Select date range of selected week*/
+                UpdateContext({
+                    locWeek: WeekNum(t_start_date.SelectedDate),
+
+                    locWeekEnd:
+                        DateAdd(
+                            Date(Year(t_start_date.SelectedDate), 1, 1) + (locWeek-1)*7 - Weekday(Date(Year(t_start_date.SelectedDate), 1, 1)) + 6,
+                            23,
+                            TimeUnit.Hours
+                        ),
+
+                    locWeekStart:
+                        DateAdd(
+                            Date(Year(t_start_date.SelectedDate), 1, 1) + (locWeek-1)*7 - Weekday(Date(Year(t_start_date.SelectedDate), 1, 1)) + 2,
+                            -1,
+                            TimeUnit.Hours
+                        )
+                });
+
+                /*Collect Data from selected date range*/
+                Set(varLoading, {Visible: true, Value: 5, Text: "Collecting All Weekly Production Data"});
+                ClearCollect(collectProduction,
+                    ForAll(
+                        Filter(FE_Production,
+                            Hour_Ending <= DateAdd(locWeekEnd, 23, TimeUnit.Hours),
+                            Hour_Starting >= DateAdd(locWeekStart, -1, TimeUnit.Hours)
+                        ),
+                        {
+                            id: Value(ThisRecord.ID),
+                            shift: Text(ThisRecord.Shift_Letter.Value),
+                            line: Text(ThisRecord.Line.Value),
+                            lot: Text(ThisRecord.Lot),
+                            catalog: Text(ThisRecord.Catalog),
+                            hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                            hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                            goal: Value(ThisRecord.Hourly_Goal),
+                            amount_built: Value(ThisRecord.Amount_Built),
+                            unit_starting: Value(ThisRecord.Unit_Starting),
+                            unit_ending: Value(ThisRecord.Unit_Ending),
+                            reject_units: Value(ThisRecord.Reject_Units)
+                        }
+                    )
+                );
+
+                Set(varLoading, {Visible: true, Value: 10, Text: "Collecting All Weekly Downtime Data"});
+                ClearCollect(collectDowntime,
+                    ForAll(
+                        Filter(FE_Downtime,
+                            Ended <= DateAdd(locWeekEnd, 23, TimeUnit.Hours),
+                            Started >= DateAdd(locWeekStart, -1, TimeUnit.Hours)
+                        ),
+                        {
+                            id: Value(ThisRecord.ID),
+                            shift: Text(ThisRecord.Shift_Letter.Value),
+                            line: Text(ThisRecord.Line.Value),
+                            lot: Text(ThisRecord.Lot),
+                            catalog: Text(ThisRecord.Catalog),
+                            started: DateTimeValue(ThisRecord.Started),
+                            ended: DateTimeValue(ThisRecord.Ended),
+                            reason: Text(ThisRecord.Reason.Value),
+                            total: Value(ThisRecord.Total_Downtime),
+                            comments: Text(ThisRecord.Comments)
+                        }
+                    )
+                );
+
+                Select(t_update);
+              Text: ="collect"
+              Visible: =false
+              X: =20
+              Y: =20
+        - t_update:
+            Control: Classic/Button
+            Properties:
+              OnSelect: "=/*Init Default Filters*/\nSet(varLoading,{Visible: true, Value: 15, Text: \"Initializing Default Filters\"});\nUpdateContext({\n    \n    locDefaultProductionFilter:\n        Filter(collectProduction,\n            hour_ending <= locWeekEnd,\n            hour_starting >= locWeekStart/*,\n            If(\n                t_line.Selected.Value = \"Average\",\n                line = line,\n                t_line.Selected.Value = \"All SSC\",\n                line = \"SSC\" || line = \"SSC2\",\n                t_line.Selected.Value = \"All XL\",\n                line = \"XL1\" || line = \"XL2\" || line = \"XL3\" || line = \"XL4\" || line = \"XL5\",\n                t_line.Selected.Value = \"All XLT\",\n                line = \"XLT\" || line = \"XLT2\" || line = \"XLT3\",\n                line = t_line.Selected.Value\n            )*/\n        ),\n\n    locDefaultDowntimeFilter:\n        Filter(collectDowntime,\n            ended <= locWeekEnd,\n            started >= locWeekStart/*,\n            If(\n                t_line.Selected.Value = \"Average\",\n                line = line,\n                t_line.Selected.Value = \"All SSC\",\n                line = \"SSC\" || line = \"SSC2\",\n                t_line.Selected.Value = \"All XL\",\n                line = \"XL1\" || line = \"XL2\" || line = \"XL3\" || line = \"XL4\" || line = \"XL5\",\n                t_line.Selected.Value = \"All XLT\",\n                line = \"XLT\" || line = \"XLT2\" || line = \"XLT3\",\n                line = t_line.Selected.Value\n            )*/\n        )\n});\n\n/*Find available sizes for date range*/\nSet(varLoading,{Visible: true, Value: 20, Text: \"Finding Available Product Sizes\"});\n\nClearCollect(\n    collectTempSizeGroup,\n    GroupBy(\n        Filter(\n            collectProduction,\n            hour_ending <= locWeekEnd,\n            hour_starting >= locWeekStart/*,\n            If(\n                t_line.Selected.Value = \"Average\",\n                line = line,\n                t_line.Selected.Value = \"All SSC\",\n                line = \"SSC\" || line = \"SSC2\",\n                t_line.Selected.Value = \"All XL\",\n                line = \"XL1\" || line = \"XL2\" || line = \"XL3\" || line = \"XL4\" || line = \"XL5\",\n                t_line.Selected.Value = \"All XLT\",\n                line = \"XLT\" || line = \"XLT2\" || line = \"XLT3\",\n                line = t_line.Selected.Value\n            )*/\n        ),\n        size,\n        line_group\n    )\n);\n\nSet(varLoading,{Visible: true, Value: 25, Text: \"Initializing List of Available Lots\"});\n/*Init Lot List collection*/\nClear(collectSizeList);\n/*Create a size list from production*/\nForAll(\n    collectTempSizeGroup,\n    Collect(\n        collectSizeList,\n        {\n            Size: size,\n            Line: line_group.line\n        }\n    )\n);\n/*Clear temp collections*/\nSet(varLoading,{Visible: true, Value: 30, Text: \"Garbage Collection\"});\nClear(collectTempSizeGroup);\n\n/*Force update Now()*/\nSet(varNow, Now());\n\nSet(varLoading,{Visible: true, Value: 35, Text: \"Combining Databases\"});\n/*Combine databases to find runtime data*/\nClear(collectCombinedData);\n/*Insert production data int combined data*/\nClearCollect(collectCombinedData,\n    Filter(\n        collectProduction,\n        /*If the selected locWeekEnd is greater than the current DateTime, use the current datetime rather than locWeekEnd*/\n        And(\n            hour_starting >= locWeekStart,\n            If(locWeekEnd > varNow,\n                hour_ending <= varNow,\n                hour_ending <= locWeekEnd\n            )\n        )\n    )\n);\n/* \n    for all lines,\n    insert downtime data that does not overlap production data\n*/\nForAll(\n    collectLineSchema,\n    {\n        Line: SCH_Line,\n        \n        Value:\n            ForAll(\n                Filter(\n                    collectDowntime,\n                    And(\n                        started >= locWeekStart,\n                        ended <= locWeekEnd\n                        \n                    ),\n                    line = SCH_Line\n                ),\n                With(\n                    {\n                        thisDowntime: ThisRecord,\n                        thisLine: SCH_Line\n                    },\n                    If(\n                        CountRows(\n                            Filter(\n                                collectProduction,\n                                And(\n                                    hour_starting >= locWeekStart,\n                                    hour_ending <= locWeekEnd\n                                ),\n                                line = SCH_Line,\n                                amount_built <> 0,\n                                (hour_starting <= thisDowntime.started && hour_ending > thisDowntime.started) || \n                                (hour_starting < thisDowntime.ended && hour_ending >= thisDowntime.ended) ||\n                                (hour_starting >= thisDowntime.started && hour_ending <= thisDowntime.ended)\n                                )) = 0,\n                        Collect(collectCombinedData, thisDowntime)\n                    )\n                )\n            )\n    }\n);\nForAll(collectLineSchema,\n    Collect(collectCombinedData,\n        {\n            Line: SCH_Line,\n\n            unreported_minutes:\n                DateDiff(\n                        Max(\n                            First(Sort(Filter(collectCombinedData, line = SCH_Line),hour_ending,SortOrder.Descending)).hour_ending,\n                            First(Sort(Filter(collectCombinedData, line = SCH_Line),ended,SortOrder.Descending)).ended\n                        ),\n                        locWeekEnd,\n                        TimeUnit.Minutes\n                )\n            }\n    )\n);\n\n/*Find size count per line for combined data*/\nSet(varLoading,{Visible: true, Value: 40, Text: \"Calculating Size Counts\"});\nUpdateContext({\n    sizes_per_line:\n        With(\n            {theseLines: Choices([@FE_Production].Line)},\n            ForAll(theseLines,\n                With({thisLine:ThisRecord.Value},\n                    {\n                        Line: thisLine,\n                        \n                        Value:\n                            CountRows(\n                                Distinct(\n                                    Filter(collectCombinedData, line = thisLine),\n                                    catalog\n                                )\n                            )\n                    }\n                )\n            )\n        )\n});\n\n\n/*For each line, for each catalog, collect output, constraint, and runtime*/\nSet(varLoading,{Visible: true, Value: 45, Text: \"Gathering OEE2 Data\"});\nClear(collectOEE2Data);\nWith(\n    {\n        theseLines: Choices([@FE_Production].Line),\n        theseCatalogs: Distinct(Table(ShowColumns(FE_Constraints, Catalog)),Title)\n    },\n    ForAll(theseLines,\n        With({thisLine: ThisRecord.Value},\n            ForAll(theseCatalogs,\n                With({thisCatalog: ThisRecord.Value},\n                    If(\n                        Sum(\n                            Filter(collectProduction,\n                                hour_starting >= locWeekStart,\n                                hour_ending <= locWeekEnd,\n                                line = thisLine,\n                                catalog = thisCatalog\n                            ),\n                            amount_built\n                        ) > 0,\n                    \n                        Collect(collectOEE2Data,\n                            {                                   \n                                line: thisLine,\n\n                                catalog: thisCatalog,\n                                \n                                output:\n                                    Sum(\n                                        Filter(collectProduction,\n                                            And(\n                                                hour_starting >= locWeekStart,\n                                                hour_ending <= locWeekEnd\n                                            ),\n                                            line = thisLine,\n                                            catalog = thisCatalog\n                                        ),\n                                        amount_built\n                                    ),\n                        \n                                constraint_goal:\n                                    /*Constraint *  Runtime*/\n                                    /*Constraint*/\n                                    IfError(\n                                        First(Filter(FE_Constraints, Line.Value = thisLine, Catalog = thisCatalog)).Constraint,\n                                        0\n                                    ) *\n                                    /* Runtime */\n                                    (\n                                        /*Collect runtime minutes from production*/\n                                        (CountRows(\n                                            Filter(collectCombinedData,\n                                                amount_built > 0,\n                                                line = thisLine,\n                                                catalog = thisCatalog\n                                            )\n                                        ) * 60) +\n                                        /*Collect runtime minutes from downtime*/\n                                        Sum(\n                                            Filter(collectCombinedData,\n                                                line = thisLine,\n                                                catalog = thisCatalog,\n                                                Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")\n                                            ),\n                                            total\n                                        )\n                                        \n                                    ) / 60,\n\n                                missing_goal:\n                                    /*Average Constraint *  Missing Runtime*/\n                                    /*Average Constraint*/\n                                    IfError(\n                                        Average(Filter(FE_Constraints, Line.Value = thisLine), Constraint),\n                                        0\n                                    ) *\n                                    /* Missing Runtime */\n                                    (\n                                        /*Total Unreported Minutes per Line / Count of sizes per line*/\n                                        (Sum(Filter(collectCombinedData, Line = thisLine),unreported_minutes) / Sum(Filter(sizes_per_line, Line = thisLine),Value))\n                                        \n                                    ) / 60,\n                                \n                                missing_attainment:\n                                    /*Average Constraint *  Missing Runtime*/\n                                    /*Average Constraint*/\n                                    IfError(\n                                        Average(Filter(FE_Constraints, Line.Value = thisLine), Constraint),\n                                        0\n                                    ) *\n                                    /* Missing Runtime */\n                                    (\n                                        /*Total Unreported Minutes per Line / Count of sizes per line * Target OEE2 %*/\n                                        (\n                                            Sum(Filter(collectCombinedData, Line = thisLine),unreported_minutes) /\n                                            Sum(Filter(sizes_per_line, Line = thisLine),Value)) *\n                                            Switch(thisLine,\n                                                \"SSC\", 0.55,\n                                                \"SSC2\", 0.55,\n                                                \"XLT\", 0.61,\n                                                \"XLT2\", 0.61,\n                                                \"XLT3\", 0.61,\n                                                /*Default*/\n                                                0.59\n                                            )\n                                        \n                                    ) / 60\n                            }\n                        )\n                    )\n                )\n            )\n        )   \n    )\n);\n\n/*Collect OEE2 for each line*/\nSet(varLoading,{Visible: true, Value: 50, Text: \"Calculating OEE2\"});\nClear(collectTrends);\nWith(\n    {\n        theseLines:\n            Choices([@FE_Analysis].Line)\n    },\n    ForAll(theseLines,\n        With({thisLine: ThisRecord.Value},\n                Collect(collectTrends,\n                    {\n                        \n                        Line: thisLine,\n\n                        New_OEE2:\n                            IfError(\n                                Round(\n                                    (\n                                        (\n                                            Sum(\n                                                Filter(collectOEE2Data,\n                                                    If(\n                                                        thisLine = \"Average\",\n                                                        true,\n                                                        line = thisLine\n                                                    )\n                                                ),\n                                                output\n                                            ) +\n                                            Sum(\n                                                Filter(collectOEE2Data,\n                                                    If(\n                                                        thisLine = \"Average\",\n                                                        true,\n                                                        line = thisLine\n                                                    )\n                                                ),\n                                                missing_attainment\n                                            )\n                                        ) /\n                                        (\n                                            Sum(\n                                                Filter(collectOEE2Data,\n                                                    If(\n                                                        thisLine = \"Average\",\n                                                        true,\n                                                        line = thisLine\n                                                    )\n                                                ),\n                                                constraint_goal\n                                            ) +\n                                            Sum(\n                                                Filter(collectOEE2Data,\n                                                    If(\n                                                        thisLine = \"Average\",\n                                                        true,\n                                                        line = thisLine\n                                                    )\n                                                ),\n                                                missing_goal\n                                            )\n                                        )\n                                    ),\n                                    2\n                                ) * 100,\n                                0\n                            )\n                    }\n                )\n        )\n    )\n);\n\nSet(varLoading,{Visible: true, Value: 75, Text: \"Patching Week \"&locWeek&\" OEE2 into Database\"});\n/*Patch data into OEE2 sharepoint list*/\nForAll(collectTrends,\n    With({thisLine:ThisRecord.Line, thisOEE: ThisRecord.New_OEE2},\n        If(\n            IsBlankOrError(\n                LookUp(\n                    FE_Analysis,\n                    Week = locWeek &&\n                    Year = Year(locWeekEnd) &&\n                    Line.Value = thisLine\n                )\n            ),\n\n            Patch(\n                FE_Analysis,\n                Defaults(FE_Analysis),\n                {\n                    OEE2: thisOEE,\n                    Week: locWeek,\n                    Year: Year(locWeekEnd),\n                    Line: {Value: thisLine}\n                }\n            ),\n\n            Patch(\n                FE_Analysis,\n                LookUp(\n                    FE_Analysis,\n                    Week = locWeek &&\n                    Year = Year(locWeekEnd) &&\n                    Line.Value = thisLine\n                ),\n                {\n                    OEE2: thisOEE\n                }\n            )\n        )\n    )\n);\n\n/*Garbage Collecting*/\nSet(varLoading,{Visible: true, Value: 98, Text: \"Garbage Collection\"});\n\n//Clear(collectOEE2Data);\n//Clear(collectCombinedData);\nClear(collectTrends);\n//UpdateContext({ \n//    locDefaultProductionFilter: Blank(),\n//    locDefaultDowntimeFilter: Blank()\n//});\n\nSet(varLoading,{Visible: true, Value: 100, Text: \"Finishing Up\"});\n/*End*/\nSet(varLoading,{Visible: false, Value: -1, Text: \"Not Loading\"});"
+              Text: ="update"
+              Visible: =false
+              X: =20
+              Y: =20
+        - t_logo:
+            Control: Image
+            Properties:
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Width: =10
+        - t_h_title:
+            Control: Label
+            Properties:
+              Text: ="Encapsualtion Daily Managmenet System"
+              Align: =Align.Center
+              Color: =varColor5
+              FillPortions: =6
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 2
+        - t_h_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =1
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =t_h_n_reload.Width * 3 + varPadding * 4
+            Children:
+            - t_h_n_reload:
+                Control: Image
+                Properties:
+                  OnSelect: =Select(t_collect);
+                  Image: =gblAppIcons.Reload
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  X: =t_h_n_settings.X - Self.Width - Parent.Width * 0.015
+                  Y: =Parent.Height/2 - Self.Height/2
+            - t_h_n_bugs:
+                Control: Image
+                Properties:
+                  OnSelect: =Navigate(Bugs)
+                  Image: =gblAppIcons.Bug
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  X: =Parent.Width * 0.99 - Self.Width
+                  Y: =Parent.Height/2 - Self.Height/2
+            - t_h_n_settings:
+                Control: Image
+                Properties:
+                  OnSelect: =Navigate(Settings)
+                  Image: =gblAppIcons.Settings
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  X: =Parent.Width * 0.99 - Self.Width - t_h_n_bugs.Width - Parent.Width * 0.015
+                  Y: =Parent.Height/2 - Self.Height/2
+            - t_h_n_user:
+                Control: Image
+                Properties:
+                  Image: |
+                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
+    - t_body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =15
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - t_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =varColor3
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - t_n_title:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Size: =Self.Height / 3
+                  Text: ="Trend Analysis"
+                  VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  FillPortions: =1
+            - t_n_seperator:
+                Control: Rectangle
+                Properties:
+                  Height: =1
+                  Width: =Parent.Width * 0.95
+            - t_n_gallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =collectNavigation
+                  DelayItemLoading: =true
+                  FillPortions: =13
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LoadingSpinner: =LoadingSpinner.Data
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: =(Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount
+                Children:
+                - t_n_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.ScreenName);
+                      Text: =ThisItem.Title
+                      Color: =varColor0
+                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =varColorAccent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight - varPadding
+                      Size: =Self.Width / 16
+                      Width: =Parent.TemplateWidth - Self.BorderThickness
+                      X: =Center(Parent.TemplateWidth, Self.Width)
+                      Y: =Center(Parent.TemplateHeight, Self.Height)
+            - t_n_footer:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =2
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - t_n_f_text:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =8
+                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
+                      Height: =Parent.Height
+                      Width: =Parent.Width
+        - t_main:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =11
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - t_controls:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =varColor4
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =varPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
+                Children:
+                - t_start_date_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Target Date"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - t_start_date:
+                    Control: DatePicker
+                    Properties:
+                      OnChange: |-
+                        =UpdateContext({ locWeek: WeekNum(t_start_date.SelectedDate) });
+                      FontSize: =Self.Width / 10
+                      Format: ="Short"
+                      SelectedDate: =varNowDay
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - t_seperator_0:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - t_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Select(t_collect);
+                      Text: ="Update Week " & locWeek & " Data"
+                      Color: =varColor0
+                      Fill: =varColorAccent
+                      FillPortions: =1
+                      FontWeight: =FontWeight.Normal
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Width / 16
+                - t_seperator_1:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - t_line_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Line"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - t_line:
+                    Control: DropDown
+                    Variant: pcfdataset
+                    Properties:
+                      Appearance: ='DropdownCanvas.Appearance'.FilledDarker
+                      DefaultSelectedItems: |-
+                        ={Value: "Average"}
+                      FontSize: =Self.Width / 10
+                      Items: =["Average","12","34","EF","GH","JK","NO","PQ","WX","YZ"]
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - t_c_footer:
+                    Control: GroupContainer
+                    Variant: manualLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      FillPortions: =11
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+            - t_section:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =9
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =varPadding
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - t_graph:
+                    Control: Image
+                    Properties:
+                      Image: "=\"https://quickchart.io/chart?width=\" & Self.Width & \"&height=\" & Self.Height*0.90 & \"&c=\" & \nEncodeUrl(\"\n\n{\n    type: 'line',\n    data: {\n        labels:\"& Concatenate( \"[\", Concat(Sort(Filter(FE_Analysis, OEE2 >= 0, Week >= 17, Line.Value = t_line.Selected.Value),Week,SortOrder.Ascending), Week, \",\" ), \"]\") &\",\n        datasets: [\n            {\n                label: '\"&t_line.Selected.Value&\"',\n                backgroundColor: '#FFC832',\n                borderColor: '#503291',\n                data: \"& Concatenate( \"[\", Concat(Sort(Filter(FE_Analysis, OEE2 >= 0, Week >= 17, Line.Value = t_line.Selected.Value),Week,SortOrder.Ascending), OEE2, \",\" ), \"]\") &\",\n                fill: false\n            }\n        ]\n    },\n    options: {\n        layout: {\n            padding: {\n                left:8\n            }\n        },\n        scales: {\n            xAxes: [{offset: true}],\n            yAxes: [{\n                id: 'y-axis-0',\n                type: 'linear',\n                position: 'right',\n                ticks: {\n                    beginAtZero: true,\n                    min: \"& First(Sort(Filter(FE_Analysis, OEE2 >= 0, Week >= 17, Line.Value = t_line.Selected.Value),OEE2,SortOrder.Ascending)).OEE2 - 5 &\",\n                    max: \"& Last(Sort(Filter(FE_Analysis, OEE2 >= 0, Week >= 17, Line.Value = t_line.Selected.Value),OEE2,SortOrder.Ascending)).OEE2 + 5 &\",\n                    stepSize: 5\n                }\n            }]\n        },\n        plugins: {\n            datalabels: {\n                color: '#000000',\n                font: {size: 16},\n                anchor: 'end',\n                align: 'top',\n                formatter: function(value, context) {\n                    return value + '%'; // Customize label text\n                }\n            }\n        },\n        annotation: {\n            annotations: [{\n                type: 'line',\n                mode: 'horizontal',\n                scaleID: 'y-axis-0',\n                value: \"&\n                    \n                    Switch(t_line.Selected.Value,\n                        \"All SSC\", 55,\n                        \"SSC\", 55,\n                        \"SSC2\", 55,\n                        \"All XLT\", 61,\n                        \"XLT\", 61,\n                        \"XLT2\", 61,\n                        59\n                    ) \n                \n                    &\",\n                borderColor: 'red',\n                borderWidth: 2,\n                borderDash: [5,5],\n                label: {\n                    enabled: true,\n                    position: 'left',\n                    content: '\"&\n\n                        Switch(t_line.Selected.Value,\n                            \"All SSC\", \"55% Target\",\n                            \"SSC\", \"55% Target\",\n                            \"SSC2\", \"55% Target\",\n                            \"All XLT\", \"61% Target\",\n                            \"XLT\", \"61% Target\",\n                            \"XLT2\", \"61% Target\",\n                            \"59% Target\"\n                        )\n                        \n                        &\"'\n                }\n            }]\n        }\n    }\n}\n\n\")"
+                      FillPortions: =1
+                      Height: =286
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Width: =Parent.Width * 0.95
+                      X: =364
+                      Y: =480
+                - t_notice:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      AutoHeight: =true
+                      BorderColor: =RGBA(255, 255, 0, 1)
+                      BorderRadiusBottomLeft: =8
+                      BorderRadiusBottomRight: =8
+                      BorderRadiusTopLeft: =8
+                      BorderRadiusTopRight: =8
+                      BorderStyle: =BorderStyle.Solid
+                      BorderThickness: =1
+                      PaddingBottom: =5
+                      PaddingTop: =5
+                      Text: ="Please note that the current Average OEE2 Trend data only applies to the validated XL Lines constraint data. SSC and XLT need updated constraint data before being added to the average. Thank you!"
+                      Height: =65
+                      LayoutMinHeight: =10
+                      Visible: =false
+                      Width: =Parent.Width * 0.95

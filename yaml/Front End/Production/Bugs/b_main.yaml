@@ -1,8 +1,0 @@
-- b_main:
-    Control: GroupContainer
-    Variant: manualLayoutContainer
-    Properties:
-      Height: =Parent.Height - Self.Y
-      Width: =Parent.Width
-      X: =Parent.Width - Parent.Width
-      Y: =b_header.X + b_header.Height

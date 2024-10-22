@@ -1,0 +1,1250 @@
+- md_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - md_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
+          LayoutMinHeight: =1
+          LayoutMinWidth: =1
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =varPadding
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - md_back:
+            Control: Image
+            Properties:
+              OnSelect: =Back();
+              Image: =gblAppIcons.Back
+              HoverFill: =varColor4
+              LayoutMinHeight: =1
+              RadiusBottomLeft: =Self.Height / 2
+              RadiusBottomRight: =Self.Height / 2
+              RadiusTopLeft: =Self.Height / 2
+              RadiusTopRight: =Self.Height / 2
+              Width: =Self.Height
+        - md_d_padding:
+            Control: GroupContainer
+            Variant: manualLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =0
+              LayoutMinHeight: =1
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =md_back.Width - md_h_bugs.Width + md_h_settings.Width
+        - md_h_title:
+            Control: Label
+            Properties:
+              Text: ="Modify Downtime"
+              Align: =Align.Center
+              Color: =varColor5
+              FillPortions: =1
+              Font: =Font.Verdana
+              Height: =Parent.Height
+              LayoutMinWidth: =1
+              Size: =Self.Width / 62
+              Width: =Parent.Width
+        - md_h_settings:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Settings, ScreenTransition.Cover)
+              Image: =gblAppIcons.Settings
+              Height: =Parent.Height * 0.75
+              HoverBorderColor: =ColorFade(varColorYes, 20%)
+              HoverFill: =ColorFade(varColorAccent, 75%)
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              RadiusBottomLeft: =Self.Width/2
+              RadiusBottomRight: =Self.Width/2
+              RadiusTopLeft: =Self.Width/2
+              RadiusTopRight: =Self.Width/2
+              Width: =Self.Height
+              X: =Parent.Width * 0.99 - Self.Width - Parent.Width * 0.015
+              Y: =Parent.Height/2 - Self.Height/2
+    - md_content:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =15
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =Parent.Width * 0.01
+          LayoutMinHeight: =0
+          LayoutMinWidth: =0
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Parent.Width * 0.01
+          PaddingLeft: =Parent.Width * 0.15
+          PaddingRight: =Parent.Width * 0.15
+          PaddingTop: =Parent.Width * 0.01
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - md_add:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              Fill: |-
+                =//RGBA(0, 0, 0, 0)
+                varColor4
+              FillPortions: =2
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+            Children:
+            - md_a_title:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =If (
+                        md_a_form.Mode = FormMode.New,
+                        "Add Downtime",
+                        "Edit Downtime for ID# " & varDowntimeID
+                        )
+                  Align: =Align.Center
+                  Color: =varColor5
+                  Fill: =varColor2
+                  Font: =Font.Verdana
+                  Height: =Parent.Height / 16
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - md_a_form:
+                Control: Form
+                Layout: horizontal
+                Properties:
+                  DataSource: =FE_Downtime
+                  DefaultMode: =varDowntimeMode
+                  Item: =If(Self.Mode = FormMode.Edit, LookUp(FE_Downtime, ID = varDowntimeID))
+                  FillPortions: =11
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                Children:
+                - Line_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Line"
+                      Default: =ThisItem.Line
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Line)
+                      Required: =true
+                      Update: =DataCardValue2.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                    Children:
+                    - StarVisible2:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey2.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey2.Y
+                    - ErrorMessage2:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue2.Y + DataCardValue2.Height
+                    - DataCardValue2:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          Items: =Choices([@FE_Downtime].Line)
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey2.X + DataCardKey2.Width
+                          Y: =10
+                    - DataCardKey2:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue2.Height / 2) - (Self.Height / 2)
+                - Shift_Letter_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Shift_Letter"
+                      Default: =ThisItem.Shift_Letter
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Shift_Letter)
+                      Required: =true
+                      Update: =DataCardValue5.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =1
+                    Children:
+                    - StarVisible7:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey7.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey7.Y
+                    - ErrorMessage7:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue5.Y + DataCardValue5.Height
+                    - DataCardValue5:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          Items: =Choices([@FE_Downtime].Shift_Letter)
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey7.X + DataCardKey7.Width
+                          Y: =10
+                    - DataCardKey7:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue5.Height / 2) - (Self.Height / 2)
+                - Lot_DataCard1:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Title"
+                      Default: =ThisItem.Lot
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Title)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Title)
+                      Update: =DataCardValue1.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =2
+                    Children:
+                    - StarVisible1:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey1.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey1.Y
+                    - ErrorMessage1:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue1.Y + DataCardValue1.Height
+                    - DataCardValue1:
+                        Control: Classic/TextInput
+                        Layout: horizontal
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey1.X + DataCardKey1.Width
+                          Y: =10
+                    - DataCardKey1:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue1.Height / 2) - (Self.Height / 2)
+                - Catalog_DataCard1:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Catalog"
+                      Default: =ThisItem.Catalog
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Catalog)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Catalog)
+                      Required: =true
+                      Update: =DataCardValue8.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =3
+                    Children:
+                    - StarVisible10:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey10.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey10.Y
+                    - ErrorMessage10:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue8.Y + DataCardValue8.Height
+                    - DataCardValue8:
+                        Control: Classic/TextInput
+                        Layout: horizontal
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey10.X + DataCardKey10.Width
+                          Y: =10
+                    - DataCardKey10:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue8.Height / 2) - (Self.Height / 2)
+                - Reason_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Reason"
+                      Default: =ThisItem.Reason
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Reason)
+                      Required: =true
+                      Update: =DataCardValue3.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =4
+                    Children:
+                    - StarVisible3:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey3.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey3.Y
+                    - ErrorMessage3:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue3.Y + DataCardValue3.Height
+                    - DataCardValue3:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          Items: =Choices([@FE_Downtime].Reason)
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey3.X + DataCardKey3.Width
+                          Y: =10
+                    - DataCardKey3:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue3.Height / 2) - (Self.Height / 2)
+                - Started_DataCard1:
+                    Control: TypedDataCard
+                    Variant: dateTimeEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Started"
+                      Default: =ThisItem.Started
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Started)
+                      Required: =true
+                      Update: =If(Not IsBlank(DateValue1.SelectedDate), DateTime(Year(DateValue1.SelectedDate), Month(DateValue1.SelectedDate), Day(DateValue1.SelectedDate), Value(HourValue1.Selected.Value), Value(MinuteValue1.Selected.Value), 0))
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =5
+                    Children:
+                    - StarVisible4:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey4.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey4.Y
+                    - ErrorMessage4:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =HourValue1.Y + HourValue1.Height
+                    - MinuteValue1:
+                        Control: Classic/DropDown
+                        Layout: horizontal
+                        Properties:
+                          Default: =Text(Minute(Parent.Default),"00")
+                          Items: =["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Height: =HourValue1.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =HourValue1.Width
+                          X: =HourValue1.X + HourValue1.Width + Separator1.Width
+                          Y: =HourValue1.Y
+                    - Separator1:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =":"
+                          Align: =Align.Center
+                          FontWeight: =FontWeight.Bold
+                          Height: =HourValue1.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Width: =10
+                          Wrap: =false
+                          X: =HourValue1.X + HourValue1.Width
+                          Y: =HourValue1.Y
+                    - HourValue1:
+                        Control: Classic/DropDown
+                        Layout: horizontal
+                        Properties:
+                          Default: =Text(Hour(Parent.Default),"00")
+                          Items: =["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Height: =DateValue1.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =DateValue1.Width / 2 - 5
+                          X: =DateValue1.X
+                          Y: =DateValue1.Y + DateValue1.Height + 10
+                    - DateValue1:
+                        Control: Classic/DatePicker
+                        Layout: horizontal
+                        Properties:
+                          DefaultDate: =Parent.Default
+                          EndYear: =Year(Today())+100
+                          StartYear: =1899
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          IsEditable: =true
+                          PaddingBottom: =0
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey4.X + DataCardKey4.Width
+                          Y: =10
+                    - DataCardKey4:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DateValue1.Height / 2) + (Self.Height / 2)
+                - Ended_DataCard1:
+                    Control: TypedDataCard
+                    Variant: dateTimeEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Ended"
+                      Default: =ThisItem.Ended
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Ended)
+                      Required: =true
+                      Update: =If(Not IsBlank(DateValue2.SelectedDate), DateTime(Year(DateValue2.SelectedDate), Month(DateValue2.SelectedDate), Day(DateValue2.SelectedDate), Value(HourValue2.Selected.Value), Value(MinuteValue2.Selected.Value), 0))
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =6
+                    Children:
+                    - StarVisible5:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey5.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey5.Y
+                    - ErrorMessage5:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =HourValue2.Y + HourValue2.Height
+                    - MinuteValue2:
+                        Control: Classic/DropDown
+                        Layout: horizontal
+                        Properties:
+                          Default: =Text(Minute(Parent.Default),"00")
+                          Items: =["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Height: =HourValue2.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =HourValue2.Width
+                          X: =HourValue2.X + HourValue2.Width + Separator2.Width
+                          Y: =HourValue2.Y
+                    - Separator2:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =":"
+                          Align: =Align.Center
+                          FontWeight: =FontWeight.Bold
+                          Height: =HourValue2.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Width: =10
+                          Wrap: =false
+                          X: =HourValue2.X + HourValue2.Width
+                          Y: =HourValue2.Y
+                    - HourValue2:
+                        Control: Classic/DropDown
+                        Layout: horizontal
+                        Properties:
+                          Default: =Text(Hour(Parent.Default),"00")
+                          Items: =["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Height: =DateValue2.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =DateValue2.Width / 2 - 5
+                          X: =DateValue2.X
+                          Y: =DateValue2.Y + DateValue2.Height + 10
+                    - DateValue2:
+                        Control: Classic/DatePicker
+                        Layout: horizontal
+                        Properties:
+                          DefaultDate: =Parent.Default
+                          EndYear: =Year(Today())+100
+                          StartYear: =1899
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          IsEditable: =true
+                          PaddingBottom: =0
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey5.X + DataCardKey5.Width
+                          Y: =10
+                    - DataCardKey5:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DateValue2.Height / 2) + (Self.Height / 2)
+                - Comments_DataCard1:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Comments"
+                      Default: =ThisItem.Comments
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Comments)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Comments)
+                      Update: =DataCardValue4.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =7
+                    Children:
+                    - StarVisible6:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey6.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey6.Y
+                    - ErrorMessage6:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue4.Y + DataCardValue4.Height
+                    - DataCardValue4:
+                        Control: Classic/TextInput
+                        Layout: horizontal
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey6.X + DataCardKey6.Width
+                          Y: =10
+                    - DataCardKey6:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue4.Height / 2) - (Self.Height / 2)
+                - Record_Editor_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Record_Editor"
+                      Default: =ThisItem.Record_Editor
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Record_Editor)
+                      Update: =DataCardValue6.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =8
+                    Children:
+                    - StarVisible8:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey8.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey8.Y
+                    - ErrorMessage8:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue6.Y + DataCardValue6.Height
+                    - DataCardValue6:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          Items: =Choices([@FE_Downtime].Record_Editor)
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey8.X + DataCardKey8.Width
+                          Y: =10
+                    - DataCardKey8:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue6.Height / 2) - (Self.Height / 2)
+                - Edit_Reason_DataCard1:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Edit_Reason"
+                      Default: =ThisItem.Edit_Reason
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Edit_Reason)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Edit_Reason)
+                      Update: =DataCardValue7.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width - varPadding
+                      Y: =9
+                    Children:
+                    - StarVisible9:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey9.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey9.Y
+                    - ErrorMessage9:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue7.Y + DataCardValue7.Height
+                    - DataCardValue7:
+                        Control: Classic/TextInput
+                        Layout: horizontal
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey9.X + DataCardKey9.Width
+                          Y: =10
+                    - DataCardKey9:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue7.Height / 2) - (Self.Height / 2)
+            - md_a_buttons:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =varPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =Self.LayoutGap
+                  PaddingLeft: =Self.LayoutGap
+                  PaddingRight: =Self.LayoutGap
+                  PaddingTop: =Self.LayoutGap
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - md_a_b_delete:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: |-
+                        =UpdateContext({locPopups: {Visible: true, Value: "delete"}});
+                      Text: ="Delete"
+                      Color: =varColor5
+                      Fill: =varColorNo
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =10
+                      HoverColor: =varColor5
+                      HoverFill: =ColorFade(Self.Fill, -50%)
+                      LayoutMinWidth: =10
+                      Size: =Self.Width / 18
+                      Width: =Parent.Width * 0.15
+                      X: =Parent.Width * 0.01
+                      Y: =Parent.Height/2 - Self.Height/2
+                - md_a_b_reset:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =ResetForm(md_a_form);
+                      Text: ="Reset"
+                      Color: =varColor0
+                      Fill: =varColorAccent
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =10
+                      HoverColor: =varColor5
+                      HoverFill: =ColorFade(Self.Fill, -50%)
+                      LayoutMinWidth: =10
+                      Size: =Self.Width / 18
+                      Width: =Parent.Width * 0.15
+                      X: =Parent.Width * 0.01
+                      Y: =Parent.Height/2 - Self.Height/2
+                - md_a_b_submit:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: "=If(\n    /*The time Exceeds 480 minutes*/\n    DateDiff(Started_DataCard1.Update, Ended_DataCard1.Update, TimeUnit.Minutes) > 480,\n    UpdateContext({locPopups: {Visible: true, Value: \"exceed\"}}),\n\n    /*The start time is greater than end time*/\n    DateDiff(Started_DataCard1.Update, Ended_DataCard1.Update, TimeUnit.Minutes) < 0,\n    UpdateContext({locPopups: {Visible: true, Value: \"time\"}}),\n    \n    /*The Lot or Catalog Are Missing*/\n    IsBlank(DataCardValue1.Text) || IsBlank(DataCardValue8.Text),\n    UpdateContext({locPopups: {Visible: true, Value: \"lot\"}}),\n\n    UpdateContext({locLoading: {Visible: true, Value: -1, Text: \"Submitting Entry\"}});\n    SubmitForm(md_a_form);\n)"
+                      Text: ="Submit"
+                      Color: =varColor5
+                      Fill: =varColorYes
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      FontWeight: =FontWeight.Bold
+                      Height: =10
+                      HoverColor: =varColor5
+                      HoverFill: =ColorFade(Self.Fill, -50%)
+                      LayoutMinWidth: =10
+                      Size: =Self.Width / 18
+                      Width: =Parent.Width * 0.15
+                      X: =Parent.Width * 0.01
+                      Y: =Parent.Height/2 - Self.Height/2
+        - md_quick:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              Fill: |-
+                =//RGBA(0, 0, 0, 0)
+                varColor4
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =varPadding
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              Visible: =md_a_form.Mode = FormMode.New
+            Children:
+            - md_q_title:
+                Control: Label
+                Properties:
+                  Text: ="Quick Post"
+                  Align: =Align.Center
+                  Color: =varColor5
+                  Fill: =varColor2
+                  Height: =Parent.Height / 16
+                  LayoutMinHeight: =1
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width
+            - md_q_SSC:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="12"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_SSC2:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="34"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_XL1:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="EF"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_XL2:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="GH"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_XL3:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="JK"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_XL4:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="NO"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_XL5:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="PQ"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_XLT1:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="RS"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_XLT2:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="WX"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_q_XLT3:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({
+                        locPopups: {Visible: true, Value: "quick"},
+                        locLine: Self.Text
+                    });
+                  Text: ="YZ"
+                  Color: =varColor0
+                  Fill: =varColorAccent
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =ColorFade(Self.Fill, -50%)
+                  LayoutMinWidth: =10
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.85
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2

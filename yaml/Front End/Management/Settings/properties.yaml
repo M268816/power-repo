@@ -1,0 +1,13 @@
+- Settings:
+    Control: Screen
+    Properties:
+      OnVisible: |-
+        =/*Init Local Variables*/
+        UpdateContext({
+            locPopup: false,
+            locContent: Blank()
+            });
+
+        /*Init time variables*/
+        Set(varNowDay, Today());
+        Set(varNowHour, Now());

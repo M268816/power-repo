@@ -1,8 +1,10 @@
-Properties:
-  OnVisible: |-
-    =UpdateContext({
-        locPadding: Self.Width * 0.005,
-        locError: false
-        });
+- Materials:
+    Control: Screen
+    Properties:
+      OnVisible: |-
+        =UpdateContext({
+                locPadding: Self.Width * 0.005,
+                locError: false
+                });
 
-    Select(m_update);
+            Select(m_update);

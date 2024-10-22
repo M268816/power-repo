@@ -27,7 +27,7 @@
         Properties:
           OnSelect: |-
             =UpdateContext({locError: !locError});
-          BorderColor: |+
+          BorderColor: |
             =Color.Red
           BorderThickness: =5
           Color: =Color.Red

@@ -62,7 +62,7 @@
         - o_h_title:
             Control: Label
             Properties:
-              Text: ="Choose Operators"
+              Text: ="Lot Setup"
               Align: =Align.Center
               Color: =varColor5
               FillPortions: =1
@@ -92,268 +92,513 @@
           FillPortions: =11
           LayoutAlignItems: =LayoutAlignItems.Center
           LayoutDirection: =LayoutDirection.Vertical
-          LayoutGap: =locPadding * 5
           LayoutJustifyContent: =LayoutJustifyContent.Center
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =locPadding
-          PaddingLeft: =locPadding
-          PaddingRight: =locPadding
-          PaddingTop: =locPadding
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - o_form:
+        - o_row_0:
             Control: GroupContainer
-            Variant: manualLayoutContainer
+            Variant: horizontalAutoLayoutContainer
             Properties:
-              AlignInContainer: =AlignInContainer.SetByContainer
-              DropShadow: =DropShadow.Regular
-              Fill: =varColor4
-              FillPortions: =0
-              Height: =Parent.Height * 0.50
-              Width: =Parent.Width * 0.45
-              X: =Parent.Width / 2 - Self.Width / 2
-              Y: =Parent.Height / 3 - Self.Height / 2
+              DropShadow: =DropShadow.None
+              FillPortions: =7
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutGap: =locPadding
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =locPadding
+              PaddingLeft: =locPadding
+              PaddingRight: =locPadding
+              PaddingTop: =locPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
             Children:
-            - o_f_packager:
-                Control: Classic/ComboBox
+            - o_operators:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
                 Properties:
-                  DisplayFields: =["DisplayName"]
-                  Items: =Choices(Production.Runner)
-                  SearchFields: =["DisplayName"]
-                  SelectMultiple: =false
-                  BorderThickness: =1
-                  ChevronBackground: =varColor1
-                  ChevronFill: =varColorAccent
-                  Fill: =varColor5
-                  Font: =Font.Verdana
-                  Height: =o_f_runner_title.Height * 0.90
-                  PaddingBottom: =Self.Width * 0.01
-                  PaddingLeft: =Self.Width * 0.01
-                  PaddingRight: =Self.Width * 0.01
-                  PaddingTop: =Self.Width * 0.01
-                  Size: =Self.Height / 4
-                  Width: =Parent.Width * 0.98 - Self.X
-                  X: =o_f_packager_title.Width
-                  Y: =o_f_packager_title.Y
-            - o_f_packager_title:
-                Control: Label
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =varColor4
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.75
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =locPadding
+                  LayoutMinHeight: =1
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =locPadding
+                  PaddingLeft: =locPadding
+                  PaddingRight: =locPadding
+                  Width: =Parent.Width * 0.4
+                Children:
+                - o_f_title:
+                    Control: Label
+                    Properties:
+                      Text: '="Who is running " & varProductionLine & "?" '
+                      Align: =Align.Center
+                      Color: =RGBA(255, 255, 255, 1)
+                      Fill: =varColor2
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
+                      X: =1-1
+                      Y: =1-1
+                - operator_1_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Operator 1"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =1-1
+                      Y: =o_f_title.Y + o_f_title.Height + Parent.Height * 0.05
+                - operator_1:
+                    Control: Classic/ComboBox
+                    Properties:
+                      OnChange: =Set(varOperator_1, operator_1.SelectedItems);
+                      DisplayFields: =["DisplayName"]
+                      Items: =Choices(FE_Production.Operator_1)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: |-
+                        =If(
+                            varProductionLine = "XL5",
+                            true,
+                            false
+                        )
+                      BorderThickness: =1
+                      ChevronBackground: =varColor1
+                      ChevronFill: =varColorAccent
+                      ChevronHoverBackground: =ColorFade(varColor1, -20%)
+                      Fill: =varColor5
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =Self.Width * 0.01
+                      PaddingLeft: =Self.Width * 0.01
+                      PaddingRight: =Self.Width * 0.01
+                      PaddingTop: =Self.Width * 0.01
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =operator_1_title.X + operator_1_title.Width
+                      Y: =operator_1_title.Y
+                - operator_2_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Operator 2"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =1-1
+                      Y: =o_f_title.Y + o_f_title.Height + Parent.Height * 0.05
+                - operator_2:
+                    Control: Classic/ComboBox
+                    Properties:
+                      OnChange: =Set(varOperator_2, operator_2.SelectedItems);
+                      DisplayFields: =["DisplayName"]
+                      Items: =Choices(FE_Production.Operator_1)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: |-
+                        =If(
+                            varProductionLine = "XL5",
+                            true,
+                            false
+                        )
+                      BorderThickness: =1
+                      ChevronBackground: =varColor1
+                      ChevronFill: =varColorAccent
+                      ChevronHoverBackground: =ColorFade(varColor1, -20%)
+                      Fill: =varColor5
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =Self.Width * 0.01
+                      PaddingLeft: =Self.Width * 0.01
+                      PaddingRight: =Self.Width * 0.01
+                      PaddingTop: =Self.Width * 0.01
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =operator_2_title.X + operator_2_title.Width
+                      Y: =operator_2_title.Y
+                - operator_3_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Operator 3"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =1-1
+                      Y: =o_f_title.Y + o_f_title.Height + Parent.Height * 0.05
+                - operator_3:
+                    Control: Classic/ComboBox
+                    Properties:
+                      OnChange: =Set(varOperator_3, operator_3.SelectedItems);
+                      DisplayFields: =["DisplayName"]
+                      Items: =Choices(FE_Production.Operator_1)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: |-
+                        =If(
+                            varProductionLine = "XL5",
+                            true,
+                            false
+                        )
+                      BorderThickness: =1
+                      ChevronBackground: =varColor1
+                      ChevronFill: =varColorAccent
+                      ChevronHoverBackground: =ColorFade(varColor1, -20%)
+                      Fill: =varColor5
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =Self.Width * 0.01
+                      PaddingLeft: =Self.Width * 0.01
+                      PaddingRight: =Self.Width * 0.01
+                      PaddingTop: =Self.Width * 0.01
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =operator_3_title.X + operator_3_title.Width
+                      Y: =operator_3_title.Y
+                - operator_4_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Operator 4"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =1-1
+                      Y: =o_f_title.Y + o_f_title.Height + Parent.Height * 0.05
+                - operator_4:
+                    Control: Classic/ComboBox
+                    Properties:
+                      OnChange: =Set(varOperator_4, operator_4.SelectedItems);
+                      DisplayFields: =["DisplayName"]
+                      Items: =Choices(FE_Production.Operator_1)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: |-
+                        =If(
+                            varProductionLine = "XL5",
+                            true,
+                            false
+                        )
+                      BorderThickness: =1
+                      ChevronBackground: =varColor1
+                      ChevronFill: =varColorAccent
+                      ChevronHoverBackground: =ColorFade(varColor1, -20%)
+                      Fill: =varColor5
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =Self.Width * 0.01
+                      PaddingLeft: =Self.Width * 0.01
+                      PaddingRight: =Self.Width * 0.01
+                      PaddingTop: =Self.Width * 0.01
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =operator_4_title.X + operator_4_title.Width
+                      Y: =operator_4_title.Y
+                - operator_5_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Operator 5"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =1-1
+                      Y: =o_f_title.Y + o_f_title.Height + Parent.Height * 0.05
+                - operator_5:
+                    Control: Classic/ComboBox
+                    Properties:
+                      OnChange: =Set(varOperator_5, operator_5.SelectedItems);
+                      DisplayFields: =["DisplayName"]
+                      Items: =Choices(FE_Production.Operator_1)
+                      SearchFields: =["DisplayName"]
+                      SelectMultiple: |-
+                        =If(
+                            varProductionLine = "XL5",
+                            true,
+                            false
+                        )
+                      BorderThickness: =1
+                      ChevronBackground: =varColor1
+                      ChevronFill: =varColorAccent
+                      ChevronHoverBackground: =ColorFade(varColor1, -20%)
+                      Fill: =varColor5
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =Self.Width * 0.01
+                      PaddingLeft: =Self.Width * 0.01
+                      PaddingRight: =Self.Width * 0.01
+                      PaddingTop: =Self.Width * 0.01
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width*0.85
+                      X: =operator_5_title.X + operator_5_title.Width
+                      Y: =operator_5_title.Y
+            - o_lot_setup:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
                 Properties:
-                  Text: ="Packager:"
-                  Align: =Align.Right
-                  Font: =Font.Verdana
-                  Height: =o_f_middle_title.Height
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =Self.Width * 0.05
-                  PaddingTop: =0
-                  Size: =Self.Height / 4
-                  Width: =o_f_middle_title.Width
-                  X: =1-1
-                  Y: =o_f_bagger_title.Y + o_f_bagger_title.Height
-            - o_f_bagger:
-                Control: Classic/ComboBox
-                Properties:
-                  DisplayFields: =["DisplayName"]
-                  Items: =Choices(Production.Runner)
-                  SearchFields: =["DisplayName"]
-                  SelectMultiple: =false
-                  BorderThickness: =1
-                  ChevronBackground: =varColor1
-                  ChevronFill: =varColorAccent
-                  Fill: =varColor5
-                  Font: =Font.Verdana
-                  Height: =o_f_runner_title.Height * 0.90
-                  PaddingBottom: =Self.Width * 0.01
-                  PaddingLeft: =Self.Width * 0.01
-                  PaddingRight: =Self.Width * 0.01
-                  PaddingTop: =Self.Width * 0.01
-                  Size: =Self.Height / 4
-                  Visible: |-
-                    =Switch(
-                        varProductionLine,
-                        "SSC",
-                        false,
-                        "SSC2",
-                        false,
-                        true
-                    )
-                  Width: =Parent.Width * 0.98 - Self.X
-                  X: =o_f_bagger_title.Width
-                  Y: =o_f_bagger_title.Y
-            - o_f_bagger_title:
-                Control: Label
-                Properties:
-                  Text: ="Bagger:"
-                  Align: =Align.Right
-                  Font: =Font.Verdana
-                  Height: =o_f_middle_title.Height
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =Self.Width * 0.05
-                  PaddingTop: =0
-                  Size: =Self.Height / 4
-                  Visible: |-
-                    =Switch(
-                        varProductionLine,
-                        "SSC",
-                        false,
-                        "SSC2",
-                        false,
-                        true
-                    )
-                  Width: =o_f_middle_title.Width
-                  X: =1-1
-                  Y: =o_f_middle_title.Y + o_f_middle_title.Height
-            - o_f_middle:
-                Control: Classic/ComboBox
-                Properties:
-                  DisplayFields: =["DisplayName"]
-                  Items: =Choices(Production.Runner)
-                  SearchFields: =["DisplayName"]
-                  SelectMultiple: =false
-                  BorderThickness: =1
-                  ChevronBackground: =varColor1
-                  ChevronFill: =varColorAccent
-                  Fill: =varColor5
-                  Font: =Font.Verdana
-                  Height: =o_f_runner_title.Height * 0.90
-                  PaddingBottom: =Self.Width * 0.01
-                  PaddingLeft: =Self.Width * 0.01
-                  PaddingRight: =Self.Width * 0.01
-                  PaddingTop: =Self.Width * 0.01
-                  Size: =Self.Height / 4
-                  Visible: |-
-                    =Switch(
-                        varProductionLine,
-                        "XL3",
-                        true,
-                        "XL4",
-                        true,
-                        "XL5",
-                        true,
-                        false
-                    )
-                  Width: =Parent.Width * 0.98 - Self.X
-                  X: =o_f_middle_title.Width
-                  Y: =o_f_middle_title.Y
-            - o_f_middle_title:
-                Control: Label
-                Properties:
-                  Text: ="Middle:"
-                  Align: =Align.Right
-                  Font: =Font.Verdana
-                  Height: =o_f_runner_title.Height
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =Self.Width * 0.05
-                  PaddingTop: =0
-                  Size: =Self.Height / 4
-                  Visible: |-
-                    =Switch(
-                        varProductionLine,
-                        "XL3",
-                        true,
-                        "XL4",
-                        true,
-                        "XL5",
-                        true,
-                        false
-                    )
-                  Width: =o_f_runner_title.Width
-                  X: =1-1
-                  Y: =o_f_runner_title.Y + o_f_runner_title.Height
-            - o_f_runner:
-                Control: Classic/ComboBox
-                Properties:
-                  OnChange: =Set(varRunner, o_f_runner.SelectedItems);
-                  DisplayFields: =["DisplayName"]
-                  Items: =Choices(Production.Runner)
-                  SearchFields: =["DisplayName"]
-                  SelectMultiple: |-
-                    =If(
-                        varProductionLine = "XL5",
-                        true,
-                        false
-                    )
-                  BorderThickness: =1
-                  ChevronBackground: =varColor1
-                  ChevronFill: =varColorAccent
-                  ChevronHoverBackground: =ColorFade(varColor1, -20%)
-                  Fill: =varColor5
-                  Font: =Font.Verdana
-                  Height: =o_f_runner_title.Height * 0.90
-                  PaddingBottom: =Self.Width * 0.01
-                  PaddingLeft: =Self.Width * 0.01
-                  PaddingRight: =Self.Width * 0.01
-                  PaddingTop: =Self.Width * 0.01
-                  Size: =Self.Height / 4
-                  Width: =Parent.Width * 0.98 - Self.X
-                  X: =o_f_runner_title.X + o_f_runner_title.Width
-                  Y: =o_f_runner_title.Y
-            - o_f_runner_title:
-                Control: Label
-                Properties:
-                  Text: ="Runner:"
-                  Align: =Align.Right
-                  Font: =Font.Verdana
-                  Height: =((Parent.Height - Self.Y)/4) * 0.95
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =Self.Width * 0.05
-                  PaddingTop: =0
-                  Size: =Self.Height / 4
-                  Width: =Parent.Width * 0.25
-                  X: =1-1
-                  Y: =o_f_title.Y + o_f_title.Height + Parent.Height * 0.05
-            - o_f_title:
-                Control: Label
-                Properties:
-                  Text: '="Who is running " & varProductionLine & "?" '
-                  Align: =Align.Center
-                  Color: =RGBA(255, 255, 255, 1)
-                  Fill: =varColor2
-                  Font: =Font.Verdana
-                  Height: =Parent.Height * 0.15
-                  Size: =Self.Height / 3
-                  Width: =Parent.Width
-                  X: =1-1
-                  Y: =1-1
-        - o_submit:
-            Control: Classic/Button
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =varColor4
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.75
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =locPadding
+                  LayoutMinHeight: =1
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =locPadding
+                  PaddingLeft: =locPadding
+                  PaddingRight: =locPadding
+                  Width: =Parent.Width * 0.4
+                Children:
+                - o_ls_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Lot Setup"
+                      Align: =Align.Center
+                      Color: =RGBA(255, 255, 255, 1)
+                      Fill: =varColor2
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
+                      X: =1-1
+                      Y: =1-1
+                - o_ls_lot_label:
+                    Control: Label
+                    Properties:
+                      Text: ="Lot"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width * 0.85
+                      X: =1-1
+                      Y: =o_ls_title.Y + o_ls_title.Height + Parent.Height * 0.05
+                - o_ls_lot:
+                    Control: TextInput
+                    Properties:
+                      OnChange: =Set(varLot, Self.Value);
+                      FillPortions: =1
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      Width: =Parent.Width * 0.85
+                - o_ls_catalog_label:
+                    Control: Label
+                    Properties:
+                      Text: ="Catalog"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width * 0.85
+                      X: =1-1
+                      Y: =o_ls_title.Y + o_ls_title.Height + Parent.Height * 0.05
+                - o_ls_catalog:
+                    Control: TextInput
+                    Properties:
+                      OnChange: =Set(varCatalog, Self.Value);
+                      FillPortions: =1
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      Width: =Parent.Width * 0.85
+                - o_ls_pleat_count_label:
+                    Control: Label
+                    Properties:
+                      Text: ="Pleats Per Pack"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width * 0.85
+                      X: =1-1
+                      Y: =o_ls_title.Y + o_ls_title.Height + Parent.Height * 0.05
+                - o_ls_pleat_count:
+                    Control: TextInput
+                    Properties:
+                      OnChange: =Set(varPleatPerPack, Self.Value)
+                      Placeholder: ="127"
+                      FillPortions: =1
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      Width: =Parent.Width * 0.85
+                - o_ls_pleat_height_label:
+                    Control: Label
+                    Properties:
+                      Text: ="Pleat Height"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width * 0.85
+                      X: =1-1
+                      Y: =o_ls_title.Y + o_ls_title.Height + Parent.Height * 0.05
+                - o_ls_pleat_height:
+                    Control: TextInput
+                    Properties:
+                      OnChange: =Set(verPleatHeight, Self.Value)
+                      Placeholder: ="0.200 - 0.455"
+                      FillPortions: =1
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      Width: =Parent.Width * 0.85
+                - o_ls_hourly_goal_label:
+                    Control: Label
+                    Properties:
+                      Text: ="Hourly Goal"
+                      Align: =Align.Center
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =Self.Width * 0.05
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width * 0.85
+                      X: =1-1
+                      Y: =o_ls_title.Y + o_ls_title.Height + Parent.Height * 0.05
+                - o_ls_hourly_goal:
+                    Control: TextInput
+                    Properties:
+                      OnChange: =Set(varHourlyGoal, Self.Value)
+                      Placeholder: ="55"
+                      FillPortions: =1
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      Width: =Parent.Width * 0.85
+        - o_row_1:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
             Properties:
-              OnSelect: |-
-                =Set(varRunner, o_f_runner.SelectedItems);
-                Set(varMiddle, o_f_middle.SelectedItems);
-                Set(varBagger, o_f_bagger.SelectedItems);
-                Set(varPackager, o_f_packager.SelectedItems);
-                Navigate(Hourly);
-              Text: ="Submit"
-              Color: =varColor0
-              DisplayMode: |-
-                =If(
-                    Or(
-                        CountRows(varRunner) > 2,
-                        o_f_runner.Selected.DisplayName = Blank(),
-                        And( o_f_runner.Selected.DisplayName = o_f_middle.Selected.DisplayName, !IsBlank(o_f_middle.Selected.DisplayName)),
-                        And(o_f_runner.Selected.DisplayName = o_f_bagger.Selected.DisplayName, !IsBlank(o_f_bagger.Selected.DisplayName)),
-                        And(o_f_middle.Selected.DisplayName = o_f_bagger.Selected.DisplayName, !IsBlank(o_f_bagger.Selected.DisplayName)),
-                        And(o_f_runner.Selected.DisplayName = o_f_packager.Selected.DisplayName, !IsBlank(o_f_packager.Selected.DisplayName)),
-                        And(o_f_middle.Selected.DisplayName = o_f_packager.Selected.DisplayName, !IsBlank(o_f_packager.Selected.DisplayName)),
-                        And(o_f_bagger.Selected.DisplayName = o_f_packager.Selected.DisplayName, !IsBlank(o_f_packager.Selected.DisplayName))
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutGap: =locPadding
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =locPadding
+              PaddingLeft: =locPadding
+              PaddingRight: =locPadding
+              PaddingTop: =locPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - o_submit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Set(varOperator_1, operator_1.SelectedItems);
+                    Navigate(Hourly);
+                  Text: ="Submit"
+                  Color: =varColor0
+                  DisplayMode: |-
+                    =If(
+                        Or(
+                            operator_1.Selected.DisplayName = Blank(),
+                            o_ls_lot.Value = "",
+                            o_ls_catalog.Value = "",
+                            o_ls_pleat_count.Value = "",
+                            o_ls_pleat_height.Value = "",
+                            o_ls_hourly_goal.Value = ""
                         ),
-                    DisplayMode.Disabled,
-                    DisplayMode.Edit
-                )
-              Fill: =varColorAccent
-              Font: =Font.Verdana
-              Height: =Self.Width * 0.25
-              HoverColor: =varColor0
-              HoverFill: =ColorFade(Self.Fill, -30%)
-              Width: =Parent.Width * 0.15
-              X: =Parent.Width/2 - Self.Width/2
-              Y: =o_form.Height + o_form.Y + Parent.Height * 0.10
+                        DisplayMode.Disabled,
+                        DisplayMode.Edit
+                    )
+                  Fill: =varColorAccent
+                  Font: =Font.Verdana
+                  Height: =Self.Width * 0.25
+                  HoverColor: =varColor0
+                  HoverFill: =ColorFade(Self.Fill, -30%)
+                  Width: =Parent.Width * 0.15
+                  X: =Parent.Width/2 - Self.Width/2
+                  Y: =10

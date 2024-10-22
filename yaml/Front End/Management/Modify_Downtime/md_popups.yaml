@@ -1,0 +1,683 @@
+- md_popups:
+    Control: GroupContainer
+    Variant: manualLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.25)
+      Height: =Parent.Height
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =locPopups.Visible
+      Width: =Parent.Width
+    Children:
+    - md_p_delete:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =varColor5
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =varPadding
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =locPopups.Value = "delete"
+          Width: =Parent.Width * 0.305
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - md_p_d_title:
+            Control: Label
+            Properties:
+              Text: ="Deleting Record."
+              Color: =varColor1
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - md_p_d_content:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              FillPortions: =4
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap*2
+              PaddingRight: =Self.LayoutGap*2
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - md_p_d_icon:
+                Control: Image
+                Properties:
+                  Image: =gblAppIcons.Delete
+                  AlignInContainer: =AlignInContainer.Start
+                  FillPortions: =1
+                  Height: =Parent.Height * 0.5
+            - md_p_d_text:
+                Control: Label
+                Properties:
+                  Text: |-
+                    ="You are about to permanently delete record #" & varDowntimeID &". Proceed?"
+                  Color: =varColor0
+                  FillPortions: =3
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Size: =Self.Height / 12
+                  VerticalAlign: =VerticalAlign.Top
+        - md_p_d_buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingLeft: =Self.Width / 3
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - md_p_d_submit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                    UpdateContext({locLoading: {Visible: true, Value: -1, Text: "Removing Downtime Entry"}});
+                    RemoveIf(FE_Downtime, ID = varDowntimeID);
+                    UpdateContext({locLoading: {Visible: false, Value: -1, Text: "Not Loading"}});
+                    Set(varDowntimeMode, FormMode.New);
+                    ResetForm(md_a_form);
+                  Text: ="Submit"
+                  Color: =varColor0
+                  Fill: =varColor5
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =varColorYes
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_p_d_cancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                  Text: ="Cancel"
+                  Color: =varColor5
+                  Fill: =varColor2
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =varColorNo
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+    - md_p_lot:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =varColor5
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =varPadding
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =locPopups.Value = "lot"
+          Width: =Parent.Width * 0.305
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - md_p_l_title:
+            Control: Label
+            Properties:
+              Text: ="Lot and Catalog number missing."
+              Color: =varColor1
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - md_p_l_content:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =4
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap*2
+              PaddingRight: =Self.LayoutGap*2
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - md_p_l_icon:
+                Control: Image
+                Properties:
+                  Image: =gblAppIcons.Announce
+                  AlignInContainer: =AlignInContainer.Start
+                  FillPortions: =1
+                  Height: =Parent.Height * 0.5
+            - md_p_l_text:
+                Control: Label
+                Properties:
+                  Text: ="The catalog and lot numbers are missing from this entry. If you proceed you will submit the entry with placeholder information as a daily occurance that did not require lot information. Proceed?"
+                  Color: =varColor0
+                  FillPortions: =3
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Size: =Self.Height / 12
+                  VerticalAlign: =VerticalAlign.Top
+        - md_p_l_buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingLeft: =Self.Width / 3
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - md_p_l_submit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({locLoading: {Visible: true, Value: -1, Text: "Submitting Downtime Entry"}});
+                    UpdateContext({locPlannedEvent: true});
+                    SubmitForm(md_a_form);
+                    UpdateContext({locPlannedEvent: false});
+                    UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                  Text: ="Submit"
+                  Color: =varColor0
+                  Fill: =varColor5
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =varColorYes
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_p_l_cancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                  Text: ="Cancel"
+                  Color: =varColor5
+                  Fill: =varColor2
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =varColorNo
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+    - md_p_exceed:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =varColor5
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =varPadding
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =locPopups.Value = "exceed"
+          Width: =Parent.Width * 0.305
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - md_p_e_title:
+            Control: Label
+            Properties:
+              Text: ="Downtime maximum reached."
+              Color: =varColor1
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - md_p_e_content:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =4
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap*2
+              PaddingRight: =Self.LayoutGap*2
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - md_p_e_icon:
+                Control: Image
+                Properties:
+                  Image: =gblAppIcons.Warning
+                  AlignInContainer: =AlignInContainer.Start
+                  FillPortions: =1
+                  Height: =Parent.Height * 0.5
+            - md_p_e_text:
+                Control: Label
+                Properties:
+                  Text: ="The downtime entry you are trying to enter exceeds 480 minutes. Please return and only define a time for a single shift."
+                  Color: =varColor0
+                  FillPortions: =3
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Size: =Self.Height / 12
+                  VerticalAlign: =VerticalAlign.Top
+        - md_p_e_cancel:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Okay"
+              AlignInContainer: =AlignInContainer.End
+              Color: =varColor5
+              Fill: =varColor2
+              FillPortions: =1
+              Font: =Font.Verdana
+              Height: =10
+              HoverColor: =varColor5
+              HoverFill: =varColorNo
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Self.Width / 18
+              Width: =Parent.Width * 0.35
+              X: =Parent.Width * 0.01
+              Y: =Parent.Height/2 - Self.Height/2
+    - md_p_time:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =varColor5
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =varPadding
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =locPopups.Value = "time"
+          Width: =Parent.Width * 0.305
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - md_p_t_title:
+            Control: Label
+            Properties:
+              Text: ="Start time incorrect."
+              Color: =varColor1
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - md_p_t_content:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =4
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap*2
+              PaddingRight: =Self.LayoutGap*2
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - md_p_t_icon:
+                Control: Image
+                Properties:
+                  Image: =gblAppIcons.Warning
+                  AlignInContainer: =AlignInContainer.Start
+                  FillPortions: =1
+                  Height: =Parent.Height * 0.5
+            - md_p_t_text:
+                Control: Label
+                Properties:
+                  Text: ="The downtime entry you are trying to enter is incorrectly assigned. Please return and select a start time earlier than the end time."
+                  Color: =varColor0
+                  FillPortions: =3
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Size: =Self.Height / 12
+                  VerticalAlign: =VerticalAlign.Top
+        - md_p_t_cancel:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+              Text: ="Okay"
+              AlignInContainer: =AlignInContainer.End
+              Color: =varColor5
+              Fill: =varColor2
+              FillPortions: =1
+              Font: =Font.Verdana
+              Height: =10
+              HoverColor: =varColor5
+              HoverFill: =varColorNo
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Self.Width / 18
+              Width: =Parent.Width * 0.35
+              X: =Parent.Width * 0.01
+              Y: =Parent.Height/2 - Self.Height/2
+    - md_p_quick:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =varColor5
+          Height: =Parent.Height * 0.5
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =varPadding
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =locPopups.Value = "quick"
+          Width: =Parent.Width * 0.25
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - md_p_q_title:
+            Control: Label
+            Properties:
+              Text: =locLine & " quick downtime entry."
+              Align: =Align.Center
+              Color: =varColor1
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - md_p_q_text:
+            Control: Label
+            Properties:
+              Text: ="You are about to post a full day of downtime for "& locLine &" ending on "& Today() &". Select the shift and reason below before posting the new entry."
+              Align: =Align.Center
+              Color: =varColor0
+              FillPortions: =3
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 10
+              VerticalAlign: =VerticalAlign.Top
+        - md_p_q_shift:
+            Control: Classic/DropDown
+            Properties:
+              Default: =""
+              Items: =["A","B","C"]
+              AlignInContainer: =AlignInContainer.Center
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+              Width: =Parent.Width * 0.3
+        - md_p_q_reason:
+            Control: Classic/DropDown
+            Properties:
+              Default: ="No Scheduled Work"
+              Items: =Choices([@FE_Downtime].Reason)
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - md_p_p_buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.Center
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =Parent.Width * 0.7
+            Children:
+            - md_p_q_submit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({locLoading: {Visible: true, Value: -1, Text: "Submitting Downtime Entry"}});
+                    Patch(
+                        FE_Downtime,
+                        Defaults(FE_Downtime),
+                        {
+                            Lot: "Management",
+                            Catalog: "Management",
+                            Line: {Value: locLine},
+                            Shift_Letter: {Value: md_p_q_shift.SelectedText.Value},
+                            Reason: {Value: md_p_q_reason.Selected.Value},
+                            Started:
+                                Switch(md_p_q_shift.Selected.Value,
+                                    "A",
+                                    DateTime(
+                                        Year(Today()),
+                                        Month(Today()),
+                                        Day(Today()),
+                                        7,
+                                        0,
+                                        0
+                                    ),
+                                    "B",
+                                    DateTime(
+                                        Year(Today()),
+                                        Month(Today()),
+                                        Day(Today()),
+                                        15,
+                                        0,
+                                        0
+                                    ),
+                                    "C",
+                                    DateTime(
+                                        Year(Today()),
+                                        Month(Today()),
+                                        Day(Today())-1,
+                                        23,
+                                        0,
+                                        0
+                                    )
+                                ),
+                            Ended:
+                                Switch(md_p_q_shift.Selected.Value,
+                                    "A",
+                                    DateTime(
+                                        Year(Today()),
+                                        Month(Today()),
+                                        Day(Today()),
+                                        15,
+                                        0,
+                                        0
+                                    ),
+                                    "B",
+                                    DateTime(
+                                        Year(Today()),
+                                        Month(Today()),
+                                        Day(Today()),
+                                        23,
+                                        0,
+                                        0
+                                    ),
+                                    "C",
+                                    DateTime(
+                                        Year(Today()),
+                                        Month(Today()),
+                                        Day(Today()),
+                                        7,
+                                        0,
+                                        0
+                                    )
+                                ),
+                            Comments: "Created with the quick entry prompt."
+                        }    
+                    );
+                    UpdateContext({locLoading: {Visible: false, Value: -1, Text: "Not Loading"}});
+
+                    UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                  Text: ="Submit"
+                  Color: =varColor0
+                  Fill: =varColor5
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =varColorYes
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - md_p_q_cancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                  Text: ="Cancel"
+                  Color: =varColor5
+                  Fill: =varColor2
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =varColor5
+                  HoverFill: =varColorNo
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2

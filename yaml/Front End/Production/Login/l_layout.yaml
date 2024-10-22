@@ -45,7 +45,7 @@
         - l_h_title:
             Control: Label
             Properties:
-              Text: ="Encapsulation Digital Daily Management System"
+              Text: ="Front End Digital Daily Management System"
               Align: =Align.Center
               Color: =varColor5
               FillPortions: =1
@@ -186,25 +186,22 @@
                     Set(varDevVis, !varDevVis),
                     //----- PASSWORD LOGINS FOR LINES -----//
                     "qRRPB4PJ",
-                    Set(varProductionLine,  "XL1"),
+                    Set(varProductionLine,  "EF"),
                     "d7vD!PbK",
-                    Set(varProductionLine,  "XL2"),
+                    Set(varProductionLine,  "GH"),
                     "2%Qw&h^7",
-                    Set(varProductionLine,  "XL3"),
+                    Set(varProductionLine,  "JK"),
                     "2i$QU4@g",
-                    Set(varProductionLine,  "XL4"),
+                    Set(varProductionLine,  "NO"),
                     "TmfR$24R",
-                    Set(varProductionLine,  "XL5"),
+                    Set(varProductionLine,  "PQ"),
                     "t6%4eZc7",
-                    Set(varProductionLine,  "XLT"),
+                    Set(varProductionLine,  "WX"),
                     "aHWd&8N3",
-                    Set(varProductionLine,  "XLT2"),
+                    Set(varProductionLine,  "YZ"),
                     "V3b#bp%r",
-                    Set(varProductionLine,  "XLT3"),
+                    Set(varProductionLine,  "3/4"),
                     "W2SBqN^R",
-                    Set(varProductionLine,  "SSC"),
-                    "^42a3GCQ",
-                    Set(varProductionLine,  "SSC2"),
                     //----- DEFAULT -----//
                     Set(varProductionLine, "Null")
                     );
@@ -236,17 +233,17 @@
             Control: Classic/DropDown
             Properties:
               OnChange: |-
-                =If(
+                "If(
                     Not(Self.SelectedText.Value = "Pick One"),
                     Set(varProductionLine, Self.SelectedText.Value)
                     );
                     
                 UpdateContext({locPopups:{Visible: true, Value: "success"}});
 
-                Reset(Self);
+                Reset(Self);"
               OnSelect: =
               Default: =0
-              Items: =["Jump to Line","XL1","XL2","XL3","XL4","XL5","XLT","XLT2","XLT3","SSC","SSC2"]
+              Items: =["Jump to Line","1/2","3/4","EF","GH","JK","NO","PQ","WX","YZ"]
               Height: =Parent.Height * 0.15
               LayoutMinHeight: =10
               Size: =Parent.Width / 58

@@ -1,10 +1,11 @@
-Properties:
-  OnHidden: |+
-    =
-  OnVisible: |-
-    =Reset(o_f_runner);
-    Reset(o_f_middle);
-    Reset(o_f_bagger);
-    Reset(o_f_packager);
+- Operators:
+    Control: Screen
+    Properties:
+      OnVisible: |-
+        =Reset(operator_1);
+        Reset(operator_2);
+        Reset(operator_3);
+        Reset(operator_4);
+        Reset(operator_5);
 
-    UpdateContext({locPadding: Self.Width * 0.005});
+        UpdateContext({locPadding: Self.Width * 0.005});

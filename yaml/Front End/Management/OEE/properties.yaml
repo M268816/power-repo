@@ -1,0 +1,10 @@
+- OEE:
+    Control: Screen
+    Properties:
+      OnVisible: |-
+        =/*Init Time Variables*/
+        Set(varNowDay, Today());
+        Set(varNowHour, Hour(Now()));
+
+        /*Call the update button*/
+        Select(oee_collect);

@@ -1,0 +1,125 @@
+- Scanner:
+    Control: Screen
+    Properties:
+      OnVisible: |-
+        =UpdateContext({locCamSwitch: false});
+
+            If(IsBlankOrError(s_barcode_reader.Text) = false,
+                UpdateContext({locCamSwitch: true})
+                )
+      Fill: =Color.AntiqueWhite
+    Children:
+    - s_DEVMODE:
+        Control: Label
+        Properties:
+          Text: ="DEV MODE"
+          Align: =Align.Center
+          Color: =RGBA(255, 0, 0, 1)
+          Fill: =RGBA(0, 0, 0, 1)
+          FontWeight: =FontWeight.Bold
+          Visible: =false
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =40
+    - s_DEVMODE_LINE:
+        Control: Label
+        Properties:
+          Text: =varProductionLine
+          Fill: =Color.White
+          Visible: =false
+          X: =45
+          Y: =145
+    - s_DEVMODE_SCANRESULT:
+        Control: Label
+        Properties:
+          Text: =s_barcode_reader.Text
+          Fill: =Color.White
+          Visible: =false
+          X: =45
+          Y: =92
+    - scan_exit:
+        Control: Classic/Icon
+        Variant: CancelBadge
+        Properties:
+          OnSelect: =Navigate(Login);
+          Height: =Parent.Height * 0.10
+          Icon: =Icon.CancelBadge
+          Width: =Self.Height
+          X: =Parent.Width - Self.Width
+          Y: =Parent.Height - Parent.Height
+    - s_guide:
+        Control: Rectangle
+        Properties:
+          BorderColor: =RGBA(255, 255, 0, 1)
+          BorderThickness: =5
+          Fill: =RGBA(0, 0, 0, 0)
+          Height: =s_barcode_reader.Height * 0.80
+          Width: =s_barcode_reader.Width * 0.80
+          X: =(s_barcode_reader.X + s_barcode_reader.Width/2) - Self.Width/2
+          Y: =(s_barcode_reader.Y + s_barcode_reader.Height/2) - Self.Height/2
+    - s_change_cam:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =UpdateContext({
+                locCamSwitch: !locCamSwitch
+            });
+          Text: ="Change Camera"
+          FocusedBorderColor: =ColorFade(Self.Fill, -75%)
+          Font: =Font.Verdana
+          Height: =Parent.Height * 0.10
+          Size: =Self.Height / 3
+          Width: =Parent.Width * 0.25
+          X: =Parent.Width/2 - Self.Width/2
+          Y: =Parent.Height * 0.02
+    - s_timer:
+        Control: Timer
+        Properties:
+          OnTimerEnd: |-
+            =Switch(
+                s_barcode_reader.Text,
+                "qRRPB4PJ",
+                Set(varScanResult,  "qRRPB4PJ"),
+                "d7vD!PbK",
+                Set(varScanResult,  "d7vD!PbK"),
+                "2%Qw&h^7",
+                Set(varScanResult,  "2%Qw&h^7"),
+                "2i$QU4@g",
+                Set(varScanResult,  "2i$QU4@g"),
+                "TmfR$24R",
+                Set(varScanResult,  "TmfR$24R"),
+                "t6%4eZc7",
+                Set(varScanResult,  "t6%4eZc7"),
+                "aHWd&8N3",
+                Set(varScanResult,  "aHWd&8N3"),
+                "V3b#bp%r",
+                Set(varScanResult,  "V3b#bp%r"),
+                "W2SBqN^R",
+                Set(varScanResult,  "W2SBqN^R"),
+                "^42a3GCQ",
+                Set(varScanResult,  "^42a3GCQ"),
+                Set(varScanResult,  "Null")
+            );
+
+            If(
+                Not(varScanResult = "Null"),
+                l_b_input.Text = varScanResult &
+                Set(varCamDisplay, DisplayMode.Disabled);
+                Navigate(Login);
+            );
+          AutoStart: =true
+          Duration: =3000
+          Repeat: =true
+          Start: =true
+          Visible: =false
+          X: =40
+          Y: =40
+    - s_barcode_reader:
+        Control: Barcode
+        Properties:
+          BarcodeType: =BarcodeType.Code128
+          Camera: =If(locCamSwitch,0,1)
+          DisplayMode: =varCamDisplay
+          Height: =Self.Width * 0.75
+          Width: =Parent.Width * 0.50
+          X: =(Parent.Width/2) - (Self. Width/2)
+          Y: =s_change_cam.Y + s_change_cam.Height + Parent.Height * 0.02

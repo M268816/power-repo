@@ -1,0 +1,58 @@
+- h_loading_parent:
+    Control: GroupContainer
+    Variant: manualLayoutContainer
+    Properties:
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      Visible: =varLoading.Visible
+      Width: =Parent.Width
+    Children:
+    - h_loading:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          DropShadow: =DropShadow.Bold
+          Fill: =varColor5
+          Height: =Parent.Height / 4
+          LayoutAlignItems: =LayoutAlignItems.Center
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =varPadding
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =varPadding
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Width: =Parent.Width * 0.3
+          X: =Center(Parent.Width,Self.Width)
+          Y: =Center(Parent.Height,Self.Height)
+        Children:
+        - h_l_text:
+            Control: Label
+            Properties:
+              Text: =varLoading.Text
+              Align: =Align.Center
+              FillPortions: =1
+              LayoutMinHeight: =1
+              Size: =Self.Height / 8
+              Width: =Parent.Width * 0.8
+        - h_l_progress:
+            Control: Progress
+            Properties:
+              Indeterminate: =varLoading.Value = -1
+              Value: =varLoading.Value
+              FillPortions: =1
+              LayoutMinHeight: =1
+              Width: =Parent.Width * 0.8
+        - h_l_icon:
+            Control: Image
+            Properties:
+              Image: =gblAppIcons.Warning
+              FillPortions: =0.5
+              LayoutMinHeight: =1
+              Visible: =varLoading.Value = -404
+              Width: =Self.Height

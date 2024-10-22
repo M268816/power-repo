@@ -1,0 +1,2534 @@
+- oee_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+      X: =
+    Children:
+    - oee_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =varPadding
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - oee_collect:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =/*Start*/
+                Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
+
+                /*Capture Local Date Selection*/
+                UpdateContext({
+                    locEndDate: oee_end_date.SelectedDate,
+                    locStartDate: oee_start_date.SelectedDate
+                });
+
+                Set(varLoading,{Visible: true, Value: 5, Text: "Checking for Updates"});
+                /*Check if collections need updating*/
+                Set(varUpdateProduction,
+                    Or(
+                        Not(First(Sort(FE_Production,ID,SortOrder.Descending)).ID = First(Sort(collectProduction,id,SortOrder.Descending)).id),
+                        Not(varEndDate = locEndDate),
+                        Not(varStartDate = locStartDate)
+                    )
+                );
+                Set(varUpdateDowntime,
+                    Or(    
+                        Not(First(Sort(FE_Downtime,ID,SortOrder.Descending)).ID = First(Sort(collectDowntime,id,SortOrder.Descending)).id),
+                        Not(varEndDate = locEndDate),
+                        Not(varStartDate = locStartDate)
+                    )
+                );
+
+                /*Set collection dates from selected local dates*/
+                If( Not(varEndDate = locEndDate), Set(varEndDate, locEndDate));
+                If( Not(varStartDate = locStartDate), Set(varStartDate, locStartDate));
+
+
+                /*Collect Production*/
+                Set(varLoading,{Visible: true, Value: 10, Text: "Collecting Production Data"});
+                If(varUpdateProduction,
+                    If(
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,
+                        Set(varLoading,{Visible: true, Value: 15, Text: "Retrieving Production Data"});
+                        ClearCollect(collectProduction,
+                            ForAll(
+                                Filter(FE_Production,
+                                    Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                    Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)
+                                ),
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter.Value),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Lot),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                                    goal: Value(ThisRecord.Hourly_Goal),
+                                    amount_built: Value(ThisRecord.Amount_Built),
+                                    unit_starting: Value(ThisRecord.Unit_Starting),
+                                    unit_ending: Value(ThisRecord.Unit_Ending),
+                                    reject_units: Value(ThisRecord.Reject_Units)
+                                }
+                            )
+                        ),
+
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,
+                        Set(varLoading,{Visible: true, Value: 15, Text: "Parsing PowerAutomate Flow for Production Data"});
+                        ClearCollect(collectProduction,
+                            ForAll(
+                                Table(
+                                    ParseJSON(
+                                        flow_get_units_range_v2.Run(
+                                            Text("All"),
+                                            Text(DateAdd(varEndDate, 23,TimeUnit.Hours), "yyyy-mm-dd"),
+                                            Text(DateAdd(varStartDate, -1, TimeUnit.Hours), "yyyy-mm-dd")
+                                        ).output
+                                    )
+                                ),
+                                {
+                                    id: Value(Value._ID),
+                                    shift: Text(Value._shift),
+                                    line: Text(Value._line),
+                                    lot: Text(Value._lot),
+                                    catalog: Text(Value._catalog),
+                                    size: Text(Value._size),
+                                    hour_ending: DateTimeValue(Value._hour_ending),
+                                    hour_starting: DateTimeValue(Value._hour_starting),
+                                    goal: Value(Value._goal),
+                                    amount_built: Value(Value._amount_built),
+                                    unit_starting: Value(Value._unit_starting),
+                                    unit_ending: Value(Value._unit_ending),
+                                    reject_labels: Value(Value._reject_labels),
+                                    reject_cartridges: Value(Value._reject_cartridges),
+                                    reject_units: Value(Value._reject_units),
+                                    qa_units: Value(Value._qa)
+                                }
+                            )
+                        ),
+
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,
+                        Set(varLoading,{Visible: true, Value: 11, Text: "Collecting Production Dataset 1"});
+                        Collect(material_1,
+                            Sort(
+                                Filter(FE_Production,
+                                    And(
+                                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        
+                                    )
+                                ),
+                                Hour_Ending,
+                                SortOrder.Ascending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 12, Text: "Collecting Production Dataset 2"});
+                        Collect(material_2,
+                            Sort(
+                                Filter(FE_Production,
+                                    And(
+                                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        
+                                    )
+                                ),
+                                Hour_Ending,
+                                SortOrder.Descending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 13, Text: "Joining Production Dataset 1"});
+                        ClearCollect(fusion, material_1);
+
+                        Set(varLoading,{Visible: true, Value: 15, Text: "Joining Production Dataset 2"});
+                        Collect(fusion,
+                            Filter(material_2, Not(ID in material_1.ID))
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 15, Text: "Collecting Joined Production Data"});
+                        ClearCollect(
+                            collectProduction,
+                            ForAll(
+                                fusion,
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter.Value),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Title),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    hour_ending: DateTimeValue(ThisRecord.Hour_Ending),
+                                    hour_starting: DateTimeValue(ThisRecord.Hour_Starting),
+                                    goal: Value(ThisRecord.Hourly_Goal),
+                                    amount_built: Value(ThisRecord.Amount_Built),
+                                    unit_starting: Value(ThisRecord.Unit_Starting),
+                                    unit_ending: Value(ThisRecord.Unit_Ending),
+                                    reject_units: Value(ThisRecord.Reject_Units)
+                                }
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 16, Text: "Garbage Collection"});
+                        Clear(fusion);
+                        Clear(material_1);
+                        Clear(material_2);
+                    )
+                );
+
+                /*Collect Downtime*/
+                Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Downtime Data"});
+                If(varUpdateDowntime,
+                    If(
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 14,
+                        Set(varLoading,{Visible: true, Value: 25, Text: "Retrieving Downtime Data"});
+                        ClearCollect(collectDowntime,
+                            ForAll(
+                                Filter(FE_Downtime,
+                                    Ended <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                    Started >= DateAdd(varStartDate, -1, TimeUnit.Hours)
+                                ),
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter.Value),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Lot),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    started: DateTimeValue(ThisRecord.Started),
+                                    ended: DateTimeValue(ThisRecord.Ended),
+                                    reason: Text(ThisRecord.Reason.Value),
+                                    total: Value(ThisRecord.Total_Downtime),
+                                    comments: Text(ThisRecord.Comments)
+                                }
+                            )
+                        ),
+
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) > 21,
+                        Set(varLoading,{Visible: true, Value: 25, Text: "Parsing PowerAutomate Flow for Downtime Data"});
+                        ClearCollect(collectDowntime,
+                            ForAll(
+                                Table(
+                                    ParseJSON(
+                                        flow_get_downtime_range_v2.Run(
+                                            Text("All"),
+                                            Text(DateAdd(varEndDate, 23,TimeUnit.Hours), "yyyy-mm-dd"),
+                                            Text(DateAdd(varStartDate, -1, TimeUnit.Hours), "yyyy-mm-dd")
+                                        ).output
+                                    )
+                                ),
+                                {
+                                    id: Value(Value._ID),
+                                    shift: Text(Value._shift),
+                                    line: Text(Value._line),
+                                    lot: Text(Value._lot),
+                                    catalog: Text(Value._catalog),
+                                    size: Text(Value._size),
+                                    started: DateTimeValue(Value._started),
+                                    ended: DateTimeValue(Value._ended),
+                                    reason: Text(Value._reason),
+                                    total: Value(Value._total),
+                                    comments: Text(Value._comments)
+                                }
+                            )
+                        ),
+
+                        DateDiff( varStartDate, varEndDate, TimeUnit.Days) <= 21,
+                        Set(varLoading,{Visible: true, Value: 21, Text: "Collecting Downtime Dataset 1"});
+                        Collect(material_1,
+                            Sort(
+                                Filter(FE_Downtime,
+                                    And(
+                                        Ended <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                        Started >= DateAdd(varStartDate, -1, TimeUnit.Hours)
+                                    )
+                                ),
+                                Ended,
+                                SortOrder.Ascending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 22, Text: "Collecting Downtime Dataset 2"});
+                        Collect(material_2,
+                            Sort(
+                                Filter(FE_Downtime,
+                                    And(
+                                        Ended <= DateAdd(varEndDate, 23, TimeUnit.Hours),
+                                        Started >= DateAdd(varStartDate, -1, TimeUnit.Hours)                        
+                                    )
+                                ),
+                                Ended,
+                                SortOrder.Descending
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 23, Text: "Joining Downtime Dataset 1"});
+                        ClearCollect(fusion, material_1);
+
+                        Set(varLoading,{Visible: true, Value: 24, Text: "Joining Downtime Dataset 2"});
+                        Collect(fusion,
+                            Filter(material_2, Not(ID in material_1.ID))
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 25, Text: "Collecting Joined Downtime Data"});
+                        ClearCollect(
+                            collectDowntime,
+                            ForAll(
+                                fusion,
+                                {
+                                    id: Value(ThisRecord.ID),
+                                    shift: Text(ThisRecord.Shift_Letter.Value),
+                                    line: Text(ThisRecord.Line.Value),
+                                    lot: Text(ThisRecord.Title),
+                                    catalog: Text(ThisRecord.Catalog),
+                                    started: DateTimeValue(ThisRecord.Started),
+                                    ended: DateTimeValue(ThisRecord.Ended),
+                                    reason: Text(ThisRecord.Reason.Value),
+                                    total: Value(ThisRecord.Total_Downtime),
+                                    comments: Text(ThisRecord.Comments)
+                                }
+                            )
+                        );
+
+                        Set(varLoading,{Visible: true, Value: 26, Text: "Garbage Collection"});
+                        Clear(fusion);
+                        Clear(material_1);
+                        Clear(material_2);
+                    )
+                );
+
+                Set(varLoading,{Visible: true, Value: 30, Text: "Finshing up"});
+
+                /*Update the UI Elements*/
+                Select(oee_update);
+              Text: ="collect"
+              Visible: =false
+              X: =20
+              Y: =20
+        - oee_update:
+            Control: Classic/Button
+            Properties:
+              OnSelect: "=/*OEE*/\n/*Init default filters*/\nSet(varLoading,{Visible: true, Value: 40, Text: \"Creating Default Filters\"});\n\nUpdateContext({locDefaultProductionFilter:\n    Filter(collectProduction,\n        hour_starting >= DateAdd(oee_start_date.SelectedDate, -1, TimeUnit.Hours),\n        hour_ending <= DateAdd(oee_end_date.SelectedDate, 23, TimeUnit.Hours),\n        If(\n            oee_line.Selected.Value = \"All\",\n            line = line,\n            line = oee_line.Selected.Value\n        )\n    )\n});\n\nUpdateContext({locDefaultDowntimeFilter:\n    Filter(collectDowntime,\n        started >= DateAdd(DateValue(oee_start_date.SelectedDate), -1, TimeUnit.Hours),\n        ended <= DateAdd(DateValue(oee_end_date.SelectedDate), 23, TimeUnit.Hours),\n        If(\n            oee_line.Selected.Value = \"All\",\n            line = line,\n            line = oee_line.Selected.Value\n        )\n    )\n});\n\nUpdateContext(\n    {        \n        count_of_days:\n            RoundDown(\n                DateDiff(oee_start_date.SelectedDate, oee_end_date.SelectedDate, TimeUnit.Days) / 7,\n                0\n            ) * 5 +\n            Mod(5 + Weekday(oee_end_date.SelectedDate) - Weekday(oee_start_date.SelectedDate), 5) + 1\n    }\n);\n\n\n/*Collect Top Downtime - CONDENSE THIS IN THE FUTURE, CAN DO THIS WITH ONE COLLECTION*/\nSet(varLoading,{Visible: true, Value: 45, Text: \"Processing Top Downtime Reasons\"});\nClear(collectTopDowntime);\nClear(collectHasReason);\n\n/*\n    For all base downtime reasons,\n    If the sum of the downtime total is greater than 0,\n    add to collectHasReason.\n    \n*/\nForAll(collectDowntimeReasons,\n    If(\n        Sum(\n            Filter(locDefaultDowntimeFilter,\n                reason = Downtime_Reason\n            ),\n            total\n        ) > 0,\n        Collect(collectHasReason,\n            {\n                Downtime_Reason: Downtime_Reason\n            }\n        )\n    )\n);\n\n/*\n    For all downtime reasons that have an amount,\n    collect the total sum of downtime within collectTopDowntime\n*/\nClear(collectTopDowntime);\nForAll(collectHasReason,\n    Collect(collectTopDowntime,\n        {\n            Downtime_Reason: Downtime_Reason,\n            \n            Downtime_Total: \n                Sum(\n                    Filter(\n                        locDefaultDowntimeFilter,\n                        reason = Downtime_Reason\n                    ),\n                    total\n                )\n        }\n    )\n);\n\n/*Clear for garbage collection*/\nClear(collectHasReason);\n\n/*Collect data for pareto chart*/\nSet(varLoading,{Visible: true, Value: 50, Text: \"Creating Pareto Chart Data\"});\nClear(collectPareto);\n/*\n    For all collectTopDowntime,\n    Sorted and filtered by user selections,\n    Create pareto data in collectPareto.\n*/\nForAll(\n    Sort(\n        Filter(collectTopDowntime,\n            If(\n                oee_downtime.Selected.Value = \"Unplanned Only\", \n                And(\n                    Not(Downtime_Reason = \"No Scheduled Work\"),\n                    Not(Downtime_Reason = \"Engineering DT\"),\n                    Not(Downtime_Reason = \"Planned Downtime\")\n                ),\n                Downtime_Reason = Downtime_Reason\n            )\n        ),\n        Downtime_Total,\n        SortOrder.Descending\n    ),\n    Collect(collectPareto,\n        {\n            id: CountRows(collectPareto)+1,\n            \n            /*Debugging value*/\n            id_lookup: LookUp(collectPareto, id = CountRows(collectPareto)).id,\n            \n            reason: Downtime_Reason,\n\n            total: ThisRecord.Downtime_Total,\n\n            sum: Sum(collectTopDowntime,Downtime_Total),\n            \n            freq:\n                /*frequency = This record's downtime / sum of total downtime */\n                Round(\n                    ThisRecord.Downtime_Total /\n                    Sum(\n                        Filter(collectTopDowntime,\n                            If(\n                                oee_downtime.Selected.Value = \"Unplanned Only\", \n                                And(\n                                    Not(Downtime_Reason = \"No Scheduled Work\"),\n                                    Not(Downtime_Reason = \"Engineering DT\"),\n                                    Not(Downtime_Reason = \"Planned Downtime\")\n                                ),\n                                Downtime_Reason = Downtime_Reason\n                            )\n                        ),\n                        Downtime_Total\n                    ) * 100,0\n                ),\n\n            cumulative:\n                /*cumulative percentage = (this record's downtime / sum of total downtime) + the last record's cumulative percentage */\n                Round(\n                    ThisRecord.Downtime_Total / \n                    Sum(\n                        Filter(collectTopDowntime,\n                            If(\n                                oee_downtime.Selected.Value = \"Unplanned Only\", \n                                And(\n                                    Not(Downtime_Reason = \"No Scheduled Work\"),\n                                    Not(Downtime_Reason = \"Engineering DT\"),\n                                    Not(Downtime_Reason = \"Planned Downtime\")\n                                ),\n                                Downtime_Reason = Downtime_Reason\n                            )\n                        ),\n                        Downtime_Total\n                    ) * 100,0\n                ) + \n                If(\n                    CountRows(collectPareto) >= 1,\n                    LookUp(collectPareto, id = CountRows(collectPareto)).cumulative,\n                    0\n                )\n        }\n    )\n);\n\n/*Combine production and downtime databases to find runtime*/\nSet(varLoading,{Visible: true, Value: 55, Text: \"Combining Databases\"});\nClear(collectCombinedData);\n\n/*Collect all Production Data*/\nClearCollect(collectCombinedData,\n    Filter(\n        collectProduction,\n        And(\n            hour_starting >= DateAdd(oee_start_date.SelectedDate, -1, TimeUnit.Hours),\n            hour_ending <= DateAdd(oee_end_date.SelectedDate, 23, TimeUnit.Hours)\n        )\n    )\n);\n/*Collect downtime data that does not fall within produciton data*/\nForAll(\n    collectLineSchema,\n    {\n        Line: SCH_Line,\n        \n        Value:\n        ForAll(\n            Filter(\n                collectDowntime,\n                And(\n                    started >= DateAdd(oee_start_date.SelectedDate, -1, TimeUnit.Hours),\n                    ended <= DateAdd(oee_end_date.SelectedDate, 23, TimeUnit.Hours)\n                ),\n                line = SCH_Line\n            ),\n            With(\n                {\n                    thisDowntime: ThisRecord,\n                    thisLine: SCH_Line\n                },\n                If(\n                    CountRows(\n                        Filter(\n                            collectProduction,\n                            hour_starting >= DateAdd(oee_start_date.SelectedDate, -1, TimeUnit.Hours),\n                            hour_ending <= DateAdd(oee_end_date.SelectedDate, 23, TimeUnit.Hours),\n                            line = SCH_Line,\n                            /*DOUBLE CHECK THAT THIS IS CORRECT, SOME PEOPLE MAY ENTER IN 0s*/\n                            amount_built <> 0,\n                            (hour_starting <= thisDowntime.started && hour_ending > thisDowntime.started) || \n                            (hour_starting < thisDowntime.ended && hour_ending >= thisDowntime.ended) ||\n                            (hour_starting >= thisDowntime.started && hour_ending <= thisDowntime.ended)\n                        )\n                    ) = 0,\n                    Collect(collectCombinedData, thisDowntime)\n                )\n            )\n        )\n    }\n);\n\n/*Gather Shift Specific OEE Data*/\nSet(varLoading,{Visible: true, Value: 60, Text: \"Gathering OEE2 Data for Shifts\"});\n/*Init this collection here or powerapps breaks*/\nClearCollect(collectShiftOEE2Data, {shift: \"A\"});\n/*\n    For each Shift,\n    for each Line,\n    for each Catalog,\n    collect outputs, constraints, and runtime.\n*/\nClear(collectShiftOEE2Data);\nWith(\n    {\n        theseLines:\n            If(\n                oee_line.Selected.Value = \"All\",\n                Choices([@FE_Production].Line),\n                [oee_line.Selected.Value]\n            ),\n        theseCatalogs:\n            Distinct(Table(ShowColumns(FE_Constraints, Catalog)),Title),\n        theseShifts:\n            [\"A\",\"B\",\"C\"]\n    },\n    ForAll(theseShifts,\n        With({thisShift: ThisRecord.Value},\n            ForAll(theseLines,\n                With({thisLine: ThisRecord.Value},\n                    ForAll(theseCatalogs,\n                        With({thisCatalog: ThisRecord.Value},\n                            If(\n                                Sum(\n                                    Filter(collectProduction,\n                                        And(\n                                            hour_starting >= DateAdd(oee_start_date.SelectedDate, -1, TimeUnit.Hours),\n                                            hour_ending <= DateAdd(oee_end_date.SelectedDate, 23, TimeUnit.Hours)\n                                        ),\n                                        line = thisLine,\n                                        catalog = thisCatalog,\n                                        shift = thisShift\n                                    ),\n                                    amount_built\n                                ) > 0,\n                            \n                                Collect(collectShiftOEE2Data,\n                                    {\n                                        shift: thisShift,\n                                        \n                                        line: thisLine,\n                                        \n                                        catalog: thisCatalog,\n                                        \n                                        constraint_setting:\n                                            IfError(\n                                                Average(\n                                                    Filter(FE_Constraints,\n                                                        Line.Value = thisLine,\n                                                        Catalog = thisCatalog,\n                                                        Constraint > 0\n                                                    ), Constraint\n                                                ),\n                                                0\n                                            ),\n                                            \n                                        output:\n                                            Sum(\n                                                Filter(collectProduction,\n                                                    And(\n                                                        hour_starting >= DateAdd(oee_start_date.SelectedDate, -1, TimeUnit.Hours),\n                                                        hour_ending <= DateAdd(oee_end_date.SelectedDate, 23, TimeUnit.Hours)\n                                                    ),\n                                                    line = thisLine,\n                                                    catalog = thisCatalog,\n                                                    shift = thisShift\n                                                ),\n                                                amount_built\n                                            ),\n                                        \n                                        runtime:\n                                            (\n                                                /*Collect Runtime Minutes From Production*/\n                                                (CountRows(\n                                                    Filter(collectCombinedData,\n                                                        amount_built > 0,\n                                                        line = thisLine,\n                                                        catalog = thisCatalog,\n                                                        shift = thisShift\n                                                    )\n                                                ) * 60) +\n                                                /*Collect Runtime Minues From Downtime*/\n                                                Sum(\n                                                    Filter(collectCombinedData,\n                                                        line = thisLine,\n                                                        catalog = thisCatalog,\n                                                        shift = thisShift,\n                                                        Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")\n                                                    ),\n                                                    total\n                                                )\n                                            )/60,\n                                    \n                                        constraint_goal:\n                                            /*Constraint *  Runtime*/\n                                            /*Constraint*/\n                                            IfError(\n                                                Average(\n                                                    Filter(FE_Constraints,\n                                                        Line.Value = thisLine,\n                                                        Catalog = thisCatalog,\n                                                        Constraint > 0\n                                                    ), Constraint\n                                                ),\n                                                0\n                                            ) *\n                                            /* Runtime */\n                                            (\n                                                /*Collect Runtime Minutes From Production*/\n                                                (CountRows(\n                                                    Filter(collectCombinedData,\n                                                        amount_built > 0,\n                                                        line = thisLine,\n                                                        catalog = thisCatalog,\n                                                        shift = thisShift\n                                                    )\n                                                ) * 60) +\n                                                /*Collect Runtime Minues From Downtime*/\n                                                Sum(\n                                                    Filter(collectCombinedData,\n                                                        line = thisLine,\n                                                        catalog = thisCatalog,\n                                                        shift = thisShift,\n                                                        Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")\n                                                    ),\n                                                    total\n                                                )\n                                            ) / 60\n                                    }\n                                )\n                            )\n                        )\n                    )\n                )\n            )\n        )\n    )\n);\n\n/*Calculate Shift Specific OEE Data*/\nSet(varLoading,{Visible: true, Value: 65, Text: \"Calculating OEE2 for Shifts\"});\nClear(collectShiftOEE);\nForAll(collectShiftSchema,\n    Collect(collectShiftOEE,\n        {\n            constraint_average:\n                IfError(\n                    Average(\n                        Filter(collectShiftOEE2Data,\n                            output > 0 ,\n                            shift = SCH_Shift\n                        ),\n                        constraint_setting\n                    ),\n                    0\n                ),\n\n            constraint_goal:\n                IfError(\n                    Sum(\n                        Filter(collectShiftOEE2Data,\n                            output > 0,\n                            shift = SCH_Shift\n                        ),\n                        constraint_goal\n                    ),\n                    0\n                ),\n            \n            downtime_planned:\n                Sum(\n                    Filter(locDefaultDowntimeFilter,\n                        shift = SCH_Shift,\n                        reason = \"No Scheduled Work\" || reason = \"Engineering DT\" || reason = \"Planned Downtime\"\n                    ),\n                    total\n                ),\n\n            OEE2:\n                IfError(\n                    Round(\n                        Sum(\n                            Filter(collectShiftOEE2Data, output > 0, shift = SCH_Shift),\n                            output\n                        ) /\n                        Sum(\n                            Filter(collectShiftOEE2Data, output > 0, shift = SCH_Shift),\n                            constraint_goal\n                        ) * 100,\n                        2\n                    ),\n                    0\n                ),\n\n            output:\n                IfError(\n                    Sum(\n                        Filter(collectShiftOEE2Data,\n                            output > 0,\n                            shift = SCH_Shift\n                        ),\n                        output\n                    ),\n                    0\n                ),\n\n            runtime_hours: \n                Sum(\n                    Filter(collectShiftOEE2Data,\n                        output > 0,\n                        shift = SCH_Shift\n                    ),\n                    runtime\n                ),\n\n            runtime_total:\n                (If(\n                oee_line.Selected.Value = \"All\",\n                count_of_days * 9,\n                oee_line.Selected.Value = \"Only SSCs\",\n                count_of_days * 2,\n                oee_line.Selected.Value = \"Only XLs\",\n                count_of_days * 5,\n                oee_line.Selected.Value = \"Only XLTs\",\n                count_of_days * 2,\n                count_of_days\n                ) * 480)/60, \n            \n            shift: SCH_Shift\n\n        }\n    )\n);\n\n/*Gather OEE Data*/\nSet(varLoading,{Visible: true, Value: 70, Text: \"Gathering OEE2 Data\"});\n/*\n    For all Lines,\n    For all Catalogs,\n    collect output, constraints, and runtime\n*/\nClear(collectOEE2Data);\nWith(\n    {\n        theseLines:\n            If(\n                oee_line.Selected.Value = \"All\",\n                Choices([@FE_Production].Line),\n                [oee_line.Selected.Value]\n            ),\n        theseCatalogs:\n            Distinct(Table(ShowColumns(FE_Constraints, Catalog)),Title)\n    },\n    ForAll(theseLines,\n        With({thisLine: ThisRecord.Value},\n            ForAll(theseCatalogs,\n                With({thisCatalog: ThisRecord.Value},\n                    If(\n                        Sum(\n                            Filter(collectProduction,\n                                And(\n                                    hour_starting >= DateAdd(oee_start_date.SelectedDate, -1, TimeUnit.Hours),\n                                    hour_ending <= DateAdd(oee_end_date.SelectedDate, 23, TimeUnit.Hours)\n                                ),\n                                line = thisLine,\n                                catalog = thisCatalog\n                            ),\n                            amount_built\n                        ) > 0,\n                    \n                        Collect(collectOEE2Data,\n                            {\n                                line: thisLine,\n                                \n                                catalog: thisCatalog,\n                                \n                                constraint_setting:\n                                    IfError(\n                                        First(Filter(FE_Constraints, Line.Value = thisLine, Catalog = thisCatalog)).Constraint,\n                                        0\n                                    ),\n                                    \n                                output:\n                                    Sum(\n                                        Filter(collectProduction,\n                                            And(\n                                                hour_starting >= DateAdd(oee_start_date.SelectedDate, -1, TimeUnit.Hours),\n                                                hour_ending <= DateAdd(oee_end_date.SelectedDate, 23, TimeUnit.Hours)\n                                            ),\n                                            line = thisLine,\n                                            catalog = thisCatalog\n                                        ),\n                                        amount_built\n                                    ),\n                                \n                                runtime:\n                                    (\n                                        /*Collect runtime minutes from production*/\n                                        (CountRows(\n                                            Filter(collectCombinedData,\n                                                amount_built > 0,\n                                                line = thisLine,\n                                                catalog = thisCatalog\n                                            )\n                                        ) * 60) +\n                                        /*Collect runtime minutes from downtime*/\n                                        Sum(\n                                            Filter(collectCombinedData,\n                                                line = thisLine,\n                                                catalog = thisCatalog,\n                                                Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")\n                                            ),\n                                            total\n                                        )\n                                    )/60,\n                            \n                                constraint_goal:\n                                    /*Constraint *  Runtime*/\n                                    /*Constraint*/\n                                    IfError(\n                                        First(Filter(FE_Constraints, Line.Value = thisLine, Catalog = thisCatalog)).Constraint,\n                                        0\n                                    ) *\n                                    /* Runtime */\n                                    (\n                                        /*Collect runtime minutes from production*/\n                                        (CountRows(\n                                            Filter(collectCombinedData,\n                                                amount_built > 0,\n                                                line = thisLine,\n                                                catalog = thisCatalog\n                                            )\n                                        ) * 60) +\n                                        /*Collect runtime minutes from downtime*/\n                                        Sum(\n                                            Filter(collectCombinedData,\n                                                line = thisLine,\n                                                catalog = thisCatalog,\n                                                Not(reason = \"Planned Downtime\" || reason = \"No Scheduled Work\" || reason = \"Engineering DT\")\n                                            ),\n                                            total\n                                        )\n                                    ) / 60\n                            }\n                        )\n                    )\n                )\n            )\n        )   \n    )\n);\n\n/*Collect OEE2*/\nSet(varLoading,{Visible: true, Value: 75, Text: \"Calculating OEE2\"});\nClear(collectOEE2);\nWith(\n    {\n        constraint_average:\n            IfError(\n                Average(Filter(collectOEE2Data, constraint_setting > 0),\n                    constraint_setting\n                ),\n                0\n            ),\n\n        constraint_goal:\n            IfError(\n                Sum(collectOEE2Data,\n                    constraint_goal\n                ),\n                0\n            ),\n\n        output:\n            IfError(\n                Sum(collectOEE2Data,\n                    output\n                ),\n                0\n            ),\n\n        runtime_total:\n            If(\n                oee_line.Selected.Value = \"All\",\n                1440 * 9 * count_of_days,\n                1440 * count_of_days\n            ),\n        \n        total:\n            Sum(\n                locDefaultProductionFilter,\n                reject_cartridges + reject_units + amount_built\n            ),\n        \n        uptime:\n            IfError(\n                Sum(collectOEE2Data,\n                    runtime\n                ),\n                0\n            )\n    },\n    Collect(collectOEE2,\n        {\n            availability:\n                IfError(\n                    Round(\n                        (uptime / (runtime_total / 60)) * 100,\n                        0\n                    ),\n                    0\n                ),\n            \n            constraint_goal: constraint_goal,\n\n            constraint_average: constraint_average,\n            \n            downtime_planned:\n                Sum(\n                    Filter(locDefaultDowntimeFilter,\n                        reason = \"No Scheduled Work\" || reason = \"Engineering DT\" || reason = \"Planned Downtime\"\n                    ),\n                    total\n                )*1,\n            \n            downtime_unplanned:\n                Sum(\n                    Filter(locDefaultDowntimeFilter,\n                        Not(reason = \"No Scheduled Work\" || reason = \"Engineering DT\" || reason = \"Planned Downtime\")\n                    ),\n                    total\n                )*1,\n                            \n            OEE2:\n                IfError(\n                    Round(\n                        (output / constraint_goal),\n                        2\n                    ) * 100,\n                    0\n                ),\n\n            \n            output: output,\n            \n            performance:\n                IfError(\n                    Round(\n                        (output / constraint_goal) * 100,\n                        0\n                    ),\n                    0\n                ),\n            \n            rejects:\n                Sum(\n                    locDefaultProductionFilter,\n                    reject_cartridges + reject_units\n                ),\n            \n            runtime_total: runtime_total/60,\n            \n            uptime: uptime,\n            \n            target: 0,\n                // FIND TARGETS PER COUNT OF DAYS\n\n                /*If(\n                    oee_line.Selected.Value = \"All\",\n                    ((varWeeklySSCTarget + varWeeklyXLTarget + varWeeklyXLTTarget)/5) * count_of_days,\n                    oee_line.Selected.Value = \"Only SSCs\",\n                    (varWeeklySSCTarget/5) * count_of_days,\n                    oee_line.Selected.Value = \"Only XLs\",\n                    (varWeeklyXLTarget/5) * count_of_days,\n                    oee_line.Selected.Value = \"Only XLTs\",\n                    (varWeeklyXLTTarget/5) * count_of_days,\n                    \"SSC\" in oee_line.Selected.Value,\n                    ((varWeeklySSCTarget / 2)/5) * count_of_days,\n                    \"XLT\" in oee_line.Selected.Value,\n                    ((varWeeklyXLTTarget / 2)/5) * count_of_days,\n                    ((varWeeklyXLTarget / 5)/5) * count_of_days\n                ),*/\n            \n            total: total,\n            \n            yield:\n                IfError(\n                    Round(\n                        (output / total) * 100,\n                        0\n                    ),\n                    0\n                )\n            \n        }\n    )\n);\n\n\n/*Garbage collection*/\nSet(varLoading,{Visible: true, Value: 95, Text: \"Finishing Up\"});\nUpdateContext({\n    locDefaultProductionFilter: Blank(),\n    locDefaultDowntimeFilter: Blank()\n});\n\n//Clear(collectCombinedData);\n//Clear(collectShiftOEE2Data);\n//Clear(collectOEE2Data);\n\n\n/*End*/\nSet(varLoading,{Visible: true, Value: 100, Text: \"Completed\"});\nSet(varLoading,{Visible: false, Value: -1, Text: \"Not Loading\"});"
+              Text: ="update"
+              Visible: =false
+              X: =20
+              Y: =20
+        - oee_logo:
+            Control: Image
+            Properties:
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Width: =10
+        - oee_h_title:
+            Control: Label
+            Properties:
+              Text: ="Encapsualtion Daily Managmenet System"
+              Align: =Align.Center
+              Color: =varColor5
+              FillPortions: =6
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 2
+        - oee_h_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =1
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =oee_h_n_reload.Width * 3 + varPadding * 4
+            Children:
+            - oee_h_n_reload:
+                Control: Image
+                Properties:
+                  OnSelect: "=/*Start*/\r\nUpdateContext({locLoading:{Visible: true, Value: 1, Text: \"Loading\"}});\r\n\r\nUpdateContext({\r\n    locStartDate: oee_start_date.SelectedDate,\r\n    locEndDate: oee_end_date.SelectedDate\r\n});\r\n\r\n/*Collect Production*/\r\nIf(\r\n    DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 10,\r\n    UpdateContext({locLoading:{Visible: true, Value: 25, Text: \"Collecting Production Data\"}});\r\n    ClearCollect(collectProduction,\r\n        ForAll(\r\n            Filter(FE_Production,\r\n                Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n                Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)\r\n            ),\r\n            {\r\n                id: Value(ThisRecord.ID),\r\n                shift: Text(ThisRecord.Shift_Letter.Value),\r\n                line: Text(ThisRecord.Line.Value),\r\n                lot: Text(ThisRecord.Lot),\r\n                catalog: Text(ThisRecord.Catalog),\r\n                hour_ending: DateTimeValue(ThisRecord.Hour_Ending),\r\n                hour_starting: DateTimeValue(ThisRecord.Hour_Starting),\r\n                goal: Value(ThisRecord.Hourly_Goal),\r\n                amount_built: Value(ThisRecord.Amount_Built),\r\n                unit_starting: Value(ThisRecord.Unit_Starting),\r\n                unit_ending: Value(ThisRecord.Unit_Ending),\r\n                reject_units: Value(ThisRecord.Reject_Units)\r\n            }\r\n        )\r\n    ),\r\n\r\n    DateDiff( locStartDate, locEndDate, TimeUnit.Days) > 20,\r\n    UpdateContext({locLoading:{Visible: true, Value: 25, Text: \"Parsing PowerAutomate Flow for Production Data\"}});\r\n    ClearCollect(collectProduction,\r\n        ForAll(\r\n            Table(\r\n                ParseJSON(\r\n                    flow_get_units_range_v2.Run(\r\n                        Text(\"All\"),\r\n                        Text(DateAdd(locEndDate, 23,TimeUnit.Hours), \"yyyy-mm-dd\"),\r\n                        Text(DateAdd(locStartDate, -1, TimeUnit.Hours), \"yyyy-mm-dd\")\r\n                    ).output\r\n                )\r\n            ),\r\n            {\r\n                id: Value(Value._ID),\r\n                shift: Text(Value._shift),\r\n                line: Text(Value._line),\r\n                lot: Text(Value._lot),\r\n                catalog: Text(Value._catalog),\r\n                size: Text(Value._size),\r\n                hour_ending: DateTimeValue(Value._hour_ending),\r\n                hour_starting: DateTimeValue(Value._hour_starting),\r\n                goal: Value(Value._goal),\r\n                amount_built: Value(Value._amount_built),\r\n                unit_starting: Value(Value._unit_starting),\r\n                unit_ending: Value(Value._unit_ending),\r\n                reject_labels: Value(Value._reject_labels),\r\n                reject_cartridges: Value(Value._reject_cartridges),\r\n                reject_units: Value(Value._reject_units),\r\n                qa_units: Value(Value._qa)\r\n            }\r\n        )\r\n    ),\r\n\r\n    DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 20,\r\n    UpdateContext({locLoading:{Visible: true, Value: 5, Text: \"Collecting Production Dataset 1\"}});\r\n     Collect(material_1,\r\n        Sort(\r\n            Filter(FE_Production,\r\n                And(\r\n                    Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n                    Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours)\r\n                )\r\n            ),\r\n            Hour_Ending,\r\n            SortOrder.Ascending\r\n        )\r\n    );\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 10, Text: \"Collecting Production Dataset 2\"}});\r\n    Collect(material_2,\r\n        Sort(\r\n            Filter(FE_Production,\r\n                And(\r\n                    Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n                    Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours)\r\n                )\r\n            ),\r\n            Hour_Ending,\r\n            SortOrder.Descending\r\n        )\r\n    );\r\n\r\n    \r\n    UpdateContext({locLoading:{Visible: true, Value: 15, Text: \"Joining Production Dataset 1\"}});\r\n    ClearCollect(fusion, material_1);\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 20, Text: \"Joining Production Dataset 2\"}});\r\n    Collect(fusion,\r\n        Filter(material_2, Not(ID in material_1.ID))\r\n    );\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 25, Text: \"Collecting Joined Production Data\"}});\r\n    ClearCollect(\r\n        collectProduction,\r\n        ForAll(\r\n            fusion,\r\n            {\r\n                id: Value(ThisRecord.ID),\r\n                shift: Text(ThisRecord.Shift_Letter.Value),\r\n                line: Text(ThisRecord.Line.Value),\r\n                lot: Text(ThisRecord.Title),\r\n                catalog: Text(ThisRecord.Catalog),\r\n                hour_ending: DateTimeValue(ThisRecord.Hour_Ending),\r\n                hour_starting: DateTimeValue(ThisRecord.Hour_Starting),\r\n                goal: Value(ThisRecord.Hourly_Goal),\r\n                amount_built: Value(ThisRecord.Amount_Built),\r\n                unit_starting: Value(ThisRecord.Unit_Starting),\r\n                unit_ending: Value(ThisRecord.Unit_Ending),\r\n                reject_units: Value(ThisRecord.Reject_Units)\r\n            }\r\n        )\r\n    );\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 26, Text: \"Garbage Collection\"}});\r\n    Clear(fusion);\r\n    Clear(material_1);\r\n    Clear(material_2);\r\n);\r\n\r\n/*Collect Downtime*/\r\nIf(\r\n    DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 10,\r\n    UpdateContext({locLoading:{Visible: true, Value: 50, Text: \"Collecting Downtime Data\"}});\r\n    ClearCollect(collectDowntime,\r\n        ForAll(\r\n            Filter(FE_Downtime,\r\n                Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n                Started >= DateAdd(locStartDate, -1, TimeUnit.Hours)\r\n            ),\r\n            {\r\n                id: Value(ThisRecord.ID),\r\n                shift: Text(ThisRecord.Shift_Letter.Value),\r\n                line: Text(ThisRecord.Line.Value),\r\n                lot: Text(ThisRecord.Lot),\r\n                catalog: Text(ThisRecord.Catalog),\r\n                started: DateTimeValue(ThisRecord.Started),\r\n                ended: DateTimeValue(ThisRecord.Ended),\r\n                reason: Text(ThisRecord.Reason.Value),\r\n                total: Value(ThisRecord.Total_Downtime),\r\n                comments: Text(ThisRecord.Comments)\r\n            }\r\n        )\r\n    ),\r\n\r\n    DateDiff( locStartDate, locEndDate, TimeUnit.Days) > 20,\r\n    UpdateContext({locLoading:{Visible: true, Value: 50, Text: \"Parsing PowerAutomate Flow for Downtime Data\"}});\r\n    ClearCollect(collectDowntime,\r\n        ForAll(\r\n            Table(\r\n                ParseJSON(\r\n                    flow_get_downtime_range_v2.Run(\r\n                        Text(\"All\"),\r\n                        Text(DateAdd(locEndDate, 23,TimeUnit.Hours), \"yyyy-mm-dd\"),\r\n                        Text(DateAdd(locStartDate, -1, TimeUnit.Hours), \"yyyy-mm-dd\")\r\n                    ).output\r\n                )\r\n            ),\r\n            {\r\n                id: Value(Value._ID),\r\n                shift: Text(Value._shift),\r\n                line: Text(Value._line),\r\n                lot: Text(Value._lot),\r\n                catalog: Text(Value._catalog),\r\n                size: Text(Value._size),\r\n                started: DateTimeValue(Value._started),\r\n                ended: DateTimeValue(Value._ended),\r\n                reason: Text(Value._reason),\r\n                total: Value(Value._total),\r\n                comments: Text(Value._comments)\r\n            }\r\n        )\r\n    ),\r\n\r\n    DateDiff( locStartDate, locEndDate, TimeUnit.Days) <= 20,\r\n    UpdateContext({locLoading:{Visible: true, Value: 30, Text: \"Collecting Downtime Dataset 1\"}});\r\n     Collect(material_1,\r\n        Sort(\r\n            Filter(FE_Downtime,\r\n                And(\r\n                    Started >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n                    Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours)\r\n                )\r\n            ),\r\n            Ended,\r\n            SortOrder.Ascending\r\n        )\r\n    );\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 35, Text: \"Collecting Downtime Dataset 2\"}});\r\n    Collect(material_2,\r\n        Sort(\r\n            Filter(FE_Downtime,\r\n                And(\r\n                    Started >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n                    Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours)\r\n                )\r\n            ),\r\n            Ended,\r\n            SortOrder.Descending\r\n        )\r\n    );\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 40, Text: \"Joining Downtime Dataset 1\"}});\r\n    ClearCollect(fusion, material_1);\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 45, Text: \"Joining Downtime Dataset 2\"}});\r\n    Collect(fusion,\r\n        Filter(material_2, Not(ID in material_1.ID))\r\n    );\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 50, Text: \"Collecting Joined Downtime Data\"}});\r\n    ClearCollect(\r\n        collectDowntime,\r\n        ForAll(\r\n            fusion,\r\n            {\r\n                id: Value(ThisRecord.ID),\r\n                shift: Text(ThisRecord.Shift_Letter.Value),\r\n                line: Text(ThisRecord.Line.Value),\r\n                lot: Text(ThisRecord.Title),\r\n                catalog: Text(ThisRecord.Catalog),\r\n                started: DateTimeValue(ThisRecord.Started),\r\n                ended: DateTimeValue(ThisRecord.Ended),\r\n                reason: Text(ThisRecord.Reason.Value),\r\n                total: Value(ThisRecord.Total_Downtime),\r\n                comments: Text(ThisRecord.Comments)\r\n            }\r\n        )\r\n    );\r\n\r\n    UpdateContext({locLoading:{Visible: true, Value: 51, Text: \"Garbage Collection\"}});\r\n    Clear(fusion);\r\n    Clear(material_1);\r\n    Clear(material_2);\r\n);\r\n\r\nUpdateContext({locLoading:{Visible: true, Value: 52, Text: \"Finshing up\"}});"
+                  Image: =gblAppIcons.Reload
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  X: =oee_h_n_settings.X - Self.Width - Parent.Width * 0.015
+                  Y: =Parent.Height/2 - Self.Height/2
+            - oee_h_n_bugs:
+                Control: Image
+                Properties:
+                  OnSelect: =Navigate(Bugs)
+                  Image: =gblAppIcons.Bug
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  X: =Parent.Width * 0.99 - Self.Width
+                  Y: =Parent.Height/2 - Self.Height/2
+            - oee_h_n_settings:
+                Control: Image
+                Properties:
+                  OnSelect: =Navigate(Settings)
+                  Image: =gblAppIcons.Settings
+                  Height: =Parent.Height * 0.75
+                  HoverBorderColor: =ColorFade(varColorYes, 20%)
+                  HoverFill: =ColorFade(varColorAccent, 75%)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =Self.Width/2
+                  RadiusBottomRight: =Self.Width/2
+                  RadiusTopLeft: =Self.Width/2
+                  RadiusTopRight: =Self.Width/2
+                  Width: =Self.Height
+                  X: =Parent.Width * 0.99 - Self.Width - oee_h_n_bugs.Width - Parent.Width * 0.015
+                  Y: =Parent.Height/2 - Self.Height/2
+            - oee_h_n_user:
+                Control: Image
+                Properties:
+                  Image: |
+                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
+    - oee_body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =15
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - oee_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =varColor3
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - oee_n_title:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Size: =Self.Height / 3
+                  Text: =App.ActiveScreen.Name
+                  VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  FillPortions: =1
+            - oee_n_seperator:
+                Control: Rectangle
+                Properties:
+                  Height: =1
+                  Width: =Parent.Width * 0.95
+            - oee_n_gallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =collectNavigation
+                  DelayItemLoading: =true
+                  FillPortions: =13
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LoadingSpinner: =LoadingSpinner.Data
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: =(Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount
+                Children:
+                - oee_n_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.ScreenName);
+                      Text: =ThisItem.Title
+                      Color: =varColor0
+                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =varColorAccent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight - varPadding
+                      Size: =Self.Width / 16
+                      Width: =Parent.TemplateWidth - Self.BorderThickness
+                      X: =Center(Parent.TemplateWidth, Self.Width)
+                      Y: =Center(Parent.TemplateHeight, Self.Height)
+            - oee_n_footer:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =2
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - oee_n_f_text:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =8
+                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
+                      Height: =Parent.Height
+                      Width: =Parent.Width
+        - oee_main:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =11
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - oee_controls:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =varColor4
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =varPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
+                Children:
+                - oee_start_date_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Starting Date"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee_start_date:
+                    Control: DatePicker
+                    Properties:
+                      FontSize: =Self.Width / 10
+                      Format: ="Short"
+                      SelectedDate: =varNowDay
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee_seperator_0:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - oee_end_date_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Ending Date"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee_end_date:
+                    Control: DatePicker
+                    Properties:
+                      FontSize: =Self.Width / 10
+                      Format: ="Short"
+                      SelectedDate: =varNowDay
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee_seperator_1:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - oee_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Select(oee_collect);
+                      Text: ="Update Date Range"
+                      Color: =varColor0
+                      Fill: =varColorAccent
+                      FillPortions: =1
+                      FontWeight: =FontWeight.Normal
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Width / 16
+                - oee_seperator_2:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - oee_line_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Line"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee_line:
+                    Control: DropDown
+                    Variant: pcfdataset
+                    Properties:
+                      OnChange: =Select(oee_update);
+                      Appearance: ='DropdownCanvas.Appearance'.FilledDarker
+                      DefaultSelectedItems: |-
+                        ={Value: "All"}
+                      FontSize: =Self.Width / 10
+                      Items: =["All","12","34","EF","GH","JK","NO","PQ","WX","YZ"]
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee_seperator_3:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - oee_downtime_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Downtime"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee_downtime:
+                    Control: DropDown
+                    Variant: pcfdataset
+                    Properties:
+                      OnChange: =Select(oee_collect);
+                      Appearance: ='DropdownCanvas.Appearance'.FilledDarker
+                      DefaultSelectedItems: |-
+                        ={Value: "All Downtime"}
+                      FontSize: =Self.Width / 10
+                      Items: =["All Downtime", "Unplanned Only"]
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee_c_footer:
+                    Control: GroupContainer
+                    Variant: manualLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      FillPortions: =7
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+            - oee_section_0:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =9
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingLeft: =
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - oee_section_1:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      FillPortions: =2.5
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutGap: =varPadding
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      PaddingBottom: =Self.LayoutGap
+                      PaddingLeft: =Self.LayoutGap/2
+                      PaddingRight: =Self.LayoutGap/2
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - oee_average:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.Semilight
+                          Fill: =varColor4
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                        Children:
+                        - oee_average_title:
+                            Control: Label
+                            Properties:
+                              Text: =Concatenate(oee_line.Selected.Value," OEE2")
+                              Align: =Align.Center
+                              Color: =varColor5
+                              Fill: =varColor2
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 3
+                        - oee_ave_layout:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              FillPortions: =7
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                            Children:
+                            - oee_average_graph:
+                                Control: Image
+                                Properties:
+                                  Image: |-
+                                    ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                                    EncodeUrl(
+                                    "{
+                                      type: 'radialGauge',
+                                      data: {
+                                        datasets: [{
+                                          data: ["& Last(collectOEE2).OEE2 &"],
+                                          backgroundColor: getGradientFillHelper('horizontal', ['blue','blue','blue','red','red','red']),
+                                        }]
+                                      },
+                                      options: {
+                                        domain: [0, "& If(Last(collectOEE2).OEE2 <= 100, 100, Last(collectOEE2).OEE2) &"],
+                                        trackColor: 'white', 
+                                        centerPercentage: 90,
+                                        centerArea: {
+                                          text: (val) => val + '%',
+                                          fontColor: 'black'
+                                        },
+                                      }
+                                    }"
+                                    )
+                                  AlignInContainer: =AlignInContainer.Stretch
+                                  FillPortions: =2
+                                  Height: =Self.Width
+                                  PaddingLeft: =varPadding/2
+                                  PaddingRight: =varPadding/2
+                            - oee_ave_data:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  BorderThickness: =1
+                                  DropShadow: =DropShadow.None
+                                  FillPortions: =4
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutDirection: =LayoutDirection.Vertical
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee_ave_upper:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_ave_built_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: '=10  '
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_ave_built_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Total Units"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_ave_built:
+                                            Control: Label
+                                            Properties:
+                                              Text: =First(collectOEE2).total*1
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              FontWeight: =FontWeight.Semibold
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3
+                                              Width: =10
+                                    - oee_ave_good_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_ave_good_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Good Units"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_ave_good:
+                                            Control: Label
+                                            Properties:
+                                              Text: =First(collectOEE2).output
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                    - oee_ave_reject_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_ave_reject_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Reject Units"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_ave_reject:
+                                            Control: Label
+                                            Properties:
+                                              Text: =First(collectOEE2).rejects
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                - oee_average_middle:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_ave_constraint_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: '=10  '
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_ave_constraint_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Constraint Goal Units"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_ave_constraint:
+                                            Control: Label
+                                            Properties:
+                                              Text: =Round(First(collectOEE2).constraint_goal*1,0)
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                    - oee_ave_target_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: '=10  '
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_ave_target_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Target Units"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_ave_target:
+                                            Control: Label
+                                            Properties:
+                                              Text: =First(collectOEE2).target
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                - oee_average_lower:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_ave_unplanned_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_ave_unplanned_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Unplanned Downtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_ave_unplanned:
+                                            Control: Label
+                                            Properties:
+                                              Text: =RoundDown(First(collectOEE2).downtime_unplanned/60,0) &"H "& Mod(First(collectOEE2).downtime_unplanned,60) & "m"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4
+                                              Width: =10
+                                    - oee_ave_planned_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_ave_planned_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Planned Downtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_ave_planned:
+                                            Control: Label
+                                            Properties:
+                                              Text: =RoundDown(First(collectOEE2).downtime_planned/60,0) &"H "& Mod(First(collectOEE2).downtime_planned,60) & "m"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4
+                                              Width: =10
+                                    - oee_ave_possible_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_ave_possible_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Possible Runtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_ave_possible:
+                                            Control: Label
+                                            Properties:
+                                              Text: =First(collectOEE2).runtime_total*1 & "H"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4
+                                              Width: =10
+                    - oee_pareto:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
+                            EncodeUrl("
+                            {
+                              type: 'bar',
+                              data: {
+                                labels: " & Concatenate("['", Concat(Sort(Filter(collectTopDowntime, If(oee_downtime.Selected.Value = "Unplanned Only", And(Not(Downtime_Reason = "No Scheduled Work"),Not(Downtime_Reason = "Engineering DT"),Not(Downtime_Reason = "Planned Downtime")), Downtime_Reason = Downtime_Reason)), Downtime_Total, SortOrder.Descending), ThisRecord.Downtime_Reason, "', '"), "']") & ",
+                                datasets: [{
+                                  label: 'Frequency',
+                                  data: " & Concatenate("['", Concat(Sort(Filter(collectTopDowntime, If(oee_downtime.Selected.Value = "Unplanned Only", And(Not(Downtime_Reason = "No Scheduled Work"),Not(Downtime_Reason = "Engineering DT"),Not(Downtime_Reason = "Planned Downtime")), Downtime_Reason = Downtime_Reason)), Downtime_Total, SortOrder.Descending), ThisRecord.Downtime_Total, "', '"), "']") & ",
+                                  backgroundColor: 'rgba(0, 123, 255, 0.7)'
+                                }, {
+                                  label: 'Cumulative Percentage',
+                                  data: " & Concatenate("['", Concat(Sort(collectPareto, freq, SortOrder.Descending), ThisRecord.cumulative, "', '"), "']") & ",
+                                  type: 'line',
+                                  borderColor: 'red',
+                                  fill: false,
+                                  yAxisID: 'right-y-axis' // Assign to the right Y-axis
+                                }]
+                              },
+                              options: {
+                                scales: {
+                                  yAxes: [{
+                                    id: 'left-y-axis',
+                                    type: 'linear',
+                                    position: 'left',
+                                    ticks: {
+                                      beginAtZero: true
+                                    }
+                                  }, {
+                                    id: 'right-y-axis',
+                                    type: 'linear',
+                                    position: 'right',
+                                    ticks: {
+                                      beginAtZero: true,
+                                      max: 100,
+                                      stepSize: 20,
+                                      callback: function(value, index, values) {
+                                        return value + '%';
+                                      }
+                                    },
+                                    gridLines: { 
+                                      drawOnChartArea: false
+                                    }
+                                  }]
+                                },
+                                tooltips: {
+                                  mode: 'index',
+                                  intersect: false
+                                },
+                                annotation: {
+                                  annotations: [{
+                                    type: 'line',
+                                    mode: 'horizontal',
+                                    scaleID: 'right-y-axis',
+                                    value: 80,
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    label: {
+                                      enabled: true,
+                                      position: 'right',
+                                      content: '80% Threshold'
+                                    }
+                                  },
+                                  {
+                                    type: 'line',
+                                    mode: 'vertical',
+                                    scaleID: 'x-axis-0',
+                                    value: ["& First(Sort(Filter(collectPareto, cumulative >= 80), freq, SortOrder.Descending)).id-1 &"],
+                                    borderColor: 'green',
+                                    borderWidth: 2,
+                                    label: {
+                                      enabled: true,
+                                      content: '80% Volume',
+                                      position: 'top',
+                                      backgroundColor: 'rgba(72, 72, 192, 0.5)'
+                                    }
+                                  }]
+                                }
+                              }
+                            }")
+                          FillPortions: =1
+                          Height: =Parent.Height
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Width: =Parent.Width
+                          X: =Parent.Width/2 - Self.Width/2
+                          Y: =Parent.Height/2 - Self.Height/2
+                - oee_section_2:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutGap: =varPadding
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      PaddingBottom: =Self.LayoutGap
+                      PaddingLeft: =varPadding/2
+                      PaddingRight: =varPadding/2
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - oee_top_downtime:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.Semilight
+                          Height: =50
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          PaddingBottom: =
+                          PaddingTop: =
+                          Width: =Parent.Width * 0.85
+                        Children:
+                        - oee_td_header:
+                            Control: GroupContainer
+                            Variant: manualLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              Fill: =varColor2
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.Width
+                            Children:
+                            - oee_td_h_title:
+                                Control: Label
+                                Properties:
+                                  Text: ="Downtime Breakdown"
+                                  Align: =Align.Center
+                                  Color: =varColor5
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  Size: =Self.Height / 3
+                                  Width: =Parent.Width
+                        - oee_td_columns:
+                            Control: GroupContainer
+                            Variant: manualLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              Fill: =varColor3
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.Width
+                            Children:
+                            - oee_td_c_amount:
+                                Control: Label
+                                Properties:
+                                  Text: ="Amount"
+                                  Align: =Align.Center
+                                  Color: =varColor5
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  Size: =Self.Width / 10
+                                  Width: =Parent.Width / 2
+                                  X: =oee_td_c_reason.X + oee_td_c_reason.Width
+                            - oee_td_c_reason:
+                                Control: Label
+                                Properties:
+                                  Text: ="Reason"
+                                  Align: =Align.Center
+                                  Color: =varColor5
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  Size: =Self.Width / 10
+                                  Width: =Parent.Width / 2
+                        - oee_td_gallery:
+                            Control: Gallery
+                            Variant: galleryVertical
+                            Properties:
+                              Items: |-
+                                =Sort(
+                                    Filter(
+                                        collectTopDowntime,
+                                        If(
+                                            oee_downtime.Selected.Value = "Unplanned Only",
+                                            And(Not(Downtime_Reason = "Planned Downtime"), Not(Downtime_Reason = "Engineering DT"), Not(Downtime_Reason = "No Scheduled Work")),
+                                            true
+                                        )
+                                    ),
+                                    Downtime_Total,
+                                    SortOrder.Descending
+                                )
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DelayItemLoading: =true
+                              FillPortions: =14
+                              Layout: =Layout.Vertical
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              LoadingSpinner: =LoadingSpinner.Data
+                              TemplatePadding: =0
+                              TemplateSize: =Self.Height / 14
+                            Children:
+                            - oee_td_g_amount:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(Parent)
+                                  Text: =RoundDown(ThisItem.Downtime_Total/60,0) & "H " & Mod(ThisItem.Downtime_Total,60) & "m"
+                                  Align: =Align.Center
+                                  Font: =Font.Verdana
+                                  Height: =Parent.TemplateHeight - oee_td_g_seperator.Height
+                                  Size: =Self.Width / 12
+                                  Width: =Parent.TemplateWidth/2
+                                  X: =oee_td_g_reason.X + oee_td_g_reason.Width
+                                  Y: =1-1
+                            - oee_td_g_reason:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(Parent)
+                                  Text: =ThisItem.Downtime_Reason
+                                  Align: =Align.Center
+                                  Font: =Font.Verdana
+                                  Height: =Parent.TemplateHeight - oee_td_g_seperator.Height
+                                  Size: =Self.Width / 14
+                                  Width: =Parent.TemplateWidth/2
+                                  X: =1-1
+                                  Y: =1-1
+                            - oee_td_g_seperator:
+                                Control: Rectangle
+                                Properties:
+                                  OnSelect: =Select(Parent)
+                                  Fill: =varColor1
+                                  Height: =Parent.TemplateHeight * 0.025
+                                  Width: =Parent.Width
+                                  Y: =Parent.TemplateHeight - Self.Height
+                - oee_section_3:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      FillPortions: =2.5
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutGap: =varPadding
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      PaddingBottom: =Self.LayoutGap
+                      PaddingLeft: =Self.LayoutGap/2
+                      PaddingRight: =Self.LayoutGap/2
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - oee_shift_c:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.Semilight
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          PaddingLeft: =
+                        Children:
+                        - oee_c_title:
+                            Control: Label
+                            Properties:
+                              Text: ="C Shift"
+                              Align: =Align.Center
+                              Color: =varColor5
+                              Fill: =varColor2
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 3
+                        - oee_c_layout:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              FillPortions: =5
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oee_c_graph:
+                                Control: Image
+                                Properties:
+                                  Image: |-
+                                    ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                                    EncodeUrl(
+                                    "{
+                                      type: 'radialGauge',
+                                      data: {
+                                        datasets: [{
+                                          data: ["& LookUp(collectShiftOEE, shift = "C").OEE2 &"],
+                                          backgroundColor: getGradientFillHelper('horizontal', ['blue', 'red']),
+                                        }]
+                                      },
+                                      options: {
+                                        domain: [0, "& If(LookUp(collectShiftOEE, shift = "C").OEE2 <= 100, 100, LookUp(collectShiftOEE, shift = "C").OEE2) &"],
+                                        trackColor: 'lightgray', 
+                                        centerPercentage: 90,
+                                        centerArea: {
+                                          text: (val) => val + '%',
+                                        },
+                                      }
+                                    }"
+                                    )
+                                  FillPortions: =2
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                            - oee_c_data:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  DropShadow: =DropShadow.None
+                                  FillPortions: =4
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutDirection: =LayoutDirection.Vertical
+                                  LayoutGap: =
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee_c_upper:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_c_built_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_c_built_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Units Built"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_c_built:
+                                            Control: Label
+                                            Properties:
+                                              Text: =LookUp(collectShiftOEE, shift = "C").output*1
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: '=Self.Height / 3 '
+                                              Width: =10
+                                    - oee_c_goal_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_c_goal_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Build Goal"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_c_goal:
+                                            Control: Label
+                                            Properties:
+                                              Text: =Round(LookUp(collectShiftOEE, shift="C").constraint_goal,2)
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3
+                                              Width: =10
+                                    - oee_c_constraint_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_c_constraint_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Constraint / hr"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 5
+                                              Width: =10
+                                        - oee_c_constraint:
+                                            Control: Label
+                                            Properties:
+                                              Text: =Round(LookUp(collectShiftOEE, shift="C").constraint_average,2)
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3
+                                              Width: =10
+                                - oee_c_lower:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_c_runtime_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_c_runtime_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Runtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_c_runtime:
+                                            Control: Label
+                                            Properties:
+                                              Text: =RoundDown(LookUp(collectShiftOEE, shift = "C").runtime_hours,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "C").runtime_hours*60,60) & "m"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                    - oee_c_downtime_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_c_downtime_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Planned Downtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 5.5
+                                              Width: =10
+                                        - oee_c_downtime:
+                                            Control: Label
+                                            Properties:
+                                              Text: =RoundDown(LookUp(collectShiftOEE, shift = "C").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "C").downtime_planned,60) & "m"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                    - oee_c_possible_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_c_possible_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Possible Runtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4
+                                              Width: =10
+                                        - oee_c_possible:
+                                            Control: Label
+                                            Properties:
+                                              Text: =LookUp(collectShiftOEE, shift = "C").runtime_total*1 & "H"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                    - oee_shift_a:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.Semilight
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          PaddingLeft: =
+                        Children:
+                        - oee_a_title:
+                            Control: Label
+                            Properties:
+                              Text: ="A Shift"
+                              Align: =Align.Center
+                              Color: =varColor5
+                              Fill: =varColor2
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 3
+                        - oee_a_layout:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              FillPortions: =5
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oee_a_graph:
+                                Control: Image
+                                Properties:
+                                  Image: |-
+                                    ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                                    EncodeUrl(
+                                    "{
+                                      type: 'radialGauge',
+                                      data: {
+                                        datasets: [{
+                                          data: ["& LookUp(collectShiftOEE, shift = "A").OEE2 &"],
+                                          backgroundColor: getGradientFillHelper('horizontal', ['blue', 'red']),
+                                        }]
+                                      },
+                                      options: {
+                                        domain: [0, "& If(LookUp(collectShiftOEE, shift = "A").OEE2 <= 100, 100, LookUp(collectShiftOEE, shift = "A").OEE2) &"],
+                                        trackColor: 'lightgray', 
+                                        centerPercentage: 90,
+                                        centerArea: {
+                                          text: (val) => val + '%',
+                                        },
+                                      }
+                                    }"
+                                    )
+                                  FillPortions: =2
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                            - oee_a_data:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  DropShadow: =DropShadow.None
+                                  FillPortions: =4
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutDirection: =LayoutDirection.Vertical
+                                  LayoutGap: =
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee_a_upper:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_a_built_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_a_built_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Units Built"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_a_built:
+                                            Control: Label
+                                            Properties:
+                                              Text: =LookUp(collectShiftOEE, shift = "A").output*1
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: '=Self.Height / 3 '
+                                              Width: =10
+                                    - oee_a_goal_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_a_goal_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Build Goal"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_a_goal:
+                                            Control: Label
+                                            Properties:
+                                              Text: =Round(LookUp(collectShiftOEE, shift="A").constraint_goal,2)
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3
+                                              Width: =10
+                                    - oee_a_constraint_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_a_constraint_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Constraint / hr"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 5
+                                              Width: =10
+                                        - oee_a_constraint:
+                                            Control: Label
+                                            Properties:
+                                              Text: =Round(LookUp(collectShiftOEE, shift="A").constraint_average,2)
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3
+                                              Width: =10
+                                - oee_a_lower:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_a_runtime_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_a_runtime_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Runtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_a_runtime:
+                                            Control: Label
+                                            Properties:
+                                              Text: =RoundDown(LookUp(collectShiftOEE, shift = "A").runtime_hours,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "A").runtime_hours*60,60) & "m"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                    - oee_a_downtime_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_a_downtime_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Planned Downtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 5.5
+                                              Width: =10
+                                        - oee_a_downtime:
+                                            Control: Label
+                                            Properties:
+                                              Text: =RoundDown(LookUp(collectShiftOEE, shift = "A").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "A").downtime_planned,60) & "m"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                    - oee_a_possible_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_a_possible_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Possible Runtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4
+                                              Width: =10
+                                        - oee_a_possible:
+                                            Control: Label
+                                            Properties:
+                                              Text: =LookUp(collectShiftOEE, shift = "A").runtime_total*1 & "H"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                    - oee_shift_b:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.Semilight
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          PaddingLeft: =
+                        Children:
+                        - oee_b_title:
+                            Control: Label
+                            Properties:
+                              Text: ="B Shift"
+                              Align: =Align.Center
+                              Color: =varColor5
+                              Fill: =varColor2
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 3
+                        - oee_b_layout:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              FillPortions: =5
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oee_b_graph:
+                                Control: Image
+                                Properties:
+                                  Image: |-
+                                    ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                                    EncodeUrl(
+                                    "{
+                                      type: 'radialGauge',
+                                      data: {
+                                        datasets: [{
+                                          data: ["& LookUp(collectShiftOEE, shift = "B").OEE2 &"],
+                                          backgroundColor: getGradientFillHelper('horizontal', ['blue', 'red']),
+                                        }]
+                                      },
+                                      options: {
+                                        domain: [0, "& If(LookUp(collectShiftOEE, shift = "B").OEE2 <= 100, 100, LookUp(collectShiftOEE, shift = "B").OEE2) &"],
+                                        trackColor: 'lightgray', 
+                                        centerPercentage: 90,
+                                        centerArea: {
+                                          text: (val) => val + '%',
+                                        },
+                                      }
+                                    }"
+                                    )
+                                  FillPortions: =2
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                            - oee_b_data:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  DropShadow: =DropShadow.None
+                                  FillPortions: =4
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutDirection: =LayoutDirection.Vertical
+                                  LayoutGap: =
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee_b_upper:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_b_built_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_b_built_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Units Built"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_b_built:
+                                            Control: Label
+                                            Properties:
+                                              Text: =LookUp(collectShiftOEE, shift = "B").output*1
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: '=Self.Height / 3 '
+                                              Width: =10
+                                    - oee_b_goal_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_b_goal_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Build Goal"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_b_goal:
+                                            Control: Label
+                                            Properties:
+                                              Text: =Round(LookUp(collectShiftOEE, shift="B").constraint_goal,2)
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3
+                                              Width: =10
+                                    - oee_b_constraint_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_b_constraint_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Constraint / hr"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 5
+                                              Width: =10
+                                        - oee_b_constraint:
+                                            Control: Label
+                                            Properties:
+                                              Text: =Round(LookUp(collectShiftOEE, shift="B").constraint_average,2)
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3
+                                              Width: =10
+                                - oee_b_lower:
+                                    Control: GroupContainer
+                                    Variant: horizontalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee_b_runtime_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_b_runtime_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Runtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4.5
+                                              Width: =10
+                                        - oee_b_runtime:
+                                            Control: Label
+                                            Properties:
+                                              Text: =RoundDown(LookUp(collectShiftOEE, shift = "B").runtime_hours,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "B").runtime_hours*60,60) & "m"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                    - oee_b_downtime_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_b_downtime_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Planned Downtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 5.5
+                                              Width: =10
+                                        - oee_b_downtime:
+                                            Control: Label
+                                            Properties:
+                                              Text: =RoundDown(LookUp(collectShiftOEE, shift = "B").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "B").downtime_planned,60) & "m"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10
+                                    - oee_b_possible_parent:
+                                        Control: GroupContainer
+                                        Variant: verticalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee_b_possible_title:
+                                            Control: Label
+                                            Properties:
+                                              Text: ="Possible Runtime"
+                                              Align: =Align.Center
+                                              Color: =varColor5
+                                              Fill: =varColor3
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 4
+                                              Width: =10
+                                        - oee_b_possible:
+                                            Control: Label
+                                            Properties:
+                                              Text: =LookUp(collectShiftOEE, shift = "B").runtime_total*1 & "H"
+                                              Align: =Align.Center
+                                              FillPortions: =1
+                                              Font: =Font.Verdana
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              Size: =Self.Height / 3.5
+                                              Width: =10

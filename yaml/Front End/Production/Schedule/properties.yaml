@@ -1,3 +1,0 @@
-Properties:
-  OnVisible: |-
-    =UpdateContext({locPadding: Self.Width * 0.005});

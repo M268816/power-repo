@@ -47,8 +47,8 @@
                             ParseJSON(
                                 flow_get_materials.Run(
                                     Text(
-                                        //m_m_r_f_line_value.Selected.Value
-                                        varProductionLine
+                                        m_m_r_f_line_value.Selected.Value
+                                        //varProductionLine
                                         )
                                     ).output
                                 )
@@ -90,7 +90,7 @@
         - m_h_title:
             Control: Label
             Properties:
-              Text: ="Encapsulation Digital Daily Management System"
+              Text: ="Front End Digital Daily Management System"
               Align: =Align.Center
               Color: =varColor5
               FillPortions: =1
@@ -242,16 +242,14 @@
                             =Filter(
                                 Choices([@'Material Requests'].Line),
                                 Or(        
-                                    Value = "SSC",
-                                    Value = "SSC2",
-                                    Value = "XL1",
-                                    Value = "XL2",
-                                    Value = "XL3",
-                                    Value = "XL4",
-                                    Value = "XL5",
-                                    Value = "XLT",
-                                    Value = "XLT2",
-                                    Value = "XLT3"
+                                    Value = "3/4",
+                                    Value = "EF",
+                                    Value = "GH",
+                                    Value = "JK",
+                                    Value = "NO",
+                                    Value = "PQ",
+                                    Value = "WX",
+                                    Value = "YZ"
                                     )
                                 )
                           SearchFields: =["Value"]
@@ -394,6 +392,7 @@
                         Properties:
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["Value"]
+                          IsSearchable: =false
                           Items: =Choices([@'Material Requests'].'Request Type')
                           SearchFields: =["Value"]
                           SelectMultiple: =false
@@ -606,6 +605,7 @@
                         Properties:
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["Value"]
+                          IsSearchable: =false
                           Items: =Choices([@'Material Requests'].Units)
                           SearchFields: =["Value"]
                           SelectMultiple: =false
@@ -675,7 +675,8 @@
                         Control: Classic/ComboBox
                         Properties:
                           DefaultSelectedItems: =Parent.Default
-                          DisplayFields: =["DisplayName","Email","Picture"]
+                          DisplayFields: =["DisplayName"]
+                          IsSearchable: =false
                           Items: =Choices([@'Material Requests'].'Requester Name')
                           SearchFields: =["DisplayName"]
                           SelectMultiple: =false

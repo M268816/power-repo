@@ -42,7 +42,7 @@
               OnSelect: |-
                 =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
                 Set(varShiftSelect, "All");
-                Reset(prod_n_shift);
+                Reset(h_n_shift);
                 Navigate(Operators);
               Text: ="Yes"
               Color: =varColor5
@@ -160,42 +160,7 @@
         - l_p_p_theme:
             Control: Classic/DropDown
             Properties:
-              OnChange: |-
-                =If(
-                    /* Merck Blue */
-                    Self.SelectedText.Value = "Merck Blue",
-                    
-                    Set(varColor0, Color.Black);
-                    Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple
-                    Set(varColor2, RGBA(15, 105, 175, 1));      //Rich Blue
-                    Set(varColor3, RGBA(45, 190, 205, 1));      //Vibrant Cyan
-                    Set(varColor4, RGBA(255, 220, 185, 1));     //Sensitive Yellow
-                    Set(varColor5, Color.White);
-                    Set(varColorAccent, RGBA(255, 200, 50, 1)); //Vibrant Yellow
-                    Set(varColorYes, RGBA(20, 155, 95, 1));     //Rich Green
-                    Set(varColorNo, RGBA(230, 30, 80, 1));      //Rich Red
-                    Set(varHexRich, "#503291");
-                    Set(varHexAccent, "#FFC832");
-                    Set(varHexYes, "#149B5F");
-                    Set(varHexNo, "#E61E50");,
-
-                    /* Merck Green */
-                    Self.SelectedText.Value = "Merck Green",
-                    
-                    Set(varColor0, Color.Black);
-                    Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple
-                    Set(varColor2, RGBA(20, 155, 95, 1));       //Rich Green
-                    Set(varColor3, RGBA(180, 220, 150, 1));     //Sensitive Green
-                    Set(varColor4, RGBA(150, 215, 210, 1));     //Sansitive Blue
-                    Set(varColor5, Color.White);
-                    Set(varColorAccent, RGBA(165, 205, 80, 1)); //Vibrant Green
-                    Set(varColorYes, RGBA(15, 105, 175, 1));    //Rich Blue
-                    Set(varColorNo, RGBA(230, 30, 80, 1));      //Rich Red
-                    Set(varHexRich, "#503291");
-                    Set(varHexAccent, "#FFC832");
-                    Set(varHexYes, "#0F69AF");
-                    Set(varHexNo, "#E61E50");
-                )
+              OnChange: "=If(\n    /* Merck Blue */\n    Self.SelectedText.Value = \"Merck Blue\",\n    \n    Set(varColor0, Color.Black);\n    Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple\n    Set(varColor2, RGBA(15, 105, 175, 1));      //Rich Blue\n    Set(varColor3, RGBA(45, 190, 205, 1));      //Vibrant Cyan\n    Set(varColor4, RGBA(255, 220, 185, 1));     //Sensitive Yellow\n    Set(varColor5, Color.White);\n    Set(varColorAccent, RGBA(255, 200, 50, 1)); //Vibrant Yellow\n    Set(varColorYes, RGBA(20, 155, 95, 1));     //Rich Green\n    Set(varColorNo, RGBA(230, 30, 80, 1));      //Rich Red\n    Set(varHexRich, \"#503291\");\n    Set(varHexAccent, \"#FFC832\");\n    Set(varHexYes, \"#149B5F\");\n    Set(varHexNo, \"#E61E50\");,\n\n    /* Merck Green */\n    Self.SelectedText.Value = \"Merck Green\",\n    \n    Set(varColor0, Color.Black);\n    Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple\n    Set(varColor2, RGBA(20, 155, 95, 1));       //Rich Green\n    Set(varColor3, RGBA(180, 220, 150, 1));     //Sensitive Green\n    Set(varColor4, RGBA(150, 215, 210, 1));     //Sansitive Blue\n    Set(varColor5, Color.White);\n    Set(varColorAccent, RGBA(165, 205, 80, 1)); //Vibrant Green\n    Set(varColorYes, RGBA(15, 105, 175, 1));    //Rich Blue\n    Set(varColorNo, RGBA(230, 30, 80, 1));      //Rich Red\n    Set(varHexRich, \"#503291\");\n    Set(varHexAccent, \"#FFC832\");\n    Set(varHexYes, \"#0F69AF\");\n    Set(varHexNo, \"#E61E50\");\n)"
               Default: =""
               Items: =["Merck Blue", "Merck Green"]
               ChevronBackground: =varColor1

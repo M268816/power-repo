@@ -38,7 +38,7 @@
         - d_collect:
             Control: Classic/Button
             Properties:
-              OnSelect: |+
+              OnSelect: |
                 =UpdateContext({locLoading:{Visible: true, Value: 1, Text: "Starting"}});
 
                 /*Set Shift*/
@@ -56,7 +56,7 @@
                 UpdateContext({locLoading:{Visible: true, Value: 50, Text: "Collecting Downtime Data"}});
                 Clear(collectDowntime);
                 ForAll(
-                    Filter(Downtime,
+                    Filter(FE_Downtime,
                         Ended <= DateAdd(varNowDay, 23, TimeUnit.Hours),
                         Started >= DateAdd(varNowDay, -1, TimeUnit.Hours),
                         Line.Value = varProductionLine
@@ -73,7 +73,7 @@
                             Total_Downtime: Value(ThisRecord.Total_Downtime),
                             Comments: ThisRecord.Comments,
                             Shift_Letter: ThisRecord.Shift_Letter,
-                            Edit_Person: ThisRecord.Edit_Person,
+                            Record_Editor: ThisRecord.Record_Editor,
                             Edit_Reason: ThisRecord.Edit_Reason
                         }
                     )
@@ -140,7 +140,7 @@
             Properties:
               OnSelect: |-
                 =UpdateContext({
-                    
+    
                     locSelectedEndTime:
                         DateTime(
                             Year(DateValue2.SelectedDate),
@@ -293,12 +293,12 @@
                 =ResetForm(d_m_form);
                 If(d_m_form.Mode = FormMode.Edit, Select(d_collect), Navigate(Hourly));
                 Notify("Submission Success", NotificationType.Success);
-              DataSource: =Downtime
+              DataSource: =FE_Downtime
               DefaultMode: =varDowntimeMode
               Item: |-
                 =If(
                     d_m_form.Mode = FormMode.Edit,
-                    LookUp(Downtime, varDowntimeID = ID)
+                    LookUp(FE_Downtime, varDowntimeID = ID)
                     )
               Height: =Parent.Height
               Width: =Parent.Width
@@ -311,14 +311,14 @@
                 Properties:
                   DataField: ="Catalog"
                   Default: =ThisItem.Catalog
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Catalog)
-                  MaxLength: =DataSourceInfo([@Downtime], DataSourceInfo.MaxLength, Catalog)
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Catalog)
+                  MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Catalog)
                   Update: =DataCardValue10.Text
                   DisplayMode: =Parent.DisplayMode
                   Height: |-
                     =//If(d_m_form.Mode = FormMode.New, Parent.Height/4, Parent.Height/5)
                     Parent.Height * 0.03
-                  Width: =Parent.Width/2
+                  Width: =683
                 Children:
                 - StarVisible9:
                     Control: Label
@@ -384,16 +384,16 @@
                 Control: TypedDataCard
                 Variant: textualEditCard
                 Properties:
-                  DataField: ="Lot"
+                  DataField: ="Title"
                   Default: =ThisItem.Lot
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Lot)
-                  MaxLength: =DataSourceInfo([@Downtime], DataSourceInfo.MaxLength, Lot)
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Lot)
+                  MaxLength: =DataSourceInfo([@FE_Downtime],DataSourceInfo.MaxLength,Lot)
                   Update: =DataCardValue9.Text
                   DisplayMode: =Parent.DisplayMode
                   Height: |-
                     =//If(d_m_form.Mode = FormMode.New, Parent.Height/4, Parent.Height/5)
                     Parent.Height * 0.10
-                  Width: =Parent.Width/2
+                  Width: =683
                   X: =1
                 Children:
                 - StarVisible8:
@@ -474,7 +474,7 @@
                             DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),0,0,0)
                         )
                     )
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Started)
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Started)
                   Required: =true
                   Update: |-
                     =DateValue1.SelectedDate + 
@@ -493,39 +493,13 @@
                         )
                   DisplayMode: =Parent.DisplayMode
                   Height: =If(d_m_form.Mode = FormMode.New, (Parent.Height - Catalog_DataCard1.Height)/3, (Parent.Height - Catalog_DataCard1.Height)/4)
-                  Width: =Parent.Width/2
+                  Width: =683
                   Y: =1
                 Children:
                 - ampm1:
                     Control: Classic/DropDown
                     Properties:
-                      Default: |-
-                        =Switch(
-                            varShiftSelect,
-                            "A Shift",
-                            Switch(
-                                Value(HourValue1.SelectedText.Value),
-                                1, "PM",
-                                2, "PM",
-                                3, "PM",
-                                12, "PM",
-                                "AM"
-                            ),
-                                
-                            "B Shift",
-                            Switch(
-                                Value(HourValue1.SelectedText.Value),
-                                12, "AM",
-                                "PM"
-                            ),
-                            
-                            "C Shift",
-                            Switch(
-                                Value(HourValue1.SelectedText.Value),
-                                11, "PM",
-                                "AM"
-                            )
-                        )
+                      Default: "=Switch(\n    varShiftSelect,\n    \"A Shift\",\n    Switch(\n        Value(HourValue1.SelectedText.Value),\n        1, \"PM\",\n        2, \"PM\",\n        3, \"PM\",\n        12, \"PM\",\n        \"AM\"\n    ),\n        \n    \"B Shift\",\n    Switch(\n        Value(HourValue1.SelectedText.Value),\n        12, \"AM\",\n        \"PM\"\n    ),\n    \n    \"C Shift\",\n    Switch(\n        Value(HourValue1.SelectedText.Value),\n        11, \"PM\",\n        \"AM\"\n    )\n)"
                       Items: =["AM","PM"]
                       Tooltip: =Parent.DisplayName
                       ChevronBackground: =varColor1
@@ -697,7 +671,7 @@
                             DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),0,0,0)
                         )
                     )
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Ended)
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Ended)
                   Required: =true
                   Update: |-
                     =DateValue2.SelectedDate + 
@@ -716,7 +690,7 @@
                         )
                   DisplayMode: =Parent.DisplayMode
                   Height: =If(d_m_form.Mode = FormMode.New, (Parent.Height - Catalog_DataCard1.Height)/3, (Parent.Height - Catalog_DataCard1.Height)/4)
-                  Width: =Parent.Width/2
+                  Width: =683
                   X: =1
                   Y: =1
                 Children:
@@ -730,34 +704,7 @@
                 - ampm2:
                     Control: Classic/DropDown
                     Properties:
-                      Default: |-
-                        =/*Check the selected time per varShiftSelect and change*/
-                        Switch(
-                            varShiftSelect,
-                            "A Shift",
-                            Switch(
-                                Value(HourValue2.SelectedText.Value),
-                                1, "PM",
-                                2, "PM",
-                                3, "PM",
-                                12, "PM",
-                                "AM"
-                            ),
-                                
-                            "B Shift",
-                            Switch(
-                                Value(HourValue2.SelectedText.Value),
-                                12, "AM",
-                                "PM"
-                            ),
-                            
-                            "C Shift",
-                            Switch(
-                                Value(HourValue2.SelectedText.Value),
-                                11, "PM",
-                                "AM"
-                            )
-                        )
+                      Default: "=/*Check the selected time per varShiftSelect and change*/\nSwitch(\n    varShiftSelect,\n    \"A Shift\",\n    Switch(\n        Value(HourValue2.SelectedText.Value),\n        1, \"PM\",\n        2, \"PM\",\n        3, \"PM\",\n        12, \"PM\",\n        \"AM\"\n    ),\n        \n    \"B Shift\",\n    Switch(\n        Value(HourValue2.SelectedText.Value),\n        12, \"AM\",\n        \"PM\"\n    ),\n    \n    \"C Shift\",\n    Switch(\n        Value(HourValue2.SelectedText.Value),\n        11, \"PM\",\n        \"AM\"\n    )\n)"
                       Items: =["AM","PM"]
                       Tooltip: =Parent.DisplayName
                       ChevronBackground: =varColor1
@@ -919,12 +866,12 @@
                 Properties:
                   DataField: ="Line"
                   Default: =ThisItem.Line
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Line)
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Line)
                   Required: =true
                   Update: =DataCardValue1.Selected
                   DisplayMode: =Parent.DisplayMode
                   Height: =If(d_m_form.Mode = FormMode.New, (Parent.Height - Catalog_DataCard1.Height)/3, (Parent.Height - Catalog_DataCard1.Height)/4)
-                  Width: =Parent.Width/2
+                  Width: =683
                   Y: =2
                 Children:
                 - DataCardAlignedValue:
@@ -969,9 +916,10 @@
                 - DataCardValue1:
                     Control: Classic/ComboBox
                     Properties:
-                      DefaultSelectedItems: =If(d_m_form.Mode = FormMode.New, LookUp(Choices([@Downtime].Line), varProductionLine = Value), Parent.Default)
+                      DefaultSelectedItems: =If(d_m_form.Mode = FormMode.New, LookUp(Choices([@FE_Downtime].Line), varProductionLine = Value), Parent.Default)
                       DisplayFields: =["Value"]
-                      Items: =Choices([@Downtime].Line)
+                      IsSearchable: =false
+                      Items: =Choices([@FE_Downtime].Line)
                       SearchFields: =["Value"]
                       SelectMultiple: =false
                       Tooltip: =Parent.DisplayName
@@ -1005,12 +953,12 @@
                 Properties:
                   DataField: ="Reason"
                   Default: =ThisItem.Reason
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Reason)
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Reason)
                   Required: =true
                   Update: =DataCardValue2.Selected
                   DisplayMode: =Parent.DisplayMode
                   Height: =If(d_m_form.Mode = FormMode.New, (Parent.Height - Catalog_DataCard1.Height)/3, (Parent.Height - Catalog_DataCard1.Height)/4)
-                  Width: =Parent.Width/2
+                  Width: =683
                   X: =1
                   Y: =2
                 Children:
@@ -1078,8 +1026,9 @@
                     Properties:
                       DefaultSelectedItems: =Parent.Default
                       DisplayFields: =["Value"]
+                      IsSearchable: =false
                       Items: |-
-                        =Filter(Choices([@Downtime].Reason),
+                        =Filter(Choices([@FE_Downtime].Reason),
                             Not(
                                 Value = "Engineering DT" ||
                                 Value = "Engineering Verifications" ||
@@ -1124,8 +1073,8 @@
                 Properties:
                   DataField: ="Comments"
                   Default: =ThisItem.Comments
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Comments)
-                  MaxLength: =DataSourceInfo([@Downtime], DataSourceInfo.MaxLength, Comments)
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Comments)
+                  MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Comments)
                   Update: =DataCardValue4.Text
                   DisplayMode: =Parent.DisplayMode
                   Height: =If(d_m_form.Mode = FormMode.New, (Parent.Height - Catalog_DataCard1.Height)/3, (Parent.Height - Catalog_DataCard1.Height)/4)
@@ -1199,13 +1148,13 @@
                 Variant: comboBoxEditCard
                 Properties:
                   DataField: ="Edit_Person"
-                  Default: =ThisItem.Edit_Person
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Edit_Person)
+                  Default: =ThisItem.Record_Editor
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Record_Editor)
                   Update: =DataCardValue7.Selected
                   DisplayMode: =Parent.DisplayMode
                   Height: =If(d_m_form.Mode = FormMode.New, (Parent.Height - Catalog_DataCard1.Height)/3, (Parent.Height - Catalog_DataCard1.Height)/4)
                   Visible: =If(d_m_form.Mode = FormMode.New, false, true)
-                  Width: =Parent.Width/2
+                  Width: =683
                   Y: =4
                 Children:
                 - StarVisible6:
@@ -1240,7 +1189,8 @@
                     Properties:
                       DefaultSelectedItems: =Parent.Default
                       DisplayFields: =["DisplayName","Email","Picture"]
-                      Items: =Choices([@Downtime].Edit_Person)
+                      IsSearchable: =false
+                      Items: =Choices([@FE_Downtime].Record_Editor)
                       SearchFields: =["Claims"]
                       SelectMultiple: =false
                       Tooltip: =Parent.DisplayName
@@ -1274,15 +1224,15 @@
                 Properties:
                   DataField: ="Edit_Reason"
                   Default: =ThisItem.Edit_Reason
-                  DisplayName: =DataSourceInfo([@Downtime],DataSourceInfo.DisplayName,Edit_Reason)
-                  MaxLength: =DataSourceInfo([@Downtime], DataSourceInfo.MaxLength, Edit_Reason)
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Edit_Reason)
+                  MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Edit_Reason)
                   Update: =DataCardValue8.Text
                   DisplayMode: =Parent.DisplayMode
                   Height: =If(d_m_form.Mode = FormMode.New, (Parent.Height - Catalog_DataCard1.Height)/3, (Parent.Height - Catalog_DataCard1.Height)/4)
                   Visible: =If(d_m_form.Mode = FormMode.New, false, true)
-                  Width: =Parent.Width/2
+                  Width: =683
                   X: =1
-                  Y: =4
+                  Y: =3
                 Children:
                 - StarVisible7:
                     Control: Label
@@ -1345,3 +1295,78 @@
                       Wrap: =false
                       X: =DataCardKey1.X
                       Y: =DataCardKey1.Y
+            - Shift_Letter_DataCard1:
+                Control: TypedDataCard
+                Variant: comboBoxEditCard
+                Properties:
+                  DataField: ="Shift_Letter"
+                  Default: |-
+                    ={
+                        Value:
+                            Switch(varShiftSelect,
+                            "A Shift", "A",
+                            "B Shift", "B",
+                            "C Shift", "C",
+                            "A"
+                        )
+                    }
+                  DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Shift_Letter)
+                  Required: =true
+                  Update: =DataCardValue31.Selected
+                  DisplayMode: =Parent.DisplayMode
+                  Height: =50
+                  Visible: =false
+                  Width: =683
+                  X: =1
+                  Y: =4
+                Children:
+                - StarVisible10:
+                    Control: Label
+                    Properties:
+                      Text: ="*"
+                      Align: =Align.Center
+                      Height: =DataCardKey38.Height
+                      Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                      Width: =30
+                      Wrap: =false
+                      Y: =DataCardKey38.Y
+                - ErrorMessage38:
+                    Control: Label
+                    Properties:
+                      Live: =Live.Assertive
+                      Text: =Parent.Error
+                      AutoHeight: =true
+                      Height: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =0
+                      PaddingRight: =0
+                      PaddingTop: =0
+                      Visible: =Parent.DisplayMode=DisplayMode.Edit
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardValue31.Y + DataCardValue31.Height
+                - DataCardValue31:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DefaultSelectedItems: =Parent.Default
+                      DisplayFields: =["Value"]
+                      Items: =Choices([@FE_Downtime].Shift_Letter)
+                      SearchFields: =["Value"]
+                      SelectMultiple: =false
+                      Tooltip: =Parent.DisplayName
+                      BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                      DisplayMode: =Parent.DisplayMode
+                      PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                      Width: =Parent.Width - 60
+                      X: =30
+                      Y: =DataCardKey38.Y + DataCardKey38.Height + 5
+                - DataCardKey38:
+                    Control: Label
+                    Properties:
+                      Text: =Parent.DisplayName
+                      AutoHeight: =true
+                      Height: =34
+                      Width: =Parent.Width - 60
+                      Wrap: =false
+                      X: =30
+                      Y: =10

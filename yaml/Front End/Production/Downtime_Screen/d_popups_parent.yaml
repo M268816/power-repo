@@ -125,7 +125,7 @@
         - d_e_s_text:
             Control: Label
             Properties:
-              Text: ="Downtime selected exceeds 60 minutes for a defiend hour slot. Make sure you do not have over-lapping downtime occurances."
+              Text: ="Downtime selected exceeds 60 minutes for a defined hour slot. Make sure you do not have over-lapping downtime occurances."
               Align: =Align.Center
               Height: =Parent.Height / 1.5
               Size: =Parent.Width / 22
@@ -195,7 +195,7 @@
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =RemoveIf(Downtime, ID = varDowntimeID);
+                =RemoveIf(FE_Downtime, ID = varDowntimeID);
                 RemoveIf(collectDowntime, ID = varDowntimeID);
                 ResetForm(d_m_form);
                 Reset(d_e_d_input);
@@ -271,148 +271,112 @@
               Items: |-
                 =[
                     {
-                        reason: "2 Lots Awaiting Lot Release",
-                        description: "When the line is stopped and awaiting the lot release TWI."
-                    },
-                    {
                         reason: "Accountability",
-                        description: "Any in process accountability issue."
+                        description: "Any in-process accountability issue."
                     },
                     {
-                        reason: "Bagger",
-                        description: "Any issues with the bagging machine."
+                        reason: "Barcode Bander Issue",
+                        description: "Any issues with running or setting up the ovens that impact the constraint"
                     },
                     {
                         reason: "Break Not Covered",
-                        description: "No coverage on the bonder during break times."
+                        description: "No coverage during break times."
                     },
                     {
-                        reason: "Data Entry",
-                        description: "Time lost due to operator data entries (Reject Database, Data Management System, etc.)"
+                        reason: "Did Not Run",
+                        description: "End of Shift/No Further Work is planned/No Work Orders Released"
+                    },
+                    {
+                        reason: "Endcapper Issues",
+                        description: "Any issues with running or setting up Endcappers that impact the constraint"
                     },
                     {
                         reason: "Engineering DT",
-                        description: "When the engineering team has use of the line. - MANAGEMENT USE ONLY."
+                        description: "Planned Project Work such as NI, NPI, Validation or engineering experiments."
                     },
                     {
                         reason: "Engineering Verifications",
-                        description: "Time loss due to verifications/changes/improvements by engineering that cause slower run speeds. - MANAGEMENT USE ONLY."
-                    },
-                    {
-                        reason: "Equipment Adjustments",
-                        description: "Time lost due to equipment parameter adjustemnts. (NOT MAINTENTANCE)"
-                    },
-                    {
-                        reason: "Huddle/Stop Work/Flow down",
-                        description: "The shift start huddle and flow down events that cause all work to stop on the line."
-                    },
-                    {
-                        reason: "Leak Master",
-                        description: "Performing the leak master calibration at openeing and any issues associated with the leak master."
+                        description: "Time lost due to slower run speeds due to engineering verifications of changes/improvements. "
                     },
                     {
                         reason: "Lot Changeover",
                         description: "Opening and closing lots with no other issues."
                     },
                     {
-                        reason: "Melt Checks",
-                        description: "Performing melt checks on lot opening and any issues associated with melt checks."
-                    },
-                    {
-                        reason: "No Scheduled Work",
-                        description: "Time lost due to no work orders released to the floor to keep planned staffed lines running (or completed weekly plan early). Also Includes Waiting on Labels and Materials WITHIN 48 hour lead time."
-                    },
-                    {
                         reason: "Other",
-                        description: "Avoid using this reason if at all possible. - MANAGEMENT USE ONLY."
+                        description: "Automatically Populated"
                     },
                     {
                         reason: "Planned Downtime",
-                        description: "When the line is planned to be down. - MANAGEMENT USE ONLY."
+                        description: "Time lost due to scheduled PMs planned in advance with Ops "
                     },
                     {
-                        reason: "Plug Bonder",
-                        description: "Any issues with running or setting up the plug bonder."
+                        reason: "Pleater Blade Maintenance",
+                        description: "Time lost due to blade adjustments or changes."
                     },
                     {
-                        reason: "Preventive Maintenance - Planned",
-                        description: "When the line is down for any PMs being performed. Planned in advance with OPS. - MANAGEMENT USE ONLY."
+                        reason: "Pleater Issues",
+                        description: "Any issues with running or setting up the pleater that impact the constraint"
                     },
                     {
-                        reason: "Preventive Maintenance - Unplanned",
-                        description: "When the line is down for any PMs being performed. Unplanned in advance with OPS."
-                    },
-                    {
-                        reason: "QA Sample Build",
-                        description: "Building QA samples. Reserved for SSC QA sample builds, XLT LALs, and XLT RTS samples."
-                    },
-                    {
-                        reason: "Quality Issue",
-                        description: "Any issues with material or process quality that results in lost time."
+                        reason: "Priority Change",
+                        description: "The Line is shut down, Employees moved another line/priority"
                     },
                     {
                         reason: "Rework",
-                        description: "Time lost due to bagging or packaging usse that requires line time to rectify."
+                        description: "Time lost due to Issues that requires line time to rectify"
                     },
                     {
-                        reason: "Safety/EMRT",
-                        description: "Daily stretches, a safety training or issues, or EMRT call."
+                        reason: "Roll Change",
+                        description: "Performing a roll change, or any issues associated with a roll change."
                     },
                     {
                         reason: "Scrap",
-                        description: "Time lost due to producing out of specification parts."
+                        description: "Time lost due to producing out of specification parts"
+                    },
+                    {
+                        reason: "Seamer Issues",
+                        description: "Any issues with running or setting up the Seamer that impact the constraint"
+                    },
+                    {
+                        reason: "Serializer Issue",
+                        description: "Any issues with running or setting up the engraver that impact the constraint"
                     },
                     {
                         reason: "Shift Change",
-                        description: "Time lost due to shift handover activities (i.e., paperwork, material accountability, counting labels, etc.) "
+                        description: "Time lost due to shift handover activities (i.e., paperwork, material accountability, counting labels, etc.)"
                     },
                     {
-                        reason: "Short Staffed Over Target",
-                        description: "When the line has scheduled work, but is down due to no available staff to run it. - MANAGEMENT USE ONLY."
+                        reason: "Short Stop",
+                        description: "Time lost due to equipment parameter adjustments."
                     },
                     {
-                        reason: "Short Staffed Under Target",
-                        description: "Time lost due a line running, but understaffed, causing slower line speed. - MANAGEMENT USE ONLY."
+                        reason: "Slitter Issues",
+                        description: "Any issues with running or setting up the Slitter that impact the constraint"
                     },
                     {
-                        reason: "Spider Bonder",
-                        description: "Any issues with running or setting up the XLT spider bonder."
+                        reason: "Staffing",
+                        description: "Time lost due a line running, but understaffed or missing opertors, causing slower line speed."
                     },
                     {
-                        reason: "SSC Bonder",
-                        description: "Any issues with running or setting up the SSC bonder."
+                        reason: "Tester Issues",
+                        description: "Any issues with running or setting up Testers that impact the constraint"
                     },
                     {
                         reason: "Training",
-                        description: "Training or trainer's meetings that stop the line."
+                        description: "Line is planned down for Employee Trainings/Meetings (All-Hands, Flow Downs, Safety Stops)"
                     },
                     {
-                        reason: "Uson Tester",
-                        description: "Any issues with running or setting up the Uson tester."
+                        reason: "Trimmer Issues",
+                        description: "Any issues with running or setting up the Trimmer that impact the constraint"
                     },
                     {
-                        reason: "Vibe Welder",
-                        description: "Any issues with running or setting up the Vibe welder."
-                    },
-                    {
-                        reason: "Waiting For Parts",
-                        description: "Time lost due to material component shortage past the agreed 48 hours service level agreement. - MANAGEMENT USE ONLY."
+                        reason: "Waiting on Materials",
+                        description: "When the line is planned to be down for materials availability"
                     },
                     {
                         reason: "Waiting for Mechanic",
-                        description: "Waiting on a mechanic and the line has stopped running."
-                    },
-                    {
-                        reason: "Waiting on Labels",
-                        description: "Time lost due to label shortage past the agreed 48 hours service level agreement. - MANAGEMENT USE ONLY."
-                    },
-                    {
-                        reason: "XL Bonder",
-                        description: "Any issues with running or setting up the XL bonder."
-                    },
-                    {
-                        reason: "XLT Bonder",
-                        description: "Any issues with running or setting up the XLT bonder."
+                        description: "Waiting on a mechanic to arrive for a maintenance problem and the line has stopped running."
                     }
                 ]
               DelayItemLoading: =true

@@ -1,10 +1,12 @@
-Properties:
-  OnVisible: |-
-    =UpdateContext({
-        locPadding: Self.Width * 0.005,
-        locPopups: {Visible: false, Value: Blank()},
-        locError:false,
-        locErrorType: Blank(),
-        locNowDay: Today()
-        });
-  Fill: =If(d_m_form.Mode = FormMode.New, varColor5, varColor4)
+- Downtime_Screen:
+    Control: Screen
+    Properties:
+      OnVisible: |-
+        =UpdateContext({
+                locPadding: Self.Width * 0.005,
+                locPopups: {Visible: false, Value: Blank()},
+                locError:false,
+                locErrorType: Blank(),
+                locNowDay: Today()
+                });
+      Fill: =If(d_m_form.Mode = FormMode.New, varColor5, varColor4)

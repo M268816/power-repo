@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 DEFAULT_DATE_FILTER = '01 JAN 2024' # TEST DATE REMOVE FOR PROD
 # DEFAULT_DATE_FILTER = datetime.today().strftime("%A %B %d %Y")
 ISO_DATE_FILTER = pd.to_datetime(DEFAULT_DATE_FILTER)
-UPDATE_TIME = 3600 # One Hour = 3600 secconds.
+UPDATE_TIME = 3600 # One Hour = 3600 seconds.
 LOG_DATE = datetime.now().strftime("%Y-%m-%d")
 
 os.makedirs('./logs', exist_ok=True)

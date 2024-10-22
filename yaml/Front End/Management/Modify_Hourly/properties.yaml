@@ -1,0 +1,13 @@
+- Modify_Hourly:
+    Control: Screen
+    Properties:
+      OnVisible: |-
+        =/*Init Local Variables*/
+        UpdateContext({
+            locLoading: {Visible: false, Value: -1, Text: "Not Loading"},
+            locPopup: false
+            });
+
+        /*Init Time Variables*/
+        Set(varNowDay, Today());
+        Set(varNowHour, Hour(Now()))
