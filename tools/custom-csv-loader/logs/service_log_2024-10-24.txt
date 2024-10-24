@@ -1,0 +1,63 @@
+[10-24-2024 01:54:17 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 01:54:17 PM] Starting up TCP server on localhost:53779
+[10-24-2024 01:54:17 PM] Flet app has started...
+[10-24-2024 01:54:17 PM] App session started
+[10-24-2024 01:55:17 PM] CSV File Processing: Completed in 9742ms
+[10-24-2024 01:55:17 PM] [GENERIC] Next runtime in: 5.0 minutes
+[10-24-2024 01:55:48 PM] [GENERIC] Service Closed
+[10-24-2024 01:56:33 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 01:56:33 PM] Starting up TCP server on localhost:53779
+[10-24-2024 01:56:33 PM] Flet app has started...
+[10-24-2024 01:56:33 PM] App session started
+[10-24-2024 01:57:11 PM] CSV File Processing: Completed in 13115ms
+[10-24-2024 01:57:11 PM] [GENERIC] Next runtime in: 3.0 minutes
+[10-24-2024 02:00:13 PM] CSV File Processing: Completed in 13431ms
+[10-24-2024 02:00:13 PM] [GENERIC] Next runtime in: 60.0 minutes
+[10-24-2024 02:20:57 PM] [GENERIC] Service Closed
+[10-24-2024 02:25:18 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 02:25:18 PM] Starting up TCP server on localhost:55409
+[10-24-2024 02:25:18 PM] Flet app has started...
+[10-24-2024 02:25:18 PM] App session started
+[10-24-2024 02:25:45 PM] [GENERIC] Processing files: EF_Pleater_Downtime_Events.csv
+[10-24-2024 02:25:46 PM] CSV File Processing: Completed in 1108ms
+[10-24-2024 02:25:46 PM] [GENERIC] Processed csv into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Ouput
+[10-24-2024 02:25:46 PM] [GENERIC] Next runtime in: 34.0 minutes
+[10-24-2024 02:26:11 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 02:26:11 PM] Starting up TCP server on localhost:55409
+[10-24-2024 02:26:11 PM] Flet app has started...
+[10-24-2024 02:26:11 PM] App session started
+[10-24-2024 02:26:28 PM] [GENERIC] Processing files: AB_Pleater_Downtime_Events.csv, CD_Pleater_Downtime_Events.csv, EF_Pleater_Downtime_Events.csv, GH_Pleater_Downtime_Events.csv, JK_Pleater_Downtime_Events.csv, LM_Pleater_Downtime_Events.csv, NO_Pleater_Downtime_Events.csv, PQ_Pleater_Downtime_Events.csv, RS_Pleater_Downtime_Events.csv, TU_Pleater_Downtime_Events.csv, WX_Pleater_Downtime_Events.csv, YZ_Pleater_Downtime_Events.csv
+[10-24-2024 02:26:42 PM] CSV File Processing: Completed in 14402ms
+[10-24-2024 02:26:42 PM] [GENERIC] Processed csv into: text {'value': 'CSV_Ouput'}
+[10-24-2024 02:26:42 PM] [GENERIC] Next runtime in: 33.0 minutes
+[10-24-2024 02:28:11 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 02:28:11 PM] Starting up TCP server on localhost:55409
+[10-24-2024 02:28:11 PM] Flet app has started...
+[10-24-2024 02:28:13 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 02:28:13 PM] Starting up TCP server on localhost:55409
+[10-24-2024 02:28:13 PM] Flet app has started...
+[10-24-2024 02:29:22 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 02:29:22 PM] Starting up TCP server on localhost:55548
+[10-24-2024 02:29:22 PM] Flet app has started...
+[10-24-2024 02:29:22 PM] App session started
+[10-24-2024 02:29:52 PM] [File System] Processing files: AB_Pleater_Downtime_Events.csv, CD_Pleater_Downtime_Events.csv, EF_Pleater_Downtime_Events.csv, GH_Pleater_Downtime_Events.csv, JK_Pleater_Downtime_Events.csv, LM_Pleater_Downtime_Events.csv, NO_Pleater_Downtime_Events.csv, PQ_Pleater_Downtime_Events.csv, RS_Pleater_Downtime_Events.csv, TU_Pleater_Downtime_Events.csv, WX_Pleater_Downtime_Events.csv, YZ_Pleater_Downtime_Events.csv
+[10-24-2024 02:30:06 PM] CSV File Processing: Completed in 14020ms
+[10-24-2024 02:30:06 PM] [File System] Processed csv into: CSV_Ouput
+[10-24-2024 02:30:06 PM] [GENERIC] Next runtime in: 30.0 minutes
+[10-24-2024 02:47:08 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 02:47:08 PM] Starting up TCP server on localhost:55934
+[10-24-2024 02:47:08 PM] Flet app has started...
+[10-24-2024 02:47:08 PM] App session started
+[10-24-2024 02:47:25 PM] [File System] Processing files: AB_Pleater_Downtime_Events.csv, CD_Pleater_Downtime_Events.csv, EF_Pleater_Downtime_Events.csv, GH_Pleater_Downtime_Events.csv, JK_Pleater_Downtime_Events.csv, LM_Pleater_Downtime_Events.csv, NO_Pleater_Downtime_Events.csv, PQ_Pleater_Downtime_Events.csv, RS_Pleater_Downtime_Events.csv, TU_Pleater_Downtime_Events.csv, WX_Pleater_Downtime_Events.csv, YZ_Pleater_Downtime_Events.csv
+[10-24-2024 02:47:30 PM] CSV File Processing: Completed in 5239ms
+[10-24-2024 02:47:30 PM] [File System] Processed csv into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Ouput
+[10-24-2024 02:47:30 PM] [GENERIC] Next runtime in: 12.0 minutes
+[10-24-2024 02:50:07 PM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\custom-csv-loader\assets
+[10-24-2024 02:50:07 PM] Starting up TCP server on localhost:55934
+[10-24-2024 02:50:07 PM] Flet app has started...
+[10-24-2024 02:50:08 PM] App session started
+[10-24-2024 02:50:29 PM] [File System] Processing files: AB_Pleater_Downtime_Events.csv, CD_Pleater_Downtime_Events.csv, EF_Pleater_Downtime_Events.csv, GH_Pleater_Downtime_Events.csv, JK_Pleater_Downtime_Events.csv, LM_Pleater_Downtime_Events.csv, NO_Pleater_Downtime_Events.csv, PQ_Pleater_Downtime_Events.csv, RS_Pleater_Downtime_Events.csv, TU_Pleater_Downtime_Events.csv, WX_Pleater_Downtime_Events.csv, YZ_Pleater_Downtime_Events.csv
+[10-24-2024 02:50:40 PM] CSV File Processing: Completed in 10811ms
+[10-24-2024 02:50:40 PM] [File System] Processed csv into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Ouput
+[10-24-2024 02:50:40 PM] [GENERIC] Next runtime in: 9.0 minutes
+[10-24-2024 02:51:12 PM] [Processing Service] Service Closed

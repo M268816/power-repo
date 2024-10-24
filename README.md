@@ -9,13 +9,14 @@
 | Encapsulation Daily Management System for Management | v1.0.0 | Released |
 | Encapsulation Daily Management System for Production | v1.0.0 | Released |
 | Encapsulation Digital SOPs | v0.1.0 | TBD |
-| Encapsulation LinkHub | v1.0.0 | Released |
-| Front End CSV Filter Service | v0.1.0 | WIP |
-| Front End Daily Management System for Management | v0.1.0 | WIP |
-| Front End Daily Management System for Production | v0.1.0 | DROPPED |
-| Scheduling Suite | v0.1.0 | TBD |
-| V-Line Daily Management System for Management | v0.1.0 | WIP |
-| V-Line Daily Management System for Production | v0.0.0 | TBD |
+| Front End CSV Filter Service | v0.3.0 | WIP |
+| Front End Daily Management System for Management | v0.2.0 | Alpha |
+| Front End Daily Management System for Production | v0.2.0 | Alpha |
+| Pleater Daily Management System | v0.2.0 | WIP |
+| PowerApp Applications Link Hub | v1.2.0 | Released |
+| Scheduling Suite | v0.1.0 | Concept |
+| V-Line Daily Management System for Management | v0.1.0 | On Hold |
+| V-Line Daily Management System for Production | v0.0.0 | On Hold |
 
 **Version tracking only started after git integration*
 
@@ -37,4 +38,4 @@ To use the YAML code you must first use PowerApps version 3.24084.21 or later. T
 
 ## References
 
-The reference folder holds various files with reference code for things like html templates, color references, svg icon implementation and more.
+The reference folders hold various files with reference code for things like html templates, color references, svg icon implementation and more.
