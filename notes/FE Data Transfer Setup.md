@@ -146,16 +146,16 @@ WHERE
         - Lot_No
         - End Cart #
     - Create a new view called 'Last 30 Days'
-        - sort by Date, Decending
+        - sort by Date, Descending
         - Filter by Date, is greater than or equal to, [Today]-30
 
-Congradulations! The new Access File is setup to run.
+Congratulations! The new Access File is setup to run.
 
 ## Automating the Data Transfer
 Now that the Access Database is created. It will pull new data from the 'Roll Data' Database, but will only work when running the 'Append_Data' Query or 'AutoAppendData' Macro. We want to change this functionality to be automatic. And the most straight forward way to do this is to create a Windows Task that runs a batch file that will Open Access, run the macro, and close access every hour.
 
 1. Create a batch file named RunAutoAppend.bat and enter these commands:
-    - The first command may be the same, but the seccond will need to be changed to where you store the new Access file. The one I used was called 'Test', and was stored within my OneDrive folder.
+    - The first command may be the same, but the second will need to be changed to where you store the new Access file. The one I used was called 'Test', and was stored within my OneDrive folder.
 
 ``` PowerShell
 "C:\Program Files\Microsoft Office\root\Office16\MSACCESS.EXE" "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\Front End\Test.accdb" /x AutoAppendMacro
@@ -170,9 +170,9 @@ Now that the Access Database is created. It will pull new data from the 'Roll Da
         - Run Only when user is logged on
     - In the Triggers Tab
         - Create a new trigger
-        - Set the task on a shedule
-        - Set the occurance to daily
-        - Set the recurance to 1 day
+        - Set the task on a schedule
+        - Set the occurrence to daily
+        - Set the recurrence to 1 day
         - Under advanced settings
         - Check repeat task to every Hour
         - Check stop task if it runs longer than 30 minutes.
@@ -214,7 +214,7 @@ The downtime data must be transferred from CSV files located on the r:\ drive to
     - Make the view the default
     - Deselect the Title column display Checkmark
     - Navigate to sorting and filters
-        - Sort the DateTime column in decending order
+        - Sort the DateTime column in descending order
         - Filter the DateTime column by 'greater than or equal to' [Today]-30
     - Click Okay and close the new SharePoint List.
 7. Create a new Power Automate Flow for the cloud.
@@ -222,7 +222,7 @@ The downtime data must be transferred from CSV files located on the r:\ drive to
 > Follow these steps very carefully, as one mistake will break the data transfer.
 ```
 1. From the power automate editor create a flow with the Recurrence Node
-    - Set the inverval to 1 and frequency to Hour
+    - Set the interval to 1 and frequency to Hour
     - Set the appropriate time zone
     - Enter '2024-01-01T00:00:00Z' as the start time
 2. Add a Get File Content Node for OneDrive - Business
@@ -268,8 +268,8 @@ The downtime data must be transferred from CSV files located on the r:\ drive to
     - Select the site address of your sharepoint site from the site address dropdown
     - Select the list from the list name dropdown
     - Add the filter query advanced parameter
-    - In the filter query field input: CSV_ID eq '@{outputs('json')?['ID']}' and Pleater ne @{outputs('json')?['Pleater']}
-14. Create a seccond condition branch
+    - In the filter query field input: CSV_ID eq '@{outputs('json')?['ID']}' and Pleater ne '@{outputs('json')?['Pleater']}'
+14. Create a second condition branch
     - Make sure it is named 'Condition'
     - Select the AND expression
     - Set the first value to: length(body('Get_items')?['value'])

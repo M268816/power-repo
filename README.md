@@ -7,7 +7,7 @@
 | Encapsulation Accountability Suite | v1.0.0 | Released |
 | Encapsulation Daily Management System for Displays | v0.1.0 | WIP |
 | Encapsulation Daily Management System for Management | v1.0.0 | Released |
-| Encapsulation Daily Management System for Production | v1.0.0 | Released |
+| Encapsulation Daily Management System for Production | v1.0.1 | Released |
 | Encapsulation Digital SOPs | v0.1.0 | TBD |
 | Front End CSV Filter Service | v0.3.0 | WIP |
 | Front End Daily Management System for Management | v0.2.0 | Alpha |

@@ -21,6 +21,14 @@ Power Apps Premium - 40k per user	200k per cloud flow
 Bad news, free plans will not be enough to capture all CRUD api calls for power automate, good news, we only need to upgrade one level to account for Encap and FE data collection to go from 10,000 to 200,000 calls per 24 hrs.
 
 # Todo
+Pleater Downtime collection pulls in a crazy amount of short stop data
+    cull data into single entry per day? designate with 'SS#Date'?
+    for each file    
+        for each line
+            for each day
+                sum all Short Stop
+                    make a new entry called 'SS#2024-10-15' to reduce record count
+
 Pleater Downtime collection does not contain lot info
     incorporation into my current OEE2 formulas will need refactoring
 
