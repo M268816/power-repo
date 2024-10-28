@@ -5,7 +5,7 @@
 | PowerApp for Production | Cancelled | Time loss | --- |
 | New FE Reject Database | Cancelled | Time loss | --- |
 | Initial Database Setup | Cancelled | Time loss | --- |
-| Custom CSV Loader Program Completed | WIP | input csv files cannot be altered, error checking required | 25 OCT 2024 |
+| Custom CSV Loader Program | Completed | --- | 25 OCT 2024 |
 | Access DB connection to PowerApp Established | FOCUS | All transfer methods of old data failing | 15 NOV 2024 |
 | Relocate CSV outputs to cloud location | WIP | --- | 01 DEC 2024 |
 | Constraint data Updated and Complete | On Hold | OEE2 algorithm inaccuracies | 17 JAN 2025 |

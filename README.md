@@ -9,7 +9,7 @@
 | Encapsulation Daily Management System for Management | v1.0.0 | Released |
 | Encapsulation Daily Management System for Production | v1.0.1 | Released |
 | Encapsulation Digital SOPs | v0.1.0 | TBD |
-| Front End CSV Filter Service | v0.3.0 | WIP |
+| Front End CSV Filter Service | v0.5.0 | Alpha |
 | Front End Daily Management System for Management | v0.2.0 | Alpha |
 | Front End Daily Management System for Production | v0.2.0 | Alpha |
 | Pleater Daily Management System | v0.2.0 | WIP |
