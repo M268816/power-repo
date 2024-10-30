@@ -1,22 +1,39 @@
 # Aggressively Realistic Timeline
 
-| Process            | Status            | Challenges        | Target Date       |
-| ------------------ |:-----------------:| ----------------- |------------------:|
-| PowerApp for Production | Cancelled | Time loss | --- |
-| New FE Reject Database | Cancelled | Time loss | --- |
-| Initial Database Setup | Cancelled | Time loss | --- |
-| Custom CSV Loader Program | Completed | --- | 25 OCT 2024 |
-| Access DB connection to PowerApp Established | FOCUS | All transfer methods of old data failing | 15 NOV 2024 |
-| Relocate CSV outputs to cloud location | WIP | --- | 01 DEC 2024 |
-| Constraint data Updated and Complete | On Hold | OEE2 algorithm inaccuracies | 17 JAN 2025 |
-| PowerApp SharePoint List Databases Structured | On Hold | Pertains to progress with previous steps | 31 JAN 2025 |
-| PowerApp for Management - Initial Build Completed | On Hold | Templates/formulas from Encap apps non-transferrable | 14 FEB 2025 |
-| Power Bi connection to PowerApp Established | On Hold | Progress determined by dashboard configuration | 21 FEB 2025 |
-| SharePoint List DB to PowerApp Data Algorithms Completed | --- | New data connections not plug and play from old system | 24 FEB 2025 |
-| OEE Algorithms Completed | --- | OEE calculation vastly more complex than encapsulation, research needed | 03 MAR 2025 |
-| PowerApp for Management - Alpha | --- | Bug Fixes | 10 MAR 2025 |
-| PowerApp for Management - Beta | --- | Bug Fixes | 17 MAR 2025 |
-| PowerApp for Management - Launch | --- | Projected Launch Day | 31 MAR 2025 |
+## High Level
+| Process            | Status            | Target Date       | Completion Date   |
+| ------------------ |:-----------------:|------------------:| ----------------- |
+| Backup Deliverable - Production | Alpha | 31 JAN 2025 | --- |
+| Backup Deliverable - Management | WIP | 31 JAN 2025 | --- |
+| Databases Fully Structured | WIP | 31 JAN 2025 | --- |
+| PowerApp Initial Build | WIP | 14 FEB 2025 | --- |
+| OEE Algorithms Completed | --- | 03 MAR 2025 | --- |
+| PowerApp for Management - Alpha | --- | 10 MAR 2025 | --- |
+| PowerApp for Management - Beta | --- | 17 MAR 2025 | --- |
+| PowerApp for Management - Launch | --- | 31 MAR 2025 | --- |
+
+## Low Level
+| Process            | Status            | Target Date       | Challenges        |
+| ------------------ |:-----------------:|------------------:| ----------------- |
+| PowerApp for Production | Cancelled | --- | Time loss |
+| New FE Reject Database | Cancelled | --- | Time loss |
+| Initial Database Setup | Cancelled | --- | Time loss |
+| Custom CSV Loader Program - Flet | Completed | 25 OCT 2024 | --- |
+| Custom CSV Loader Program - CLI | Completed | 25 OCT 2024 | --- |
+| Access DB connection to PowerApp Established | On Hold | 15 NOV 2024 | Transfer system works, waiting on confirmation of OEE focus |
+| Relocate CSV outputs to cloud location | On Hold | 01 DEC 2024 | Needs Wrona intervention. |
+| Constraint data Updated and Complete | On Hold | 17 JAN 2025 | Current data in use, need data for missing lines |
+| Backup Deliverable - Production | Alpha | 31 JAN 2025 | Time loss |
+| Backup Deliverable - Management | WIP | 31 JAN 2025 | Time loss |
+| PowerApp SharePoint List Databases Structured | On Hold | 31 JAN 2025 | Initial structure implemented |
+| PowerApp for Management - Initial Build Completed | WIP | 14 FEB 2025 | Templates/formulas from Encap apps non-transferrable |
+| Power Bi connection to PowerApp Established | On Hold | 21 FEB 2025 | Progress determined by dashboard configuration |
+| SharePoint List DB to PowerApp Data Algorithms Completed | --- | 24 FEB 2025 | New data connections not plug and play from old system |
+| OEE Algorithms Completed | WIP | 03 MAR 2025 | OEE algorithm updated, pulls good OEE percentages, needs confirmation |
+| PowerApp for Management - Alpha | --- | 10 MAR 2025 | Bug Fixes |
+| PowerApp for Management - Beta | --- | 17 MAR 2025 | Bug Fixes |
+| PowerApp for Management - Launch | --- | 31 MAR 2025 | Projected Launch Day |
+
 
 *Subject to changes*
 
@@ -46,7 +63,13 @@ functionality or useability as the Encapsulation version of the PowerApp.
     - OEE2 Calculations will be simplified, robust data filtering cannot be achieved
     - A new system will need to be created to track Planned Runtime
         - Extracting the planned runtime cannot be achieved in the same way its calculated with the Encap version
-- Constraint data not complete and may be invalid
-    - Running the currently obtainable data from the Pleater DB incurs problems with the OEE2 calculation
-    - OEE2 percentages are much higher than they should be
-    - Problems may lie with the PowerApp algorithms, but from trials, constraint data seems to be the culprit.
+- Constraint data not complete
+    - Data pulled from databases cannot be parsed though OEE algorithm without constraint data.
+
+- Backup Deliverable
+    - Current access and csv databases are too unpredictable and unreliable to confirm completion of a DMS system
+    - Creating a backup deliverable with Manual Inputs and Sharepoint Databases
+
+- Cannot compile custom apps without sadm account
+    - Time loss, took 2 days to get sadm acct for code compilations
+    - Worked on App and Database in the mean time.
