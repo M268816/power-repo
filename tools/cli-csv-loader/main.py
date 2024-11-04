@@ -1,11 +1,16 @@
 from datetime import datetime, timedelta
 import msvcrt
+import os
 import pandas as pd
 from sys import exit
 import time
 import threading
+from tqdm import tqdm
 
 UPDATE_TIME = 3600 # One Hour = 3600 seconds.
+
+def clear_terminal():
+    return os.system('cls' if os.name == 'nt' else 'clear')
 
 try:
     FILES = pd.read_csv('./file_locations.csv')
@@ -23,6 +28,7 @@ Press Any Key to Exit.'''
     
 # CLI
 def main():
+    clear_terminal()
     # Init Variables
     exit_flag = False
     date_filter = pd.to_datetime(datetime.today().strftime('%A %B %d %Y'))
@@ -30,46 +36,25 @@ def main():
     input_files = FILES['Location'][:-1].tolist()
     
     output_folder = FILES['Location'].iloc[-1]
-    print(output_folder)
     
     # Init date for data filter
     def update_date_filter():
         nonlocal date_filter
         date_filter = pd.to_datetime(datetime.today().strftime('%A %B %d %Y'))
+        # date_filter = pd.to_datetime('2024-01-01 00:00:00') # test date
     
     def find_sleep_time():
         nonlocal date_filter
         start_time = datetime.now()
         end_time = (start_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
         sleep_time = (end_time-start_time).total_seconds()
-        print(f'Next runtime in: {round(sleep_time/60, 0)} minutes')
+        # print(f'Next runtime in: {round(sleep_time/60, 0)} minutes')
         return int(sleep_time if start_time.minute != 0 else 3600)
-     
-    def sum_short_stops(file):
-        short_stops = file.copy()
-        short_stops[' Downtime Minutes'] = pd.to_numeric(short_stops[' Downtime Minutes'], errors='coerce')
-        
-        short_stops[' DateTime'] = short_stops[' DateTime'].dt.date
-        short_stops = short_stops[short_stops[' Downtime Reason'] == 'Short Stop']
-        
-        short_stops = short_stops.groupby([' DateTime', 'Pleater', ' Shift'])[' Downtime Minutes'].sum()
-        short_stops = short_stops.reset_index()
-        short_stops['ID'] = 0
-        short_stops[' Downtime Reason'] = 'Short Stop'
-        short_stops[' Comments'] = 'MERGED RECORDS'
-        
-        short_stops = short_stops[['ID', ' DateTime', ' Shift', ' Downtime Minutes', ' Downtime Reason', ' Comments', 'Pleater']]
-
-        # Reformat csv file
-        file = file[file[' Downtime Reason'] != 'Short Stop']
-        file = pd.concat([file, short_stops], ignore_index=True)
-        file[' DateTime'] = pd.to_datetime(file[' DateTime'])
-        
-        return file
       
     def validity_check():
         data_frames = []
-        for i in input_files:
+        print()
+        for i in tqdm(input_files, desc='Validity Check', dynamic_ncols=False, ncols=75):
             temp_read = pd.read_csv(i,
                 dtype={
                     'ID': str,
@@ -107,9 +92,11 @@ def main():
             data_frames.append(temp_read)
         
         # Create single file from all data frames
+        print('Creating Working File')
         file = pd.concat(data_frames, ignore_index=True)
 
         # Try: applying the datetime type to the ' Datetime' column
+        print('Formatting DateTime to Datetime')
         try:
             file[' DateTime'] = pd.to_datetime(file[' DateTime'])
         except:
@@ -119,16 +106,75 @@ def main():
     
     def filter_by_date(file):
         # Try: Filter by date
+        print(f'Filtering records >= {date_filter.strftime('%Y %B %d')}')
         try:
             filtered_file = file[file[' DateTime'] >= date_filter]
             filtered_file = sum_short_stops(filtered_file) # Combine 'Short Stop' records
+            filtered_file = sum_not_entered(filtered_file) # Combine 'Not Entered' and Blank records
         except:
             print('INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED')
         
         return filtered_file
     
+    def sum_short_stops(file):
+        print('Combining Short Stop Records')
+        short_stops = file.copy()
+        short_stops[' Downtime Minutes'] = pd.to_numeric(short_stops[' Downtime Minutes'], errors='coerce')
+        
+        short_stops[' DateTime'] = short_stops[' DateTime'].dt.date
+        short_stops = short_stops[short_stops[' Downtime Reason'] == 'Short Stop']
+        
+        short_stops = short_stops.groupby([' DateTime', 'Pleater', ' Shift'])[' Downtime Minutes'].sum()
+        short_stops = short_stops.reset_index()
+        short_stops['ID'] = 0
+        short_stops[' Downtime Reason'] = 'Short Stop'
+        short_stops[' Comments'] = 'MERGED RECORDS'
+        
+        short_stops = short_stops[['ID', ' DateTime', ' Shift', ' Downtime Minutes', ' Downtime Reason', ' Comments', 'Pleater']]
+
+        # Reformat csv file
+        file = file[file[' Downtime Reason'] != 'Short Stop']
+        file = pd.concat([file, short_stops], ignore_index=True)
+        file[' DateTime'] = pd.to_datetime(file[' DateTime'])
+        
+        return file
+    
+    def sum_not_entered(file):
+        print('Combining Not Entered Records')
+        not_entered = file.copy()
+        not_entered[' Downtime Minutes'] = pd.to_numeric(not_entered[' Downtime Minutes'], errors='coerce')
+        
+        not_entered[' DateTime'] = not_entered[' DateTime'].dt.date
+        not_entered = not_entered[
+            (not_entered[' Downtime Reason'] == 'Not Entered') |
+            (not_entered[' Downtime Reason'] == '') |
+            (not_entered[' Downtime Reason'].isnull())
+        ]
+        
+        not_entered = not_entered.groupby([' DateTime', 'Pleater', ' Shift'])[' Downtime Minutes'].sum()
+        not_entered = not_entered.reset_index()
+        not_entered['ID'] = 0
+        not_entered[' Downtime Reason'] = 'Not Entered'
+        not_entered[' Comments'] = 'MERGED RECORDS'
+        
+        not_entered = not_entered[['ID', ' DateTime', ' Shift', ' Downtime Minutes', ' Downtime Reason', ' Comments', 'Pleater']]
+
+        # Reformat csv file
+        file = file[
+            ~(
+                (file[' Downtime Reason'] == 'Not Entered') |
+                (file[' Downtime Reason'] == '') |
+                (file[' Downtime Reason'].isnull())
+            )
+        ]
+        file = pd.concat([file, not_entered], ignore_index=True)
+        file[' DateTime'] = pd.to_datetime(file[' DateTime'])
+        
+        return file
+    
     def duplicate_check(file):
-        filtered_file = file.drop_duplicates(subset=['ID', 'Pleater'])
+        print('Dropping possible duplicates')
+        filtered_file = file.drop_duplicates(subset=['ID', ' Shift', 'Pleater'])
 
         return filtered_file
         
@@ -138,8 +184,8 @@ def main():
 
         execute_time_start = time.time() # Start recording execution time
         csv_file = validity_check() # Correct invalid records
-        csv_file = filter_by_date(csv_file)
         csv_file = duplicate_check(csv_file)
+        csv_file = filter_by_date(csv_file)
         
         # Try: Output to csv
         try:
@@ -150,11 +196,11 @@ def main():
         # Capture execution time
         execute_time_end = time.time()
         execute_time = int((execute_time_end - execute_time_start)*1000)
-        print(f'CSV File Processed in {execute_time}')
+        print()
+        print(f'CSV File Processed in {execute_time}ms')
             
     def close_service_listener():
         nonlocal exit_flag
-        print('Press any key to exit this service.')
         msvcrt.getch()
         exit_flag = True
     
@@ -170,12 +216,17 @@ def main():
         listener = threading.Thread(target=close_service_listener, daemon=True)
         listener.start()
         
+        bar_format = '{desc}: {remaining}'
+
         while not exit_flag:
-            print(f'Processing files: {input_files}')
+            print('Processing Files:')
+            for i in input_files:
+                print(i)
             process_file()
-            print(f'Processed csv into: {output_folder}')
+            print(f'CSV Saved into: {output_folder}')
+            print('You may press any key to exit this service.')
             sleep_time = find_sleep_time()
-            for _ in range(sleep_time):
+            for _ in tqdm(range(sleep_time), desc='Next execution in', dynamic_ncols=True, bar_format=bar_format):
                 if exit_flag:
                     break
                 time.sleep(1)

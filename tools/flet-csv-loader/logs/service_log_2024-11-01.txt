@@ -1,0 +1,8 @@
+[11-01-2024 10:28:39 AM] Assets path configured: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\git-repo\power-repo\tools\flet-csv-loader\assets
+[11-01-2024 10:28:39 AM] Starting up TCP server on localhost:58377
+[11-01-2024 10:28:39 AM] Flet app has started...
+[11-01-2024 10:28:39 AM] App session started
+[11-01-2024 10:30:10 AM] [File System] Processing files: AB_Pleater_Downtime_Events.csv, CD_Pleater_Downtime_Events.csv, EF_Pleater_Downtime_Events.csv, GH_Pleater_Downtime_Events.csv, JK_Pleater_Downtime_Events.csv, LM_Pleater_Downtime_Events.csv, NO_Pleater_Downtime_Events.csv, PQ_Pleater_Downtime_Events.csv, RS_Pleater_Downtime_Events.csv, TU_Pleater_Downtime_Events.csv, WX_Pleater_Downtime_Events.csv, YZ_Pleater_Downtime_Events.csv
+[11-01-2024 10:30:23 AM] CSV File Processing: Completed in 13382ms
+[11-01-2024 10:30:23 AM] [File System] Processed csv into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Ouput
+[11-01-2024 10:30:23 AM] [GENERIC] Next runtime in: 30.0 minutes

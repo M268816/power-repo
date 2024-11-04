@@ -28,6 +28,14 @@
     #B4DC96                 //Sensitive Green Hex
     #FFDBC9                 //Sensitive Yellow Hex
     
+    // Color deficiency ?
+    #FFD48E                 //sunset
+    #FFAF2F                 //Orange
+    #2DBECD                 //Robin Egg Blue
+    #6052A5                 //ultra violet
+    #503291                 //tekhelet
+
+
 */
 
 /*New Themes*/
