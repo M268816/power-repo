@@ -1,0 +1,121 @@
+Filter Downtime and Production by Date Range and Selected Line
+In this example we filter by a single day, but all lines.
+
+For Each Catalog with a constraint, Each Line, and Each Shift Create a Data Structure
+    Constraint: Constraint Pulled from the constraint database, filtered by line and catalog
+    Output: Sum of the amount of units built (Start Unit - End Unit + 1)
+    Runtime: count_of_days (1 in this case) * 16 (8 hours per line side, 'E' and 'F')
+
+For Each Shift, from the Shift Data Structure Create Shift_OEE
+    With (Each shift and line: (Runtime - Downtime) * Constraint) = Constraint_Goal
+    For Each Constraint_Goal,
+        OEE2: Sum of Output / Constraint_Goal
+
+Production,
+shift, Line, amount_built, Catalog, Constraint
+A, E, 50, ABC, 25
+A, E, 12, ABC, 25
+A, F, 75, ABC, 25
+A, F, 100, ABC, 25
+A, G, 25, ABC, 25
+A, H, 30, ABC, 25
+B, E, 60, ABC, 25
+B, F, 40, ABC, 25
+B, J, 60, ABC, 0
+B, K, 60, ABC, 0
+C, E, 60, ABC, 25
+C, F, 100, ABC, 25
+C, E, 55, 123, 30
+C, F, 65, 123, 30 
+
+Downtime,
+Shift, Line, Downtime Reason, Downtime Total
+A, EF, Planned, 150
+A, GH, Unplanned, 10
+B, EF, Unplanned, 25
+C, EF, Unplanned, 5
+
+First for loop
+    -> A Shift, Line EF, Catalog ABC
+    A, E, 50, ABC, 25
+    A, E, 12, ABC, 25
+    A, F, 75, ABC, 25
+    A, F, 100, ABC, 25
+    ------------------
+    Constraint, Output, Runtime
+    25, 237, 16 Hours
+    
+    -> A Shift, Line GH, Catalog ABC
+    A, G, 25, ABC, 25
+    A, H, 30, ABC, 25
+    ------------------
+    Constraint, Output, Runtime
+    25, 55, 16 Hours
+
+    -> B Shift, Line EF, Catalog ABC
+    B, E, 60, ABC, 25
+    B, F, 40, ABC, 25
+    ------------------
+    Constraint, Output, Runtime
+    25, 100, 16 Hours
+    
+    -> B Shift, Line JK, Catalog ABC !!! NO CONSTRAINT DATA, ENTRIES NOT PARSED
+    B, J, 60, ABC, 0
+    B, K, 60, ABC, 0
+    ------------------
+
+    -> C Shift, Line EF, Catalog ABC
+    C, E, 60, ABC, 25
+    C, F, 100, ABC, 25
+    ------------------
+    Constraint, Output, Runtime
+    30, 160, 16 Hours
+
+    -> C Shift, Line EF, Catalog 123    
+    C, E, 55, 123, 30
+    C, F, 65, 123, 30
+    ------------------
+    Constraint, Output, Runtime
+    30, 120, 16 Hours
+
+Second For loop
+    With Each Shift and Line Create a Constraint Array:
+        (Runtime Minutes - Downtime Minutes) * Constraint Average
+            !!! Because Downtime Data does not specify what catalog it was run on,
+                it cannot be explicitly filtered, and instead is averaged.
+
+        -> A Shift, EF Line
+        ((16 * 60) - 150)/60) * Average(25)) = Constraint_Goal: 337.5
+        
+        -> A Shift, GH Line
+        ((16 * 60) - 10)/60) * Average(25)) = Constraint_Goal: 395.83
+        
+        -> B Shift, EF Line
+        ((16 * 60) - 25)/60) * Average(25)) = Constraint_Goal: 389.583
+
+        -> C Shift, EF Line
+        ((16 * 60) - 5)/60) * Average(25, 30) = Constraint_Goal: 437.8
+
+    OEE2 = Sum of Output in the Data Structure / Sum of Constraint_Goal in Constraint_Array
+    OEE2 = (237 + 55 + 100 + 160 + 120) / (337.5 + 395.83 + 389.583 + 437.8)
+    OEE2 = 672 / 1560.713
+    OEE2 = Round(0.4305 * 100, 2)
+    OEE2 = 43.05%
+
+"12","34","AB","CD","EF","GH","JK","LM","NO","PQ","RS","TU","WX","YZ"
+
+Selecting All Lines
+14 lines = 24 hours  * 14 lines * 60 minutes =  20160 minutes = 336 total hours
+28 lanes = 24 hours * 28 lanes * 60 minutes = 40320 minutes = 672 total hours
+
+Selecting a single line
+1 line = 24 hours * 1 line * 60 = 1440 minutes = 24 hours
+2 lanes = 24 hours * 2 lanes * 60 = 2880 minutes = 48 hours
+
+Per Shift All Lines
+14 lines = 8 hours  * 14 lines * 60 minutes =  6720 minutes = 112 total hours
+28 lanes = 8 hours * 28 lanes * 60 minutes = 11520 minutes = 192 total hours
+
+Per Shift Single Line
+1 line = 8 hours * 1 line * 60 = 480 minutes = 8 hours
+2 lanes = 8 hours * 2 lanes * 60 = 960 minutes = 16 hours
