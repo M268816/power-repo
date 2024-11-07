@@ -41,7 +41,7 @@ def main():
     def update_date_filter():
         nonlocal date_filter
         # date_filter = pd.to_datetime(datetime.today().strftime('%A %B %d %Y'))
-        date_filter = pd.to_datetime('2024-10-01 00:00:00') # test date
+        date_filter = pd.to_datetime('2024-11-01 00:00:00') # test date
     
     def find_sleep_time():
         nonlocal date_filter
