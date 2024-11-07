@@ -17,8 +17,8 @@
 | PowerApp for Production | Cancelled | --- | Time loss |
 | New FE Reject Database | Cancelled | --- | Time loss |
 | Initial Database Setup | Cancelled | --- | Time loss |
-| Custom CSV Loader Program - Flet | Completed | 25 OCT 2024 | Pleaters loads data 15-20 mins late? |
-| Custom CSV Loader Program - CLI | Completed | 25 OCT 2024 | Pleaters loads data 15-20 mins late? |
+| Custom CSV Loader Program - Flet | Completed | 25 OCT 2024 | downtime data collection broken 02-Nov |
+| Custom CSV Loader Program - CLI | Completed | 25 OCT 2024 | downtime data collection broken 02-Nov |
 | Access DB connection to PowerApp Established | Completed | 15 NOV 2024 | --- |
 | Complete Constraint Data | On Hold | 17 JAN 2025 | --- |
 | Backup Deliverable - Production | Alpha | 31 JAN 2025 | Time loss |
@@ -38,10 +38,15 @@
 
 ## Current Challenges
 
+- [! NEW !] Bubble trap is going forward with myself as acting operator. Time Loss.
+
+- [! NEW !] Encapsulation Applications are starting to need maintenance. Some mornings I am required to stop work on FE to fix complications with the degrading stability of the old applications. Updates and code refinements will be needed soon. This also means that because i'm reusing the same old codebase to complete this project, the applications i'm making for FE will need to go through the same updates and corrections.
+
 - Time loss due to scope change
     - The first three weeks of work on the project were essentially scrapped as new information made all previous work obsolete.
 
-- Time loss due to SADM account problems 
+- Time loss due to SADM account problems with the new Passkey system.
+    - Needed to wait  2 days to compile the CSV transfer tool.
 
 - Time extension due to scope change
     - Previously acquired assets from the Encapsulation Application are non-transferrable. (Old app templates, database structure)
@@ -56,18 +61,23 @@
     - Large databases inhibit automatic information transfer and manipulation
 
 Currently, because of the state of the data collection of downtime and line data The Front End DMS Management Suite will not have the same
-functionality or useability as the Encapsulation version of the PowerApp.
+functionality or useability as the Encapsulation version of the PowerApp. Most of the usability is being stripped, and will only focus on OEE collection.
 
 - Missing Lot Information for downtime collection
     - Downtime tracking will not be as robust as the Encapsulation version.
-    - A simple graphing version can still be made for downtime reasons, but only the built in reasons from the CSV and not the updated LSPS tracking
+    - A simple graphing version can still be made for downtime reasons, but only the built in reasons from the CSV and not the updated LSPS downtime codes
     - OEE2 Calculations will be simplified, robust data filtering cannot be achieved
     - A new system will need to be created to track Planned Runtime
         - Extracting the planned runtime cannot be achieved in the same way its calculated with the Encapsulation version
 
 - Constraint data not complete
     - Data pulled from databases cannot be parsed though OEE algorithm without constraint data.
-    - OEE2 will not accurately reflect data from all lines.
+    - OEE2 will not accurately reflect data from all lines and catalogs.
+    - OEE2 data is not complete or accurate because of the lapse of this data.
+
+- Input pleater data not poke`okd/validated/consistent,
+    - Creating output data from the roll data access database is problematic.
+    - Data is not validated on entry, and is creating a problem with capturing reliable output data.
 
 - Backup Deliverable
     - Current access and csv databases and the bridge solutions are too incomplete and unpredictable to affirm completion of a semi-automatic DMS system

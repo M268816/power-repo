@@ -8,14 +8,13 @@ Because PowerApps does not have a robust database structure, all data needs to b
 
 ### Production
 
-The first data structure that the app collects is the roll data, stored in a collection I call 'Production'. This collection is filtered by the selected dates within the app. Because of how large the dataset in the Sharepoint List is, it must also be sorted by date by most recent to increase collection speed.
+The first data structure that the app collects is the roll data, stored in a collection I call 'Production'. This collection is filtered by the selected dates within the app. Because of how large the dataset in the Sharepoint List is, it must also be sorted by date by most recent to increase collection speed. Big note here, because the Roll Data only collects the day of entry and not time, the data is skewed by a single hour. Processing the start and end of c shift is impossible with the current date time data format.
 
 ```cpp
 ClearCollect(collectProduction,
     ForAll(
         Filter(Sort(Roll_Data_Filtered_SPL, Date, SortOrder.Descending),
-            Date <= DateAdd(locEndDate, 1, TimeUnit.Days),
-            Date >= locStartDate
+            Date = locStartDate
         ),
         {
             id: Value(ThisRecord.ID),
@@ -37,14 +36,14 @@ ClearCollect(collectProduction,
 
 ### Downtime
 
-The second data structure I create is called Downtime, also stored in a collection filtered and sorted in the same way as production.
+The second data structure I create is called Downtime, also stored in a collection filtered and sorted in the same way as production. This datetime data can be collected properly, but then it would skew the data once again, so instead I conform to the date range possible with the Roll Data database.
 
 ```cpp
 ClearCollect(collectDowntime,
     ForAll(
         Filter(Sort(FE_Express_DT_Events, DateTime, SortOrder.Descending),
-            DateTime >= DateAdd(locStartDate, -1, TimeUnit.Hours),
-            DateTime <= DateAdd(locStartDate, 23, TimeUnit.Hours)
+            DateTime >= locStartDate,
+            DateTime <= locEndDate
         ),
         {
             id: Value(ThisRecord.ID),
@@ -62,13 +61,13 @@ ClearCollect(collectDowntime,
 
 ## Total widgets
 
-The Roll Data Access DB records a beginning and ending cartridge number. I take these numbers and retrieve an amount built from it.
+To find the total widget part of the OEE formula, the Roll Data Access DB records a beginning and ending cartridge number. I take these numbers and retrieve an amount built from it.
 
 ``` cpp
 amount_built: Value(ThisRecord.'End Cart #') - Value(ThisRecord.'Begin Cart #') + 1
 ```
 
-This is complicated by the structure of the Roll Data DB, as it splits the line per lane. This means I need to then combine these amount_built values I retrieve into a single line record. This is done farther into the algorithm, as I compress all the data into another data structure that collects the basal math for converting into OEE2, but more about that later, this is a small snip from that code.
+This is complicated by the structure of the Roll Data DB, as it splits the line per lane. This means I need to collect each individual lane's cart output then combine these amount_built values into a single line record. The next piece of code is in part from a larger function, but here is the argument that collects the build amount into a variable called output we use later.
 
 ```cpp
 output:
@@ -82,7 +81,7 @@ output:
 ```
 ## Ideal Output and Planned Runtime
 
-The ideal output of OEE2 must be pulled from the constraint of a particular catalog, and how long that catalog ran. All these catalog\constraint relationships then need to be calculated separately to get a proper constraint per hour number. However, with current roll data and downtime data base constraints, I cannot pull the total runtime or connecting downtime for this information. Instead, I suggest that the line should run all 24 hours, then subtract any collected downtime from the total possible runtime. The constraint is then averaged from the collected OEE2 data. Using average this way lends more accuracy to single line analysis. The algorithm will only pull in the constraint for say, '110605RCVGLG' on 'EF', essentially cancelling out the average function here. When selecting multiple lines the averaging applies appropriately instead. This causes an unwanted, but unavoidable skewing of overall OEE2 to the average rather than a perfect calculation.
+
 
 ```cpp
 Constraint_Goal:
@@ -101,7 +100,7 @@ Constraint_Goal:
 
 To properly collect the OEE information, data from the Production and Downtime collections need to be recursively collected into two separately generated data structures. One for base OEE data, and a second to gather the constraint data. These collections need to iterate over each line, each catalog and in the case of the shift specific version of this algorithm the shift as well.
 
-First lets start with the basic information we need. With a For loop, we create a structure that PowerApps can call into itself to determine specific lines and catalogs to iterate over.
+First lets start with the basic information we need. With a For loop, we create a structure that PowerApps can call into itself to determine specific lines and catalogs to iterate over. Otherwise, the conditions we try to filter the data by will be out of scope and PowerApps cannot reference the filter.
 
 ```cpp
 /*
@@ -126,7 +125,7 @@ With(
                 With({thisCatalog: ThisRecord.Value},
 ```
 
-Here we need to check to make sure the production data actually has an amount associated with it, as some data comes through incomplete. We use an AND operator to check and make sure the catalog has a constraint value as well.
+Here we need to check to make sure the production data actually has an amount associated with it, as some data comes through incomplete. We use an AND operator to check and make sure the catalog has a constraint value as well. A lot of data is filtered out with this step, as a large amount of catalog/line pairings are missing constraint data.
 
 ```cpp
                     If(
@@ -186,9 +185,11 @@ This next piece of the puzzle filters the data into a collection that will be us
 );
 ```
 
-This next collection uses the same strategy as before, but instead collects the 'Ideal Output * Planned Runtime' for OEE, a variable I call the constraint_goal in the algorithm. Previously for Encapsulation this was also collected in the for loop above. The data sources between production and downtime are inconsistent and this causes a problem. The downtime data does not capture lot data. This created another level of complexity where I cannot simply capture the 'Ideal Output' by catalog and line as with everything else, but only by line meaning I would capture the same downtime data multiple times per line. Thus this step needed to be extracted from the original data filtering and instead parsed though concatenated line data. This unfortunately makes the algorithm much less accurate. Now I cannot capture the Ideal Output for each catalog for the line then iterate over each, instead it essentially averages all of the Ideal Output data.
+### Ideal Output and Planned Runtime
 
-To try and simplify it into an equation, it takes this:
+This next collection uses the same strategy as before, but instead collects the 'Ideal Output * Planned Runtime' for OEE, a variable I call the constraint_goal in the algorithm. Previously for Encapsulation this was also collected in the for loop above. However because of the challenges of these databases, it needed to be compiled differently.
+
+To increase the accuracy of OEE, I suggest in this next method that the ideal output of OEE2 must be pulled from the constraint of each catalog and line combination, then multiplied by how long that combination ran. All these catalog\constraint relationships then need to be compiled together to create a constraint goal per catalog and line combination that can simply be added together to capture the 'Ideal Output * Planned Runtime' arguments of the OEE formula. 
 
 > OEE2 = Total Units / (Sum an array of Ideal Output * Planed Runtime)
 > 
@@ -196,7 +197,11 @@ To try and simplify it into an equation, it takes this:
 
 > OEE2 = 54.04%
 
-and turns it into this:
+With the current roll data and downtime database I cannot pull the total runtime or connecting downtime for the combined information required. They must be calculated separately because the downtime data only contains information attributing it to a line and shift. Without lot information on the downtime data, this makes the connection difficult but not impossible.
+
+Yet, the only other avenue I could see would be trying to create relationships though pure time management. Though the downtime data has proper timestamps, the roll data does not, so I cannot extrapolate those relations from time, making the relationships between production and downtime data now impossible.
+
+Instead, I change my original methodology of this part of the OEE formula and I suggest that the line should run all 24 hours, then subtract any collected downtime from the total possible runtime. The constraint is then averaged from the collected OEE2 data. This causes an unwanted, but unavoidable skewing of overall OEE2 to the average constraint of the line rather than a perfect catalog by catalog calculation.
 
 > OEE2 = Total Units / ((Average an array of constraints) * Planned Runtime)
 > 
@@ -204,7 +209,7 @@ and turns it into this:
 
 > OEE2 = 55.56%
 
-It's not ideal. But it's what I can do with what I have to work with.
+It's not ideal. But, from tests it works.
 
 ```cpp
 Clear(collectConstraintArray);
@@ -236,7 +241,7 @@ With({theseLines:Distinct(collectOEE2Data, line)},
 );
 ```
 
-Now that we have collected the data we need to run through the basic OEE Formula, we can complete the process by, again, collecting the resulting data into another data structure that hold the completed data. I use the With() function here to make the creation of OEE more readable. Some items are averaged to setup the view for management, but in all cases of OEE calculation I use as little averaging as possible, instead summing or concatenating data to create as accurate OEE percentages as possible.
+Now that we have collected the data we need to run through the basic OEE Formula, we can complete the process by, again, collecting the resulting data into another data structure that holds the completed data. I use the With() function here to make the creation of OEE more readable.
 
 ```cpp
 /*Collect OEE2*/
@@ -322,8 +327,19 @@ With(
 
 # Conclusion
 
-Collected OEE from the current databases is troublesome at best, and misleading at worst. Because of the challenges of data retrieval and missing constraint data. The usefulness of this tool is highly questionable without a complete constraint dataset or database restructure.
+With what I'm trying to accomplish, collected OEE from the current databases is troublesome at best and misleading always. Because of the challenges of data retrieval and missing constraint data, the usefulness of this tool is highly questionable without a complete constraint dataset and/or database restructure. This is also under the assumption that the cart data that i'm pulling for unit counts is correct and operators enter it accurately.
 
-As a precaution against this, I have been also developing a backup deliverable that works the same as the Encapsulation version and only relies on sharepoint lists and manual operator entries. This would mean another satellite system in our ecosystem, anther point of entry for operators, and another management requirement from leads and supervisors to review the manual data entries, like the encapsulation area has adopted.
+This can be seen when selecting filters with bad data. This is not the extreme, but the norm when polling the data from the access db and CSV files. Even with all the loopholes, duct tape, and bubblegum that I use to clean and thoroughly inspect data for consistent OEE calculations, the state of the database contorts and disturbs the algorithm to vast inaccuracies. 
+
+> This is data from the 4th of November, this day has information that conforms with the OEE algorithm.
+
+![alt text](OEE1.PNG)
+
+
+> This is data from the 7th of October, Because of all the glue holding this OEE together, I cant pinpoint what is the main cause of this problem, but the constraint data is lower than it should be, and the output data is higher.
+
+![alt text](OEE2.PNG)
+
+As a precaution against this, stretching myself thin a little bit to be honest, I have been also developing a backup deliverable that works the same as the Encapsulation version and only relies on sharepoint lists and manual operator entries. This would mean another satellite system in our ecosystem, anther point of entry for operators, and another management requirement from leads and supervisors to review the manual data entries, but i would rather be able to deliver another cog in the wheel than one missing teeth.
 
 Both the data retrieval and manual method applications have been stripped of all other functionality to develop them in tandem.
