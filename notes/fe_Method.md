@@ -79,24 +79,7 @@ output:
         amount_built                // Sum the amount built to combine 'E' and 'F' into 'EF'
     )
 ```
-## Ideal Output and Planned Runtime
-
-
-
-```cpp
-Constraint_Goal:
-    Round(
-        (
-            ((count_of_days * 1440)                                         // For each day selected multiply by 1440 minutes
-            - Sum(Filter(locDownFilter, thisLine = line),total))            // Subtract, the total amount of downtime for the line in iteration
-            / 60                                                            // Divide by 60, to get hours instead of minutes
-        )
-        * Average(Filter(collectOEE2Data, thisLine = line), constraint),    // Multiply, by the average constraint of the collected
-        0                                                                   // OEE2 data in the iteration
-    )
-```
-
-## Collecting the basal OEE information
+## Collecting the base OEE information
 
 To properly collect the OEE information, data from the Production and Downtime collections need to be recursively collected into two separately generated data structures. One for base OEE data, and a second to gather the constraint data. These collections need to iterate over each line, each catalog and in the case of the shift specific version of this algorithm the shift as well.
 
