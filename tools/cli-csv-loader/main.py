@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
+from datetime import time as dt_time
 import msvcrt
 import os
 import pandas as pd
@@ -31,7 +32,7 @@ def main():
     clear_terminal()
     # Init Variables
     exit_flag = False
-    date_filter = pd.to_datetime(datetime.today().strftime('%A %B %d %Y'))
+    date_filter = pd.to_datetime(datetime.combine(date=date.today(),time=dt_time(0))) - timedelta(hours=1)
 
     input_files = FILES['Location'][:-1].tolist()
     
@@ -40,7 +41,9 @@ def main():
     # Init date for data filter
     def update_date_filter():
         nonlocal date_filter
-        date_filter = pd.to_datetime(datetime.today().strftime('%A %B %d %Y'))
+        d = datetime.combine(date=date.today(),time=dt_time(0))
+        d = d - timedelta(hours=1)
+        date_filter = pd.to_datetime(d)
         # date_filter = pd.to_datetime('2024-10-01 00:00:00') # test date
     
     def find_sleep_time():
@@ -106,7 +109,7 @@ def main():
     
     def filter_by_date(file):
         # Try: Filter by date
-        print(f'Filtering records >= {date_filter.strftime('%Y %B %d')}')
+        print(f'Filtering records >= {date_filter}')
         try:
             filtered_file = file[file[' DateTime'] >= date_filter]
             filtered_file = sum_short_stops(filtered_file) # Combine 'Short Stop' records
@@ -219,7 +222,8 @@ def main():
         bar_format = '{desc}: {remaining}'
 
         while not exit_flag:
-            print('Processing Files:')
+            clear_terminal()
+            print(f'[{datetime.now()}] Processing Files:')
             for i in input_files:
                 print(i)
             process_file()
