@@ -81,9 +81,11 @@ output:
 ```
 ## Collecting the base OEE information
 
-To properly collect the OEE information, data from the Production and Downtime collections need to be recursively collected into two separately generated data structures. One for base OEE data, and a second to gather the constraint data. These collections need to iterate over each line, each catalog and in the case of the shift specific version of this algorithm the shift as well.
+To collect the information for the OEE formula the Production and Downtime collections need to be collected into two separately generated data structures. One for base OEE data, and a second to gather the constraint data. These collections need to iterate over each line, each catalog and the shift.
 
-First lets start with the basic information we need. With a For loop, we create a structure that PowerApps can call into itself to determine specific lines and catalogs to iterate over. Otherwise, the conditions we try to filter the data by will be out of scope and PowerApps cannot reference the filter.
+> In this example we are only collecting overall OEE so shift data is not being separated in this case.
+
+First I collect the base information. With a For loop, we create a data structure that PowerApps can call into itself to iterate over each lines and catalog. This is a PowerFX specific method, if we don't setup the loop in this way the conditions we try to iterate the data over will be out of 'scope' and PowerApps cannot reference them.
 
 ```cpp
 /*
@@ -108,7 +110,7 @@ With(
                 With({thisCatalog: ThisRecord.Value},
 ```
 
-Here we need to check to make sure the production data actually has an amount associated with it, as some data comes through incomplete. We use an AND operator to check and make sure the catalog has a constraint value as well. A lot of data is filtered out with this step, as a large amount of catalog/line pairings are missing constraint data.
+Next I check to make sure the production data has an amount associated with it. This is because some data may come through incomplete. I use an AND operator to check and make sure the catalog has a constraint value as well. A lot of data is filtered out with this step, as a large amount of catalog/line pairings are missing constraint data.
 
 ```cpp
                     If(
@@ -125,17 +127,17 @@ Here we need to check to make sure the production data actually has an amount as
                         ),
 ```
 
-This causes another problem with collecting OEE with the current databases all data cannot be parsed though the algorithm. This algorithm can only calculate production data that has constraint data associated with it. All other data is filtered out, and thus does not represent the total capacity of a selected set of data ranges.
+I am missing line/catalog constraint parings and this causes problems with collecting a complete dataset for OEE analysis. This algorithm then can only calculate production data that has constraint data associated with it. All other data is filtered out, and thus does not represent a total representation of OEE.
 
-For Example, I currently have  a single constraint data point for 'WX' for catalog '110605RCVGL'. My outputs for the 6th of Novemeber show that 'WX' ran 440 units.
+> For Example, I currently have  a single constraint data point for 'WX' for catalog '110605RCVGL'. My outputs for the 6th of Novemeber show that 'WX' ran 440 units.
+>
+> ![alt text](./WX%20Output.PNG)
+>
+> But when pushed through the OEE algorithm, filtered for 'WX', it displays the OEE is at 0% for the day.
+>
+>![alt text](./WX%20OEE.PNG)
 
-![alt text](./WX%20Output.PNG)
-
-But when pushed through the OEE algorithm show that 'WX' was a 0% OEE for the day.
-
-![alt text](./WX%20OEE.PNG)
-
-This next piece of the puzzle filters the data into a collection that will be used to gather the output and constraint data for specific catalogs. It collects the constraint from a Sharepoint List that houses all the current constraint data I was able to obtain thus far with the help of Jen and the total output of the catalog as well.
+This next piece of the algorithm gathers the output and constraint data for each line/catalog pairing into a collection that will be used with the final OEE formula.
 
 ```cpp
                         Collect(collectOEE2Data,
@@ -172,7 +174,7 @@ This next piece of the puzzle filters the data into a collection that will be us
 
 This next collection uses the same strategy as before, but instead collects the 'Ideal Output * Planned Runtime' for OEE, a variable I call the constraint_goal in the algorithm. Previously for Encapsulation this was also collected in the for loop above. However because of the challenges of these databases, it needed to be compiled differently.
 
-To increase the accuracy of OEE, I suggest in this next method that the ideal output of OEE2 must be pulled from the constraint of each catalog and line combination, then multiplied by how long that combination ran. All these catalog\constraint relationships then need to be compiled together to create a constraint goal per catalog and line combination that can simply be added together to capture the 'Ideal Output * Planned Runtime' arguments of the OEE formula. 
+To increase the accuracy of OEE, I suggest in this next method that the ideal output of OEE2 must be pulled from the constraint of each catalog and line combination, then multiplied by how long that combination ran. All these catalog\constraint relationships then need to be compiled together to create a constraint goal. A per catalog and line combination that can be added together to capture the 'Ideal Output * Planned Runtime' arguments of the OEE formula. 
 
 > OEE2 = Total Units / (Sum an array of Ideal Output * Planed Runtime)
 > 
@@ -180,11 +182,11 @@ To increase the accuracy of OEE, I suggest in this next method that the ideal ou
 
 > OEE2 = 54.04%
 
-With the current roll data and downtime database I cannot pull the total runtime or connecting downtime for the combined information required. They must be calculated separately because the downtime data only contains information attributing it to a line and shift. Without lot information on the downtime data, this makes the connection difficult but not impossible.
+With the current roll data and downtime database I cannot connect the constraint data to planned runtime. This is done with my Encapsulation algorithm by referencing the date, shift, and lot information relationships between the production and downtime entries. For FE they must be calculated separately because the downtime data only contains information attributing it to a line and shift. Without lot information on the downtime data, this makes the data connections difficult but not impossible.
 
-Yet, the only other avenue I could see would be trying to create relationships though pure time management. Though the downtime data has proper timestamps, the roll data does not, so I cannot extrapolate those relations from time, making the relationships between production and downtime data now impossible.
+Yet, the only other avenue I could travel would be trying to create relationships though pure time management. Finding relationships between when downtime was entered, and when production outputs were posted. The downtime data has proper timestamps, the roll data does not, so I cannot extrapolate those relations from time either making the relationships between production and downtime data impossible.
 
-Instead, I change my original methodology of this part of the OEE formula and I suggest that the line should run all 24 hours, then subtract any collected downtime from the total possible runtime. The constraint is then averaged from the collected OEE2 data. This causes an unwanted, but unavoidable skewing of overall OEE2 to the average constraint of the line rather than a perfect catalog by catalog calculation.
+Instead, I changed my original methodology of this part of the OEE formula and I suggest that the line should run all 24 hours, then subtract any collected downtime from the total possible runtime. The constraint is then averaged from the collected OEE2 data. This causes an unwanted, but unavoidable skewing of overall OEE2 to the average constraint of the line rather than a perfect catalog by catalog calculation.
 
 > OEE2 = Total Units / ((Average an array of constraints) * Planned Runtime)
 > 
@@ -224,7 +226,7 @@ With({theseLines:Distinct(collectOEE2Data, line)},
 );
 ```
 
-Now that we have collected the data we need to run through the basic OEE Formula, we can complete the process by, again, collecting the resulting data into another data structure that holds the completed data. I use the With() function here to make the creation of OEE more readable.
+The data we need to run through the basic OEE Formula is now collected. I complete the process by, again, collecting the resulting data into another data structure that holds the final OEE data. I use the With() function here to make the creation of OEE more readable.
 
 ```cpp
 /*Collect OEE2*/
@@ -301,7 +303,7 @@ With(
                     0
                 ),
 
-            possible_runtime: runtime_total // The total amount of runtime possible for each LANE of each line, for the selected date range.
+            possible_runtime: runtime_total // The total amount of runtime possible for each line by the selected date range.
             
         }
     )
@@ -323,6 +325,6 @@ This can be seen when selecting filters with bad data. This is not the extreme, 
 
 ![alt text](OEE2.PNG)
 
-As a precaution against this, stretching myself thin a little bit to be honest, I have been also developing a backup deliverable that works the same as the Encapsulation version and only relies on sharepoint lists and manual operator entries. This would mean another satellite system in our ecosystem, anther point of entry for operators, and another management requirement from leads and supervisors to review the manual data entries, but i would rather be able to deliver another cog in the wheel than one missing teeth.
+As a precaution against these database problems, stretching myself thin a little bit to be honest, I have also been developing a backup deliverable that works the same as the Encapsulation version and only relies on sharepoint lists and manual operator entries. This would mean another satellite system in our ecosystem, another point of entry for operators, and another management requirement from leads and supervisors to review the manual data entries, but I would rather be able to deliver another cog in the wheel that spins with itself than one missing teeth that can't do it's job.
 
 Both the data retrieval and manual method applications have been stripped of all other functionality to develop them in tandem.
