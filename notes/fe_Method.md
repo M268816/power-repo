@@ -36,19 +36,40 @@ ClearCollect(collectProduction,
 
 ### Downtime
 
-The second data structure I create is called Downtime, also stored in a collection filtered and sorted in the same way as production. This datetime data can be collected properly, but then it would skew the data once again, so instead I conform to the date range possible with the Roll Data database.
+The second data structure I create is called Downtime, also stored in a collection filtered and sorted in the same way as production. This datetime data can be collected properly, but then it would skew the data once again, so instead I conform to the date range possible with the Roll Data database. Another challenge with the database is that it also contains records for E and D shifts. Because the Roll Data only collects A B and C shifts, I need to lookup the time of the E or D shift entry post and convert it to A, B, or C shift entry instead.
 
 ```cpp
+Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Downtime Data"});
 ClearCollect(collectDowntime,
     ForAll(
         Filter(Sort(FE_Express_DT_Events, DateTime, SortOrder.Descending),
-            DateTime >= locStartDate,
-            DateTime <= locEndDate
+            DateTime < DateAdd(locEndDate, 1, TimeUnit.Days),
+            DateTime >= locStartDate
         ),
         {
             id: Value(ThisRecord.ID),
             csv_id: Value(ThisRecord.CSV_ID),
-            shift: Text(ThisRecord.' Shift'),
+            shift:
+                If(
+                    Or(
+                        ThisRecord.' Shift' = "E",
+                        ThisRecord.' Shift' = "D"
+                    ),
+                    If(
+                        And(
+                            TimeValue(ThisRecord.DateTime) >= TimeValue("7:00 AM"),
+                            TimeValue(ThisRecord.DateTime) < TimeValue("3:00 PM")
+                        ),
+                        "A",
+                        And(
+                            TimeValue(ThisRecord.DateTime) >= TimeValue("3:00 PM"),
+                            TimeValue(ThisRecord.DateTime) < TimeValue("11:00 PM")
+                        ),
+                        "B",
+                        "C"
+                    ),
+                    ThisRecord.' Shift'
+                ),
             line: Text(ThisRecord.Pleater),
             date: ThisRecord.DateTime,
             reason: Text(ThisRecord.' Downtime Reason'),
