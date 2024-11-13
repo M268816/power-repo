@@ -36,7 +36,7 @@ ClearCollect(collectProduction,
 
 ### Downtime
 
-The second data structure I create is called Downtime, also stored in a collection filtered and sorted in the same way as production. This datetime data can be collected properly, but then it would skew the data once again, so instead I conform to the date range possible with the Roll Data database. Another challenge with the database is that it also contains records for E and D shifts. Because the Roll Data only collects A B and C shifts, I need to lookup the time of the E or D shift entry post and convert it to A, B, or C shift entry instead.
+The second data structure I create is called Downtime, also stored in a collection filtered and sorted in the same way as production. This datetime data can be collected properly, but then it would skew the data once again, so instead I conform to the date range possible with the Roll Data database. Another challenge with the database is that it also contains records for E and D shifts. Because the Roll Data only collects A, B, and C shifts, I need to lookup the time of the E or D shift entry post and convert it to A, B, or C shift entry instead. This may be the wrong approach however as trying to capture this downtime data causes the OEE formula to break (creating a negative amount of runtime when an entry pulls in data for a shift not run for 600~ minutes). Removing E and D shift downtime, normalizes this data and that may be right way to go about it instead.
 
 ```cpp
 Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Downtime Data"});
