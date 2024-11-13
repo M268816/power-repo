@@ -2,35 +2,40 @@
 
 ## The Now
 
-Currently our data systems are functional but fractured, non-standard and non-conforming. We have various avenues of data acquisition that do not play nice with one another and also do not follow any standards.
+Currently our data systems are functional but fractured, non-standard and non-conforming. We have various avenues of data acquisition that do not play nice with one another and also do not follow any of the same data entry standards. (IE Must have Datetime value, hourly entries, Lot Info, User Info, constraint data)
 
-The Encapsulation and SSC V lines run on multiple sharepoint databases across PowerApps and Power Bi. These systems track line schedules, material requests, production data, downtime data, and OEE analysis. All working singular systems that run separately and with different standards, input and output data methods.
+From the experience I've gained working on the OEE project, FE Durapore, Encapsulation/SSC and SSC V Line run on multiple databases across Oracle, Excel, Access, Sharepoint, NodeJS/Node Red, PowerApps, Power Bi and probably many more I am unfamiliar with. These systems track schedules, material requests, material stock, production data, downtime data, and OEE analysis. All working singular systems that run separately and with different standards, input and output data methods.
 
-Front End Durapore runs on many of these systems as well, with additional automated systems that run on separate and non-conforming access, node red, raspberry pi and CSV data structures/methods.
+These systems, though separate, work well and keep the plant running efficiently, but in my opinion make data analysis and management by data driven decisions challenging. 
 
 ## The Goal
 
-A unified data collection and analysis system that talks and connects with all aspects of production and management. Scheduling systems that compare data with material systems. Operation systems that talk with material and management systems. Management systems that can view the big picture or drill down specific constraints, stressors and successes.
+A unified data collection and analysis system that talks and connects with all aspects of production, materials and management. Scheduling systems that compare data with material systems. Operation systems that talk with material and management systems. Management systems that can view the big picture or drill down specific constraints, stressors and successes.
 
-All of these unified by a standard set of data acquisition, uniformity and integrity procedures. Long term supported, in house developed, tools, programs and data structures that rely on local talent and management. Build the tools we need, with the standards we set, with the people who know the business in its entirety.
+All of these unified by a standard set of data acquisition, data uniformity and data integrity procedures. In house developed tools, programs and data structures that rely on local talent and management with long term support. Build the tools we need, with the standards we set, with the people who know the business. 3rd party solutions can also be an extremely viable solution, but only if they can meet a large majority of the needs of the system, using satellite systems sparingly but also with some uniformity.
 
 - Local SQL Databases
-- DJango (or Angular/Express/ASP.NET) Based Web Applications for production and management
+- DJango (or Angular/Express/ASP.NET) Based Web Applications for production, engineering and management
 - Integration with Oracle
 
 ## The Bridge
 
 Usage of all known and newly experimental methods of data analysis and management systems to get as close to a unified system as possible.
 
-- This can include a standardized approach to manual data entry into PowerApps systems to obtain daily production data.
-- Then standardize an approach to data views and analysis with PowerBi systems. 
-- Move all scheduling, material, and planning systems from sharepoint sites/lists to the same Power Platform systems to create a more unified environment.
-    - For example, move the ugly sharepoint site schedule to a more readable PowerApp system.
+- This could include a standardized approach data entry.
+    - This could mean migrating to a full Power Platform System with Dataverse, using powerapps as a manual method.
+    - Or instead, a standardized approach using an automated method to pull data from machines and use Access Databases.
+- Then standardize an approach to data views and analysis.
+    - This could be with the Power Platform System with PowerBi.
+    - I've also heard of some parts of the company using tableau.
+    - We could also create our own system with python or other data analysis languages. 
+- Clean and standardize scheduling, material, and planning systems away from sharepoint sites.
+    - We could move all of this data to the Power Platform and Dataverse.
     > Something I've already prototyped:
     > 
     > ![Alt Text](ScheduleProto.PNG)
-- Temporarily discontinue relying on satellite systems with access databases and direct machine connections.
-- Temporarily move all data storage to the Power Platform's Dataverse
+    - We could instead clean and refactor our Oracle system to unify these tools instead.
+- Temporarily discontinue and discourage relying on satellite systems that do not adhere to these new standards.
 
 # Aggressively Realistic Timeline
 ## High Level

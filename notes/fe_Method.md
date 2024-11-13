@@ -186,7 +186,7 @@ With the current roll data and downtime database I cannot connect the constraint
 
 Yet, the only other avenue I could travel would be trying to create relationships though pure time management. Finding relationships between when downtime was entered, and when production outputs were posted. The downtime data has proper timestamps, the roll data does not, so I cannot extrapolate those relations from time either making the relationships between production and downtime data impossible.
 
-Instead, I changed my original methodology of this part of the OEE formula and I suggest that the line should run all 24 hours, then subtract any collected downtime from the total possible runtime. The constraint is then averaged from the collected OEE2 data. This causes an unwanted, but unavoidable skewing of overall OEE2 to the average constraint of the line rather than a perfect catalog by catalog calculation.
+Instead, I changed my original methodology of this part of the OEE formula and I suggest taking the total runtime then subtract any collected planned downtime. The constraint is then averaged from the collected OEE2 data. This causes an unwanted and unavoidable skewing of overall OEE2 to the average constraint of the line rather than a perfect catalog by catalog calculation.
 
 > OEE2 = Total Units / ((Average an array of constraints) * Planned Runtime)
 > 
@@ -314,7 +314,7 @@ With(
 
 With what I'm trying to accomplish, collected OEE from the current databases is troublesome at best and misleading always. Because of the challenges of data retrieval and missing constraint data, the usefulness of this tool is highly questionable without a complete constraint dataset and/or database restructure. This is also under the assumption that the cart data that i'm pulling for unit counts is correct and operators enter it accurately.
 
-This can be seen when selecting filters with bad data. This is not the extreme, but the norm when polling the data from the access db and CSV files. Even with all the loopholes, duct tape, and bubblegum that I use to clean and thoroughly inspect data for consistent OEE calculations, the state of the database contorts and disturbs the algorithm to vast inaccuracies. 
+This can be seen when selecting filters with bad data. Even with all the validation, duct tape, and bubblegum that I use to clean and thoroughly inspect data for consistent OEE calculations, the state of the databases contort and disturb the algorithm to vast inaccuracies when erroneous data is passed into the algorithm. 
 
 > This is data from the 4th of November, this day has information that conforms with the OEE algorithm.
 
@@ -325,6 +325,6 @@ This can be seen when selecting filters with bad data. This is not the extreme, 
 
 ![alt text](OEE2.PNG)
 
-As a precaution against these database problems, stretching myself thin a little bit to be honest, I have also been developing a backup deliverable that works the same as the Encapsulation version and only relies on sharepoint lists and manual operator entries. This would mean another satellite system in our ecosystem, another point of entry for operators, and another management requirement from leads and supervisors to review the manual data entries, but I would rather be able to deliver another cog in the wheel that spins with itself than one missing teeth that can't do it's job.
+As a precaution against these database problems, stretching myself thin a little bit to be honest, I have also been developing a backup deliverable that works the same as the Encapsulation version and only relies on sharepoint lists and manual operator entries. This would mean another satellite system in our ecosystem, another point of entry for operators, and another management requirement from leads and supervisors to review the manual data entries, but I would rather be able to deliver a working finished product rather than none at all.
 
 Both the data retrieval and manual method applications have been stripped of all other functionality to develop them in tandem.
