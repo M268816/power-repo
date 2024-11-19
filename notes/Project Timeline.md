@@ -46,7 +46,7 @@ Usage of all known and newly experimental methods of data analysis and managemen
 | Backup Deliverables - Manual Method | Alpha | 31 JAN 2025 | --- |
 | Databases Fully Established | WIP | 14 FEB 2025 | --- |
 | Service Computer Setup | On Hold | 24 FEB 2025 | --- |
-| OEE Algorithms Completed | --- | 03 MAR 2025 | --- |
+| OEE Algorithms Completed | Focus | 03 MAR 2025 | --- |
 | PowerApp Launch | --- | 31 MAR 2025 | --- |
 
 ## Low Level
@@ -76,9 +76,11 @@ Usage of all known and newly experimental methods of data analysis and managemen
 
 ## Current Challenges
 
-- [! NEW !] Bubble trap is going forward with myself as acting operator. Time Loss.
+- Bubble trap is going forward with myself as acting operator. Time Loss.
+    - Turns out it was only a single lot of 30 pieces, was only away for about 4~5 hours total.
+    - Possibility of a second lot later to build the large BT
 
-- [! NEW !] Encapsulation Applications are starting to need maintenance. Some mornings I am required to stop work on FE to fix complications with the degrading stability of the old applications. Updates and code refinements will be needed soon. This also means that because i'm reusing the same old codebase to complete this project, the applications i'm making for FE will need to go through the same updates and corrections.
+- Encapsulation Applications are starting to need maintenance. Some mornings I am required to stop work on FE to fix complications with the degrading stability of the old applications. Updates and code refinements will be needed soon. This also means that because i'm reusing the same old codebase to complete this project, the applications i'm making for FE will need to go through the same updates and corrections.
 
 - Time loss due to scope change
     - The first three weeks of work on the project were essentially scrapped as new information made all previous work obsolete.

@@ -1,4 +1,179 @@
-# OEE2
+# OEE v1.5
+
+Here is a v1.5 of the FE OEE Algorithm, produced after the 11/18/24 meeting with Chad Hebert
+
+## Method
+
+After speaking with Chad, the method that I collect OEE has changed. The OEE formula has stayed the same, and even my theory on creating a 'constraint_goal' variable. Instead this algorithm uses pleater packs and machine speeds as constraints to calculate the OEE. I define units here on as packs.
+
+> OEE2 = Total Packs / Planned Packs
+
+Planned packs now becomes the 'constraint_goal' from the previous algorithm and is plainly defined instead of relying on the base OEE2 formula definitions.
+
+We start by clearing any data within the data structure to start clean every time the algorithm is called.
+
+``` cpp
+// Collect OEE
+Clear(collectOEE2Data);
+```
+
+Then, we start a ForAll loop that iterates over all distinct production lanes (even though it states lines.. note for later, I need to change the variable name) and nest the loop into another iteration of distinct pleat per pack values (127,133,99 etc.). As before these need to be used with the With() function to allow the loop to properly init the variables within the scope of the Collect() function.
+
+``` cpp
+ForAll(distinct_prod_lines,
+    With({thisLane:ThisRecord.Value},
+        ForAll(Distinct(Filter(locProdFilter, thisLane in line),pleats_per_pack),
+            With({thisPleatPerPack: ThisRecord.Value},
+```
+
+Next we collect all the base information we need to gather for the OEE calculation. These need to be populated in a seperate data structure, because we need to concatenate all the lane data into line data later on.
+
+Data collected here:
+- lane, the lane of the pleater we iterate over
+- total_packs, a summation of the original production data filer by the amount of packs built
+- pleats_per_pack, the amount of pleats per pack we iterate over
+- pleats_per_hour, we return the lookup function of a data structure that holds the pleat per hour data for the line
+- packs_per_hour, how many packs can be built per hour for this line, pleats_per_hour / pleats_per_pack rounded to the 4th sig. dig.
+
+```cpp
+                Collect(collectOEE2Data,
+                    {
+                        lane: thisLane,
+                        total_packs: Sum(Filter(locProdFilter, thisLane = line, pleats_per_pack = thisPleatPerPack),amount_built),
+                        pleats_per_pack: thisPleatPerPack,
+                        pleats_per_hour: LookUp(pleaterSpeeds, thisLane in Line).Pleats_Per_Hour,
+                        pack_per_hour:
+                            IfError(
+                                Round(
+                                    LookUp(pleaterSpeeds, thisLane in Line).Pleats_Per_Hour
+                                    / thisPleatPerPack,
+                                    4
+                                ),
+                                0
+                            )
+                    }
+                )
+            )
+        )
+    )
+);
+```
+
+If I filter the production data to display 6-Nov, only EF Line, the above will return a data structure that looks like this.
+
+| lane | pack_per_hour | pleats_per_hour | pleats_per_pack | total_packs |
+| ---- | ------------- |---------------- | --------------- | ----------- |
+| F    | 28.3465       | 3600            | 127             | 104         |
+| F    | 27.0677       | 3600            | 133             | 86          |
+| E    | 28.3465       | 3600            | 127             | 108         |
+| E    | 27.0677       | 3600            | 133             | 88          |
+
+The next step in the algorithm then takes this information and combines it into a single line and adds a total runtime datapoint as well.
+
+The downside of this algorithm starts here. It is not yet possible to collect specific runtimes for each pleat_per_pack datapoint. This means I cannot iterate over each pleat_per_pack/uptime relationship and construct an accurate account of how many packs should have been built in this time, stored in planned_packs. Instead I average the pack_per_hour data and relate it to 48 hours of runtime for the line. I chose to use 24 hours per lane here because in the future I suspect we may try and change downtime collection to represent each lane of a line to increase the accuracy of its collection.
+
+```cpp
+Clear(collectOEE2);
+ForAll( // Lines
+    If(
+        oee_line.Selected.Value = "All",
+        Distinct(pleaterSpeeds, Line),
+        [oee_line.Selected.Value]
+    ),
+    With({thisLine: ThisRecord.Value},
+        If( 
+            IfError(Round(Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour),4) > 0,false),
+        
+            Collect(collectOEE2,
+                {
+                    line: thisLine,
+                    pack_per_hour: Round(Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour),4), 
+                    total_runtime: 48 * count_of_days, // This is a substitution for planned runtime
+                    planned_packs: Round(Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour) * 48 * count_of_days,4),
+                    total_packs: 0,
+                    OEE2: 0
+                }
+            )
+        )
+    )   
+);
+```
+
+This is returned into the collectOEE data structure. It created unpopulated columns for OEE and total_packs for the following step.
+
+| OEE2 | line | pack_per_hour | planned_packs | total_packs | total_runtime |
+| ---- | ---- | ------------- |-------------- | ----------- | ------------- |
+| 0    | EF   | 27.7071       | 1329.9408     | 0           | 48            |
+
+
+Finally we come to the OEE2 formula. This next ForAll() loop patches in the OEE and total_pack data into our data structure here instead of collecting new information. It very simply sums all total_pack data points from the OEEData collection to create a final total collection into each Line. Then takes our original OEE formula and collects it as well, rounding to the 4th sig. dig.
+
+```cpp
+ForAll( // Lines
+    Distinct(collectOEE2, line),
+    With({thisLine: ThisRecord.Value},
+        If(
+            Sum(Filter(collectOEE2Data, lane in thisLine),total_packs) > 0,
+
+            Patch(collectOEE2, First(Filter(collectOEE2, line = thisLine)),
+                {
+                    total_packs: Sum(Filter(collectOEE2Data, lane in thisLine),total_packs),
+                    
+                    OEE2:
+                        IfError(
+                            Round(
+                                Sum(Filter(collectOEE2Data, lane in thisLine),total_packs)
+                                / Sum(Filter(collectOEE2, line = thisLine),planned_packs) 
+                                * 100,
+                                4
+                            ),
+                            0
+                        )
+                }
+            )
+        )
+    )
+);
+```
+
+The last code returns this collection:
+
+| OEE2    | line | pack_per_hour | planned_packs | total_packs | total_runtime |
+| ------- | ---- | ------------- |-------------- | ----------- | ------------- |
+| 29.0238 | EF   | 27.7071       | 1329.9408     | 386         | 48            |
+
+The final step I take is patching in an average of all the previous data we gathered. 
+
+```cpp
+Patch(collectOEE2, Defaults(collectOEE2),
+    {
+        line: "Average",
+        pack_per_hour:Round(Average(collectOEE2, pack_per_hour),4),
+        total_packs: Sum(collectOEE2, total_packs),
+        planned_packs: Round(Sum(collectOEE2, planned_packs),4),
+        total_runtime: Sum(collectOEE2, total_runtime),
+        OEE2:
+            IfError(
+                Round(
+                    Sum(collectOEE2, total_packs)
+                    / Sum(collectOEE2, planned_packs)
+                    * 100,
+                    4
+                ),
+                0
+            )   
+    }
+);
+```
+
+This will return this collection. Here, the average does not change because we are looking into a single line with our filters.
+
+| OEE2    | line    | pack_per_hour | planned_packs | total_packs | total_runtime |
+| ------- | ------- | ------------- |-------------- | ----------- | ------------- |
+| 29.0238 | EF      | 27.7071       | 1329.9408     | 386         | 48            |
+| 29.0238 | Average | 27.7071       | 1329.9408     | 386         | 48            |
+
+# OEE2 v1.0
 
 > OEE2 = Total Widgets / (Ideal Output * Planned Runtime)
 
@@ -197,8 +372,7 @@ This next collection uses the same strategy as before, but instead collects the 
 
 To increase the accuracy of OEE, I suggest in this next method that the ideal output of OEE2 must be pulled from the constraint of each catalog and line combination, then multiplied by how long that combination ran. All these catalog\constraint relationships then need to be compiled together to create a constraint goal. A per catalog and line combination that can be added together to capture the 'Ideal Output * Planned Runtime' arguments of the OEE formula. 
 
-> OEE2 = Total Units / (Sum an array of Ideal Output * Planed Runtime)
-> 
+> OEE2 = Total Units / (Sum an array of Ideal Output * Planed Runtime)\
 > OEE2 = 100 / ((20\*3)+(25\*5))
 
 > OEE2 = 54.04%
@@ -209,13 +383,10 @@ Yet, the only other avenue I could travel would be trying to create relationship
 
 Instead, I changed my original methodology of this part of the OEE formula and I suggest taking the total runtime then subtract any collected planned downtime. The constraint is then averaged from the collected OEE2 data. This causes an unwanted and unavoidable skewing of overall OEE2 to the average constraint of the line rather than a perfect catalog by catalog calculation.
 
-> OEE2 = Total Units / ((Average an array of constraints) * Planned Runtime)
-> 
+> OEE2 = Total Units / ((Average an array of constraints) * Planned Runtime) \
 > OEE2 = 100 / ((20,25) \* 8)
 
 > OEE2 = 55.56%
-
-It's not ideal. But, from tests it works.
 
 ```cpp
 Clear(collectConstraintArray);

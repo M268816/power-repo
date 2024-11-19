@@ -15,14 +15,15 @@ def clear_terminal():
 
 try:
     FILES = pd.read_csv('./file_locations.csv')
-except:
-    print(
-'''Could not find file_locations.csv.
+except Exception as FILES_e:
+    print(str(FILES_e) +
+'''
+Could not find file_locations.csv.
 Please create a csv of file locations to load into the program.
 
 Note: the last location must be a folder location for the output file.
 
-Press Any Key to Exit.'''
+Press Any Key to Exit. '''
     )
     msvcrt.getch()
     exit()
@@ -102,20 +103,21 @@ def main():
         print('Formatting DateTime to Datetime')
         try:
             file[' DateTime'] = pd.to_datetime(file[' DateTime'])
-        except:
-            print('INVALID DATE FOUND') # Convert DateTime column to iso datetime format
+        except Exception as e:
+            print(str(e) + 'INVALID DATE FOUND') # Convert DateTime column to iso datetime format
         
         return file
     
     def filter_by_date(file):
         # Try: Filter by date
         print(f'Filtering records >= {date_filter}')
+        filtered_file = file
         try:
             filtered_file = file[file[' DateTime'] >= date_filter]
             filtered_file = sum_short_stops(filtered_file) # Combine 'Short Stop' records
             filtered_file = sum_not_entered(filtered_file) # Combine 'Not Entered' and Blank records
-        except:
-            print('INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED')
+        except Exception as e:
+            print(str(e) + ' INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED')
         
         return filtered_file
     
@@ -181,7 +183,7 @@ def main():
 
         return filtered_file
         
-    def process_file(e=None):
+    def process_file():
 
         update_date_filter()
 
@@ -193,8 +195,8 @@ def main():
         # Try: Output to csv
         try:
             csv_file.to_csv(output_folder + '\\! - output.csv', index=False) # Return the filtered file content
-        except:
-            print('File could not be written! Process Aborted. Is the output file opened?')
+        except Exception as e:
+            print(str(e) + 'File could not be written! Process Aborted. Is the output file opened?')
         
         # Capture execution time
         execute_time_end = time.time()
@@ -207,7 +209,7 @@ def main():
         msvcrt.getch()
         exit_flag = True
     
-    def main_service(e=None):
+    def main_service():
         nonlocal exit_flag
         
         if len(input_files) == 0:

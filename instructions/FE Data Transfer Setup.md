@@ -126,7 +126,7 @@ WHERE
 5. Create a new macro called 'AutoAppendMacro' Set it up as shown below:
     - You may need to select Show All Actions in the macro editor.
 
-    ![](/assets/AutoAppendMacro.PNG)
+    ![](./assets/AutoAppendMacro.PNG)
 
 6. Run the 'Create_Table' query.
     - This initializes the table we need to export to SharePoint
@@ -134,10 +134,10 @@ WHERE
     - Right Click on the Table, select Export -> SharePoint List    
     - when Creating the Exported List Name the table 'Roll_Data_Filtered_SPL' 
 
-    ![](/assets/ExportToSP.PNG)
+    ![](./assets/ExportToSP.PNG)
 8. Create a linked Table to the new SharePoint List by creating a new Table from External Data -> New Data Source -> From Online Services -> SharePoint List
 
-    ![](/assets/ImportSPL.PNG)
+    ![](./assets/ImportSPL.PNG)
 
 9. Navigate to the SharePoint list, Roll_Data_Filtered_SPL, though sharepoint
     - Go to Settings -> List Settings
@@ -185,7 +185,7 @@ Now that the Access Database is created. It will pull new data from the 'Roll Da
 
 3. Test the task by manually running the batch file.
 
-    ![](/assets/RunTask.PNG)
+    ![](./assets/RunTask.PNG)
 
 > If Access opens and stops with any prompts, follow this link for instructions to enable all macros to run without notifications.
 >

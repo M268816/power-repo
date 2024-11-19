@@ -1,4 +1,56 @@
-# Notes
+# 11/18/24 Meeting Notes
+
+> OEE2 = Total Packs / Planned Packs
+
+Total Packs = (Ending S# - Beginning S# + 1) \
+Total Packs = (1156 - 1001 + 1) \
+Total Packs = 156
+
+Planned Packs = (Packs Per Hour * Planned Runtime Hours) \
+Planned Packs = (28.3464 * 7) \
+Planned Packs = 198.4248
+
+> OEE2 = 156 / 198.4248
+> OEE2 = 79.0174%
+
+Pack Per Hour = Pleats Per Hour / Pleats Per Pack \
+Pleats Per Hour = Pleats Per Minute * 60 (3600 or 7200)
+
+> Main Line - 60 ppm - EF GH \
+> Opti - 60ppm - LM RS \
+> HighSpeed - 120ppm - WX YZ \
+> Express - 120ppm - 12 34 JK* NO PQ
+
+> Design for 80%, approx Less 10%, Excludes GH aervent and LM/RS slit post pleat also JK high area, revisit \
+> Exclude V Line, GH Aervent, Lm/RS Slit post pleat, JK High Area
+
+Pack Per Hour = Pleats Per Hour / Pleats Per Unit \
+Pack Per Hour = 3600 / 127 \
+Pack Per Hour = 28.3464 Packs Per Hour
+
+> Per Pleater Side, Team has the option to run one or both side for volume reqs \
+> Split Operators per line \
+> Hours obtained, linear? E and F or EF?
+
+## Now Calculate OEE for Multiple Catalogs?
+
+> NOT NEEDED IF RUNNING FOR SINGULAR LINE
+
+> Overall OEE2 = Total Good Packs Per Lane / Total Planned Packs Per Lane
+
+Line E = 3600 Pleats Per Hour, 127 Pleats Per Pack, 28.3464 Planned Packs, 226.7712 Planned Packs per Hour, 50 Completed Packs, 8 Hour Runtime \
+Line F = 3600 Pleats Per Hour, 127 Pleats Per Pack, 28.3464 Planned Packs, 226.7712 Planned Packs per Hour, 75 Completed Packs, 8 Hour Runtime
+
+Line N = 7200 Pleats Per Hour, 107 Pleats Per Pack, 67.2897 Planned Packs, 336.4485 Planned Packs per Hour, 100 Completed Packs, 5 Hour Runtime \
+Line O = 7200 Pleats Per Hour, 107 Pleats Per Pack, 67.2897 Planned Packs, 538.3176 Planned Packs per Hour, 100 Completed Packs, 8 Hour Runtime
+
+Total Packs = 325 \
+Planned Packs = 1328.3085
+
+OEE2 = 325 / 1328.3085 \
+OEE2 = 24.4672%
+
+# Notes Before 11/19/24
 
 Collect all data form Master Roll #
 
