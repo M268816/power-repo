@@ -1,6 +1,6 @@
 # OEE v1.5
 
-Here is a v1.5 of the FE OEE Algorithm, produced after the 11/18/24 meeting with Chad Hebert
+Here is a v1.5 of the FE OEE Algorithm, produced after the 11/18/24 meeting with Chad
 
 ## Method
 

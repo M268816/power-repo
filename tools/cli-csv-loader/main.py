@@ -48,11 +48,9 @@ def main():
         # date_filter = pd.to_datetime('2024-10-01 00:00:00') # test date
     
     def find_sleep_time():
-        nonlocal date_filter
         start_time = datetime.now()
         end_time = (start_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
         sleep_time = (end_time-start_time).total_seconds()
-        # print(f'Next runtime in: {round(sleep_time/60, 0)} minutes')
         return int(sleep_time if start_time.minute != 0 else 3600)
       
     def validity_check():
