@@ -1,0 +1,304 @@
+- h_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      Width: =Parent.Width
+      X: =
+    Children:
+    - h_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =varPadding/2
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding/2
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - h_logo:
+            Control: Image
+            Properties:
+              OnSelect: =Back()
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              ImagePosition: =ImagePosition.Stretch
+              LayoutMinHeight: =1
+              LayoutMinWidth: '=1   '
+              PaddingBottom: =1
+              PaddingTop: =1
+              Width: =Min(Parent.Width * 0.128, 170)
+        - h_title:
+            Control: Label
+            Properties:
+              Text: ="FE Durapore Daily Managmenet System"
+              Align: =Align.Center
+              Color: =varColor5
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 2
+        - h_h_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding/2
+              LayoutJustifyContent: =LayoutJustifyContent.End
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =h_logo.Width
+            Children:
+            - h_darkmode:
+                Control: Classic/Icon
+                Variant: HalfFilledCircle
+                Properties:
+                  OnSelect: |-
+                    =Set(varDarkMode, !varDarkMode);
+                    If(varDarkMode, 
+
+                        Set(varColor0, RGBA(235,235,235,1));
+                        Set(varColor1, Color.DimGray);       //Rich Purple
+                        Set(varColor2, Color.Gray);      //Rich Blue
+                        Set(varColor3, Color.SlateGray);      //Vibrant Cyan
+                        Set(varColor4, RGBA(205, 170, 135, 1));     //Sensitive Yellow
+                        Set(varColor5, Color.Black);
+                        Set(varColorAccent, RGBA(170, 125, 50, 1));,//Vibrant Yellow
+
+                        Set(varColor0, Color.Black);
+                        Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple
+                        Set(varColor2, RGBA(15, 105, 175, 1));      //Rich Blue
+                        Set(varColor3, RGBA(45, 190, 205, 1));      //Vibrant Cyan
+                        Set(varColor4, RGBA(255, 220, 185, 1));     //Sensitive Yellow
+                        Set(varColor5, Color.White);
+                        Set(varColorAccent, RGBA(255, 200, 50, 1)); //Vibrant Yellow
+
+                    );
+                  Color: =If(varDarkMode, Color.White, Color.Black)
+                  Icon: =Icon.HalfFilledCircle
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Rotation: =If(varDarkMode, 180, 0)
+                  Width: =Self.Height
+            - h_bugs:
+                Control: Image
+                Properties:
+                  Image: =gblAppIcons.Bug
+                  AlignInContainer: =AlignInContainer.Stretch
+                  HoverFill: =varColor4
+                  LayoutMinHeight: '=1   '
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
+            - h_user_img:
+                Control: Image
+                Properties:
+                  Image: |
+                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
+                  AlignInContainer: =AlignInContainer.Stretch
+                  LayoutMinHeight: '=1   '
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
+    - h_body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =15
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - h_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =varColor3
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - h_n_title:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  FontColor: =varColor0
+                  Size: =Self.Height / 3
+                  Text: =App.ActiveScreen.Name
+                  VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  FillPortions: =1
+            - h_n_seperator:
+                Control: Rectangle
+                Properties:
+                  Height: =1
+                  LayoutMinWidth: =15
+                  Width: =Parent.Width * 0.95
+            - h_n_gallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =collectNavigation
+                  DelayItemLoading: =true
+                  FillPortions: =13
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LoadingSpinner: =LoadingSpinner.Data
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: =(Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount
+                Children:
+                - h_n_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.ScreenName);
+                      Text: =ThisItem.Title
+                      Color: =varColor0
+                      DisabledColor: =varColor0
+                      DisabledFill: =varColor4
+                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =varColorAccent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight - varPadding
+                      Size: =Self.Width / 16
+                      Width: =Parent.TemplateWidth - Self.BorderThickness
+                      X: =Center(Parent.TemplateWidth, Self.Width)
+                      Y: =Center(Parent.TemplateHeight, Self.Height)
+            - h_n_footer:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =2
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - h_n_f_text:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =8
+                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
+                      Height: =Parent.Height
+                      Width: =Parent.Width
+        - h_main:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =varColor5
+              FillPortions: =11
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =varPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - h_construction:
+                Control: Image
+                Properties:
+                  Image: ='under-construction'
+            - h_welcome_parent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =varColor0
+                  BorderThickness: =If(varDarkMode, 1, 0)
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.3333
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width* 0.25
+                Children:
+                - h_w_title:
+                    Control: Label
+                    Properties:
+                      Text: ="Welcome, " & User().FullName
+                      Align: =Align.Center
+                      Color: =varColor5
+                      Fill: =varColor2
+                      FillPortions: =1
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      Size: =Self.Height / 3
+                - h_w_section_0:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="    This application is currently in development. You can find the bug report button on each screen in the top banner. If you happen to come across any  faults with the system please send out a report so it may be addressed. You can also send reports for requests for additional functionality.
+
+                            The navigation on the left allows you to display the outputs of each pleater line's built packs, pull reports from the pleaters downtime collection system, and analize OEE2 data and their weekly trends." & varDarkMode
+                      BorderColor: =varColor0
+                      Color: =varColor0
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =7
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      Overflow: =Overflow.Scroll
+                      Size: =Self.Height / 24

@@ -1,0 +1,689 @@
+- o_layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      Width: =Parent.Width
+      X: =
+    Children:
+    - o_header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =varColor1
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =varPadding/2
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding/2
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - o_collect:
+            Control: Classic/Button
+            Properties:
+              OnSelect: "=/*Start*/\nSet(varLoading,{Visible: true, Value: 1, Text: \"Loading\"});\n\n/*Update Dates Variables*/\nUpdateContext({\n    locEndDate: o_end_date.SelectedDate,\n    locStartDate: o_start_date.SelectedDate\n    \n});\n\n/*Collect Production*/\nSet(varLoading,{Visible: true, Value: 10, Text: \"Collecting Production Data\"});\nClearCollect(collectProduction,\n    ForAll(\n        Filter(Sort(Roll_Data_Filtered_SPL, Date, SortOrder.Descending),\n            Date <= locEndDate,\n            Date >= locStartDate\n        ),\n        {\n            id: Value(ThisRecord.ID),\n            shift: Text(ThisRecord.Shift),\n            line: Text(Upper(ThisRecord.Pleater)),\n            date: DateValue(ThisRecord.Date),\n            lot: Text(ThisRecord.Lot_No),\n            catalog: Text(ThisRecord.Catalog),\n            amount_built: Value(ThisRecord.'End Cart #') - Value(ThisRecord.'Begin Cart #') + 1,\n            unit_starting: Value(ThisRecord.'Begin Cart #'),\n            unit_ending: Value(ThisRecord.'End Cart #'),\n            reject_pleats: Value(ThisRecord.Total_Reject_Pleats),\n            pleats_per_pack: Value(ThisRecord.PleatPerPack),\n            pleats_height: Value(ThisRecord.Pleat_Height)\n        }\n    )\n);\n\n/*Update*/\nSet(varLoading,{Visible: true, Value: 100, Text: \"Finishing Collection\"});\nSelect(o_update);"
+              Text: ="collect"
+              Visible: =false
+              Width: =10
+              X: =20
+              Y: =20
+        - o_update:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =
+                /*Continued from o_collect*/
+                Set(varLoading,{Visible: true, Value: 10, Text: "Updating Values"});
+
+                /*Join and Create Output Table*/
+                Set(varLoading,{Visible: true, Value: 45, Text: "Collecting Output Data"});
+                ClearCollect(
+                    collectLocalOutputData,
+                    ForAll(
+                        collectLineSchema,
+                        {
+                            line: SCH_Line,
+                            total:
+                                /*Filter and Sum to get total amount built, per line, per selected shift*/
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        line in SCH_Line,
+                                        If(
+                                            o_shift.Selected.Value = "All",
+                                            shift = shift,
+                                            shift = o_shift.Selected.Value
+                                        )
+                                    ),
+                                    amount_built
+                                ),
+                            pleats:
+                                Sum(
+                                    Filter(
+                                        collectProduction,
+                                        line in SCH_Line,
+                                        If(
+                                            o_shift.Selected.Value = "All",
+                                            shift = shift,
+                                            shift = o_shift.Selected.Value
+                                        )
+                                    ),
+                                    reject_pleats
+                                ),
+                            perpack:
+                                IfError(
+                                    Average(
+                                        Filter(
+                                            collectProduction,
+                                            line in SCH_Line,
+                                            If(
+                                                o_shift.Selected.Value = "All",
+                                                shift = shift,
+                                                shift = o_shift.Selected.Value
+                                            )
+                                        ),
+                                        pleats_per_pack
+                                    ),
+                                    ""
+                                )
+                        }
+                    )
+                );
+
+
+
+                /*Garbage Collecting*/
+                Set(varLoading,{Visible: true, Value: 95, Text: "Finishing Up"});
+
+
+                /*End*/
+                Set(varLoading,{Visible: true, Value: 100, Text: "Completed"});
+                Set(varLoading,{Visible: false, Value: -1, Text: "Not Loading"});
+              Text: ="update"
+              Visible: =false
+              Width: =10
+              X: =20
+              Y: =20
+        - o_logo:
+            Control: Image
+            Properties:
+              OnSelect: =Back()
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              ImagePosition: =ImagePosition.Stretch
+              LayoutMinHeight: =1
+              LayoutMinWidth: '=1   '
+              PaddingBottom: =1
+              PaddingTop: =1
+              Width: =Min(Parent.Width * 0.128, 170)
+        - o_title:
+            Control: Label
+            Properties:
+              Text: ="FE Durapore Daily Managmenet System"
+              Align: =Align.Center
+              Color: =varColor5
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 2
+        - o_o_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding/2
+              LayoutJustifyContent: =LayoutJustifyContent.End
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =o_logo.Width
+            Children:
+            - o_darkmode:
+                Control: Classic/Icon
+                Variant: HalfFilledCircle
+                Properties:
+                  OnSelect: |-
+                    =Set(varDarkMode, !varDarkMode);
+                    If(varDarkMode, 
+
+                        Set(varColor0, RGBA(235,235,235,1));
+                        Set(varColor1, Color.DimGray);       //Rich Purple
+                        Set(varColor2, Color.Gray);      //Rich Blue
+                        Set(varColor3, Color.SlateGray);      //Vibrant Cyan
+                        Set(varColor4, RGBA(205, 170, 135, 1));     //Sensitive Yellow
+                        Set(varColor5, Color.Black);
+                        Set(varColorAccent, RGBA(170, 125, 50, 1));,//Vibrant Yellow
+
+                        Set(varColor0, Color.Black);
+                        Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple
+                        Set(varColor2, RGBA(15, 105, 175, 1));      //Rich Blue
+                        Set(varColor3, RGBA(45, 190, 205, 1));      //Vibrant Cyan
+                        Set(varColor4, RGBA(255, 220, 185, 1));     //Sensitive Yellow
+                        Set(varColor5, Color.White);
+                        Set(varColorAccent, RGBA(255, 200, 50, 1)); //Vibrant Yellow
+
+                    );
+                  Color: =If(varDarkMode, Color.White, Color.Black)
+                  Icon: =Icon.HalfFilledCircle
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Rotation: =If(varDarkMode, 180, 0)
+                  Width: =Self.Height
+            - o_bugs:
+                Control: Image
+                Properties:
+                  Image: =gblAppIcons.Bug
+                  AlignInContainer: =AlignInContainer.Stretch
+                  HoverFill: =varColor4
+                  LayoutMinHeight: '=1   '
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
+            - o_user_img:
+                Control: Image
+                Properties:
+                  Image: |
+                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
+                  AlignInContainer: =AlignInContainer.Stretch
+                  LayoutMinHeight: '=1   '
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
+    - o_body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =15
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - o_nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =varColor3
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - o_n_title:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  FontColor: =varColor0
+                  Size: =Self.Height / 3
+                  Text: =App.ActiveScreen.Name
+                  VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  FillPortions: =1
+            - o_n_seperator:
+                Control: Rectangle
+                Properties:
+                  Height: =1
+                  LayoutMinWidth: =15
+                  Width: =Parent.Width * 0.95
+            - o_n_gallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =collectNavigation
+                  DelayItemLoading: =true
+                  FillPortions: =13
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LoadingSpinner: =LoadingSpinner.Data
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: =(Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount
+                Children:
+                - o_n_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.ScreenName);
+                      Text: =ThisItem.Title
+                      Color: =varColor0
+                      DisabledColor: =varColor0
+                      DisabledFill: =varColor4
+                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =varColorAccent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight - varPadding
+                      Size: =Self.Width / 16
+                      Width: =Parent.TemplateWidth - Self.BorderThickness
+                      X: =Center(Parent.TemplateWidth, Self.Width)
+                      Y: =Center(Parent.TemplateHeight, Self.Height)
+            - o_n_footer:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =2
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - o_n_f_text:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =8
+                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
+                      Height: =Parent.Height
+                      Width: =Parent.Width
+        - o_main:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =varColor5
+              FillPortions: =11
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - o_controls:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =varColor4
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =varPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
+                Children:
+                - o_start_date_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Starting Date"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - o_start_date:
+                    Control: DatePicker
+                    Properties:
+                      FontSize: =Self.Width / 10
+                      Format: ="Short"
+                      SelectedDate: =varNowDay
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - o_seperator_0:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - o_end_date_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Ending Date"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - o_end_date:
+                    Control: DatePicker
+                    Properties:
+                      FontSize: =Self.Width / 10
+                      Format: ="Short"
+                      SelectedDate: =varNowDay
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - o_seperator_1:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - o_button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Select(o_collect);
+                      Text: ="Update Date Range"
+                      Color: =varColor0
+                      Fill: =varColorAccent
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Width / 16
+                - o_seperator_2:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - o_shift_title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      Size: =Self.Height / 3
+                      Text: ="Shift"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - o_shift:
+                    Control: DropDown
+                    Variant: pcfdataset
+                    Properties:
+                      OnChange: =Select(o_update)
+                      Appearance: ='DropdownCanvas.Appearance'.FilledDarker
+                      DefaultSelectedItems: |-
+                        ={Value: "All"}
+                      FontSize: =Self.Width / 10
+                      Items: =["All", "C", "A", "B"]
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - o_seperator_3:
+                    Control: Rectangle
+                    Properties:
+                      Height: =1
+                      LayoutMinWidth: =10
+                - o_c_footer:
+                    Control: GroupContainer
+                    Variant: manualLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      FillPortions: =10
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+            - o_section:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =9
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =varPadding
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - o_outputs:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =varColor0
+                      BorderThickness: =If(varDarkMode, 1,0)
+                      DropShadow: =DropShadow.Semilight
+                      FillPortions: =0
+                      Height: =500
+                      LayoutAlignItems: =LayoutAlignItems.Center
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      PaddingBottom: =
+                      Width: =Parent.Width/2
+                    Children:
+                    - o_o_header:
+                        Control: GroupContainer
+                        Variant: manualLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.None
+                          Fill: =varColor2
+                          FillPortions: =0.5
+                          LayoutMinHeight: =1
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width
+                        Children:
+                        - o_o_h_title:
+                            Control: Label
+                            Properties:
+                              Text: ="Outputs"
+                              Align: =Align.Center
+                              Color: =varColor5
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              Size: =Self.Height / 2
+                              Width: =Parent.Width
+                    - o_o_columns:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Fill: =varColor4
+                          FillPortions: =0.5
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                        Children:
+                        - o_o_c_line:
+                            Control: Label
+                            Properties:
+                              Text: ="Line"
+                              Align: =Align.Center
+                              Color: =varColor0
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Width / 18
+                              Width: =Parent.Width / 2
+                        - o_o_c_outputs:
+                            Control: Label
+                            Properties:
+                              Text: ="Total Pack Output"
+                              Align: =Align.Center
+                              Color: =varColor0
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Width / 18
+                              Width: =Parent.Width / 2
+                              X: =o_o_c_line.X + o_o_c_line.Width
+                        - o_o_c_reject:
+                            Control: Label
+                            Properties:
+                              Text: ="Reject Packs"
+                              Align: =Align.Center
+                              Color: =varColor0
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Width / 18
+                              Width: =Parent.Width / 2
+                              X: =o_o_c_line.X + o_o_c_line.Width
+                    - o_o_gallery:
+                        Control: Gallery
+                        Variant: galleryVertical
+                        Properties:
+                          Items: =collectLocalOutputData
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DelayItemLoading: =true
+                          FillPortions: =6.5
+                          Layout: =Layout.Vertical
+                          LayoutMinHeight: =1
+                          LoadingSpinner: =LoadingSpinner.Data
+                          TemplatePadding: =0
+                          TemplateSize: =Self.Height / 11
+                          Width: =Parent.Width
+                        Children:
+                        - o_o_g_columns:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Fill: =RGBA(0,0,0,0)
+                              Height: =Parent.TemplateHeight
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.TemplateWidth
+                            Children:
+                            - o_o_g_line:
+                                Control: Label
+                                Properties:
+                                  Text: =ThisItem.line
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =10
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Width / 16
+                                  Width: =10
+                            - o_o_g_outputs:
+                                Control: Label
+                                Properties:
+                                  Text: =ThisItem.total*1
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =10
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Width / 16
+                                  Width: =10
+                                  X: =o_o_g_line.X + o_o_g_line.Width
+                            - o_o_g_pleats:
+                                Control: Label
+                                Properties:
+                                  Text: =IfError(Round(ThisItem.pleats/ThisItem.perpack,0),0)
+                                  Align: =Align.Center
+                                  Color: =varColor0
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =10
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Width / 16
+                                  Width: =10
+                                  X: =o_o_g_line.X + o_o_g_line.Width
+                        - o_o_g_seperator:
+                            Control: Rectangle
+                            Properties:
+                              OnSelect: =Select(Parent)
+                              Fill: =varColor1
+                              Height: =Parent.TemplateHeight * 0.025
+                              Width: =Parent.Width
+                              Y: =Parent.TemplateHeight - Self.Height
+                    - o_o_copy:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: |-
+                            =IfError(  
+                                Copy(
+                                    Concat(
+                                        collectLocalOutputData,
+                                        If(IsBlankOrError(total), 0, total),
+                                        Char(9)
+                                    )
+                                ),
+                                /*New bug with teams, cannot copy so show error*/
+                                Notify("Cannot copy data from new Teams, or other embeded tools. Please open this app in a web browser.", NotificationType.Error)
+                            );
+                          Text: ="Copy Outputs"
+                          Color: =varColor0
+                          Fill: =varColorAccent
+                          FillPortions: =0.5
+                          Font: =Font.Verdana
+                          HoverColor: =varColor5
+                          LayoutMinHeight: =1
+                          Size: =Self.Width / 20
+                          Width: =Parent.Width * 0.50
