@@ -128,3 +128,7 @@ Power Bi models need to have dashboards
 (4276.09)/6
 
 712.6816 ft
+
+# Stable PowerApp Versions
+
+Encap Production = 1303

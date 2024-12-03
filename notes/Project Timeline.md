@@ -1,3 +1,78 @@
+# Aggressively Realistic Timeline
+## High Level
+| Process            | Status            | Target Date       | Completion Date   |
+| ------------------ |:-----------------:|------------------:| ----------------- |
+| Custom Data Retrieval  | Final Testing | 01 DEC 2024 | --- |
+| PowerApp Initial Build | WIP | 31 DEC 2024 | --- |
+| Backup Deliverables - Manual Method | Alpha | 31 JAN 2025 | --- |
+| Databases Fully Established | WIP | 14 FEB 2025 | --- |
+| Service Computer Setup | On Hold | 24 FEB 2025 | --- |
+| OEE Algorithms Completed | Focus | 03 MAR 2025 | --- |
+| PowerApp Launch | --- | 31 MAR 2025 | --- |
+
+## Low Level
+| Focus | Process            | Status            | Target Date       | Notes             |
+| ----- | ------------------ |:-----------------:|------------------:| ----------------- |
+| ----- | PowerApp for Production | Cancelled | --- | Time loss |
+| ----- | New FE Reject Database | Cancelled | --- | Time loss |
+| ----- | Initial Database Setup | Cancelled | --- | Time loss |
+| ----- | Custom CSV Loader Program - Flet | Completed | 25 OCT 2024 | --- |
+| +++++ | Custom CSV Loader Program - CLI | Refactoring | 25 OCT 2024 | --- |
+| +++++ | Access DB connection to PowerApp Established | Completed | 15 NOV 2024 | --- |
+| ----- | Complete Constraint Data | WIP | 17 JAN 2025 | --- |
+| ----- | Backup Deliverable - Production | Alpha | 31 JAN 2025 | Time loss |
+| ----- | Backup Deliverable - Management | Alpha | 31 JAN 2025 | Time loss |
+| +++++ | Data Connections Established - Initial | WIP | 31 JAN 2025 | --- |
+| ----- | PowerApp for Management - Initial Build | Alpha | 14 FEB 2025 | --- |
+| ----- | Power Bi connection to PowerApp Established | Cancelled | 21 FEB 2025 | --- |
+| +++++ | Service PC Setup | On Hold | 24 FEB 2025 | --- |
+| +++++ | Data Connections Established - Final | --- | 24 FEB 2025 | --- |
+| ----- | OEE Algorithms Completed | On Hold | 03 MAR 2025 | --- |
+| ----- | PowerApp for Management - Alpha | --- | 10 MAR 2025 | Bug Fixes |
+| ----- | PowerApp for Management - Beta | --- | 17 MAR 2025 | Bug Fixes |
+| ----- | PowerApp for Management - Launch | --- | 31 MAR 2025 | Projected Launch Day |
+
+
+*Subject to changes*
+
+## Current Challenges
+
+- Time loss due to scope change
+    - Previously acquired assets from the Encapsulation Application are non-transferrable. (Old app templates, database structure)
+    - Formula and Algorithm scope has changed, more complex, non-transferrable
+    - New knowledge of processes, programs and data transfer are required before actionable progress can be made. 
+    - The new work constraints have created a large change of scope for the project.
+    - These new project constraints include:
+        - No new inputs for Operators
+        - Working with legacy data sources, Access, CSV files
+        - Legacy data structures cannot be altered, only hooked into
+        - Large databases inhibit automatic information transfer and manipulation
+    - Most Useability functions to be scrapped and focus turned to OEE2.
+
+- Missing Lot Information for downtime collection
+    - Downtime tracking will not be as robust as the Encapsulation version.
+    - A simple graphing version can still be made for downtime reasons, but only the built in reasons from the CSV and not the updated LSPS downtime codes
+    - OEE2 Calculations will be simplified, robust data filtering cannot be achieved
+
+- Planned Runtime cannot be captured with this initial version
+    - Runtime must be simplified to true/false system.
+        - If a pleater runs, assume 8 hour runtime, if not assume no runtime.
+    - A new system will need to be created to track proper runtime for a v2
+
+- Constraint data not complete, pleater speed per catalog per line cannot be captured.
+    - Pleater speeds constraints will be adjusted to averages for v1
+        - 120ppm for Express/HighSpeed
+        - 60ppm for Main/Opti
+    - OEE2 will not accurately reflect data from all lines and catalogs.
+        - Excludes High Area and Aervent
+
+- Input pleater data not poka-yoke'd,
+    - Output data from the roll data access database is problematic.
+    - Data is not validated on entry, and is creating a problem with capturing reliable output data.
+
+- Backup Deliverable
+    - To mitigate a total failure of this semi-automatic intermediate project using existing data systems, a backup deliverable is being programmed in tandem with this project to handle all required data entries that are required to compile a complete oee2 system.
+
 # A possible future of data Analysis
 
 ## The Now
@@ -36,90 +111,3 @@ Usage of all known and newly experimental methods of data analysis and managemen
     > ![Alt Text](ScheduleProto.PNG)
     - We could instead clean and refactor our Oracle system to unify these tools instead.
 - Temporarily discontinue and discourage relying on satellite systems that do not adhere to these new standards.
-
-# Aggressively Realistic Timeline
-## High Level
-| Process            | Status            | Target Date       | Completion Date   |
-| ------------------ |:-----------------:|------------------:| ----------------- |
-| Custom Data Retrieval  | Final Testing | 01 DEC 2024 | --- |
-| PowerApp Initial Build | WIP | 31 DEC 2024 | --- |
-| Backup Deliverables - Manual Method | Alpha | 31 JAN 2025 | --- |
-| Databases Fully Established | WIP | 14 FEB 2025 | --- |
-| Service Computer Setup | On Hold | 24 FEB 2025 | --- |
-| OEE Algorithms Completed | Focus | 03 MAR 2025 | --- |
-| PowerApp Launch | --- | 31 MAR 2025 | --- |
-
-## Low Level
-| Process            | Status            | Target Date       | Challenges        |
-| ------------------ |:-----------------:|------------------:| ----------------- |
-| PowerApp for Production | Cancelled | --- | Time loss |
-| New FE Reject Database | Cancelled | --- | Time loss |
-| Initial Database Setup | Cancelled | --- | Time loss |
-| Custom CSV Loader Program - Flet | Completed | 25 OCT 2024 | downtime data collection broken 02-Nov |
-| Custom CSV Loader Program - CLI | Completed | 25 OCT 2024 | downtime data collection broken 02-Nov |
-| Access DB connection to PowerApp Established | Completed | 15 NOV 2024 | --- |
-| Complete Constraint Data | On Hold | 17 JAN 2025 | --- |
-| Backup Deliverable - Production | Alpha | 31 JAN 2025 | Time loss |
-| Backup Deliverable - Management | Alpha | 31 JAN 2025 | Time loss |
-| Data Connections Established - Initial | On Hold | 31 JAN 2025 | --- |
-| PowerApp for Management - Initial Build | WIP | 14 FEB 2025 | --- |
-| Power Bi connection to PowerApp Established | Cancelled | 21 FEB 2025 | --- |
-| Service PC Setup | On Hold | 24 FEB 2025 | --- |
-| Data Connections Established - Final | --- | 24 FEB 2025 | --- |
-| OEE Algorithms Completed | WIP | 03 MAR 2025 | --- |
-| PowerApp for Management - Alpha | --- | 10 MAR 2025 | Bug Fixes |
-| PowerApp for Management - Beta | --- | 17 MAR 2025 | Bug Fixes |
-| PowerApp for Management - Launch | --- | 31 MAR 2025 | Projected Launch Day |
-
-
-*Subject to changes*
-
-## Current Challenges
-
-- Bubble trap is going forward with myself as acting operator. Time Loss.
-    - Turns out it was only a single lot of 30 pieces, was only away for about 4~5 hours total.
-    - Possibility of a second lot later to build the large BT
-
-- Encapsulation Applications are starting to need maintenance. Some mornings I am required to stop work on FE to fix complications with the degrading stability of the old applications. Updates and code refinements will be needed soon. This also means that because i'm reusing the same old codebase to complete this project, the applications i'm making for FE will need to go through the same updates and corrections.
-
-- Time loss due to scope change
-    - The first three weeks of work on the project were essentially scrapped as new information made all previous work obsolete.
-
-- Time loss due to SADM account problems with the new Passkey system.
-    - Needed to wait  2 days to compile the CSV transfer tool.
-
-- Time extension due to scope change
-    - Previously acquired assets from the Encapsulation Application are non-transferrable. (Old app templates, database structure)
-    - Formula and Algorithm scope has changed, more complex, non-transferrable
-    - New knowledge of processes, programs and data transfer are required before actionable progress can be made. 
-    - The new work constraints have created a large change of scope for the project.
-
-- These new project constraints include:
-    - No new inputs for Operators
-    - Working with legacy data sources, Access, CSV files
-    - Legacy data structures cannot be altered, only hooked into
-    - Large databases inhibit automatic information transfer and manipulation
-
-Currently, because of the state of the data collection of downtime and line data The Front End DMS Management Suite will not have the same
-functionality or useability as the Encapsulation version of the PowerApp. Most of the usability is being stripped, and will only focus on OEE collection.
-
-- Missing Lot Information for downtime collection
-    - Downtime tracking will not be as robust as the Encapsulation version.
-    - A simple graphing version can still be made for downtime reasons, but only the built in reasons from the CSV and not the updated LSPS downtime codes
-    - OEE2 Calculations will be simplified, robust data filtering cannot be achieved
-    - A new system will need to be created to track Planned Runtime
-        - Extracting the planned runtime cannot be achieved in the same way its calculated with the Encapsulation version
-
-- Constraint data not complete
-    - Data pulled from databases cannot be parsed though OEE algorithm without constraint data.
-    - OEE2 will not accurately reflect data from all lines and catalogs.
-    - OEE2 data is not complete or accurate because of the lapse of this data.
-
-- Input pleater data not poke`okd/validated/consistent,
-    - Creating output data from the roll data access database is problematic.
-    - Data is not validated on entry, and is creating a problem with capturing reliable output data.
-
-- Backup Deliverable
-    - Current access and csv databases and the bridge solutions are too incomplete and unpredictable to affirm completion of a semi-automatic DMS system
-    - Creating a backup deliverable with Manual Inputs and Sharepoint Databases
-    - Time Loss
