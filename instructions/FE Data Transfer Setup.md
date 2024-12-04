@@ -3,9 +3,9 @@ These are the instructions on how to setup the transfer of data from the Front E
 
 ## Setting Up the Transfer Database
 
-1. Create a new Access Database in a service account cloud location, name it something appropriate
-2. Setup a linked table to the 'Roll Data' table from 'Data.aacdb' in the r:\ drive
-3. Setup a query called 'Create_Table' with the following SQL code:
+1. Create a new Access Database File. This will be used as a bridge/hook for the 'Data.accdb'.
+2. Setup a linked table to the 'Roll Data' table from 'Data.aacdb' in the 'r:\' drive.
+3. Setup a query called 'Table_Setup' with the following SQL code:
 
 ``` SQL
 SELECT 
@@ -55,6 +55,19 @@ FROM
 WHERE
     [Roll Data].[Date] = #01/01/1111#;
 ```
+
+> I don't actually know SQL all that well, and ChatGPT came in clutch here, because of that all my SQL scripts can most likely be improved.
+
+> This creates a new table with all the properties from the 'Data.accdb' and adds a few features needed for the SharePoint List connection. It makes this table's new record IDs connect with the 'Data.accdb' IDs without actually making it a relational database. It makes the old IDs accessible with the lists if need be. It also combines all the reject pleat records into a total (for now I don't need each individual datapoint).
+>
+> Within this:
+>
+> ```SQL
+> WHERE
+>     [Roll Data].[Date] = #01/01/1111#;
+> ```
+>
+> I just try and make sure I don't pull any information into this table by making the date way out of scope.
 
 4. Create a new query called 'Append_Data' with the following SQL code:
 
@@ -123,10 +136,14 @@ WHERE
         SELECT [Old_Id] FROM Roll_Data_Filtered_SPL WHERE [Old_Id] IS NOT NULL
     );
 ```
+> When this query runs, it will pull new data into the table, making sure not to pull in duplicates.
+
 5. Create a new macro called 'AutoAppendMacro' Set it up as shown below:
     - You may need to select Show All Actions in the macro editor.
 
     ![](./assets/AutoAppendMacro.PNG)
+
+> You know we're on the bleeding edge where 75% of this macro has the "Unsafe Action" warning.
 
 6. Run the 'Create_Table' query.
     - This initializes the table we need to export to SharePoint
@@ -155,10 +172,13 @@ Congratulations! The new Access File is setup to run.
 Now that the Access Database is created. It will pull new data from the 'Roll Data' Database, but will only work when running the 'Append_Data' Query or 'AutoAppendData' Macro. We want to change this functionality to be automatic. And the most straight forward way to do this is to create a Windows Task that runs a batch file that will Open Access, run the macro, and close access every hour.
 
 1. Create a batch file named RunAutoAppend.bat and enter these commands:
-    - The first command may be the same, but the second will need to be changed to where you store the new Access file. The one I used was called 'Test', and was stored within my OneDrive folder.
+    - "C:\Program Files\Microsoft Office\root\Office16\MSACCESS.EXE"
+    - "C:\dev\PowerApps\FrontEnd\Roll_Data_Transfer.accdb"
+        - The first command may be the same, but the second will need to the path of the new Access file.
+    - /x AutoAppendMacro
 
 ``` PowerShell
-"C:\Program Files\Microsoft Office\root\Office16\MSACCESS.EXE" "C:\Users\M268816\OneDrive - MerckGroup\Special Projects\PowerApps\Front End\Test.accdb" /x AutoAppendMacro
+"C:\Program Files\Microsoft Office\root\Office16\MSACCESS.EXE" "C:\dev\PowerApps\FrontEnd\Roll_Data_Transfer.accdb" /x AutoAppendMacro
 ```
 
 2. Create the Windows Task
@@ -191,7 +211,7 @@ Now that the Access Database is created. It will pull new data from the 'Roll Da
 >
 >(https://support.microsoft.com/en-us/office/enable-or-disable-macros-in-microsoft-365-files-12b036fd-d140-4e74-b45e-16fed1a7e5c6?ns=msaccess&version=90&syslcid=1033&uilcid=1033&appver=zac900&helpid=62817&ui=en-us&rs=en-us&ad=us)
 
-# Downtime Data Transfer
+# Downtime Data Transfer - INCOMPLETE - NEEDS PROPER UPDATE
 The downtime data must be transferred from CSV files located on the r:\ drive to a SharePoint List to use with Power Apps. This can be done through transferring a filtered and cleaned version of the CSV though a Power Automate Flow to the SharePoint List. These are the instructions on how to setup the data transfer.
 
 1. Setup a folder for this data transfer in a cloud location with a service account.

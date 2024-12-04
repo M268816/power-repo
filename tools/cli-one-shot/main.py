@@ -1,62 +1,56 @@
-from datetime import datetime, timedelta, date
-from datetime import time as dt_time
-import msvcrt
+from datetime import datetime, timedelta, date, timezone, time
+from sys import exit
+
 import os
 import pandas as pd
-from sys import exit
-import time
-import threading
-from tqdm import tqdm
 
-UPDATE_TIME = 3600 # One Hour = 3600 seconds.
 
-def clear_terminal():
-    return os.system('cls' if os.name == 'nt' else 'clear')
+SERVICE_START = datetime.strftime(datetime.now(), '%d-%m-%Y, %H:%M:%S')
+
+try:
+    ERROR_LOG = open('./error_log.txt', 'at')
+except Exception as e:
+    print(str(e))
+
+try:
+    RUN_LOG = open('./run_log.txt', 'at')
+    RUN_LOG.write(f'\n[ NEW OPERATION ] Operation Started at: {SERVICE_START}.\n')
+except Exception as e:
+    ERROR_LOG.write(f'[ERROR] Could not open or write the run_log.txt file.\n')
+    ERROR_LOG.write(str(e)+'\n')
+    exit()
 
 try:
     FILES = pd.read_csv('./file_locations.csv')
-except Exception as FILES_e:
-    print(str(FILES_e) +
-'''
-Could not find file_locations.csv.
-Please create a csv of file locations to load into the program.
-
-Note: the last location must be a folder location for the output file.
-
-Press Any Key to Exit. '''
-    )
-    msvcrt.getch()
+except Exception as e:
+    ERROR_LOG.write(f'[ERROR] Could not read the file_locations.csv file.\n')
+    ERROR_LOG.write(str(e) + '\n')
     exit()
+
+def clear_terminal():
+    return os.system('cls' if os.name == 'nt' else 'clear')
     
 # CLI
 def main():
     clear_terminal()
-    # Init Variables
-    exit_flag = False
-    date_filter = pd.to_datetime(datetime.combine(date=date.today(),time=dt_time(0))) - timedelta(hours=1)
-
-    input_files = FILES['Location'][:-1].tolist()
     
+    # Init Variables
+    date_filter = pd.to_datetime(datetime.combine(date=date.today(),time=time(0))) - timedelta(hours=1)
+    input_files = FILES['Location'][:-1].tolist()
     output_folder = FILES['Location'].iloc[-1]
     
     # Init date for data filter
     def update_date_filter():
         nonlocal date_filter
-        d = datetime.combine(date=date.today(),time=dt_time(0))
+        d = datetime.combine(date=date.today(),time=time(0))
         d = d - timedelta(hours=1)
         date_filter = pd.to_datetime(d)
         # date_filter = pd.to_datetime('2024-10-01 00:00:00') # test date
-    
-    def find_sleep_time():
-        start_time = datetime.now()
-        end_time = (start_time + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
-        sleep_time = (end_time-start_time).total_seconds()
-        return int(sleep_time if start_time.minute != 0 else 3600)
       
     def validity_check():
         data_frames = []
         print()
-        for i in tqdm(input_files, desc='Validity Check', dynamic_ncols=False, ncols=75):
+        for i in input_files:
             temp_read = pd.read_csv(i,
                 dtype={
                     'ID': str,
@@ -102,7 +96,7 @@ def main():
         try:
             file[' DateTime'] = pd.to_datetime(file[' DateTime'])
         except Exception as e:
-            print(str(e) + 'INVALID DATE FOUND') # Convert DateTime column to iso datetime format
+            ERROR_LOG.write(str(e) + 'INVALID DATE FOUND\n') # Convert DateTime column to iso datetime format
         
         return file
     
@@ -115,7 +109,7 @@ def main():
             filtered_file = sum_short_stops(filtered_file) # Combine 'Short Stop' records
             filtered_file = sum_not_entered(filtered_file) # Combine 'Not Entered' and Blank records
         except Exception as e:
-            print(str(e) + ' INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED')
+            ERROR_LOG.write(str(e) + ' INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED\n')
         
         return filtered_file
     
@@ -144,6 +138,7 @@ def main():
     
     def sum_not_entered(file):
         print('Combining Not Entered Records')
+        
         not_entered = file.copy()
         not_entered[' Downtime Minutes'] = pd.to_numeric(not_entered[' Downtime Minutes'], errors='coerce')
         
@@ -156,6 +151,7 @@ def main():
         
         not_entered = not_entered.groupby([' DateTime', 'Pleater', ' Shift'])[' Downtime Minutes'].sum()
         not_entered = not_entered.reset_index()
+        
         not_entered['ID'] = 0
         not_entered[' Downtime Reason'] = 'Not Entered'
         not_entered[' Comments'] = 'MERGED RECORDS'
@@ -177,6 +173,7 @@ def main():
     
     def duplicate_check(file):
         print('Dropping possible duplicates')
+        
         filtered_file = file.drop_duplicates(subset=['ID', ' Shift', 'Pleater'])
 
         return filtered_file
@@ -185,7 +182,8 @@ def main():
 
         update_date_filter()
 
-        execute_time_start = time.time() # Start recording execution time
+        # execute_time_start = time.time() # Start recording execution time
+        execute_time_start = datetime.now(timezone.utc)
         csv_file = validity_check() # Correct invalid records
         csv_file = duplicate_check(csv_file)
         csv_file = filter_by_date(csv_file)
@@ -194,47 +192,39 @@ def main():
         try:
             csv_file.to_csv(output_folder + '\\! - output.csv', index=False) # Return the filtered file content
         except Exception as e:
-            print(str(e) + 'File could not be written! Process Aborted. Is the output file opened?')
+            ERROR_LOG.write(str(e) + 'File could not be written! Process Aborted. Is the output file opened?')
         
         # Capture execution time
-        execute_time_end = time.time()
-        execute_time = int((execute_time_end - execute_time_start)*1000)
-        print()
+        # execute_time_end = time.time()
+        execute_time_end = datetime.now(timezone.utc)
+        # execute_time = int((execute_time_end - execute_time_start)*1000)
+        execute_time = execute_time_end - execute_time_start
+        execute_time = round(execute_time.total_seconds()*1000,0)
+        RUN_LOG.write(f'CSV File Processed in {execute_time}ms.\n')
         print(f'CSV File Processed in {execute_time}ms')
-            
-    def close_service_listener():
-        nonlocal exit_flag
-        msvcrt.getch()
-        exit_flag = True
     
     def main_service():
-        nonlocal exit_flag
         
         if len(input_files) == 0:
-            print('No file(s) selected, service not started, import from file_locations.csv. Press any key to exit.')
-            msvcrt.getch()
-            # service_running = False
+            RUN_LOG.write('No file(s) selected, service not started, import from file_locations.csv.\n')
             return
-        
-        listener = threading.Thread(target=close_service_listener, daemon=True)
-        listener.start()
-        
-        bar_format = '{desc}: {remaining}'
 
-        while not exit_flag:
-            clear_terminal()
-            print(f'[{datetime.now()}] Processing Files:')
-            for i in input_files:
-                print(i)
-            process_file()
-            print(f'CSV Saved into: {output_folder}')
-            print('You may press any key to exit this service.')
-            sleep_time = find_sleep_time()
-            for _ in tqdm(range(sleep_time), desc='Next execution in', dynamic_ncols=True, bar_format=bar_format):
-                if exit_flag:
-                    break
-                time.sleep(1)
-        print('Service stopped by user.')
+        clear_terminal()
+        
+        print(f'[{datetime.now()}] Processing Files:')
+        
+        for i in input_files:
+            print(i)
+        process_file()
+        
+        print(f'CSV Saved into: {output_folder}')
+
+        SERVICE_STOP = datetime.strftime(datetime.now(), '%d-%m-%Y, %H:%M:%S')
+        RUN_LOG.write(f'CSV Saved into: {output_folder}\n')
+        RUN_LOG.write(f'Service Ended: {SERVICE_STOP}\n')
+        RUN_LOG.close()
+        ERROR_LOG.close()
+
     main_service()
     
 

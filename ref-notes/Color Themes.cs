@@ -35,6 +35,28 @@
     #6052A5                 //ultra violet
     #503291                 //tekhelet
 
+    //Dark Mode?
+    //Light
+    #000000 Black
+    #FFFFFF White
+    #503291 Primary Purple
+    #739132 Primary Green Complementary
+    #0F69AF Secondary Blue
+    #AF540F Secondary Orange Complementary
+    #149B5F Accept Green
+    #E61E50 Deny Red
+    #FFC832 Accent Yellow
+    
+    //Dark
+    #121212 Black
+    #FFFFFF White
+    #373737 Primary Gray
+    #B5C97B Primary Green Complementary
+    #717171 Secondary Gray
+    #ed771b Secondary Orange Complementary
+    #98d3b2 Accept Green
+    #fabac9 Deny Red
+    #fff8e2 Accent Yellow
 
 */
 
@@ -197,3 +219,46 @@ If(
 );
 
 Set(varColorTheme, Self.SelectedText.Value);
+
+
+// NEWEST Light/Dark Theme
+Set(gThemeMode, 
+    {
+        Light:
+        {
+            Mode: "Light",
+            Text_Dark: ColorValue("#000000"),
+            Text_Light: ColorValue("#FFFFFF"),
+            Text_Header: ColorValue("#FFFFFF"),
+            Text_Accent: ColorValue("#000000"),
+            Background_0: ColorValue("#FFFFFF"),
+            Background_1: ColorValue("#EEEEEE"),
+            Primary: ColorValue("#503291"),
+            Pri_Complement: ColorValue("#2DBECD"),
+            Secondary: ColorValue("#0f69af"),
+            Sec_Complement: ColorValue("#AD540F"),
+            Accept: ColorValue("#149B5f"),
+            Deny: ColorValue("#e61e50"),
+            Accent: ColorValue("#FFC832")
+        },
+        Dark:
+        {
+            Mode: "Dark",
+            Text_Dark: ColorValue("#FFFFFF"),
+            Text_Light: ColorValue("#000000"),
+            Text_Header: ColorValue("#FFFFFF"),
+            Text_Accent: ColorValue("#000000"),
+            Background_0: ColorValue("#121212"),
+            Background_1: ColorValue("#232323"),
+            Primary: ColorValue("#373737"),
+            Pri_Complement: ColorValue("#444444"),
+            Secondary: ColorValue("#717171"),
+            Sec_Complement: ColorValue("#af9ecf"),
+            Accept: ColorValue("#98d3b2"),
+            Deny: ColorValue("#f68da5"),
+            Accent: ColorValue("#ffdf85")
+        }
+    }
+);
+
+Set(gTheme, gThemeMode.Light);
