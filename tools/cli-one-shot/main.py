@@ -42,7 +42,7 @@ def main():
       
     def clean_csvs():
         data_frames = []
-        print()
+        print('Reading Files, Please Wait...')
         for i in input_files:
             temp_read = pd.read_csv(i,
                 dtype={

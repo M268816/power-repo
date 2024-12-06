@@ -1,0 +1,1 @@
+pyinstaller .\main.py --name cli-one-shot --onefile --console --clean
