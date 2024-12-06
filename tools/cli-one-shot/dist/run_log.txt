@@ -3,3 +3,18 @@
 CSV Files Processed in 5708.0ms.
 CSV Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
 Service Ended: 06-12-2024, 10:04:05
+
+[ NEW OPERATION ] Operation Started at: 06-12-2024, 10:57:39.
+CSV Files Processed in 3608.0ms.
+CSV Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
+Service Ended: 06-12-2024, 10:57:43
+
+[ NEW OPERATION ] Operation Started at: 06-12-2024, 11:00:00.
+CSV Files Processed in 5631.0ms.
+CSV Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
+Service Ended: 06-12-2024, 11:00:06
+
+[ NEW OPERATION ] Operation Started at: 06-12-2024, 11:14:34.
+CSV Files Processed in 7207.0ms.
+CSV Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
+Service Ended: 06-12-2024, 11:14:41

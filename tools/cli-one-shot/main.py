@@ -1,26 +1,51 @@
 from datetime import datetime, timedelta, date, timezone, time
-from sys import exit
 
+import msvcrt
 import os
 import pandas as pd
 
 # Collects timestamp of the start of the process.
 SERVICE_START = datetime.strftime(datetime.now(), '%d-%m-%Y, %H:%M:%S')
 
+ERROR_PATH = '.\\error_log.txt'
+RUN_PATH = '.\\run_log.txt'
+
 # Try: Open or create the error log.
 try:
-    ERROR_LOG = open('./error_log.txt', 'at')
+    ERROR_LOG = open(ERROR_PATH, 'at')
 except Exception as e:
+    print('[ERROR] Could not open or write the error_log.txt file.')
     print(str(e))
+
+# Ensure file permissions for the Error Log
+try:
+    if os.path.exists(ERROR_PATH):
+        os.chmod(ERROR_PATH, 0o666)
+        print('File permissions modified')
+    else:
+        print('Error file path not found:', ERROR_PATH)
+except PermissionError:
+    print('Permissions denied: You don\'t have the necessary permissions to change the permissions of the error file.')
+    msvcrt.getch()
 
 # Try: Open or create the run log. Write the start time.
 try:
-    RUN_LOG = open('./run_log.txt', 'at')
+    RUN_LOG = open(RUN_PATH, 'at')
     RUN_LOG.write(f'\n[ NEW OPERATION ] Operation Started at: {SERVICE_START}.\n')
 except Exception as e:
     ERROR_LOG.write(f'[ERROR] Could not open or write the run_log.txt file.\n')
     ERROR_LOG.write(str(e)+'\n')
-    exit()
+
+# Ensure file permissions for the Run Log
+try:
+    if os.path.exists(RUN_PATH):
+        os.chmod(RUN_PATH, 0o666)
+        print('File permissions modified')
+    else:
+        print('Log file path not found:', RUN_PATH)
+except PermissionError:
+    print('Permissions denied: You don\'t have the necessary permissions to change the permissions of the log file.')
+    msvcrt.getch()
 
 # Try: Read the csv file paths located from file_locations.csv
 try:
@@ -28,10 +53,7 @@ try:
 except Exception as e:
     ERROR_LOG.write(f'[ERROR] Could not read the file_locations.csv file.\n')
     ERROR_LOG.write(str(e) + '\n')
-    exit()
-
-def clear_terminal():
-    return os.system('cls' if os.name == 'nt' else 'clear')
+    msvcrt.getch()
     
 def main():    
     # Init Variables
@@ -190,9 +212,7 @@ def main():
         if len(input_files) == 0:
             RUN_LOG.write('No file(s) selected, service not started, import from file_locations.csv.\n')
             return
-
-        clear_terminal()
-        
+                
         print(f'[{datetime.now()}] Processing Files:')
         for i in input_files:
             print(i)
