@@ -111,7 +111,7 @@ def main():
         short_stops = short_stops[['ID', ' DateTime', ' Shift', ' Downtime Minutes', ' Downtime Reason', ' Comments', 'Pleater']]
 
         # Reformat csv file
-        summed_file = summed_file[summed_file[' Downtime Reason'] != 'Short Stop']
+        summed_file = input_file[input_file[' Downtime Reason'] != 'Short Stop']
         summed_file = pd.concat([summed_file, short_stops], ignore_index=True)
         summed_file[' DateTime'] = pd.to_datetime(summed_file[' DateTime'])
         
@@ -135,11 +135,11 @@ def main():
         not_entered = not_entered[['ID', ' DateTime', ' Shift', ' Downtime Minutes', ' Downtime Reason', ' Comments', 'Pleater']]
 
         # Reformat csv file
-        summed_file = summed_file[
+        summed_file = input_file[
             ~(
-                (summed_file[' Downtime Reason'] == 'Not Entered') |
-                (summed_file[' Downtime Reason'] == '') |
-                (summed_file[' Downtime Reason'].isnull())
+                (input_file[' Downtime Reason'] == 'Not Entered') |
+                (input_file[' Downtime Reason'] == '') |
+                (input_file[' Downtime Reason'].isnull())
             )
         ]
         summed_file = pd.concat([summed_file, not_entered], ignore_index=True)

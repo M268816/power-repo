@@ -1,0 +1,1 @@
+cannot access local variable 'summed_file' where it is not associated with a value INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED
