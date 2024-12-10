@@ -4,9 +4,7 @@ import msvcrt
 import os
 import pandas as pd
 
-# Collects timestamp of the start of the process.
 SERVICE_START = datetime.strftime(datetime.now(), '%d-%m-%Y, %H:%M:%S')
-
 ERROR_PATH = '.\\error_log.txt'
 RUN_PATH = '.\\run_log.txt'
 

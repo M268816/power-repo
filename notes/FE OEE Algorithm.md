@@ -70,7 +70,9 @@ If I filter the production data to display 6-Nov, only EF Line, the above will r
 
 The next step in the algorithm then takes this information and combines it into a single line and adds a total runtime datapoint as well.
 
-The downside of this algorithm starts here. It is not yet possible to collect specific runtimes for each pleat_per_pack datapoint. This means I cannot iterate over each pleat_per_pack/uptime relationship and construct an accurate account of how many packs should have been built in this time, stored in planned_packs. Instead I average the pack_per_hour data and relate it to 48 hours of runtime for the line. I chose to use 24 hours per lane here because in the future I suspect we may try and change downtime collection to represent each lane of a line to increase the accuracy of its collection.
+The downside of this algorithm starts here. It is not yet possible to collect specific runtimes for each pleat_per_pack datapoint. This means I cannot iterate over each pleat_per_pack/uptime relationship and construct an accurate account of how many packs should have been built in this time, stored in planned_packs. Instead I average the pack_per_hour data and relate it to 48 hours of runtime for the line. I then subtract any downtime that we consider a planned downtime code.
+
+> I chose to use 24 hours per lane here because in the future I suspect we may try and change downtime collection to represent each lane of a line to increase the accuracy of its collection.
 
 ```cpp
 Clear(collectOEE2);
@@ -89,7 +91,14 @@ ForAll( // Lines
                     line: thisLine,
                     pack_per_hour: Round(Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour),4), 
                     total_runtime: 48 * count_of_days, // This is a substitution for planned runtime
-                    planned_packs: Round(Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour) * 48 * count_of_days,4),
+                    total_downtime: Round(Sum(Filter(locDownFilter, thisLine in line, reason in collectPlannedReasons),total)/60,4),
+                    planned_packs:
+                        Round(
+                            Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour)
+                            * (48 - Round(Sum(Filter(locDownFilter, thisLine in line, reason in collectPlannedReasons),total)/60,4))
+                            * count_of_days,
+                            4
+                        ),
                     total_packs: 0,
                     OEE2: 0
                 }
@@ -106,7 +115,7 @@ This is returned into the collectOEE data structure. It created unpopulated colu
 | 0    | EF   | 27.7071       | 1329.9408     | 0           | 48            |
 
 
-Finally we come to the OEE2 formula. This next ForAll() loop patches in the OEE and total_pack data into our data structure here instead of collecting new information. It very simply sums all total_pack data points from the OEEData collection to create a final total collection into each Line. Then takes our original OEE formula and collects it as well, rounding to the 4th sig. dig.
+Finally we come to the OEE2 formula. This next ForAll() loop patches in the OEE and total_pack data into our data structure here instead of collecting new information. It sums all total_pack data points from the OEE Data collection to create a final total for each Line. Then calculates our original OEE formula, rounding to the 4th sig. dig.
 
 ```cpp
 ForAll( // Lines
@@ -211,7 +220,7 @@ ClearCollect(collectProduction,
 
 ### Downtime
 
-The second data structure I create is called Downtime, also stored in a collection filtered and sorted in the same way as production. This datetime data can be collected properly, but then it would skew the data once again, so instead I conform to the date range possible with the Roll Data database. Another challenge with the database is that it also contains records for E and D shifts. Because the Roll Data only collects A, B, and C shifts, I need to lookup the time of the E or D shift entry post and convert it to A, B, or C shift entry instead. This may be the wrong approach however as trying to capture this downtime data causes the OEE formula to break (creating a negative amount of runtime when an entry pulls in data for a shift not run for 600~ minutes). Removing E and D shift downtime, normalizes this data and that may be right way to go about it instead.
+The second data structure I create is called Downtime, also stored in a collection filtered and sorted in the same way as production. This datetime data can be collected properly, but then it would skew the data an hour out of sync from the production data. Instead I conform to the date range possible with the Roll Data database. Another challenge with the database is that it also contains records for E and D shifts. Because the Roll Data only collects A, B, and C shifts, I need to lookup the time of the E or D shift entry post and convert it to A, B, or C shift entry instead. This may be the wrong approach however as trying to capture this downtime data causes the OEE formula to break (creating a negative amount of runtime when an entry pulls in data for a shift not run for 600~ minutes). Removing E and D shift downtime, normalizes this data and that may be right way to go about it instead.
 
 ```cpp
 Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Downtime Data"});
@@ -504,19 +513,4 @@ With(
 
 # Conclusion
 
-With what I'm trying to accomplish, collected OEE from the current databases is troublesome at best and misleading always. Because of the challenges of data retrieval and missing constraint data, the usefulness of this tool is highly questionable without a complete constraint dataset and/or database restructure. This is also under the assumption that the cart data that i'm pulling for unit counts is correct and operators enter it accurately.
-
-This can be seen when selecting filters with bad data. Even with all the validation, duct tape, and bubblegum that I use to clean and thoroughly inspect data for consistent OEE calculations, the state of the databases contort and disturb the algorithm to vast inaccuracies when erroneous data is passed into the algorithm. 
-
-> This is data from the 4th of November, this day has information that conforms with the OEE algorithm.
-
-![alt text](OEE1.PNG)
-
-
-> This is data from the 7th of October, Because of all the glue holding this OEE together, I cant pinpoint what is the main cause of this problem, but the constraint data is lower than it should be, and the output data is higher.
-
-![alt text](OEE2.PNG)
-
-As a precaution against these database problems, stretching myself thin a little bit to be honest, I have also been developing a backup deliverable that works the same as the Encapsulation version and only relies on sharepoint lists and manual operator entries. This would mean another satellite system in our ecosystem, another point of entry for operators, and another management requirement from leads and supervisors to review the manual data entries, but I would rather be able to deliver a working finished product rather than none at all.
-
-Both the data retrieval and manual method applications have been stripped of all other functionality to develop them in tandem.
+With what I'm trying to accomplish collected OEE from the current databases is troublesome because of the challenges of data retrieval and missing constraint data. With the tools I have developed to pull this data, and the minor concessions made to the constraint values of the formula, the application in this version one state is the best quality to expediency ratio I can accomplish within the current timeline and my professional duties.

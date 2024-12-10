@@ -3,11 +3,11 @@
 | Process            | Status            | Target Date       | Completion Date   |
 | ------------------ |:-----------------:|------------------:| ----------------- |
 | Custom Data Retrieval  | Final Testing | 01 DEC 2024 | --- |
-| PowerApp Initial Build | WIP | 31 DEC 2024 | --- |
+| PowerApp Initial Build | Alpha | 31 DEC 2024 | --- |
 | Backup Deliverables - Manual Method | Alpha | 31 JAN 2025 | --- |
-| Databases Fully Established | WIP | 14 FEB 2025 | --- |
-| Service Computer Setup | On Hold | 24 FEB 2025 | --- |
-| OEE Algorithms Completed | Focus | 03 MAR 2025 | --- |
+| Databases Fully Established | Alpha | 14 FEB 2025 | --- |
+| Service Computer Setup | Alpha | 24 FEB 2025 | --- |
+| OEE Algorithms Completed | Alpha | 03 MAR 2025 | --- |
 | PowerApp Launch | --- | 31 MAR 2025 | --- |
 
 ## Low Level
@@ -17,17 +17,17 @@
 | ----- | New FE Reject Database | Cancelled | --- | Time loss |
 | ----- | Initial Database Setup | Cancelled | --- | Time loss |
 | ----- | Custom CSV Loader Program - Flet | Completed | 25 OCT 2024 | --- |
-| +++++ | Custom CSV Loader Program - CLI | Refactoring | 25 OCT 2024 | --- |
-| +++++ | Access DB connection to PowerApp Established | Completed | 15 NOV 2024 | --- |
-| ----- | Complete Constraint Data | WIP | 17 JAN 2025 | --- |
+| ----- | Custom CSV Loader Program - CLI | Completed | 25 OCT 2024 | --- |
+| ----- | Access DB connection to PowerApp Established | Completed | 15 NOV 2024 | --- |
+| ----- | Complete Constraint Data | Completed | 17 JAN 2025 | Using Nominals for v1 |
 | ----- | Backup Deliverable - Production | Alpha | 31 JAN 2025 | Time loss |
 | ----- | Backup Deliverable - Management | Alpha | 31 JAN 2025 | Time loss |
-| +++++ | Data Connections Established - Initial | WIP | 31 JAN 2025 | --- |
+| ----- | Data Connections Established - Initial | Alpha | 31 JAN 2025 | --- |
 | ----- | PowerApp for Management - Initial Build | Alpha | 14 FEB 2025 | --- |
-| ----- | Power Bi connection to PowerApp Established | Cancelled | 21 FEB 2025 | --- |
-| +++++ | Service PC Setup | On Hold | 24 FEB 2025 | --- |
-| +++++ | Data Connections Established - Final | --- | 24 FEB 2025 | --- |
-| ----- | OEE Algorithms Completed | On Hold | 03 MAR 2025 | --- |
+| ----- | Power Bi connection to PowerApp Established | On Hold | 21 FEB 2025 | --- |
+| ----- | Service PC Setup | Alpha | 24 FEB 2025 | --- |
+| ----- | Data Connections Established - Final | --- | 24 FEB 2025 | --- |
+| ----- | OEE Algorithms Completed | Alpha | 03 MAR 2025 | --- |
 | ----- | PowerApp for Management - Alpha | --- | 10 MAR 2025 | Bug Fixes |
 | ----- | PowerApp for Management - Beta | --- | 17 MAR 2025 | Bug Fixes |
 | ----- | PowerApp for Management - Launch | --- | 31 MAR 2025 | Projected Launch Day |
