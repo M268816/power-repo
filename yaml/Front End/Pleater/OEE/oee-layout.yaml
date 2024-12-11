@@ -1,0 +1,2983 @@
+- oee-layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutGap: =
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+      X: =
+    Children:
+    - oee-header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =varPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =varPadding/2
+          PaddingLeft: =varPadding
+          PaddingRight: =varPadding
+          PaddingTop: =varPadding/2
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - oee-collect:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =/*Start*/
+                Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
+
+                /*Capture Local Date Selection*/
+                UpdateContext({
+                    locEndDate: 'oee-end-date'.SelectedDate,
+                    locStartDate: 'oee-start-date'.SelectedDate
+                });
+
+                /*Collect Production*/
+                Set(varLoading,{Visible: true, Value: 10, Text: "Collecting Production Data"});
+                ClearCollect(collectProduction,
+                    ForAll(
+                        Filter(Sort(Roll_Data_Filtered_SPL, Date, SortOrder.Descending),
+                            Date <= locEndDate,
+                            Date >= locStartDate
+                        ),
+                        {
+                            id: Value(ThisRecord.ID),
+                            shift: Text(ThisRecord.Shift),
+                            line: Text(Upper(ThisRecord.Pleater)),
+                            date: DateValue(ThisRecord.Date),
+                            lot: Text(ThisRecord.Lot_No),
+                            catalog: Text(ThisRecord.Catalog),
+                            amount_built: Value(ThisRecord.'End Cart #') - Value(ThisRecord.'Begin Cart #') + 1,
+                            unit_starting: Value(ThisRecord.'Begin Cart #'),
+                            unit_ending: Value(ThisRecord.'End Cart #'),
+                            reject_pleats: Value(ThisRecord.Total_Reject_Pleats),
+                            pleats_per_pack: Value(ThisRecord.PleatPerPack),
+                            pleats_height: Value(ThisRecord.Pleat_Height)
+                        }
+                    )
+                );
+
+                /*Collect Downtime*/
+                Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Downtime Data"});
+                ClearCollect(collectDowntime,
+                    ForAll(
+                        Filter(
+                            ShowColumns(
+                                Sort(FE_Express_DT_Events,DateTime, SortOrder.Descending),
+                                ID,
+                                CSV_ID,
+                                ' Shift',
+                                Pleater,
+                                DateTime,
+                                ' Downtime Reason',
+                                ' Downtime Minutes',
+                                ' Comments'
+                            ),
+                            DateTime < DateAdd(locEndDate, 1, TimeUnit.Days),
+                            DateTime >= locStartDate,
+                            field_2 <> "D",
+                            field_2 <> "E"
+                            // field_3 <= 480
+                        ),
+                        {
+                            id: Value(ThisRecord.ID),
+                            csv_id: Value(ThisRecord.CSV_ID),
+                            shift: ThisRecord.field_2,
+                            line: Text(ThisRecord.Pleater),
+                            date: ThisRecord.DateTime,
+                            reason: Text(ThisRecord.field_4),
+                            total: Value(ThisRecord.field_3),
+                            comments: Text(ThisRecord.field_5)
+                        }
+                    )
+                );
+
+                Set(varLoading,{Visible: true, Value: 30, Text: "Finishing up"});
+
+                /*Update the UI Elements*/
+                Select('oee-update');
+              Text: ="collect"
+              Visible: =false
+              X: =20
+              Y: =20
+        - oee-update:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =/*OEE*/
+                /*Init default filters*/
+                Set(varLoading,{Visible: true, Value: 40, Text: "Creating Default Filters"});
+
+                UpdateContext({
+                    locProdFilter:
+                        Filter(collectProduction,
+                            amount_built > 0,
+                            date >= locStartDate,
+                            date <= locEndDate,
+                            If(
+                                'oee-line'.Selected.Value = "All",
+                                line = line,
+                                line in 'oee-line'.Selected.Value
+                            )
+                        ),
+                    locDownFilter:
+                        Filter(collectDowntime,
+                            date >= locStartDate,
+                            date < DateAdd(locEndDate,1,TimeUnit.Days),
+                            If(
+                                'oee-line'.Selected.Value = "All",
+                                line = line,
+                                line = 'oee-line'.Selected.Value
+                            )
+                        ),      
+                    count_of_days:
+                        RoundDown(DateDiff(locStartDate, locEndDate, TimeUnit.Days) / 7, 0)
+                        * 5
+                        + Mod(5 + Weekday(locEndDate) - Weekday(locStartDate), 5)
+                        + 1
+                });
+
+                UpdateContext({
+                    distinct_catalogs: Distinct(locProdFilter, catalog),
+                    distinct_prod_lines: Distinct(locProdFilter, line),
+                    distinct_down_lines: Distinct(locDownFilter, line)
+                });
+
+
+                /*Collect Top Downtime*/
+                Set(varLoading,{Visible: true, Value: 45, Text: "Processing Top Downtime Reasons"});
+                Clear(collectTopDowntime);
+                /*
+                    For all base downtime reasons,
+                    If the sum of the downtime total is greater than 0,
+                    add to collectTopDowntime.
+                    
+                */
+                ForAll(Distinct(locDownFilter, reason),
+                    If(Sum(Filter(locDownFilter,reason = Value), total) > 0,
+                        Collect(collectTopDowntime,
+                            {
+                                Downtime_Reason: Value,
+
+                                Downtime_Total: 
+                                    Round(
+                                        Sum(
+                                            Filter(
+                                                locDownFilter,
+                                                reason = Value
+                                            ),
+                                            total
+                                        ),
+                                        0
+                                    )
+                            }
+                        )
+                    )
+                );
+
+                /*Collect OEE 2 data for pareto chart*/
+                Set(varLoading,{Visible: true, Value: 50, Text: "Creating Pareto Chart Data"});
+                Clear(collectPareto);
+                /*
+                    For all collectTopDowntime,
+                    Sorted and filtered by user selections,
+                    Create pareto data in collectPareto.
+                */
+                ForAll(
+                    Sort(
+                        Filter(collectTopDowntime,
+                                Not(Downtime_Reason in collectPlannedReasons)
+                        ),
+                        Downtime_Total,
+                        SortOrder.Descending
+                    ),
+                    Collect(collectPareto,
+                        {
+                            id: CountRows(collectPareto)+1,
+                            /*Debugging value*/
+                            id_lookup: LookUp(collectPareto, id = CountRows(collectPareto)).id,
+                            reason: Downtime_Reason,
+                            total: ThisRecord.Downtime_Total,
+                            sum: Sum(collectTopDowntime,Downtime_Total),
+                            /*frequency = This record's downtime / sum of total downtime */
+                            freq:
+                                Round(
+                                    ThisRecord.Downtime_Total /
+                                    Sum(
+                                        Filter(collectTopDowntime,
+                                            Not(Downtime_Reason in collectPlannedReasons)
+                                        ),
+                                        Downtime_Total
+                                    ) * 100,0
+                                ),
+                            /*cumulative percentage = (this record's downtime / sum of total downtime) + the last record's cumulative percentage */
+                            cumulative:
+                                Round(
+                                    ThisRecord.Downtime_Total / 
+                                    Sum(
+                                        Filter(collectTopDowntime,
+                                            Not(Downtime_Reason in collectPlannedReasons)
+                                        ),
+                                        Downtime_Total
+                                    ) * 100,0
+                                ) + 
+                                If(
+                                    CountRows(collectPareto) >= 1,
+                                    LookUp(collectPareto, id = CountRows(collectPareto)).cumulative,
+                                    0
+                                )
+                        }
+                    )
+                );
+
+                /*Collect OEE 1 data for pareto chart*/
+                Set(varLoading,{Visible: true, Value: 50, Text: "Creating Pareto Chart Data"});
+                Clear(collectParetoOEE1);
+                /*
+                    For all collectTopDowntime,
+                    Sorted and filtered by user selections,
+                    Create pareto data in collectPareto.
+                */
+                ForAll(
+                    Sort(
+                        Filter(collectTopDowntime,
+                            Downtime_Reason in collectPlannedReasons
+                        ),
+                        Downtime_Total,
+                        SortOrder.Descending
+                    ),
+                    Collect(collectParetoOEE1,
+                        {
+                            id: CountRows(collectParetoOEE1)+1,            
+                            reason: Downtime_Reason,
+                            total: ThisRecord.Downtime_Total,
+                            sum: Sum(collectTopDowntime,Downtime_Total),            
+                            /*frequency = This record's downtime / sum of total downtime */
+                            freq:
+                                Round(
+                                    ThisRecord.Downtime_Total /
+                                    Sum(
+                                        Filter(collectTopDowntime,
+                                            Downtime_Reason in collectPlannedReasons
+                                        ),
+                                        Downtime_Total
+                                    ) * 100,0
+                                ),
+                            /*cumulative percentage = frequency + the last record's cumulative percentage */
+                            cumulative:
+                                Round(
+                                    ThisRecord.Downtime_Total / 
+                                    Sum(
+                                        Filter(collectTopDowntime,
+                                                Downtime_Reason in collectPlannedReasons
+                                        ),
+                                        Downtime_Total
+                                    ) * 100,0
+                                ) + 
+                                If(
+                                    CountRows(collectParetoOEE1) >= 1,
+                                    LookUp(collectParetoOEE1, id = CountRows(collectParetoOEE1)).cumulative,
+                                    0
+                                )
+                        }
+                    )
+                );
+
+                // Collect OEE
+                Set(varLoading,{Visible: true, Value: 70, Text: "Gathering OEE2 Data"});
+                Clear(collectOEE2Data);
+                ForAll(distinct_prod_lines,
+                    With({thisLane:ThisRecord.Value},
+                        ForAll(Distinct(Filter(locProdFilter, thisLane in line),pleats_per_pack),
+                            With({thisPleatPerPack: ThisRecord.Value},
+                                Collect(collectOEE2Data,
+                                    {
+                                        lane: thisLane,
+                                        total_packs: Sum(Filter(locProdFilter, thisLane = line, pleats_per_pack = thisPleatPerPack),amount_built),
+                                        pleats_per_pack: thisPleatPerPack,
+                                        pleats_per_hour: LookUp(collectPleaterSpeeds, thisLane in Line).Pleats_Per_Hour,
+                                        pack_per_hour:
+                                            IfError(
+                                                Round(
+                                                    LookUp(collectPleaterSpeeds, thisLane in Line).Pleats_Per_Hour
+                                                    / thisPleatPerPack,
+                                                    4
+                                                ),
+                                                0
+                                            )
+                                    }
+                                )
+                            )
+                        )
+                    )
+                );
+                Clear(collectOEE2);
+                ForAll( // Lines
+                    If(
+                        'oee-line'.Selected.Value = "All",
+                        Distinct(collectPleaterSpeeds, Line),
+                        ['oee-line'.Selected.Value]
+                    ),
+                    With({thisLine: ThisRecord.Value},
+                        If( 
+                            IfError(Round(Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour),4) > 0,false),
+                        
+                            Collect(collectOEE2,
+                                {
+                                    line: thisLine,
+                                    pack_per_hour: Round(Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour),4), 
+                                    total_runtime: 48 * count_of_days, // This is a substitution for planned runtime
+                                    total_downtime: Round(Sum(Filter(locDownFilter, thisLine in line, reason in collectPlannedReasons),total)/60,4),
+                                    planned_packs:
+                                        Round(
+                                            Average(Filter(collectOEE2Data, lane in thisLine), pack_per_hour)
+                                            * (48 - Round(Sum(Filter(locDownFilter, thisLine in line, reason in collectPlannedReasons),total)/60,4))
+                                            * count_of_days,
+                                            4
+                                        ),
+                                    total_packs: 0,
+                                    OEE2: 0
+                                }
+                            )
+                        )
+                    )   
+                );
+                ForAll( // Lines
+                    Distinct(collectOEE2, line),
+                    With({thisLine: ThisRecord.Value},
+                        If(
+                            Sum(Filter(collectOEE2Data, lane in thisLine),total_packs) > 0,
+
+                            Patch(collectOEE2, First(Filter(collectOEE2, line = thisLine)),
+                                {
+                                    total_packs: Sum(Filter(collectOEE2Data, lane in thisLine),total_packs),
+                                    
+                                    OEE2:
+                                        IfError(
+                                            Round(
+                                                Sum(Filter(collectOEE2Data, lane in thisLine),total_packs)
+                                                / Sum(Filter(collectOEE2, line = thisLine),planned_packs) 
+                                                * 100,
+                                                4
+                                            ),
+                                            0
+                                        )
+                                }
+                            )
+                        )
+                    )
+                );
+                Patch(collectOEE2, Defaults(collectOEE2),
+                    {
+                        line: "Average",
+                        pack_per_hour:Round(Average(collectOEE2, pack_per_hour),4),
+                        total_packs: Sum(collectOEE2, total_packs),
+                        planned_packs: Round(Sum(collectOEE2, planned_packs),4),
+                        total_runtime: Sum(collectOEE2, total_runtime),
+                        total_downtime: Sum(collectOEE2, total_downtime),
+                        OEE2:
+                            IfError(
+                                Round(
+                                    Sum(collectOEE2, total_packs)
+                                    / Sum(collectOEE2, planned_packs)
+                                    * 100,
+                                    4
+                                ),
+                                0
+                            )   
+                    }
+                );
+
+                // Collect Shift OEE
+                Clear(collectShiftOEE2Data);
+                ForAll(collectShiftSchema,
+                    With({thisShift: ThisRecord.SCH_Shift},
+                        ForAll(distinct_prod_lines,
+                            With({thisLane:ThisRecord.Value},
+                                ForAll(Distinct(Filter(locProdFilter, thisLane in line, thisShift = shift),pleats_per_pack),
+                                    With({thisPleatPerPack: ThisRecord.Value},
+                                        Collect(collectShiftOEE2Data,
+                                            {
+                                                shift: thisShift,
+                                                lane: thisLane,
+                                                total_packs: Sum(Filter(locProdFilter, thisLane = line, pleats_per_pack = thisPleatPerPack, shift = thisShift),amount_built),
+                                                pleats_per_pack: thisPleatPerPack,
+                                                pleats_per_hour: LookUp(collectPleaterSpeeds, thisLane in Line).Pleats_Per_Hour,
+                                                pack_per_hour:
+                                                    IfError(
+                                                        Round(
+                                                            LookUp(collectPleaterSpeeds, thisLane in Line).Pleats_Per_Hour
+                                                            / thisPleatPerPack,
+                                                            4
+                                                        ),
+                                                        0
+                                                    )
+                                            }
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+                Clear(collectShiftOEE2);
+                ForAll(collectShiftSchema,
+                    With({thisShift: SCH_Shift},
+                        ForAll( // Lines
+                            If(
+                                'oee-line'.Selected.Value = "All",
+                                Distinct(collectPleaterSpeeds, Line),
+                                ['oee-line'.Selected.Value]
+                            ),
+                            With({thisLine: ThisRecord.Value},
+                                If( 
+                                    IfError(Round(Average(Filter(collectShiftOEE2Data, lane in thisLine, shift = thisShift), pack_per_hour),4) > 0,false),
+                                
+                                    Collect(collectShiftOEE2,
+                                        {
+                                            shift: thisShift,
+                                            line: thisLine,
+                                            pack_per_hour: Round(Average(Filter(collectShiftOEE2Data, lane in thisLine, shift = thisShift), pack_per_hour),4), 
+                                            total_runtime: 16 * count_of_days, // This is a substitution for planned runtime
+                                            total_downtime: Round(Sum(Filter(locDownFilter, line = thisLine, shift = thisShift, reason in collectPlannedReasons),total)/60,4),
+                                            planned_packs: Round(Average(Filter(collectShiftOEE2Data, lane in thisLine, shift = thisShift), pack_per_hour) * 16 * count_of_days,4),
+                                            new_planned_packs: Round(Average(Filter(collectShiftOEE2Data, lane in thisLine, shift = thisShift), pack_per_hour) * (16-Round(Sum(Filter(locDownFilter, line = thisLine, shift = thisShift),total)/60,4)) * count_of_days,4),
+                                            total_packs: 0,
+                                            OEE2: 0
+                                        }
+                                    )
+                                )
+                            )
+                        )
+                    )   
+                );
+                ForAll(collectShiftSchema,
+                    With({thisShift:SCH_Shift},
+                        ForAll( // Lines
+                            Distinct(collectShiftOEE2, line),
+                            With({thisLine: ThisRecord.Value},
+                                If(
+                                    Sum(Filter(collectShiftOEE2Data, lane in thisLine, shift = thisShift),total_packs) > 0,
+
+                                    Patch(collectShiftOEE2, First(Filter(collectShiftOEE2, line = thisLine, shift = thisShift)),
+                                        {
+                                            total_packs: Sum(Filter(collectShiftOEE2Data, lane in thisLine, shift = thisShift),total_packs),
+                                            
+                                            OEE2:
+                                                IfError(
+                                                    Round(
+                                                        Sum(Filter(collectShiftOEE2Data, lane in thisLine, shift = thisShift),total_packs)
+                                                        / Sum(Filter(collectShiftOEE2, line = thisLine, shift = thisShift),planned_packs) 
+                                                        * 100,
+                                                        4
+                                                    ),
+                                                    0
+                                                )
+                                        }
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+                Patch(collectShiftOEE2, Defaults(collectShiftOEE2),
+                    {
+                        line: "Average",
+                        pack_per_hour:Round(Average(collectShiftOEE2, pack_per_hour),4),
+                        total_packs: Sum(collectShiftOEE2, total_packs),
+                        total_downtime: Sum(collectShiftOEE2, total_downtime),
+                        planned_packs: Round(Sum(collectShiftOEE2, planned_packs),4),
+                        new_planned_packs: Sum(collectShiftOEE2, new_planned_packs),
+                        total_runtime: Sum(collectShiftOEE2, total_runtime),
+                        OEE2:
+                            IfError(
+                                Round(
+                                    Sum(collectShiftOEE2, total_packs)
+                                    / Sum(collectShiftOEE2, planned_packs)
+                                    * 100,
+                                    4
+                                ),
+                                0
+                            )   
+                    }
+                );
+
+                /*Garbage collection*/
+                /*Set(varLoading,{Visible: true, Value: 95, Text: "Finishing Up"});
+                UpdateContext({
+                    locProdFilter: Blank(),
+                    locDownFilter: Blank(),
+                    distinct_catalogs: Blank(),
+                    distinct_prod_lines: Blank(),
+                    distinct_down_lines: Blank()
+                });
+
+                Clear(collectShiftOEE2Data);
+                Clear(collectOEE2Data);*/
+
+
+                /*End*/
+                Set(varLoading,{Visible: true, Value: 100, Text: "Completed"});
+                Set(varLoading,{Visible: false, Value: -1, Text: "Not Loading"});
+              Text: ="update"
+              Visible: =false
+              X: =20
+              Y: =20
+        - oee-logo:
+            Control: Image
+            Properties:
+              OnSelect: =Back()
+              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              ImagePosition: =ImagePosition.Stretch
+              LayoutMinHeight: =1
+              LayoutMinWidth: '=1   '
+              PaddingBottom: =1
+              PaddingTop: =1
+              Width: =Min(Parent.Width * 0.128, 170)
+        - oee-title:
+            Control: Label
+            Properties:
+              Text: ="FE Durapore Daily Management System"
+              Align: =Align.Center
+              Color: =gTheme.Text_Header
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 2
+        - oee-h-nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding/2
+              LayoutJustifyContent: =LayoutJustifyContent.End
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: ='oee-logo'.Width
+            Children:
+            - oee-darkmode:
+                Control: Classic/Icon
+                Variant: HalfFilledCircle
+                Properties:
+                  OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light));
+                  Tooltip: ="Toggle Light/Dark modes."
+                  Color: =gTheme.Text_Dark
+                  Icon: =Icon.HalfFilledCircle
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Rotation: =If(gTheme.Mode = "Light", 180, 0)
+                  Width: =Self.Height
+            - oee-bugs:
+                Control: Image
+                Properties:
+                  OnSelect: =Navigate(Bugs)
+                  Image: =gblAppIcons.Bug
+                  Tooltip: ="Report a bug, or request a feature."
+                  AlignInContainer: =AlignInContainer.Stretch
+                  HoverFill: =gTheme.Accept
+                  LayoutMinHeight: '=1   '
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
+            - oee-user-img:
+                Control: Image
+                Properties:
+                  Image: |
+                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
+                  AlignInContainer: =AlignInContainer.Stretch
+                  LayoutMinHeight: '=1   '
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =Self.Height / 2
+                  RadiusBottomRight: =Self.Height / 2
+                  RadiusTopLeft: =Self.Height / 2
+                  RadiusTopRight: =Self.Height / 2
+                  Width: =Self.Height
+    - oee-body:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =15
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - oee-nav:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              BorderColor: =gTheme.Pri_Complement
+              BorderThickness: |-
+                =//If(gTheme.Mode = "Light",0,1)
+                0
+              DropShadow: =DropShadow.None
+              Fill: =gTheme.Background_1
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =150
+            Children:
+            - oee-n-title:
+                Control: Text
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  FontColor: =gTheme.Text_Dark
+                  Size: =Self.Height / 3
+                  Text: =App.ActiveScreen.Name
+                  VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
+                  Weight: ='TextCanvas.Weight'.Semibold
+                  FillPortions: =1
+            - oee-n-separator:
+                Control: Rectangle
+                Properties:
+                  Fill: =gTheme.Accent
+                  Height: =1
+                  LayoutMinWidth: =15
+                  Width: =Parent.Width * 0.95
+            - oee-n-gallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =collectNavigation
+                  DelayItemLoading: =true
+                  FillPortions: =13
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LoadingSpinner: =LoadingSpinner.Data
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: |-
+                    =//IfError((Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount,0)
+                    IfError(Parent.Height * 0.05,0)
+                Children:
+                - oee-n-button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.ScreenName);
+                      Text: =ThisItem.Title
+                      Color: =gTheme.Text_Accent
+                      DisabledColor: =ColorFade(Self.Color, 75%)
+                      DisabledFill: =ColorFade(Self.Fill, 75%)
+                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight - varPadding
+                      Size: =Self.Width / 16
+                      Width: =Parent.TemplateWidth - Self.BorderThickness
+                      X: =Center(Parent.TemplateWidth, Self.Width)
+                      Y: =Center(Parent.TemplateHeight, Self.Height)
+            - oee-n-footer:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =2
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - oee-n-f-text:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      FontColor: =gTheme.Text_Dark
+                      Size: =8
+                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
+                      Height: =Parent.Height
+                      Width: =Parent.Width
+        - oee-main:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gTheme.Background_0
+              FillPortions: =11
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =varPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =varPadding
+              PaddingLeft: =varPadding
+              PaddingRight: =varPadding
+              PaddingTop: =varPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - oee-controls:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gTheme.Sec_Complement
+                  BorderThickness: |-
+                    =//If(gTheme.Mode = "Light", 0, 1)
+                    0
+                  Fill: =gTheme.Background_2
+                  FillPortions: =0
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =varPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =varPadding
+                  PaddingLeft: =varPadding
+                  PaddingRight: =varPadding
+                  PaddingTop: =varPadding
+                  Width: =150
+                Children:
+                - oee-start-date-title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      FontColor: =gTheme.Text_Dark
+                      Size: =Self.Height / 3
+                      Text: ="Start Date"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee-start-date:
+                    Control: DatePicker
+                    Properties:
+                      Fill: =gTheme.Background_0
+                      FontColor: =gTheme.Text_Dark
+                      FontSize: =Self.Width / 10
+                      Format: ="Short"
+                      SelectedDate: =varNowDay
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee-separator-0:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gTheme.Accent
+                      Height: =1
+                      LayoutMinWidth: =10
+                - oee-end-date-title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      FontColor: =gTheme.Text_Dark
+                      Size: =Self.Height / 3
+                      Text: ="End Date"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee-end-date:
+                    Control: DatePicker
+                    Properties:
+                      Fill: =gTheme.Background_0
+                      FontColor: =gTheme.Text_Dark
+                      FontSize: =Self.Width / 10
+                      Format: ="Short"
+                      SelectedDate: =varNowDay
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee-separator-1:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gTheme.Accent
+                      Height: =1
+                      LayoutMinWidth: =10
+                - oee-button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Select('oee-collect');
+                      Text: ="Update Date Range"
+                      Tooltip: ="Updates date range for OEE2 calculation."
+                      Color: =gTheme.Text_Accent
+                      Fill: =gTheme.Accent
+                      FillPortions: =1
+                      FontWeight: =FontWeight.Normal
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Width / 16
+                - oee-separator-2:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gTheme.Accent
+                      Height: =1
+                      LayoutMinWidth: =10
+                - oee-line-title:
+                    Control: Text
+                    Properties:
+                      Align: ='TextCanvas.Align'.Center
+                      FontColor: =gTheme.Text_Dark
+                      Size: =Self.Height / 3
+                      Text: ="Line"
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                - oee-line:
+                    Control: Classic/DropDown
+                    Properties:
+                      OnChange: =Select('oee-update');
+                      Items: =["All","12","34","EF","GH","JK","LM","NO","PQ","RS","WX","YZ"]
+                      BorderColor: =RGBA(0,0,0,0)
+                      ChevronBackground: =gTheme.Primary
+                      ChevronFill: =gTheme.Text_Header
+                      Color: =gTheme.Text_Dark
+                      Fill: =gTheme.Background_0
+                      FillPortions: =1
+                      HoverFill: =gTheme.Sec_Complement
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - oee-separator-3:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gTheme.Accent
+                      Height: =1
+                      LayoutMinWidth: =10
+                - oee-c-footer:
+                    Control: GroupContainer
+                    Variant: manualLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      FillPortions: =9
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+            - oee-section-0:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =8
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =varPadding * 5
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingLeft: =
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - oee-last-update:
+                    Control: GroupContainer
+                    Variant: manualLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.Regular
+                      Fill: =gTheme.Pri_Complement
+                      FillPortions: =0
+                      Height: =Parent.Height * 0.05
+                      RadiusBottomLeft: =8
+                      RadiusBottomRight: =8
+                      RadiusTopLeft: =8
+                      RadiusTopRight: =8
+                    Children:
+                    - oee-lu-text:
+                        Control: Label
+                        Properties:
+                          Text: |-
+                            ="Last Database Update: " & gLastDBUpdate
+                          Align: =Align.Center
+                          Color: =gTheme.Text_Dark
+                          Height: =Parent.Height
+                          Width: =Parent.Width
+                - oee-average:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gTheme.Sec_Complement
+                      BorderThickness: |-
+                        =//If(gTheme.Mode = "Light", 0, 1)
+                        0
+                      DropShadow: =DropShadow.Semilight
+                      Fill: =gTheme.Background_1
+                      FillPortions: =0
+                      Height: =Self.Width * 0.6
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      Width: =Parent.Width * 0.33
+                    Children:
+                    - oee-average-title:
+                        Control: Label
+                        Properties:
+                          Text: =Concatenate('oee-line'.Selected.Value," OEE2")
+                          Align: =Align.Center
+                          Color: =gTheme.Text_Header
+                          Fill: =gTheme.Secondary
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 3
+                    - oee-ave-layout:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          FillPortions: =7
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                        Children:
+                        - oee-average-graph:
+                            Control: Image
+                            Properties:
+                              Image: |-
+                                ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                                EncodeUrl(
+                                "{
+                                  type: 'radialGauge',
+                                  data: {
+                                    datasets: [{
+                                      data: ["& Last(collectOEE2).OEE2 &"],
+                                      backgroundColor: getGradientFillHelper('horizontal', [
+                                        '"& gTheme.Chart_Blue &"',
+                                        '"& gTheme.Chart_Blue &"',
+                                        '"& gTheme.Chart_Blue &"',
+                                        '"& gTheme.Chart_Red &"',
+                                        '"& gTheme.Chart_Red &"',
+                                        '"& gTheme.Chart_Red &"'
+                                        ]),
+                                    }]
+                                  },
+                                  options: {
+                                    domain: [0, "& If(Last(collectOEE2).OEE2 <= 100, 100, Last(collectOEE2).OEE2) &"],
+                                    trackColor: '"& gTheme.Chart_White &"', 
+                                    centerPercentage: 90,
+                                    centerArea: {
+                                      text: (val) => val + '%',
+                                      fontColor: '"& gTheme.Chart_Black &"'
+                                    },
+                                  }
+                                }"
+                                )
+                              AlignInContainer: =AlignInContainer.Stretch
+                              FillPortions: =3
+                              Height: =Self.Width
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              PaddingLeft: =varPadding/2
+                              PaddingRight: =varPadding/2
+                        - oee-ave-data:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              FillPortions: =5
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oee-ave-upper:
+                                Control: GroupContainer
+                                Variant: horizontalAutoLayoutContainer
+                                Properties:
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee-ave-built-parent:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: '=10  '
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-ave-built-title:
+                                        Control: Label
+                                        Properties:
+                                          Text: ="Total Packs"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Accent
+                                          Fill: =gTheme.Sec_Complement
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4.5
+                                          Width: =10
+                                    - oee-ave-built:
+                                        Control: Label
+                                        Properties:
+                                          Text: =Last(collectOEE2).total_packs*1
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Dark
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          FontWeight: =FontWeight.Semibold
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 3
+                                          Width: =10
+                                - oee-ave-reject-parent:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-ave-reject-title:
+                                        Control: Label
+                                        Properties:
+                                          Text: ="Reject Pleats"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Accent
+                                          Fill: =gTheme.Sec_Complement
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4.5
+                                          Width: =10
+                                    - oee-ave-reject:
+                                        Control: Label
+                                        Properties:
+                                          Text: |-
+                                            ="Not Collected"
+                                            //Last(collectOEE2).line
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Dark
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 3.5
+                                          Width: =10
+                            - oee-ave-middle:
+                                Control: GroupContainer
+                                Variant: horizontalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee-ave-constraint-parent:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: '=10  '
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-ave-constraint-title:
+                                        Control: Label
+                                        Properties:
+                                          Text: ="Average Constraint"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Accent
+                                          Fill: =gTheme.Sec_Complement
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4.5
+                                          Width: =10
+                                    - oee-ave-constraint:
+                                        Control: Label
+                                        Properties:
+                                          Text: |-
+                                            =IfError(Round(Last(collectOEE2).pack_per_hour*1,0),0) & "
+                                            packs per hour"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Dark
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4
+                                          Width: =10
+                                - oee-ave-target-parent:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: '=10  '
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-ave-target-title:
+                                        Control: Label
+                                        Properties:
+                                          Text: ="Total Packs Possible"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Accent
+                                          Fill: =gTheme.Sec_Complement
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4.5
+                                          Width: =10
+                                    - oee-ave-target:
+                                        Control: Label
+                                        Properties:
+                                          Text: =RoundDown(Last(collectOEE2).planned_packs,0)
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Dark
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 3.5
+                                          Width: =10
+                            - oee-average-lower:
+                                Control: GroupContainer
+                                Variant: horizontalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee-ave-unplanned-parent:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-ave-unplanned-title:
+                                        Control: Label
+                                        Properties:
+                                          Text: ="Planned Downtime"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Accent
+                                          Fill: =gTheme.Sec_Complement
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4.5
+                                          Width: =10
+                                    - oee-ave-unplanned:
+                                        Control: Label
+                                        Properties:
+                                          Text: |-
+                                            =Round(Last(collectOEE2).total_downtime,0) & "H "& Round(Mod(Last(collectOEE2).total_downtime*60,60),0) & "m"
+                                            //"Not Collected"
+                                            //RoundDown(First(collectOEE2).downtime_unplanned/60,0) &"H "& Mod(First(collectOEE2).downtime_unplanned,60) & "m"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Dark
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4
+                                          Width: =10
+                                - oee-ave-planned-parent:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-ave-planned-title:
+                                        Control: Label
+                                        Properties:
+                                          Text: ="Calculated Runtime"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Accent
+                                          Fill: =gTheme.Sec_Complement
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4.5
+                                          Width: =10
+                                    - oee-ave-planned:
+                                        Control: Label
+                                        Properties:
+                                          Text: |-
+                                            =Round(Sum(-Last(collectOEE2).total_downtime,Last(collectOEE2).total_runtime),0)& "H"
+                                            //"Not Collected"
+                                            //RoundDown(First(collectOEE2).downtime_planned/60,0) &"H "& Mod(First(collectOEE2).downtime_planned,60) & "m"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Dark
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4
+                                          Width: =10
+                                - oee-ave-possible-parent:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-ave-possible-title:
+                                        Control: Label
+                                        Properties:
+                                          Text: |-
+                                            ="Total
+                                            Runtime"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Accent
+                                          Fill: =gTheme.Sec_Complement
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4.5
+                                          Width: =10
+                                    - oee-ave-possible:
+                                        Control: Label
+                                        Properties:
+                                          Text: =Last(collectOEE2).total_runtime*1 & "H"
+                                          Align: =Align.Center
+                                          Color: =gTheme.Text_Dark
+                                          FillPortions: =1
+                                          Font: =Font.Verdana
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          Size: =Self.Height / 4
+                                          Width: =10
+                - oee-section-1:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      FillPortions: =0
+                      Height: =Self.Width
+                      LayoutGap: =varPadding * 2.5
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Width: =Parent.Width * 0.50
+                    Children:
+                    - oee-section-2:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.None
+                          FillPortions: =3
+                          Height: =Parent.Height
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutGap: =varPadding * 2.5
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          PaddingBottom: =varPadding
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width * 0.65
+                        Children:
+                        - oee-shift-c:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              BorderColor: =RGBA(0,0,0,0)
+                              DropShadow: =DropShadow.Semilight
+                              Fill: =gTheme.Background_1
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              PaddingLeft: =
+                            Children:
+                            - oee-c-title:
+                                Control: Label
+                                Properties:
+                                  Text: ="C Shift"
+                                  Align: =Align.Center
+                                  Color: =gTheme.Text_Header
+                                  Fill: =gTheme.Secondary
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 3
+                            - oee-c-layout:
+                                Control: GroupContainer
+                                Variant: horizontalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  DropShadow: =DropShadow.None
+                                  FillPortions: =5
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee-c-graph:
+                                    Control: Image
+                                    Properties:
+                                      Image: |-
+                                        ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                                        EncodeUrl(
+                                        "{
+                                          type: 'radialGauge',
+                                          data: {
+                                            datasets: [{
+                                              data: ["& LookUp(collectShiftOEE2, shift = "C").OEE2 &"],
+                                              backgroundColor: getGradientFillHelper('horizontal', [
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Red &"',
+                                                '"& gTheme.Chart_Red &"',
+                                                '"& gTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                          },
+                                          options: {
+                                            domain: [0, "& If(LookUp(collectShiftOEE2, shift = "C").OEE2 <= 100, 100, LookUp(collectShiftOEE2, shift = "C").OEE2) &"],
+                                            trackColor: '"& gTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                              text: (val) => val + '%',
+                                              fontColor: '"& gTheme.Chart_Black &"'
+                                            },
+                                          }
+                                        }"
+                                        )
+                                      FillPortions: =2
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                - oee-c-data:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      FillPortions: =4
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutGap: =
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-c-upper:
+                                        Control: GroupContainer
+                                        Variant: horizontalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee-c-built-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-c-built-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Units Built"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-c-built:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =Sum(Filter(collectShiftOEE2, shift = "C"),total_packs)*1
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-c-goal-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-c-goal-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Build Goal"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-c-goal:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =Round(Sum(Filter(collectShiftOEE2, shift="C"),planned_packs),0)
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-c-constraint-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-c-constraint-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Constraint"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-c-constraint:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =IfError(Round(Average(Filter(collectShiftOEE2, shift="C"),pack_per_hour),1),0)
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                    - oee-c-lower:
+                                        Control: GroupContainer
+                                        Variant: horizontalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee-c-runtime-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-c-runtime-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Collected Runtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-c-runtime:
+                                                Control: Label
+                                                Properties:
+                                                  Text: |-
+                                                    =Round(Sum(Filter(collectShiftOEE2, shift= "C"), total_runtime),0) & "H"
+                                                    //RoundDown(LookUp(collectShiftOEE2, shift = "C").runtime,0) & "H "& Mod(LookUp(collectShiftOEE, shift = "C").runtime*60,60) & "m"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-c-downtime-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-c-downtime-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Planned Downtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-c-downtime:
+                                                Control: Label
+                                                Properties:
+                                                  Text: |-
+                                                    =Round(Sum(Filter(collectShiftOEE2, shift = "C"),total_downtime),0) & "H " & Round(Mod(Sum(Filter(collectShiftOEE2, shift = "C"),total_downtime)*60,60),0) & "m"
+                                                    //"Not Collected"
+                                                    //RoundDown(LookUp(collectShiftOEE, shift = "C").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "C").downtime_planned,60) & "m"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-c-possible-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-c-possible-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Possible Runtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-c-possible:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =If('oee-line'.Selected.Value = "All", 11, 1) * 16 * count_of_days & "H"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                        - oee-shift-a:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              BorderColor: =RGBA(0,0,0,0)
+                              DropShadow: =DropShadow.Semilight
+                              Fill: =gTheme.Background_1
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              PaddingLeft: =
+                            Children:
+                            - oee-a-title:
+                                Control: Label
+                                Properties:
+                                  Text: ="A Shift"
+                                  Align: =Align.Center
+                                  Color: =gTheme.Text_Header
+                                  Fill: =gTheme.Secondary
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 3
+                            - oee-a-layout:
+                                Control: GroupContainer
+                                Variant: horizontalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  DropShadow: =DropShadow.None
+                                  FillPortions: =5
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee-a-graph:
+                                    Control: Image
+                                    Properties:
+                                      Image: |-
+                                        ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                                        EncodeUrl(
+                                        "{
+                                          type: 'radialGauge',
+                                          data: {
+                                            datasets: [{
+                                              data: ["& LookUp(collectShiftOEE2, shift = "A").OEE2 &"],
+                                              backgroundColor: getGradientFillHelper('horizontal', [
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Red &"',
+                                                '"& gTheme.Chart_Red &"',
+                                                '"& gTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                          },
+                                          options: {
+                                            domain: [0, "& If(LookUp(collectShiftOEE2, shift = "A").OEE2 <= 100, 100, LookUp(collectShiftOEE2, shift = "A").OEE2) &"],
+                                            trackColor: '"& gTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                              text: (val) => val + '%',
+                                              fontColor: '"& gTheme.Chart_Black &"'
+                                            },
+                                          }
+                                        }"
+                                        )
+                                      FillPortions: =2
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                - oee-a-data:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      FillPortions: =4
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutGap: =
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-a-upper:
+                                        Control: GroupContainer
+                                        Variant: horizontalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee-a-built-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-a-built-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Units Built"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-a-built:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =Sum(Filter(collectShiftOEE2, shift = "A"),total_packs)*1
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-a-goal-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-a-goal-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Build Goal"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-a-goal:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =Round(Sum(Filter(collectShiftOEE2, shift="C"),planned_packs),0)
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-a-constraint-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-a-constraint-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Constraint"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-a-constraint:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =IfError(Round(Average(Filter(collectShiftOEE2, shift="C"),pack_per_hour),1),0)
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                    - oee-a-lower:
+                                        Control: GroupContainer
+                                        Variant: horizontalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee-a-runtime-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-a-runtime-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Collected Runtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-a-runtime:
+                                                Control: Label
+                                                Properties:
+                                                  Text: |-
+                                                    =Round(Sum(Filter(collectShiftOEE2, shift= "C"), total_runtime),0) & "H"
+                                                    //RoundDown(LookUp(collectShiftOEE2, shift = "A").runtime,0) & "H "& Mod(LookUp(collectShiftOEE, shift = "A").runtime*60,60) & "m"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-a-downtime-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-a-downtime-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Planned Downtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-a-downtime:
+                                                Control: Label
+                                                Properties:
+                                                  Text: |-
+                                                    =Round(Sum(Filter(collectShiftOEE2, shift = "A"),total_downtime),0) & "H " & Round(Mod(Sum(Filter(collectShiftOEE2, shift = "A"),total_downtime)*60,60),0) & "m"
+                                                    //"Not Collected"
+                                                    //RoundDown(LookUp(collectShiftOEE, shift = "A").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "A").downtime_planned,60) & "m"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-a-possible-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-a-possible-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Possible Runtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-a-possible:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =If('oee-line'.Selected.Value = "All", 11, 1) * 16 * count_of_days & "H"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                        - oee-shift-b:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              BorderColor: =RGBA(0,0,0,0)
+                              DropShadow: =DropShadow.Semilight
+                              Fill: =gTheme.Background_1
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              PaddingLeft: =
+                            Children:
+                            - oee-b-title:
+                                Control: Label
+                                Properties:
+                                  Text: ="B Shift"
+                                  Align: =Align.Center
+                                  Color: =gTheme.Text_Header
+                                  Fill: =gTheme.Secondary
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 3
+                            - oee-b-layout:
+                                Control: GroupContainer
+                                Variant: horizontalAutoLayoutContainer
+                                Properties:
+                                  AlignInContainer: =AlignInContainer.SetByContainer
+                                  DropShadow: =DropShadow.None
+                                  FillPortions: =5
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oee-b-graph:
+                                    Control: Image
+                                    Properties:
+                                      Image: |-
+                                        ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                                        EncodeUrl(
+                                        "{
+                                          type: 'radialGauge',
+                                          data: {
+                                            datasets: [{
+                                              data: ["& LookUp(collectShiftOEE2, shift = "B").OEE2 &"],
+                                              backgroundColor: getGradientFillHelper('horizontal', [
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Blue &"',
+                                                '"& gTheme.Chart_Red &"',
+                                                '"& gTheme.Chart_Red &"',
+                                                '"& gTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                          },
+                                          options: {
+                                            domain: [0, "& If(LookUp(collectShiftOEE2, shift = "B").OEE2 <= 100, 100, LookUp(collectShiftOEE2, shift = "B").OEE2) &"],
+                                            trackColor: '"& gTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                              text: (val) => val + '%',
+                                              fontColor: '"& gTheme.Chart_Black &"'
+                                            },
+                                          }
+                                        }"
+                                        )
+                                      FillPortions: =2
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                - oee-b-data:
+                                    Control: GroupContainer
+                                    Variant: verticalAutoLayoutContainer
+                                    Properties:
+                                      AlignInContainer: =AlignInContainer.SetByContainer
+                                      DropShadow: =DropShadow.None
+                                      FillPortions: =4
+                                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                                      LayoutDirection: =LayoutDirection.Vertical
+                                      LayoutGap: =
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      LayoutMode: =LayoutMode.Auto
+                                      RadiusBottomLeft: =0
+                                      RadiusBottomRight: =0
+                                      RadiusTopLeft: =0
+                                      RadiusTopRight: =0
+                                    Children:
+                                    - oee-b-upper:
+                                        Control: GroupContainer
+                                        Variant: horizontalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee-b-built-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-b-built-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Units Built"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-b-built:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =Sum(Filter(collectShiftOEE2, shift = "B"),total_packs)*1
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-b-goal-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-b-goal-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Build Goal"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-b-goal:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =Round(Sum(Filter(collectShiftOEE2, shift="C"),planned_packs),0)
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-b-constraint-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-b-constraint-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Constraint"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-b-constraint:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =IfError(Round(Average(Filter(collectShiftOEE2, shift="C"),pack_per_hour),1),0)
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                    - oee-b-lower:
+                                        Control: GroupContainer
+                                        Variant: horizontalAutoLayoutContainer
+                                        Properties:
+                                          AlignInContainer: =AlignInContainer.SetByContainer
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          LayoutMode: =LayoutMode.Auto
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                        - oee-b-runtime-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-b-runtime-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Collected Runtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-b-runtime:
+                                                Control: Label
+                                                Properties:
+                                                  Text: |-
+                                                    =Round(Sum(Filter(collectShiftOEE2, shift= "C"), total_runtime),0) & "H"
+                                                    //RoundDown(LookUp(collectShiftOEE2, shift = "B").runtime,0) & "H "& Mod(LookUp(collectShiftOEE, shift = "B").runtime*60,60) & "m"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-b-downtime-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-b-downtime-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Planned Downtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-b-downtime:
+                                                Control: Label
+                                                Properties:
+                                                  Text: |-
+                                                    =Round(Sum(Filter(collectShiftOEE2, shift = "B"),total_downtime),0) & "H " & Round(Mod(Sum(Filter(collectShiftOEE2, shift = "B"),total_downtime)*60,60),0) & "m"
+                                                    //"Not Collected"
+                                                    //RoundDown(LookUp(collectShiftOEE, shift = "B").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "B").downtime_planned,60) & "m"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                                        - oee-b-possible-parent:
+                                            Control: GroupContainer
+                                            Variant: verticalAutoLayoutContainer
+                                            Properties:
+                                              AlignInContainer: =AlignInContainer.SetByContainer
+                                              DropShadow: =DropShadow.None
+                                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                                              LayoutDirection: =LayoutDirection.Vertical
+                                              LayoutMinHeight: =10
+                                              LayoutMinWidth: =10
+                                              LayoutMode: =LayoutMode.Auto
+                                              RadiusBottomLeft: =0
+                                              RadiusBottomRight: =0
+                                              RadiusTopLeft: =0
+                                              RadiusTopRight: =0
+                                            Children:
+                                            - oee-b-possible-title:
+                                                Control: Label
+                                                Properties:
+                                                  Text: ="Possible Runtime"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Accent
+                                                  Fill: =gTheme.Sec_Complement
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4.5
+                                                  Width: =10
+                                            - oee-b-possible:
+                                                Control: Label
+                                                Properties:
+                                                  Text: =If('oee-line'.Selected.Value = "All", 11, 1) * 16 * count_of_days & "H"
+                                                  Align: =Align.Center
+                                                  Color: =gTheme.Text_Dark
+                                                  FillPortions: =1
+                                                  Font: =Font.Verdana
+                                                  LayoutMinHeight: =10
+                                                  LayoutMinWidth: =10
+                                                  Size: =Self.Height / 4
+                                                  Width: =10
+                    - oee-top-downtime:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          BorderColor: =gTheme.Sec_Complement
+                          BorderThickness: |-
+                            =//If(gTheme.Mode = "Light", 0, 1)
+                            0
+                          DropShadow: =DropShadow.Semilight
+                          Fill: =gTheme.Background_1
+                          FillPortions: =2
+                          Height: =Parent.Height
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          PaddingBottom: =varPadding
+                          PaddingTop: =
+                          Width: =Parent.Width * 0.65
+                        Children:
+                        - oee-td-header:
+                            Control: GroupContainer
+                            Variant: manualLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              Fill: =gTheme.Secondary
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.Width
+                            Children:
+                            - oee-td-h-title:
+                                Control: Label
+                                Properties:
+                                  Text: ="Downtime Breakdown"
+                                  Align: =Align.Center
+                                  Color: =gTheme.Text_Header
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  Size: =Self.Height / 3
+                                  Width: =Parent.Width
+                        - oee-td-columns:
+                            Control: GroupContainer
+                            Variant: manualLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              Fill: =gTheme.Sec_Complement
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.Width
+                            Children:
+                            - oee-td-c-amount:
+                                Control: Label
+                                Properties:
+                                  Text: ="Amount"
+                                  Align: =Align.Center
+                                  Color: =gTheme.Text_Accent
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  Size: =Self.Height / 3.5
+                                  Width: =Parent.Width / 2
+                                  X: ='oee-td-c-reason'.X + 'oee-td-c-reason'.Width
+                            - oee-td-c-reason:
+                                Control: Label
+                                Properties:
+                                  Text: ="Reason"
+                                  Align: =Align.Center
+                                  Color: =gTheme.Text_Accent
+                                  Font: =Font.Verdana
+                                  Height: =Parent.Height
+                                  Size: =Self.Height / 3.5
+                                  Width: =Parent.Width / 2
+                        - oee-td-gallery:
+                            Control: Gallery
+                            Variant: galleryVertical
+                            Properties:
+                              Items: |-
+                                =Sort(collectTopDowntime,
+                                    Downtime_Total,
+                                    SortOrder.Descending
+                                )
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DelayItemLoading: =true
+                              FillPortions: =14
+                              Layout: =Layout.Vertical
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              LoadingSpinner: =LoadingSpinner.Data
+                              TemplatePadding: =0
+                              TemplateSize: =Self.Height / 14
+                            Children:
+                            - oee-td-g-amount:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(Parent)
+                                  Text: =RoundDown(ThisItem.Downtime_Total/60,0) & "H " & Mod(ThisItem.Downtime_Total,60) & "m"
+                                  Align: =Align.Center
+                                  Color: =gTheme.Text_Dark
+                                  Font: =Font.Verdana
+                                  Height: =Parent.TemplateHeight - 'oee-td-g-separator'.Height
+                                  Size: =Self.Height / 4.5
+                                  Width: =Parent.TemplateWidth/2
+                                  X: ='oee-td-g-reason'.X + 'oee-td-g-reason'.Width
+                                  Y: =1-1
+                            - oee-td-g-reason:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(Parent)
+                                  Text: =ThisItem.Downtime_Reason
+                                  Align: =Align.Center
+                                  Color: =gTheme.Text_Dark
+                                  Font: =Font.Verdana
+                                  Height: =Parent.TemplateHeight - 'oee-td-g-separator'.Height
+                                  Size: =Self.Height / 4.5
+                                  Width: =Parent.TemplateWidth/2
+                                  X: =1-1
+                                  Y: =1-1
+                            - oee-td-g-separator:
+                                Control: Rectangle
+                                Properties:
+                                  OnSelect: =Select(Parent)
+                                  Fill: =gTheme.Accent
+                                  Height: =Parent.TemplateHeight * 0.025
+                                  Width: =Parent.Width
+                                  Y: =Parent.TemplateHeight - Self.Height
+                - oee-pareto-oee2:
+                    Control: Image
+                    Properties:
+                      Image: |-
+                        ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
+                        EncodeUrl("
+                        {
+                          type: 'bar',
+                          data: {
+                            labels: "&
+                                Concatenate(
+                                    "['",
+                                    Concat(
+                                        Sort(
+                                            Filter(collectTopDowntime,
+                                                Not(Downtime_Reason in collectPlannedReasons)
+                                            ),
+                                            Downtime_Total,
+                                            SortOrder.Descending
+                                        ),
+                                        ThisRecord.Downtime_Reason,
+                                        "',
+                                        '"
+                                    ),
+                                    "']")
+                                &",
+                            datasets: [{
+                              label: 'Frequency',
+                              data: "&
+                                Concatenate(
+                                    "['",
+                                    Concat(
+                                        Sort(
+                                            Filter(collectTopDowntime,
+                                                Not(Downtime_Reason in collectPlannedReasons)
+                                            ),
+                                            Downtime_Total,
+                                            SortOrder.Descending
+                                        ),
+                                        ThisRecord.Downtime_Total,
+                                        "',
+                                        '"
+                                    ),
+                                    "']"
+                                )
+                              &",
+                              backgroundColor: '"& gTheme.Chart_Blue &"'
+                            }, {
+                              label: 'Cumulative Percentage',
+                              data: " & Concatenate("['", Concat(Sort(collectPareto, freq, SortOrder.Descending), ThisRecord.cumulative, "', '"), "']") & ",
+                              type: 'line',
+                              borderColor: '"& gTheme.Chart_Red &"',
+                              fill: false,
+                              yAxisID: 'right-y-axis' // Assign to the right Y-axis
+                            }]
+                          },
+                          options: {
+                            title: {
+                              display: true,
+                              text: 'OEE2 ',
+                            },
+                            scales: {
+                              xAxes: [{
+                                offset: true,
+                                fontColor: '"&gTheme.Chart_Black&"',
+                                ticks:{fontColor: '"&gTheme.Chart_Black&"'},
+                                gridLines: {color: '"&gTheme.Chart_Dim&"'}
+                              }],
+                              yAxes: [{
+                                id: 'left-y-axis',
+                                type: 'linear',
+                                position: 'left',
+                                ticks: {
+                                  beginAtZero: true,
+                                  fontColor: '"&gTheme.Chart_Black&"'
+                                },
+                                gridLines: {color: '"&gTheme.Chart_Dim&"'}
+                              },
+                              {
+                                id: 'right-y-axis',
+                                type: 'linear',
+                                position: 'right',
+                                ticks: {
+                                  beginAtZero: true,
+                                  fontColor: '"&gTheme.Chart_Black&"',
+                                  max: 100,
+                                  stepSize: 20,
+                                  callback: function(value, index, values) {
+                                    return value + '%';
+                                  }
+                                },
+                                gridLines: { 
+                                  drawOnChartArea: false
+                                }
+                              }]
+                            },
+                            tooltips: {
+                              mode: 'index',
+                              intersect: false
+                            },
+                            annotation: {
+                              annotations: [{
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'right-y-axis',
+                                value: 80,
+                                borderColor: '"& gTheme.Chart_Red &"',
+                                borderWidth: 2,
+                                label: {
+                                  enabled: true,
+                                  position: 'right',
+                                  content: '80% Threshold'
+                                }
+                              },
+                              {
+                                type: 'line',
+                                mode: 'vertical',
+                                scaleID: 'x-axis-0',
+                                value: ["& First(Sort(Filter(collectPareto, cumulative >= 80), freq, SortOrder.Descending)).id-1 &"],
+                                borderColor: '"& gTheme.Chart_Blue &"',
+                                borderWidth: 2,
+                                label: {
+                                  enabled: true,
+                                  content: '80% Volume',
+                                  position: 'top',
+                                  backgroundColor: 'rgba(72, 72, 192, 0.5)'
+                                }
+                              }]
+                            }
+                          }
+                        }")
+                      BorderColor: =gTheme.Sec_Complement
+                      BorderThickness: |-
+                        =//If(gTheme.Mode = "Light", 0, 1)
+                        0
+                      Fill: =gTheme.Background_0
+                      Height: =Self.Width / 2.15
+                      HoverFill: =Self.Fill
+                      Width: =Parent.Width * 0.65
+                      X: =Parent.Width/2 - Self.Width/2
+                      Y: =Parent.Height/2 - Self.Height/2
+                - oee-pareto-oee1:
+                    Control: Image
+                    Properties:
+                      Image: |-
+                        ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
+                        EncodeUrl("
+                        {
+                          type: 'bar',
+                          data: {
+                            labels: "&
+                                Concatenate(
+                                    "['",
+                                    Concat(
+                                        Sort(
+                                            Filter(collectTopDowntime,
+                                                Downtime_Reason in collectPlannedReasons
+                                            ),
+                                            Downtime_Total,
+                                            SortOrder.Descending
+                                        ),
+                                        ThisRecord.Downtime_Reason,
+                                        "',
+                                        '"
+                                    ),
+                                    "']")
+                                &",
+                            datasets: [{
+                              label: 'Frequency',
+                              data: "&
+                                Concatenate(
+                                    "['",
+                                    Concat(
+                                        Sort(
+                                            Filter(collectTopDowntime,
+                                                Downtime_Reason in collectPlannedReasons
+                                            ),
+                                            Downtime_Total,
+                                            SortOrder.Descending
+                                        ),
+                                        ThisRecord.Downtime_Total,
+                                        "',
+                                        '"
+                                    ),
+                                    "']"
+                                )
+                              &",
+                              backgroundColor: '"& gTheme.Chart_Blue &"'
+                            }, {
+                              label: 'Cumulative Percentage',
+                              data: " & Concatenate("['", Concat(Sort(collectParetoOEE1, freq, SortOrder.Descending), ThisRecord.cumulative, "', '"), "']") & ",
+                              type: 'line',
+                              borderColor: '"& gTheme.Chart_Red &"',
+                              fill: false,
+                              yAxisID: 'right-y-axis' // Assign to the right Y-axis
+                            }]
+                          },
+                          options: {
+                            title: {
+                              display: true,
+                              text: 'OEE1',
+                            },
+                            scales: {
+                              xAxes: [{
+                                offset: true,
+                                fontColor: '"&gTheme.Chart_Black&"',
+                                ticks:{fontColor: '"&gTheme.Chart_Black&"'},
+                                gridLines: {color: '"&gTheme.Chart_Dim&"'}
+                              }],
+                              yAxes: [{
+                                id: 'left-y-axis',
+                                type: 'linear',
+                                position: 'left',
+                                ticks: {
+                                  beginAtZero: true,
+                                  fontColor: '"&gTheme.Chart_Black&"'
+                                },
+                                gridLines: {color: '"&gTheme.Chart_Dim&"'}
+                              },
+                              {
+                                id: 'right-y-axis',
+                                type: 'linear',
+                                position: 'right',
+                                ticks: {
+                                  beginAtZero: true,
+                                  fontColor: '"&gTheme.Chart_Black&"',
+                                  max: 100,
+                                  stepSize: 20,
+                                  callback: function(value, index, values) {
+                                    return value + '%';
+                                  }
+                                },
+                                gridLines: { 
+                                  drawOnChartArea: false
+                                }
+                              }]
+                            },
+                            tooltips: {
+                              mode: 'index',
+                              intersect: false
+                            },
+                            annotation: {
+                              annotations: [{
+                                type: 'line',
+                                mode: 'horizontal',
+                                scaleID: 'right-y-axis',
+                                value: 80,
+                                borderColor: '"& gTheme.Chart_Red &"',
+                                borderWidth: 2,
+                                label: {
+                                  enabled: true,
+                                  position: 'right',
+                                  content: '80% Threshold'
+                                }
+                              },
+                              {
+                                type: 'line',
+                                mode: 'vertical',
+                                scaleID: 'x-axis-0',
+                                value: ["& First(Sort(Filter(collectParetoOEE1, cumulative >= 80), freq, SortOrder.Descending)).id-1 &"],
+                                borderColor: '"& gTheme.Chart_Blue &"',
+                                borderWidth: 2,
+                                label: {
+                                  enabled: true,
+                                  content: '80% Volume',
+                                  position: 'top',
+                                  backgroundColor: 'rgba(72, 72, 192, 0.5)'
+                                }
+                              }]
+                            }
+                          }
+                        }")
+                      BorderColor: =gTheme.Sec_Complement
+                      BorderThickness: |-
+                        =//If(gTheme.Mode = "Light", 0, 1)
+                        0
+                      Fill: =gTheme.Background_0
+                      Height: =Self.Width / 2.15
+                      HoverFill: =Self.Fill
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Width: =Parent.Width * 0.65
+                      X: =Parent.Width/2 - Self.Width/2
+                      Y: =Parent.Height/2 - Self.Height/2

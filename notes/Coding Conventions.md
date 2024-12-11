@@ -166,6 +166,24 @@ We can use a SharePoint list to store this information, and when the user opens
 the app, access the list, detect the user, and detect that user's preferences
 and load them into the application on launch.
 
+## Dates and Times
+
+The Today() and Now() functions will only update their values when first called
+or used to set parameters. This means for objects like the Text Label, when
+Today() and Now() are used it only pulls in the value stored the last time they
+were called. Other times it works as intended. These are so inconsistent that
+I fix this by assigning the functions to variables.
+
+The variables are set at a global level each time a screen is loaded or 
+logic needs to be run. The variables I set for these purposes is as follows:
+```cpp
+Set(gToday, Today());
+
+Set(gNow, Now());
+
+Set(gHour, Hour(Now()));
+```
+
 ## Collections
 
 Collections in PowerApps are powerful data structures that can be used for a

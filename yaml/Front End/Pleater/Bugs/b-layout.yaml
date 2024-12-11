@@ -1,43 +1,49 @@
-- b_layout:
+- b-layout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
+      DropShadow: =DropShadow.None
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical
       LayoutGap: =
       LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
       Width: =Parent.Width
       X: =
     Children:
-    - b_header:
+    - b-header:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          Fill: =varColor1
+          Fill: =gTheme.Primary
           LayoutAlignItems: =LayoutAlignItems.Stretch
           LayoutGap: =varPadding
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =varPadding/2
+          PaddingBottom: =varPadding / 2
           PaddingLeft: =varPadding
           PaddingRight: =varPadding
-          PaddingTop: =varPadding/2
+          PaddingTop: =varPadding / 2
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - b_back:
+        - b-back:
             Control: Image
             Properties:
               OnSelect: =Back()
               Image: =gblAppIcons.Back
+              Tooltip: ="Return to previous screen."
               AlignInContainer: =AlignInContainer.Stretch
-              HoverFill: =varColor4
+              HoverFill: =gTheme.Accept
               LayoutMinHeight: '=1   '
               LayoutMinWidth: =1
               RadiusBottomLeft: =Self.Height / 2
@@ -45,7 +51,7 @@
               RadiusTopLeft: =Self.Height / 2
               RadiusTopRight: =Self.Height / 2
               Width: =Self.Height
-        - b_logo:
+        - b-logo:
             Control: Image
             Properties:
               OnSelect: =Back()
@@ -56,17 +62,17 @@
               PaddingBottom: =1
               PaddingTop: =1
               Width: =Min(Parent.Width * 0.128, 170)
-        - b_title:
+        - b-title:
             Control: Label
             Properties:
               Text: ="FE Durapore Daily Managmenet System"
               Align: =Align.Center
-              Color: =varColor5
+              Color: =gTheme.Text_Header
               FillPortions: =1
               LayoutMinHeight: =1
               LayoutMinWidth: =1
               Size: =Self.Height / 2
-        - b_h_nav:
+        - b-h-nav:
             Control: GroupContainer
             Variant: horizontalAutoLayoutContainer
             Properties:
@@ -83,53 +89,40 @@
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
-              Width: =b_logo.Width + b_back.Width + varPadding
+              Width: =b-logo.Width + b-back.Width + varPadding
             Children:
-            - b_darkmode:
+            - b-darkmode:
                 Control: Classic/Icon
                 Variant: HalfFilledCircle
                 Properties:
-                  OnSelect: |-
-                    =Set(varDarkMode, !varDarkMode);
-                    If(varDarkMode, 
-
-                        Set(varColor0, RGBA(235,235,235,1));
-                        Set(varColor1, Color.DimGray);       //Rich Purple
-                        Set(varColor2, Color.Gray);      //Rich Blue
-                        Set(varColor3, Color.SlateGray);      //Vibrant Cyan
-                        Set(varColor4, RGBA(205, 170, 135, 1));     //Sensitive Yellow
-                        Set(varColor5, Color.Black);
-                        Set(varColorAccent, RGBA(170, 125, 50, 1));,//Vibrant Yellow
-
-                        Set(varColor0, Color.Black);
-                        Set(varColor1, RGBA(80, 50, 145, 1));       //Rich Purple
-                        Set(varColor2, RGBA(15, 105, 175, 1));      //Rich Blue
-                        Set(varColor3, RGBA(45, 190, 205, 1));      //Vibrant Cyan
-                        Set(varColor4, RGBA(255, 220, 185, 1));     //Sensitive Yellow
-                        Set(varColor5, Color.White);
-                        Set(varColorAccent, RGBA(255, 200, 50, 1)); //Vibrant Yellow
-
-                    );
-                  Color: =If(varDarkMode, Color.White, Color.Black)
+                  OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark), Set(gTheme, gThemeMode.Light))
+                  Tooltip: ="Toggle Light/Dark modes."
+                  Color: =gTheme.Text_Dark
+                  HoverColor: =gTheme.Accent
                   Icon: =Icon.HalfFilledCircle
                   LayoutMinHeight: =1
                   LayoutMinWidth: =1
-                  Rotation: =If(varDarkMode, 180, 0)
+                  PaddingBottom: =5
+                  PaddingLeft: =5
+                  PaddingRight: =5
+                  PaddingTop: =5
+                  Rotation: =If(gTheme.Mode = "Dark", 180, 0)
                   Width: =Self.Height
-            - b_bugs:
+            - b-bugs:
                 Control: Image
                 Properties:
                   Image: =gblAppIcons.Bug
+                  Tooltip: ="Disabled"
                   AlignInContainer: =AlignInContainer.Stretch
                   DisplayMode: =DisplayMode.Disabled
-                  HoverFill: =varColor4
+                  HoverFill: =gTheme.Accept
                   LayoutMinHeight: '=1   '
                   RadiusBottomLeft: =Self.Height / 2
                   RadiusBottomRight: =Self.Height / 2
                   RadiusTopLeft: =Self.Height / 2
                   RadiusTopRight: =Self.Height / 2
                   Width: =Self.Height
-            - b_user_img:
+            - b-user-img:
                 Control: Image
                 Properties:
                   Image: |
@@ -142,40 +135,43 @@
                   RadiusTopLeft: =Self.Height / 2
                   RadiusTopRight: =Self.Height / 2
                   Width: =Self.Height
-    - b_row_0:
+    - b-row-0:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          Fill: =varColor5
-          FillPortions: =15
+          Fill: =gTheme.Background_0
+          FillPortions: =16
           LayoutAlignItems: =LayoutAlignItems.Stretch
-          LayoutGap: =varPadding
+          LayoutGap: =varPadding * 4
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =varPadding
-          PaddingLeft: =Parent.Width * 0.18
-          PaddingRight: =Parent.Width * 0.18
-          PaddingTop: =varPadding
+          PaddingBottom: =Parent.Height * 0.05
+          PaddingLeft: =Parent.Width * 0.20
+          PaddingRight: =Parent.Width * 0.20
+          PaddingTop: =Parent.Height * 0.05
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - b_form_parent:
+        - b-form-parent:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
-              BorderColor: =varColor0
-              BorderThickness: =If(varDarkMode, 1, 0)
+              BorderColor: =gTheme.Sec_Complement
+              BorderThickness: |-
+                =//If(gTheme.Mode = "Light", 0, 1)
+                0
+              Fill: =gTheme.Background_1
               LayoutDirection: =LayoutDirection.Vertical
               LayoutMinHeight: =1
               LayoutMinWidth: =1
               LayoutMode: =LayoutMode.Auto
             Children:
-            - b_form_header:
+            - b-form-header:
                 Control: GroupContainer
                 Variant: horizontalAutoLayoutContainer
                 Properties:
@@ -187,57 +183,59 @@
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                - b_form_title:
+                - b-form-title:
                     Control: Label
                     Properties:
                       Text: ="Report A Bug"
                       Align: =Align.Center
                       AlignInContainer: =AlignInContainer.Stretch
-                      Color: =varColor5
-                      Fill: =varColor2
+                      Color: =gTheme.Text_Header
+                      Fill: =gTheme.Secondary
                       FillPortions: =1
                       Height: =10
                       LayoutMinWidth: =10
                       Size: =Self.Height / 3
-            - b_form:
+            - b-form:
                 Control: Form
                 Layout: vertical
                 Properties:
                   OnFailure: =Notify("Submission Failed.")
-                  OnSuccess: =Notify("Submission Success.");ResetForm(b_form);
+                  OnSuccess: |-
+                    =Notify("Submission Success.");
+                    ResetForm('b-form');
                   DataSource: =BugReports
                   DefaultMode: =FormMode.New
                   FillPortions: =10
                   LayoutMinHeight: =1
                   LayoutMinWidth: =1
                 Children:
-                - User_DataCard1:
+                - b-f-user-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: vertical
                     Properties:
                       DataField: ="User"
                       Default: =ThisItem.User
-                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'User')
+                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,User)
                       Required: =true
-                      Update: =DataCardValue1.Selected
+                      Update: ='b-f-u-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
                     Children:
-                    - StarVisible1:
+                    - b-f-u-star:
                         Control: Label
                         Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Color: =varColor1
-                          Height: =DataCardKey1.Height
+                          Color: =gTheme.Text_Dark
+                          Height: ='b-f-u-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey1.Y
-                    - ErrorMessage1:
+                          Y: ='b-f-u-key'.Y
+                    - b-f-u-error:
                         Control: Label
                         Layout: vertical
                         Properties:
@@ -252,64 +250,67 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue1.Y + DataCardValue1.Height
-                    - DataCardValue1:
+                          Y: ='b-f-u-value'.Y + 'b-f-u-value'.Height
+                    - b-f-u-value:
                         Control: Classic/ComboBox
                         Layout: vertical
                         Properties:
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["DisplayName"]
-                          Items: =Choices([@BugReports].'User')
+                          Items: =Choices([@BugReports].User)
                           SearchFields: =["DisplayName"]
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_Dark
                           DisplayMode: =Parent.DisplayMode
-                          Fill: =RGBA(255,255,255,1)
+                          Fill: =gTheme.Background_0
+                          Height: =Parent.Height * 0.4
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          SelectionColor: =gTheme.Text_Dark
+                          SelectionFill: =gTheme.Sec_Complement
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardKey1.Y + DataCardKey1.Height + 5
-                    - DataCardKey1:
+                          Y: ='b-f-u-key'.Y + 'b-f-u-key'.Height + 5
+                    - b-f-u-key:
                         Control: Label
                         Layout: vertical
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Color: =varColor1
+                          Color: =gTheme.Text_Dark
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
-                          Y: =10
-                - Problem Type_DataCard1:
+                - b-f-type-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: vertical
                     Properties:
                       DataField: ="ProblemType"
                       Default: =ThisItem.'Problem Type'
-                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'ProblemType')
+                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,ProblemType)
                       Required: =true
-                      Update: =DataCardValue4.Selected
+                      Update: ='b-f-t-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
                       Y: =1
                     Children:
-                    - StarVisible4:
+                    - b-f-t-star:
                         Control: Label
                         Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Color: =varColor1
-                          Height: =DataCardKey4.Height
+                          Color: =gTheme.Text_Dark
+                          Height: ='b-f-t-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey4.Y
-                    - ErrorMessage4:
+                          Y: ='b-f-t-key'.Y
+                    - b-f-t-error:
                         Control: Label
                         Layout: vertical
                         Properties:
@@ -324,64 +325,66 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue4.Y + DataCardValue4.Height
-                    - DataCardValue4:
+                          Y: ='b-f-t-value'.Y + 'b-f-t-value'.Height
+                    - b-f-t-value:
                         Control: Classic/ComboBox
                         Layout: vertical
                         Properties:
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["Value"]
-                          Items: =Choices([@BugReports].'ProblemType')
+                          Items: =Choices([@BugReports].ProblemType)
                           SearchFields: =["Value"]
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_Dark
                           DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background_0
+                          Height: =Parent.Height * 0.4
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardKey4.Y + DataCardKey4.Height + 5
-                    - DataCardKey4:
+                          Y: ='b-f-t-key'.Y + 'b-f-t-key'.Height + 5
+                    - b-f-t-key:
                         Control: Label
                         Layout: vertical
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Color: =varColor1
+                          Color: =gTheme.Text_Dark
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
-                          Y: =10
-                - Expected_Result_DataCard1:
+                - b-f-expeted-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: vertical
                     Properties:
                       DataField: ="Expected_Result"
                       Default: =ThisItem.Expected_Result
-                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Expected_Result')
-                      MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, 'Expected_Result')
+                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Expected_Result)
+                      MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Expected_Result)
                       Required: =true
-                      Update: =DataCardValue5.Text
+                      Update: ='b-f-e-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
                       Y: =3
                     Children:
-                    - StarVisible5:
+                    - b-f-e-star:
                         Control: Label
                         Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Color: =varColor1
-                          Height: =DataCardKey5.Height
+                          Color: =gTheme.Text_Dark
+                          Height: ='b-f-e-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey5.Y
-                    - ErrorMessage5:
+                          Y: ='b-f-e-key'.Y
+                    - b-f-e-error:
                         Control: Label
                         Layout: vertical
                         Properties:
@@ -396,68 +399,71 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue5.Y + DataCardValue5.Height
-                    - DataCardValue5:
+                          Y: ='b-f-e-value'.Y + 'b-f-e-value'.Height
+                    - b-f-e-value:
                         Control: Classic/TextInput
                         Layout: vertical
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
                           MaxLength: =Parent.MaxLength
-                          Tooltip: =Parent.DisplayName
+                          Tooltip: ="The expected function or result of the action or problem."
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_Dark
                           DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background_0
                           Height: =Parent.Height * 0.4
+                          HoverFill: =gTheme.Sec_Complement
                           Mode: =TextMode.MultiLine
                           PaddingLeft: =5
                           RadiusBottomLeft: =0
                           RadiusBottomRight: =0
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
+                          Size: =Self.Height / 4
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardKey5.Y + DataCardKey5.Height + 5
-                    - DataCardKey5:
+                          Y: ='b-f-e-key'.Y + 'b-f-e-key'.Height + 5
+                    - b-f-e-key:
                         Control: Label
                         Layout: vertical
                         Properties:
-                          Text: =Parent.DisplayName
+                          Text: ="Expected Result"
                           AutoHeight: =true
-                          Color: =varColor1
+                          Color: =gTheme.Text_Dark
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
-                          Y: =10
-                - Actual_Result_DataCard1:
+                - b-f-actual-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: vertical
                     Properties:
                       DataField: ="Actual_Result"
                       Default: =ThisItem.Actual_Result
-                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Actual_Result')
-                      MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, 'Actual_Result')
+                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Actual_Result)
+                      MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Actual_Result)
                       Required: =true
-                      Update: =DataCardValue6.Text
+                      Update: ='b-f-a-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
                       Y: =4
                     Children:
-                    - StarVisible6:
+                    - b-f-a-star:
                         Control: Label
                         Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Color: =varColor1
-                          Height: =DataCardKey6.Height
+                          Color: =gTheme.Text_Dark
+                          Height: ='b-f-a-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey6.Y
-                    - ErrorMessage6:
+                          Y: ='b-f-a-key'.Y
+                    - b-f-a-eror:
                         Control: Label
                         Layout: vertical
                         Properties:
@@ -472,18 +478,21 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue6.Y + DataCardValue6.Height
-                    - DataCardValue6:
+                          Y: ='b-f-a-value'.Y + 'b-f-a-value'.Height
+                    - b-f-a-value:
                         Control: Classic/TextInput
                         Layout: vertical
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
                           MaxLength: =Parent.MaxLength
-                          Tooltip: =Parent.DisplayName
+                          Tooltip: ="The current result of your action or problem."
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_Dark
                           DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background_0
                           Height: =Parent.Height * 0.4
+                          HoverFill: =gTheme.Sec_Complement
                           Mode: =TextMode.MultiLine
                           PaddingLeft: =5
                           RadiusBottomLeft: =0
@@ -492,20 +501,19 @@
                           RadiusTopRight: =0
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardKey6.Y + DataCardKey6.Height + 5
-                    - DataCardKey6:
+                          Y: ='b-f-a-key'.Y + 'b-f-a-key'.Height + 5
+                    - b-f-a-key:
                         Control: Label
                         Layout: vertical
                         Properties:
-                          Text: =Parent.DisplayName
+                          Text: ="Actual Result"
                           AutoHeight: =true
-                          Color: =varColor1
+                          Color: =gTheme.Text_Dark
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
-                          Y: =10
-                - Environment_DataCard1:
+                - b-f-environment-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: vertical
@@ -513,27 +521,27 @@
                       DataField: ="Environment"
                       Default: |-
                         ={Value: "FE DMS Management"}
-                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Environment')
+                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Environment)
                       Required: =true
-                      Update: =DataCardValue3.Selected
+                      Update: ='b-f-env-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Visible: =false
                       Width: =Parent.Width
                       Y: =5
                     Children:
-                    - StarVisible3:
+                    - b-f-env-star:
                         Control: Label
                         Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey3.Height
+                          Height: ='b-f-env-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey3.Y
-                    - ErrorMessage3:
+                          Y: ='b-f-env-key'.Y
+                    - b-f-env-error:
                         Control: Label
                         Layout: vertical
                         Properties:
@@ -548,14 +556,14 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue3.Y + DataCardValue3.Height
-                    - DataCardValue3:
+                          Y: ='b-f-env-value'.Y + 'b-f-env-value'.Height
+                    - b-f-env-value:
                         Control: Classic/ComboBox
                         Layout: vertical
                         Properties:
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["Value"]
-                          Items: =Choices([@BugReports].'Environment')
+                          Items: =Choices([@BugReports].Environment)
                           SearchFields: =["Value"]
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
@@ -564,8 +572,8 @@
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardKey3.Y + DataCardKey3.Height + 5
-                    - DataCardKey3:
+                          Y: ='b-f-env-key'.Y + 'b-f-env-key'.Height + 5
+                    - b-f-env-key:
                         Control: Label
                         Layout: vertical
                         Properties:
@@ -576,7 +584,7 @@
                           Wrap: =false
                           X: =30
                           Y: =10
-                - Status_DataCard1:
+                - b-f-status-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: vertical
@@ -584,27 +592,27 @@
                       DataField: ="Status"
                       Default: |-
                         ={Value: "Open"}
-                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Status')
+                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Status)
                       Required: =true
-                      Update: =DataCardValue8.Selected
+                      Update: ='b-f-s-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Visible: =false
                       Width: =Parent.Width
                       Y: =6
                     Children:
-                    - StarVisible8:
+                    - b-f-s-star:
                         Control: Label
                         Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey8.Height
+                          Height: ='b-f-s-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey8.Y
-                    - ErrorMessage8:
+                          Y: ='b-f-s-key'.Y
+                    - b-f-s-error:
                         Control: Label
                         Layout: vertical
                         Properties:
@@ -619,14 +627,14 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue8.Y + DataCardValue8.Height
-                    - DataCardValue8:
+                          Y: ='b-f-s-value'.Y + 'b-f-s-value'.Height
+                    - b-f-s-value:
                         Control: Classic/ComboBox
                         Layout: vertical
                         Properties:
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["Value"]
-                          Items: =Choices([@BugReports].'Status')
+                          Items: =Choices([@BugReports].Status)
                           SearchFields: =["Value"]
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
@@ -635,8 +643,8 @@
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardKey8.Y + DataCardKey8.Height + 5
-                    - DataCardKey8:
+                          Y: ='b-f-s-key'.Y + 'b-f-s-key'.Height + 5
+                    - b-f-s-key:
                         Control: Label
                         Layout: vertical
                         Properties:
@@ -647,33 +655,33 @@
                           Wrap: =false
                           X: =30
                           Y: =10
-                - Title_DataCard2:
+                - b-f-description-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Properties:
                       DataField: ="Title"
                       Default: =ThisItem.Title
-                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Title')
-                      MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, 'Title')
+                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Title)
+                      MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Title)
                       Required: =true
-                      Update: =DataCardValue9.Text
+                      Update: ='b-f-d-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
                       Y: =2
                     Children:
-                    - StarVisible9:
+                    - b-f-d-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Color: =varColor1
-                          Height: =DataCardKey9.Height
+                          Color: =gTheme.Text_Dark
+                          Height: ='b-f-d-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey9.Y
-                    - ErrorMessage9:
+                          Y: ='b-f-d-key'.Y
+                    - b-f-d-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
@@ -687,37 +695,40 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue9.Y + DataCardValue9.Height
-                    - DataCardValue9:
+                          Y: ='b-f-d-value'.Y + 'b-f-d-value'.Height
+                    - b-f-d-value:
                         Control: Classic/TextInput
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
                           MaxLength: =Parent.MaxLength
-                          Tooltip: =Parent.DisplayName
+                          Tooltip: ="A short description of the problem."
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_Dark
                           DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background_0
                           Height: =Parent.Height * 0.4
+                          HoverFill: =gTheme.Sec_Complement
                           PaddingLeft: =5
                           RadiusBottomLeft: =0
                           RadiusBottomRight: =0
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
+                          Size: =Self.Height / 4
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardKey9.Y + DataCardKey9.Height + 5
-                    - DataCardKey9:
+                          Y: ='b-f-d-key'.Y + 'b-f-d-key'.Height + 5
+                    - b-f-d-key:
                         Control: Label
                         Properties:
                           Text: ="Short Description"
                           AutoHeight: =true
-                          Color: =varColor1
+                          Color: =gTheme.Text_Dark
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
-                          Y: =10
-            - b_form_footer:
+            - b-form-footer:
                 Control: GroupContainer
                 Variant: horizontalAutoLayoutContainer
                 Properties:
@@ -736,13 +747,15 @@
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                - h_form_reset:
+                - b-form-reset:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: =ResetForm(b_form);
+                      OnSelect: =ResetForm('b-form');
                       Text: ="Reset"
-                      Color: =varColor0
-                      Fill: =varColor3
+                      Tooltip: ="Reset the form to default values."
+                      BorderColor: =gTheme.Pri_Complement
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Deny
                       FillPortions: =1
                       FontWeight: =FontWeight.Normal
                       Height: =10
@@ -751,13 +764,15 @@
                       Size: =Self.Height / 3
                       Width: =10
                       Y: =1
-                - h_form_submit:
+                - b-form-submit:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: =SubmitForm(b_form);
+                      OnSelect: =SubmitForm('b-form');
                       Text: ="Submit"
-                      Color: =varColor5
-                      Fill: =varColorYes
+                      Tooltip: ="Submit the bug report."
+                      BorderColor: =gTheme.Pri_Complement
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Accept
                       FillPortions: =1
                       FontWeight: =FontWeight.Normal
                       Height: =10
@@ -766,13 +781,16 @@
                       Size: =Self.Height / 3
                       Width: =10
                       Y: =1
-        - b_gallery_parent:
+        - b-gallery-parent:
             Control: GroupContainer
             Variant: horizontalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
-              BorderColor: =varColor0
-              BorderThickness: =If(varDarkMode, 1, 0)
+              BorderColor: =gTheme.Sec_Complement
+              BorderThickness: |-
+                =//If(gTheme.Mode = "Light", 0, 1)
+                0
+              Fill: =gTheme.Background_1
               LayoutAlignItems: =LayoutAlignItems.Center
               LayoutDirection: =LayoutDirection.Vertical
               LayoutJustifyContent: =LayoutJustifyContent.Center
@@ -780,7 +798,7 @@
               LayoutMinWidth: =1
               LayoutMode: =LayoutMode.Auto
             Children:
-            - b_gallery_header:
+            - b-gallery-header:
                 Control: GroupContainer
                 Variant: horizontalAutoLayoutContainer
                 Properties:
@@ -792,23 +810,23 @@
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                - b_gallery_title:
+                - b-gallery-title:
                     Control: Label
                     Properties:
                       Text: ="Open Tickets"
                       Align: =Align.Center
                       AlignInContainer: =AlignInContainer.Stretch
-                      Color: =varColor5
-                      Fill: =varColor2
+                      Color: =gTheme.Text_Header
+                      Fill: =gTheme.Secondary
                       FillPortions: =1
                       Height: =10
                       LayoutMinWidth: =10
                       Size: =Self.Height / 3
-            - b_gallery:
+            - b-gallery:
                 Control: Gallery
                 Variant: galleryVertical
                 Properties:
-                  Items: =Sort(Filter(BugReports, Status.Value = "Open", Environment.Value = "FE DMS Management"),Created,SortOrder.Descending)
+                  Items: =Sort(Filter(BugReports, Status.Value <> "Closed", Environment.Value = "FE DMS Management"),Created,SortOrder.Descending)
                   DelayItemLoading: =true
                   FillPortions: =11
                   Layout: =Layout.Vertical
@@ -818,12 +836,12 @@
                   TemplatePadding: =0
                   TemplateSize: =Self.Height / 8
                 Children:
-                - b_g_col_0:
+                - b-g-col-0:
                     Control: GroupContainer
                     Variant: verticalAutoLayoutContainer
                     Properties:
                       DropShadow: =DropShadow.None
-                      Height: =Parent.TemplateHeight - b_g_separator.Height
+                      Height: =Parent.TemplateHeight - 'b-g-separator'.Height
                       LayoutDirection: =LayoutDirection.Vertical
                       LayoutMode: =LayoutMode.Auto
                       RadiusBottomLeft: =0
@@ -832,37 +850,37 @@
                       RadiusTopRight: =0
                       Width: =Parent.TemplateWidth
                     Children:
-                    - b_g_date:
+                    - b-g-date:
                         Control: Label
                         Properties:
-                          Text: ="Created by, " & ThisItem.User.DisplayName &" on "& ThisItem.Created
-                          Color: =varColor0
+                          Text: =ThisItem.Status.Value &" / Created by, " & ThisItem.User.DisplayName &" on "& ThisItem.Created
+                          Color: =gTheme.Text_Dark
                           FillPortions: =1
                           LayoutMinHeight: =1
                           Size: =Self.Height / 3
                           Width: =Parent.Width
-                    - b_g_type:
+                    - b-g-type:
                         Control: Label
                         Properties:
                           Text: =ThisItem.'Problem Type'.Value
-                          Color: =varColor0
+                          Color: =gTheme.Text_Dark
                           FillPortions: =1
                           LayoutMinHeight: =1
                           Size: =Self.Height / 3
                           Width: =Parent.Width
-                    - b_g_title:
+                    - b-g-title:
                         Control: Label
                         Properties:
                           Text: =ThisItem.Title
-                          Color: =varColor0
+                          Color: =gTheme.Text_Dark
                           FillPortions: =1
                           LayoutMinHeight: =1
                           Size: =Self.Height / 3
                           Width: =Parent.Width
-                - b_g_separator:
+                - b-g-separator:
                     Control: Rectangle
                     Properties:
-                      Fill: =varColor4
+                      Fill: =gTheme.Accent
                       Height: =varPadding
                       Width: =Parent.TemplateWidth
                       Y: =Parent.TemplateHeight-Self.Height

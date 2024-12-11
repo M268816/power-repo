@@ -1,4 +1,4 @@
-- t_loading_parent:
+- o-loading-parent:
     Control: GroupContainer
     Variant: manualLayoutContainer
     Properties:
@@ -7,12 +7,14 @@
       Visible: =varLoading.Visible
       Width: =Parent.Width
     Children:
-    - t_loading:
+    - o-loading:
         Control: GroupContainer
         Variant: verticalAutoLayoutContainer
         Properties:
+          BorderColor: =gTheme.Sec_Complement
+          BorderThickness: =If(gTheme.Mode = "Light", 0, 1)
           DropShadow: =DropShadow.Bold
-          Fill: =varColor5
+          Fill: =gTheme.Background_0
           Height: =Parent.Height / 4
           LayoutAlignItems: =LayoutAlignItems.Center
           LayoutDirection: =LayoutDirection.Vertical
@@ -31,16 +33,17 @@
           X: =Center(Parent.Width,Self.Width)
           Y: =Center(Parent.Height,Self.Height)
         Children:
-        - t_l_text:
+        - o-l-text:
             Control: Label
             Properties:
               Text: =varLoading.Text
               Align: =Align.Center
+              Color: =gTheme.Text_Dark
               FillPortions: =1
               LayoutMinHeight: =1
               Size: =Self.Height / 8
               Width: =Parent.Width * 0.8
-        - t_l_progress:
+        - o-l-progress:
             Control: Progress
             Properties:
               Indeterminate: =varLoading.Value = -1
@@ -48,7 +51,7 @@
               FillPortions: =1
               LayoutMinHeight: =1
               Width: =Parent.Width * 0.8
-        - t_l_icon:
+        - o-l-icon:
             Control: Image
             Properties:
               Image: =gblAppIcons.Warning

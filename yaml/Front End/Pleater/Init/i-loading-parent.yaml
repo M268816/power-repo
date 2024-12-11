@@ -1,21 +1,18 @@
-- oee_loading_parent:
+- i-loading-parent:
     Control: GroupContainer
     Variant: manualLayoutContainer
     Properties:
       Fill: =RGBA(0, 0, 0, 0.5)
       Height: =Parent.Height
-      Visible: =varLoading.Visible
       Width: =Parent.Width
     Children:
-    - oee_loading:
+    - i-loading:
         Control: GroupContainer
         Variant: verticalAutoLayoutContainer
         Properties:
-          BorderColor: =varColor0
-          BorderThickness: =If(varDarkMode, 1, 0)
           DropShadow: =DropShadow.Bold
-          Fill: =varColor5
-          Height: =Parent.Height / 4
+          Fill: =gTheme.Background_0
+          Height: =Parent.Height * 0.25
           LayoutAlignItems: =LayoutAlignItems.Center
           LayoutDirection: =LayoutDirection.Vertical
           LayoutGap: =varPadding
@@ -30,20 +27,19 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
           Width: =Parent.Width * 0.3
-          X: =Center(Parent.Width,Self.Width)
-          Y: =Center(Parent.Height,Self.Height)
+          X: =Parent.Width * 0.5 - Self.Width * 0.5
+          Y: =Parent.Height * 0.5 - Self.Height * 0.5
         Children:
-        - oee_l_text:
+        - i-l-text:
             Control: Label
             Properties:
               Text: =varLoading.Text
               Align: =Align.Center
-              Color: =varColor0
               FillPortions: =1
               LayoutMinHeight: =1
-              Size: =Self.Height / 8
+              Size: =Self.Height * 0.128
               Width: =Parent.Width * 0.8
-        - oee_l_progress:
+        - i-l-progress:
             Control: Progress
             Properties:
               Indeterminate: =varLoading.Value = -1
@@ -51,7 +47,7 @@
               FillPortions: =1
               LayoutMinHeight: =1
               Width: =Parent.Width * 0.8
-        - oee_l_icon:
+        - i-l-icon:
             Control: Image
             Properties:
               Image: =gblAppIcons.Warning
