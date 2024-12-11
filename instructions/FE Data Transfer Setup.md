@@ -244,7 +244,7 @@ The downtime data must be transferred from CSV files located on the r:\ drive to
 1. From the power automate editor create a flow with the Recurrence Node
     - Set the interval to 1 and frequency to Hour
     - Set the appropriate time zone
-    - Enter '2024-01-01T00:00:00Z' as the start time
+    - Enter '2024-01-01T00:10:00Z' as the start time
 2. Add a Get File Content Node for OneDrive - Business
     - Make sure it is named 'Get file content'
     - Set the file to the output.csv file we created earlier
