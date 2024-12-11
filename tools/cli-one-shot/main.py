@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, date, timezone, time
-
 import msvcrt
 import os
 import pandas as pd
@@ -11,6 +10,7 @@ RUN_PATH = '.\\run_log.txt'
 # Try: Open or create the error log.
 try:
     ERROR_LOG = open(ERROR_PATH, 'at')
+
 except Exception as e:
     print('[ERROR] Could not open or write the error_log.txt file.')
     print(str(e))
@@ -22,14 +22,19 @@ try:
         print('File permissions modified')
     else:
         print('Error file path not found:', ERROR_PATH)
+
 except PermissionError:
-    print('Permissions denied: You don\'t have the necessary permissions to change the permissions of the error file.')
+    print('''
+        Permissions denied: You do not have the necessary permissions to change
+        the permissions of the error file.
+    ''')
     msvcrt.getch()
 
 # Try: Open or create the run log. Write the start time.
 try:
     RUN_LOG = open(RUN_PATH, 'at')
-    RUN_LOG.write(f'\n[ NEW OPERATION ] Operation Started at: {SERVICE_START}.\n')
+    RUN_LOG.write(f'[ NEW OPERATION ] Operation Started at: {SERVICE_START}.\n')
+
 except Exception as e:
     ERROR_LOG.write(f'[ERROR] Could not open or write the run_log.txt file.\n')
     ERROR_LOG.write(str(e)+'\n')
@@ -41,22 +46,31 @@ try:
         print('File permissions modified')
     else:
         print('Log file path not found:', RUN_PATH)
+
 except PermissionError:
-    print('Permissions denied: You don\'t have the necessary permissions to change the permissions of the log file.')
+    print('''
+        Permissions denied: You don\'t have the necessary permissions to change
+        the permissions of the log file.
+    ''')
     msvcrt.getch()
 
 # Try: Read the csv file paths located from file_locations.csv
 try:
     FILES = pd.read_csv('./file_locations.csv')
+
 except Exception as e:
     ERROR_LOG.write(f'[ERROR] Could not read the file_locations.csv file.\n')
     ERROR_LOG.write(str(e) + '\n')
     msvcrt.getch()
     
-def main():    
-    # Init Variables
-    date_filter = pd.to_datetime(datetime.combine(date=date.today(),time=time(0))) - timedelta(hours=1)
-    # date_filter = pd.to_datetime('2024-10-01 00:00:00') # test date
+def main():
+    # Test date
+    # date_filter = pd.to_datetime('2024-10-01 00:00:00')
+    
+    date_filter = pd.to_datetime(
+        datetime.combine(date=date.today(),time=time(0))
+    )
+    date_filter -= timedelta(hours=1)
     input_files = FILES['Location'][:-1].tolist()
     output_folder = FILES['Location'].iloc[-1]
       
@@ -76,17 +90,30 @@ def main():
             )
             
             # Check row validity through ID column
-            temp_read['ID_is_numeric'] = pd.to_numeric(temp_read['ID'], errors='coerce').notnull()  # Add bool column to check validity
-            temp_read = temp_read[temp_read['ID_is_numeric']]                                       # Return a data frame where validity column is true
-            temp_read = temp_read.drop('ID_is_numeric', axis=1)                                     # Remove the extra column
+            # Add bool column to check validity
+            temp_read['ID_is_numeric'] = pd.to_numeric(
+                temp_read['ID'],
+                errors='coerce'
+            ).notnull()  
+            # Return a data frame where validity column is true
+            temp_read = temp_read[temp_read['ID_is_numeric']]  
+            # Remove the extra column
+            temp_read = temp_read.drop('ID_is_numeric', axis=1)
 
             # Check row validity though datetime column
-            temp_read['DateTime_is_datetime'] = pd.to_datetime(temp_read[' DateTime'], format='%a %b %d %Y %H:%M:%S', errors='coerce').notnull()
+            temp_read['DateTime_is_datetime'] = pd.to_datetime(
+                temp_read[' DateTime'],
+                format='%a %b %d %Y %H:%M:%S',
+                errors='coerce'
+            ).notnull()
             temp_read = temp_read[temp_read['DateTime_is_datetime']]
             temp_read = temp_read.drop('DateTime_is_datetime', axis=1)
 
             # Check row validity through downtime minutes column
-            temp_read['Downtime_is_numeric'] = pd.to_numeric(temp_read[' Downtime Minutes'], errors='coerce').notnull()
+            temp_read['Downtime_is_numeric'] = pd.to_numeric(
+                temp_read[' Downtime Minutes'],
+                errors='coerce'
+            ).notnull()
             temp_read = temp_read[temp_read['Downtime_is_numeric']]
             temp_read = temp_read.drop('Downtime_is_numeric', axis=1)
             
@@ -106,29 +133,48 @@ def main():
         cleaned_file = pd.concat(data_frames, ignore_index=True)
 
         # Try: applying the datetime type to the ' Datetime' column
-        print('Formatting DateTime to Datetime')
+        print('Formatting \' DateTime\' to Datetime')
         try:
-            cleaned_file[' DateTime'] = pd.to_datetime(cleaned_file[' DateTime'])
+            cleaned_file[' DateTime'] = pd.to_datetime(
+                cleaned_file[' DateTime']
+            )
         except Exception as e:
-            ERROR_LOG.write(str(e) + 'INVALID DATE FOUND\n') # Convert DateTime column to iso datetime format
+            ERROR_LOG.write(str(e) + 'INVALID DATE FOUND\n')
         
         return cleaned_file
     
     def sum_short_stops(input_file):
         print('Combining Short Stop Records')
         short_stops = input_file.copy()
-        short_stops[' Downtime Minutes'] = pd.to_numeric(short_stops[' Downtime Minutes'], errors='coerce')
+        short_stops[' Downtime Minutes'] = pd.to_numeric(
+            short_stops[' Downtime Minutes'],
+            errors='coerce'
+        )
         
         short_stops[' DateTime'] = short_stops[' DateTime'].dt.date
-        short_stops = short_stops[short_stops[' Downtime Reason'] == 'Short Stop']
+        short_stops = short_stops[
+            short_stops[' Downtime Reason'] == 'Short Stop'
+        ]
         
-        short_stops = short_stops.groupby([' DateTime', 'Pleater', ' Shift'])[' Downtime Minutes'].sum()
+        short_stops = short_stops.groupby([
+                ' DateTime',
+                'Pleater',
+                ' Shift'
+            ])[' Downtime Minutes'].sum()
         short_stops = short_stops.reset_index()
         short_stops['ID'] = 0
         short_stops[' Downtime Reason'] = 'Short Stop'
         short_stops[' Comments'] = 'MERGED RECORDS'
         
-        short_stops = short_stops[['ID', ' DateTime', ' Shift', ' Downtime Minutes', ' Downtime Reason', ' Comments', 'Pleater']]
+        short_stops = short_stops[[
+                'ID',
+                ' DateTime',
+                ' Shift',
+                ' Downtime Minutes',
+                ' Downtime Reason',
+                ' Comments',
+                'Pleater'
+            ]]
 
         # Reformat csv file
         summed_file = input_file[input_file[' Downtime Reason'] != 'Short Stop']
@@ -140,19 +186,34 @@ def main():
     def sum_not_entered(input_file):
         print('Combining Not Entered Records')
         not_entered = input_file.copy()
-        not_entered[' Downtime Minutes'] = pd.to_numeric(not_entered[' Downtime Minutes'], errors='coerce')
+        not_entered[' Downtime Minutes'] = pd.to_numeric(
+            not_entered[' Downtime Minutes'],
+            errors='coerce'
+        )
         not_entered[' DateTime'] = not_entered[' DateTime'].dt.date
         not_entered = not_entered[
             (not_entered[' Downtime Reason'] == 'Not Entered') |
             (not_entered[' Downtime Reason'] == '') |
             (not_entered[' Downtime Reason'].isnull())
         ]
-        not_entered = not_entered.groupby([' DateTime', 'Pleater', ' Shift'])[' Downtime Minutes'].sum()
+        not_entered = not_entered.groupby([
+            ' DateTime',
+            'Pleater',
+            ' Shift'
+        ])[' Downtime Minutes'].sum()
         not_entered = not_entered.reset_index()
         not_entered['ID'] = 0
         not_entered[' Downtime Reason'] = 'Not Entered'
         not_entered[' Comments'] = 'MERGED RECORDS'
-        not_entered = not_entered[['ID', ' DateTime', ' Shift', ' Downtime Minutes', ' Downtime Reason', ' Comments', 'Pleater']]
+        not_entered = not_entered[[
+            'ID',
+            ' DateTime',
+            ' Shift',
+            ' Downtime Minutes',
+            ' Downtime Reason',
+            ' Comments',
+            'Pleater'
+        ]]
 
         # Reformat csv file
         summed_file = input_file[
@@ -168,21 +229,34 @@ def main():
         return summed_file
     
     def filter_by_date(input_file):
-        # Try: Filter by date
         print(f'Filtering records >= {date_filter}')
         filtered_file = input_file
+        
+        # Try: Filter by date
         try:
             filtered_file = input_file[input_file[' DateTime'] >= date_filter]
-            filtered_file = sum_short_stops(filtered_file) # Combine 'Short Stop' records
-            filtered_file = sum_not_entered(filtered_file) # Combine 'Not Entered' and Blank records
+            # Combine 'Short Stop' records
+            filtered_file = sum_short_stops(filtered_file)
+            # Combine 'Not Entered' and Blank records
+            filtered_file = sum_not_entered(filtered_file)
         except Exception as e:
-            ERROR_LOG.write(str(e) + ' INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED\n')
+            ERROR_LOG.write(
+                str(e) + '''
+                INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED\n
+                '''
+            )
         
         return filtered_file
     
     def duplicate_check(input_file):
         print('Dropping possible duplicates')
-        filtered_file = input_file.drop_duplicates(subset=['ID', ' Shift', 'Pleater'])
+        filtered_file = input_file.drop_duplicates(
+            subset=[
+                'ID',
+                ' Shift',
+                'Pleater'
+            ]
+        )
         return filtered_file
         
     def process_files():
@@ -193,9 +267,15 @@ def main():
         
         # Try: Output to csv
         try:
-            csv_file.to_csv(output_folder + '\\! - output.csv', index=False) # Return the filtered file content
+             # Return the filtered file content
+            csv_file.to_csv(output_folder + '\\! - output.csv', index=False)
         except Exception as e:
-            ERROR_LOG.write(str(e) + 'Output file could not be written! Process Aborted. Is the output file opened?')
+            ERROR_LOG.write(
+                str(e) +'''
+                Output file could not be written! Process Aborted.
+                Is the output file opened?\n
+                '''
+            )
         
         # Capture execution time
         execute_time_end = datetime.now(timezone.utc)
@@ -208,7 +288,10 @@ def main():
     
     def main_service():
         if len(input_files) == 0:
-            RUN_LOG.write('No file(s) selected, service not started, import from file_locations.csv.\n')
+            RUN_LOG.write('''
+                No file(s) selected, service not started.
+                Import from file_locations.csv.\n
+            ''')
             return
                 
         print(f'[{datetime.now()}] Processing Files:')
