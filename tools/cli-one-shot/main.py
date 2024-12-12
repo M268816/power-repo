@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, date, timezone, time
 import msvcrt
 import os
 import pandas as pd
+import textwrap
 
 SERVICE_START = datetime.strftime(datetime.now(), '%d-%m-%Y, %H:%M:%S')
 ERROR_PATH = '.\\error_log.txt'
@@ -34,7 +35,9 @@ except PermissionError:
 # Try: Open or create the run log.
 try:
     RUN_LOG = open(RUN_PATH, 'at')
-    RUN_LOG.write(f'[ NEW OPERATION ] Operation Started at: {SERVICE_START}.\n')
+    RUN_LOG.write(
+        f'\n[ NEW OPERATION ] Operation Started at: {SERVICE_START}.\n'
+    )
 
 except Exception as e:
     ERROR_LOG.write(
@@ -51,10 +54,10 @@ try:
         ERROR_LOG.write('Log file path not found:', RUN_PATH + '\n')
 
 except PermissionError:
-    ERROR_LOG.write('''
+    ERROR_LOG.write(textwrap.dedent('''
         Permissions denied: You don\'t have the necessary permissions to change
         the permissions of the log file.\n
-    ''')
+    ''').strip())
 
 # Try: Read the csv file paths located from file_locations.csv
 try:
@@ -86,7 +89,7 @@ def main():
             date=date.today(),
             time=time(datetime.now().hour)
         )
-    ) - timedelta(hours=1)
+    ) - timedelta(hours=4)
     
     input_files = FILES['Location'][:-1].tolist()
     output_folder = FILES['Location'].iloc[-1]
@@ -135,10 +138,10 @@ def main():
             temp_read = temp_read.drop('Downtime_is_numeric', axis=1)
             
             # New Pleater Capture
-            #   Split i(path) by '\',
-            #   return last string [-1](file name),
-            #   split file name by '_',
-            #   return first string [0]
+            # Split i(path) by '\',
+            # return last string [-1](file name),
+            # split file name by '_',
+            # return first string [0]
             pleater = i.split('\\')[-1].split('_')[0]
             
             # Add Pleater line to output
@@ -251,16 +254,18 @@ def main():
         
         # Try: Filter by date
         try:
-            filtered_file = filtered_file[filtered_file[' DateTime'] >= date_filter]
+            filtered_file = filtered_file[
+                filtered_file[' DateTime'] >= date_filter
+            ]
             # Combine 'Short Stop' records
             filtered_file = sum_short_stops(filtered_file)
             # Combine 'Not Entered' and Blank records
             filtered_file = sum_not_entered(filtered_file)
         except Exception as e:
-            ERROR_LOG.write('''
+            ERROR_LOG.write(textwrap.dedent('''
                 INVALID DATE FORMAT FOUND IN DATETIME COLUMN
                 WHILE FILTERING FOR DATE. PROCESS ABORTED\n
-                '''
+                ''').strip()
                 + str(e) + '\n'
             )
         
@@ -271,21 +276,27 @@ def main():
         print(f'Starting hour: {time_filter_start}.')
         print(f'Ending hour: {time_filter_end}.')
         
-        filtered_file = input_file
+        filtered_file = input_file.copy()
+        filtered_file
         try:
+            print('Before Filter')
+            print(filtered_file.head())
             filtered_file = filtered_file[
-                (filtered_file[' DateTime'] > time_filter_start)
-                & (filtered_file[' DateTime'] <= time_filter_end)
+                ((filtered_file[' DateTime'] > time_filter_start)
+                & (filtered_file[' DateTime'] <= time_filter_end))
             ]
+            print('After Filter')
+            print(filtered_file.head())
         except Exception as e:
-            ERROR_LOG.write('''
+            ERROR_LOG.write(textwrap.dedent('''
                 INVALID DATE FORMAT FOUND IN DATETIME COLUMN
                 WHILE FILTERING FOR TIME. PROCESS ABORTED\n
-                '''.strip(' ')
+                ''').strip()
                 + str(e) + '\n'
                 + str(filtered_file)
             )
         
+
         return filtered_file
     
     def duplicate_check(input_file):
@@ -309,13 +320,19 @@ def main():
         # Try: Output to csv
         try:
              # Return the filtered file content
-            csv_file.to_csv(output_folder + '\\!daily.csv', index=False)
-            hourly_csv_file.to_csv(output_folder + '\\!hourly.csv')
+            csv_file.to_csv(output_folder
+                + '\\!-daily-output.csv',
+                index=False
+            )
+            hourly_csv_file.to_csv(output_folder
+                + '\\!-hourly-output.csv',
+                index=False
+            )
         except Exception as e:
-            ERROR_LOG.write('''
+            ERROR_LOG.write(textwrap.dedent('''
                 Output file could not be written! Process Aborted.
                 Is the output file opened?\n
-                '''
+                ''').strip()
                 + str(e) + '\n'
             )
         
@@ -330,10 +347,10 @@ def main():
     
     def main_service():
         if len(input_files) == 0:
-            RUN_LOG.write('''
+            RUN_LOG.write(textwrap.dedent('''
                 No file(s) selected, service not started.
                 Import from file_locations.csv.\n
-            ''')
+            ''').strip())
             return
                 
         print(f'[{datetime.now()}] Processing Files:')
