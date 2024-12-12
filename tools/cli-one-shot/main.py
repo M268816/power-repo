@@ -6,6 +6,7 @@ import pandas as pd
 SERVICE_START = datetime.strftime(datetime.now(), '%d-%m-%Y, %H:%M:%S')
 ERROR_PATH = '.\\error_log.txt'
 RUN_PATH = '.\\run_log.txt'
+LINES_IN_OPERATION = ['12','34','EF','GH','JK','LM','NO','PQ','WX','YZ']
 
 # Try: Open or create the error log.
 try:
@@ -30,14 +31,16 @@ except PermissionError:
     ''')
     msvcrt.getch()
 
-# Try: Open or create the run log. Write the start time.
+# Try: Open or create the run log.
 try:
     RUN_LOG = open(RUN_PATH, 'at')
     RUN_LOG.write(f'[ NEW OPERATION ] Operation Started at: {SERVICE_START}.\n')
 
 except Exception as e:
-    ERROR_LOG.write(f'[ERROR] Could not open or write the run_log.txt file.\n')
-    ERROR_LOG.write(str(e)+'\n')
+    ERROR_LOG.write(
+        f'[ERROR] Could not open or write the run_log.txt file.\n'
+        + str(e) + '\n'
+    )
 
 # Ensure file permissions for the Run Log
 try:
@@ -45,23 +48,23 @@ try:
         os.chmod(RUN_PATH, 0o666)
         print('File permissions modified')
     else:
-        print('Log file path not found:', RUN_PATH)
+        ERROR_LOG.write('Log file path not found:', RUN_PATH + '\n')
 
 except PermissionError:
-    print('''
+    ERROR_LOG.write('''
         Permissions denied: You don\'t have the necessary permissions to change
-        the permissions of the log file.
+        the permissions of the log file.\n
     ''')
-    msvcrt.getch()
 
 # Try: Read the csv file paths located from file_locations.csv
 try:
-    FILES = pd.read_csv('./file_locations.csv')
+    FILES = pd.read_csv('.\\file_locations.csv')
 
 except Exception as e:
-    ERROR_LOG.write(f'[ERROR] Could not read the file_locations.csv file.\n')
-    ERROR_LOG.write(str(e) + '\n')
-    msvcrt.getch()
+    ERROR_LOG.write(
+        f'[ERROR] Could not read the file_locations.csv file.\n'
+        + str(e) + '\n'
+    )
     
 def main():
     # Test date
@@ -69,8 +72,22 @@ def main():
     
     date_filter = pd.to_datetime(
         datetime.combine(date=date.today(),time=time(0))
+    ) - timedelta(hours=1)
+    
+    time_filter_end = pd.to_datetime(
+        datetime.combine(
+            date=date.today(),
+            time=time(datetime.now().hour)
+        )
     )
-    date_filter -= timedelta(hours=1)
+    
+    time_filter_start = pd.to_datetime(
+        datetime.combine(
+            date=date.today(),
+            time=time(datetime.now().hour)
+        )
+    ) - timedelta(hours=1)
+    
     input_files = FILES['Location'][:-1].tolist()
     output_folder = FILES['Location'].iloc[-1]
       
@@ -97,7 +114,7 @@ def main():
             ).notnull()  
             # Return a data frame where validity column is true
             temp_read = temp_read[temp_read['ID_is_numeric']]  
-            # Remove the extra column
+            # Remove the bool column
             temp_read = temp_read.drop('ID_is_numeric', axis=1)
 
             # Check row validity though datetime column
@@ -139,7 +156,7 @@ def main():
                 cleaned_file[' DateTime']
             )
         except Exception as e:
-            ERROR_LOG.write(str(e) + 'INVALID DATE FOUND\n')
+            ERROR_LOG.write('INVALID DATE FOUND\n' + str(e) + '\n')
         
         return cleaned_file
     
@@ -234,16 +251,39 @@ def main():
         
         # Try: Filter by date
         try:
-            filtered_file = input_file[input_file[' DateTime'] >= date_filter]
+            filtered_file = filtered_file[filtered_file[' DateTime'] >= date_filter]
             # Combine 'Short Stop' records
             filtered_file = sum_short_stops(filtered_file)
             # Combine 'Not Entered' and Blank records
             filtered_file = sum_not_entered(filtered_file)
         except Exception as e:
-            ERROR_LOG.write(
-                str(e) + '''
-                INVALID DATE FORMAT FOUND IN DATETIME COLUMN. PROCESS ABORTED\n
+            ERROR_LOG.write('''
+                INVALID DATE FORMAT FOUND IN DATETIME COLUMN
+                WHILE FILTERING FOR DATE. PROCESS ABORTED\n
                 '''
+                + str(e) + '\n'
+            )
+        
+        return filtered_file
+    
+    def filter_by_time(input_file):
+        print('Creating hourly filter.')
+        print(f'Starting hour: {time_filter_start}.')
+        print(f'Ending hour: {time_filter_end}.')
+        
+        filtered_file = input_file
+        try:
+            filtered_file = filtered_file[
+                (filtered_file[' DateTime'] > time_filter_start)
+                & (filtered_file[' DateTime'] <= time_filter_end)
+            ]
+        except Exception as e:
+            ERROR_LOG.write('''
+                INVALID DATE FORMAT FOUND IN DATETIME COLUMN
+                WHILE FILTERING FOR TIME. PROCESS ABORTED\n
+                '''.strip(' ')
+                + str(e) + '\n'
+                + str(filtered_file)
             )
         
         return filtered_file
@@ -264,17 +304,19 @@ def main():
         csv_file = clean_csvs()
         csv_file = filter_by_date(csv_file)
         csv_file = duplicate_check(csv_file)
+        hourly_csv_file = filter_by_time(csv_file)
         
         # Try: Output to csv
         try:
              # Return the filtered file content
-            csv_file.to_csv(output_folder + '\\! - output.csv', index=False)
+            csv_file.to_csv(output_folder + '\\!daily.csv', index=False)
+            hourly_csv_file.to_csv(output_folder + '\\!hourly.csv')
         except Exception as e:
-            ERROR_LOG.write(
-                str(e) +'''
+            ERROR_LOG.write('''
                 Output file could not be written! Process Aborted.
                 Is the output file opened?\n
                 '''
+                + str(e) + '\n'
             )
         
         # Capture execution time
@@ -282,9 +324,9 @@ def main():
         execute_time = execute_time_end - execute_time_start
         execute_time = round(execute_time.total_seconds()*1000,0)
         RUN_LOG.write(f'CSV Files Processed in {execute_time}ms.\n')
-        RUN_LOG.write(f'CSV Saved into: {output_folder}\n')
+        RUN_LOG.write(f'CSV Files Saved into: {output_folder}\n')
         print(f'CSV Files Processed in {execute_time}ms')
-        print(f'CSV Saved into: {output_folder}')
+        print(f'CSV Files Saved into: {output_folder}')
     
     def main_service():
         if len(input_files) == 0:
