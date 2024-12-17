@@ -7,7 +7,6 @@ import textwrap
 SERVICE_START = datetime.strftime(datetime.now(), '%d-%m-%Y, %H:%M:%S')
 ERROR_PATH = '.\\error_log.txt'
 RUN_PATH = '.\\run_log.txt'
-LINES_IN_OPERATION = ['12','34','EF','GH','JK','LM','NO','PQ','WX','YZ']
 
 # Try: Open or create the error log.
 try:
@@ -71,7 +70,7 @@ except Exception as e:
     
 def main():
     # Test date
-    # date_filter = pd.to_datetime('2024-10-01 00:00:00')
+    # date_filter = pd.to_datetime('1990-10-16 20:00:00')
     
     date_filter = pd.to_datetime(
         datetime.combine(date=date.today(),time=time(0))
@@ -137,11 +136,11 @@ def main():
             temp_read = temp_read[temp_read['Downtime_is_numeric']]
             temp_read = temp_read.drop('Downtime_is_numeric', axis=1)
             
-            # New Pleater Capture
-            # Split i(path) by '\',
-            # return last string [-1](file name),
+            # Capture pleater from file name.
+            # Split i (path) by '\',
+            # return last string [-1] (file name),
             # split file name by '_',
-            # return first string [0]
+            # return first string [0] (pleater)
             pleater = i.split('\\')[-1].split('_')[0]
             
             # Add Pleater line to output
@@ -279,14 +278,10 @@ def main():
         filtered_file = input_file.copy()
         filtered_file
         try:
-            print('Before Filter')
-            print(filtered_file.head())
             filtered_file = filtered_file[
                 ((filtered_file[' DateTime'] > time_filter_start)
                 & (filtered_file[' DateTime'] <= time_filter_end))
             ]
-            print('After Filter')
-            print(filtered_file.head())
         except Exception as e:
             ERROR_LOG.write(textwrap.dedent('''
                 INVALID DATE FORMAT FOUND IN DATETIME COLUMN

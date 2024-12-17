@@ -66,3 +66,8 @@ Service Ended: 12-12-2024, 10:41:52
 CSV Files Processed in 4646.0ms.
 CSV Files Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
 Service Ended: 12-12-2024, 10:43:30
+
+[ NEW OPERATION ] Operation Started at: 17-12-2024, 07:29:59.
+CSV Files Processed in 8317.0ms.
+CSV Files Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
+Service Ended: 17-12-2024, 07:30:08
