@@ -2,12 +2,12 @@
 ## High Level
 | Process            | Status            | Target Date       | Completion Date   |
 | ------------------ |:-----------------:|------------------:| ----------------- |
-| Custom Data Retrieval  | Final Testing | 01 DEC 2024 | --- |
-| PowerApp Initial Build | Alpha | 31 DEC 2024 | --- |
-| Backup Deliverables - Manual Method | Alpha | 31 JAN 2025 | --- |
+| Custom Data Retrieval  | Completed | 01 DEC 2024 | 26 DEC 2024 |
+| PowerApp Initial Build | Completed | 31 DEC 2024 | 26 DEC 2024 |
+| Backup Deliverables - Manual Method | WIP | 31 JAN 2025 | --- |
 | Databases Fully Established | Alpha | 14 FEB 2025 | --- |
-| Service Computer Setup | Alpha | 24 FEB 2025 | --- |
-| OEE Algorithms Completed | Alpha | 03 MAR 2025 | --- |
+| Service Computer Setup | Beta | 24 FEB 2025 | --- |
+| OEE Algorithms Completed | Beta | 03 MAR 2025 | --- |
 | PowerApp Launch | --- | 31 MAR 2025 | --- |
 
 ## Low Level
@@ -20,24 +20,23 @@
 | ----- | Custom CSV Loader Program - CLI | Completed | 25 OCT 2024 | --- |
 | ----- | Access DB connection to PowerApp Established | Completed | 15 NOV 2024 | --- |
 | ----- | Complete Constraint Data | Completed | 17 JAN 2025 | Using Nominals for v1 |
-| ----- | Backup Deliverable - Production | Alpha | 31 JAN 2025 | Time loss |
-| ----- | Backup Deliverable - Management | Alpha | 31 JAN 2025 | Time loss |
+| +++++ | Backup Deliverable - Production | WIP | 31 JAN 2025 | --- |
+| +++++ | Backup Deliverable - Management | WIP | 31 JAN 2025 | --- |
 | ----- | Data Connections Established - Initial | Alpha | 31 JAN 2025 | --- |
-| ----- | PowerApp for Management - Initial Build | Alpha | 14 FEB 2025 | --- |
-| ----- | Power Bi connection to PowerApp Established | On Hold | 21 FEB 2025 | --- |
-| ----- | Service PC Setup | Alpha | 24 FEB 2025 | --- |
-| ----- | Data Connections Established - Final | --- | 24 FEB 2025 | --- |
+| ----- | PowerApp for Management - Initial Build | Completed | 14 FEB 2025 | --- |
+| ----- | Power Bi connection to PowerApp Established | Cancelled | 21 FEB 2025 | --- |
+| ----- | Service PC Setup | Completed | 24 FEB 2025 | --- |
+| ----- | Data Connections Established - Final | Cancelled | 24 FEB 2025 | --- |
 | ----- | OEE Algorithms Completed | Alpha | 03 MAR 2025 | --- |
-| ----- | PowerApp for Management - Alpha | --- | 10 MAR 2025 | Bug Fixes |
-| ----- | PowerApp for Management - Beta | --- | 17 MAR 2025 | Bug Fixes |
-| ----- | PowerApp for Management - Launch | --- | 31 MAR 2025 | Projected Launch Day |
-
+| ----- | PowerApp for Management - Alpha | Cancelled | 10 MAR 2025 | Bug Fixes |
+| ----- | PowerApp for Management - Beta | Cancelled | 17 MAR 2025 | Bug Fixes |
+| ----- | PowerApp for Management - Launch | Cancelled | 31 MAR 2025 | Projected Launch Day |
 
 *Subject to changes*
 
 ## Current Challenges
 
-- Time loss due to scope change
+- Time loss due to scope change - Mid September
     - Previously acquired assets from the Encapsulation Application are non-transferrable. (Old app templates, database structure)
     - Formula and Algorithm scope has changed, more complex, non-transferrable
     - New knowledge of processes, programs and data transfer are required before actionable progress can be made. 
@@ -51,7 +50,8 @@
 
 - Missing Lot Information for downtime collection
     - Downtime tracking will not be as robust as the Encapsulation version.
-    - A simple graphing version can still be made for downtime reasons, but only the built in reasons from the CSV and not the updated LSPS downtime codes
+    - A simple graphing version can still be made for downtime reasons, but only
+        the built in reasons from the CSV and not the updated LSPS downtime codes
     - OEE2 Calculations will be simplified, robust data filtering cannot be achieved
 
 - Planned Runtime cannot be captured with this initial version
@@ -72,6 +72,14 @@
 
 - Backup Deliverable
     - To mitigate a total failure of this semi-automatic intermediate project using existing data systems, a backup deliverable is being programmed in tandem with this project to handle all required data entries that are required to compile a complete oee2 system.
+
+- Scope changes - 30 DEC 2024
+    - Due to a change in upper management's project vision as per a one on one
+        meeting with J.Tomachick on 30 DEC 2024, progress on the semi-automatic
+        system was halted and the scope returned to a manual method.
+    - Data acquisition will also be repurposed to focus from day to day operations
+        to a high level management perspective focused on Toyota Model OEE and not
+        LSPS OEE2
 
 # A possible future of data Analysis
 
