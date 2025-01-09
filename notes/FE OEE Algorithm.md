@@ -1,3 +1,25 @@
+# OEE2 Method
+
+> OEE2 = Total Packs / Planned Packs
+
+> Total Packs = (End Catalog# - Start Catalog#) + 1
+
+Total packs are pulled from a selected date range and calculated from the Pleater Line Access Database. The database holds Start and End Catalog data that can be summed over each record pulled.
+
+> Planned Packs = (Average Pleats Per Hour / Pleats Per Pack) * Total Runtime Hours
+
+Because of the quality of information in the Pleater Line Access Database, calculating planned packs needs to be averaged by each lines statistical history of run product. Planned packs are calculated from the average pleats per minute of a single lane of a pleater asset.
+
+The Pleater Line Access Database does not contain the proper information of the pleater speed setting. Because of this we cannot calculate the pleat per hour variable for our planned pack formula. I completed a study of each lane 3 year history to help justify using an average pleat per minute speed instead.
+
+I found that 64% of the available data suggests that 80% of our product runs at nominal speeds. 60ppm for Main Room and Opti, and 120ppm for Express and High Speed.
+
+Total Packs for EF = ( 2001 - 1750 ) + 1 = 252
+
+Planned Packs for EF = ( 3600 / 137.3044 ) * 24 = 629.25
+
+OEE2 for EF = 252 / 629.25 = 40%
+
 # OEE v1.5
 
 Here is a v1.5 of the FE OEE Algorithm, produced after the 11/18/24 meeting with Chad

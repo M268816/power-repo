@@ -10,26 +10,32 @@ when using outside data sources, it's good practice to first create the database
 you want to pull the information from. Once the initial data base structure is
 built, it makes linking to PowerApps a much simpler process.
 
-Currently I use SharePoint Lists and format list names in Pascal case, column
-names in snake case and with all first letters capitalized. Values can be 
-formatted appropriately for their needs.
+Currently I use SharePoint Lists and format list names in pascal case, column
+names in capitalized snake case. Values can be formatted appropriately for
+their needs.
 
 ### UserPreferences
 
 | First_Name | Last_Name | E_Mail                            | Theme_Mode |
 |:---------- |:--------- |:--------------------------------- |:---------- |
-| Raymond    | Comeau    | raymond.comeau@milliporesigma.com | "Light"    |
-| Someone    | Else      | someone.else@milliporesigma.com   | "Dark"     |
+| Raymond    | Comeau    | raymond.comeau@milliporesigma.com | ( Light )  |
+| Someone    | Else      | someone.else@milliporesigma.com   | ( Dark )   |
 
 ## Objects / Controls
 
+```
+<Screen>-<Parent>-<Object>-<Iteration>"
+```
+
 Because the complexity of object trees can increase quickly naming objects in
-the app can get out of hand very quickly. To combat this, I use kebab case as my
-naming convention as a distinguishing factor between variables, then begin the
-name with a parent screen. Next, the lowest significant parent of the object on
-on the tree is added to the name until I need to use an unique identifier. For
-example, A submit button on the home page in the main content of the screen may
-be named 'h-form-submit'. The parent structure looks like this.
+the app can get out of hand quickly. To combat this; first I use kebab case to
+distinguish between objects and variables, then begin the name of an object with
+its parent screen. Next, the lowest significant parent of the object on the tree
+is added to the name until I need to use an unique identifier. For example, A
+button that would submit information on the home page, located in the main form
+content of the screen may be named 'h-form-submit'.
+
+The parent structure looks like this.
 ```
 Home
   |_. h-popups
@@ -50,10 +56,10 @@ Home
     |_. h-footer
 ```
 Each object starts with the first letter of the screen's name. Then they receive
-either, their own name, becoming a parent, or their first significant parent's
-name. With the submit button nested so far within the tree, naming it something
-like 'h-main-body-form-submit' is too unwieldy. So, nested controls should only
-try and be as distinctive as their screen name and lowest significant parent.
+either, their own name, becoming a parent, or their parent's name. With the
+submit button nested so far within the tree, naming it something like
+'h-main-body-form-submit' is too unwieldy. So, nested controls should only try
+and be as distinctive as their screen name and *lowest significant parent*.
 > h-form-submit
 
 But with objects like the popups, this does get ugly, as we need to distinguish 
@@ -85,6 +91,7 @@ just use 'le' instead.
 I break this rule for items that would only appear once. Like a bug report
 button would not need to describe its located within the header or footer, but
 that its the bug button for that page.
+
 > ~~h-main-header-report-bug~~
 >
 > h-report-bug
@@ -107,7 +114,8 @@ UpdateContext({variable: value});
 The variable scopes I use in a PowerApp are constant, local, global, and
 something I call universal. Here are the conventions that I use.
 
-- Constants: Variables that should be set, and not changed.
+### Constant
+- Variables that should be set, and not changed.
     - Use the Set() function.
     - Snake case.
     - All capital letters.
@@ -117,21 +125,26 @@ something I call universal. Here are the conventions that I use.
     ```cpp
     Set(THEME_MODE, Theme.Mode.Dark);
     ```
-- Local: Variables that only need to apply to the current loaded screen.
+
+### Local
+- Variables that only need to apply to the current loaded screen.
     - Use the UpdateContext({}) function.
     - Prefix with 'l' or 'loc'.
     - Camel case.
     ```cpp
     UpdateContext({lThemeMode: Theme.Mode.Dark});
     ```
-- Global: Variables that need to be applied across the whole application.
+
+### Global
+- Variables that need to be applied across the whole application.
     - Use the Set() function.
     - Prefix with 'g' or 'gbl'.
     - Camel Case.
     ```cpp
     Set(gThemeMode, Theme.Mode.Dark);
     ```
-- Universal: Variables that need to be applied across application *sessions*.
+### Universal
+- Variables that need to be applied across application *sessions*.
     - Use the Set() function.
     - Prefix with 'U' or 'UNI'.
     - Snake case.
@@ -182,6 +195,16 @@ Set(gToday, Today());
 Set(gNow, Now());
 
 Set(gHour, Hour(Now()));
+
+/*Or to allow for dot notation*/
+
+Set(gTime,
+    {
+        Today: Today(),
+        Now: Now(),
+        Hour: Hour(Now())
+    }
+);
 ```
 
 ## Collections
@@ -212,7 +235,32 @@ Collect(cProduction,
 );
 ```
 
-### Filed Names
+## Records
+
+When we only need to store a single record. Instead of using a collection, we
+use the Set() function like we would set a variable. We structure the variable
+just like we would structure a record in a collection. Using single records this
+way allows us to use dot notation to pull in data more readily. This method also
+ensure we are using as little memory as possible with the app, as setting a
+record variable is less intensive than setting up a collection for a single
+record.
+- Records
+    - Use Set() for initialization.
+    - Prefix the record with 'r' or 'record'
+    - Use camel case.
+```cpp
+Set(rOEE,
+    {
+        OEE2: 0.5,
+        Amount_Built: 100,
+        Goal: 200,
+        Rejects: 5
+
+    }
+);
+```
+
+## Field Names
 
 When naming field names within collections, tables, lists or dictionaries the
 field or column name will use snake case. Global collections will capitalize

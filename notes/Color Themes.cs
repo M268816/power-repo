@@ -262,3 +262,104 @@ Set(gThemeMode,
 );
 
 Set(gTheme, gThemeMode.Light);
+
+
+Set(gThemeMode, 
+    {
+        Light:
+        {
+            Mode: "Light",
+            Text_On_Light: ColorValue("#000000"),
+            Text_On_Dark: ColorValue("#FFFFFF"),
+            Text_Dark: ColorValue("#000000"),
+            Text_Light: ColorValue("#FFFFFF"),
+            Text_Header: ColorValue("#FFFFFF"),
+            Text_Accent: ColorValue("#000000"),
+            Background: ColorValue("#FFFFFF"),
+            Foreground: ColorValue("#EEEEEE"),
+            Primary: ColorValue("#503291"),
+            Pri_Complement: ColorValue("#2DBECD"),
+            Secondary: ColorValue("#0f69af"),
+            Sec_Complement: ColorValue("#AD540F"),
+            Accept: ColorValue("#149B5f"),
+            Deny: ColorValue("#e61e50"),
+            Accent: ColorValue("#FFC832")
+        },
+        Dark:
+        {
+            Mode: "Dark",
+            Text_On_Light: ColorValue("#FFFFFF"),
+            Text_On_Dark: ColorValue("#000000"),
+            Text_Dark: ColorValue("#000000"),
+            Text_Light: ColorValue("#FFFFFF"),
+            Text_Header: ColorValue("#FFFFFF"),
+            Text_Accent: ColorValue("#000000"),
+            Background: ColorValue("#121212"),
+            Foreground: ColorValue("#232323"),
+            Primary: ColorValue("#373737"),
+            Pri_Complement: ColorValue("#444444"),
+            Secondary: ColorValue("#717171"),
+            Sec_Complement: ColorValue("#af9ecf"),
+            Accept: ColorValue("#98d3b2"),
+            Deny: ColorValue("#f68da5"),
+            Accent: ColorValue("#ffdf85")
+        }
+    }
+);
+
+Set(gTheme, gThemeMode.Light);
+
+
+/*Default Formatting Variables*/
+Set(gThemeMode, 
+    {
+        Light:
+        {
+            Mode: "Light",
+            Text_Dark: ColorValue("#000000"),
+            Text_Light: ColorValue("#FFFFFF"),
+            Text_Header: ColorValue("#FFFFFF"),
+            Text_Accent: ColorValue("#000000"),
+            Background_0: ColorValue("#FFFFFF"),
+            Background_1: ColorValue("#EEEEEE"),
+            Background_2: ColorValue("#DDDDDD"),
+            Primary: ColorValue("#503291"),
+            Pri_Complement: ColorValue("#2DBECD"),
+            Secondary: ColorValue("#0f69af"),
+            Sec_Complement: ColorValue("#FFDBC9"),
+            Accept: ColorValue("#149B5f"),
+            Deny: ColorValue("#e61e50"),
+            Accent: ColorValue("#FFC832"),
+            Chart_Black: "#121212",
+            Chart_White: "#FFFFFF",
+            Chart_Red: "#e61e50",
+            Chart_Blue: "#503291",
+            Chart_Accent: "#FFC832",
+            Chart_Dim: "#787878"
+        },
+        Dark:
+        {
+            Mode: "Dark",
+            Text_Dark: ColorValue("#FFFFFF"),
+            Text_Light: ColorValue("#000000"),
+            Text_Header: ColorValue("#FFFFFF"),
+            Text_Accent: ColorValue("#000000"),
+            Background_0: ColorValue("#121212"),
+            Background_1: ColorValue("#232323"),
+            Background_2: ColorValue("#343434"),
+            Primary: ColorValue("#454545"),
+            Pri_Complement: ColorValue("#ec9d99"),
+            Secondary: ColorValue("#565656"),
+            Sec_Complement: ColorValue("#af9ecf"),
+            Accept: ColorValue("#98d3b2"),
+            Deny: ColorValue("#f68da5"),
+            Accent: ColorValue("#ffdf85"),
+            Chart_Black: "#FFFFFF",
+            Chart_White: "#121212",
+            Chart_Red: "#f68da5",
+            Chart_Blue: "#0f69af",
+            Chart_Accent: "#ffdf85",
+            Chart_Dim: "#565656"
+        }
+    }
+);
