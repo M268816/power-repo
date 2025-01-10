@@ -1,4 +1,4 @@
-- b_layout:
+- b-layout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -15,7 +15,7 @@
       Width: =Parent.Width
       X: =
     Children:
-    - b_header:
+    - b-header:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -36,7 +36,7 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - b_exit:
+        - b-exit:
             Control: Image
             Properties:
               OnSelect: =Back()
@@ -48,13 +48,13 @@
               RadiusTopLeft: =Self.Height / 2
               RadiusTopRight: =Self.Height / 2
               Width: =Self.Height
-        - b_logo:
+        - b-logo:
             Control: Image
             Properties:
               Image: =LOGO_MSIG_SBlue_FIT_ALPHA
               LayoutMinHeight: =10
               Width: =Self.Height * 3
-        - b_h_title:
+        - b-h-title:
             Control: Label
             Properties:
               Text: ="Report a Bug"
@@ -64,7 +64,7 @@
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Size: =Self.Height / 3
-        - b_h_padding:
+        - b-h-padding:
             Control: GroupContainer
             Variant: manualLayoutContainer
             Properties:
@@ -76,11 +76,137 @@
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
-              Width: =b_exit.Width + b_logo.Width - b_submit.Width - b_cancel.Width
-        - b_submit:
+              Width: ='b-exit'.Width + 'b-logo'.Width - 'b-submit'.Width - 'b-cancel'.Width
+        - b-submit:
             Control: Image
             Properties:
-              OnSelect: =IfError(SubmitForm(b_form), "", Back(ScreenTransition.Fade));
+              OnSelect: |-
+                  =Set(EmailBody,
+                      "<!DOCTYPE html>
+                      <html>
+                      <head>
+                          <style>
+                              body {
+                                  font-family: Arial, sans-serif;
+                                  color: #333333;
+                                  margin: 0;
+                                  padding: 0; /* Removed padding to prevent extra space */
+                              }
+                              .email-container {
+                                  border: 1px solid #dddddd;
+                                  border-radius: 5px;
+                                  overflow: hidden;
+                                  width: 100%; /* Ensure the table uses full width */
+                              }
+                              .email-header {
+                                  background-color: #5585b5;
+                                  color: #ffffff;
+                                  padding: 20px;
+                                  text-align: center;
+                              }
+                              .email-header h1 {
+                                  margin: 0;
+                                  font-size: 24px;
+                              }
+                              .email-body {
+                                  padding: 20px;
+                              }
+                              .bug-report-table {
+                                  width: 100%;
+                                  border-collapse: collapse;
+                              }
+                              .bug-report-table th, .bug-report-table td {
+                                  padding: 12px;
+                                  text-align: left;
+                                  vertical-align: top;
+                                  border-bottom: 1px solid #dddddd;
+                              }
+                              .bug-report-table th {
+                                  background-color: #f5f5f5;
+                                  width: 150px;
+                              }
+                              .footer {
+                                  text-align: center;
+                                  color: #aaaaaa;
+                                  font-size: 12px;
+                                  padding: 10px;
+                              }
+                              /* Inline styles may be more reliable in emails */
+                          </style>
+                      </head>
+                      <body>
+                      <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                          <tr>
+                              <!-- Left Margin -->
+                              <td width='15%'>&nbsp;</td>
+                              
+                              <!-- Main Content -->
+                              <td width='70%'>
+                                  <div class='email-container'>
+                                      <!-- Email Header -->
+                                      <div class='email-header'>
+                                          <h1>DMS Bug Report System</h1>
+                                      </div>
+                          
+                                      <!-- Email Body -->
+                                      <div class='email-body'>
+                                          <table class='bug-report-table'>
+                                              <tr>
+                                                  <th>Title</th>
+                                                  <td>"& 'b-f-title-value'.Text &"</td>
+                                              </tr>
+                                              <tr>
+                                                  <th>Environment</th>
+                                                  <td>"& 'b-f-environment-value'.Selected.Value &"</td>
+                                              </tr>
+                                              <tr>
+                                                  <th>Problem Type</th>
+                                                  <td>"& 'b-f-type-value'.Selected.Value &"</td>
+                                              </tr>
+                                              <tr>
+                                                  <th>Expected Result</th>
+                                                  <td>"& 'b-f-expected-value'.Text &"</td>
+                                              </tr>
+                                              <tr>
+                                                  <th>Actual Result</th>
+                                                  <td>"& 'b-f-actual-value'.Text &"</td>
+                                              </tr>
+                                              <tr>
+                                                  <th>Status</th>
+                                                  <td>"& 'b-f-status-value'.Selected.Value &"</td>
+                                              </tr>
+                                          </table>
+                                      </div>
+                          
+                                      <!-- Email Footer -->
+                                      <div class='footer'>
+                                          &copy; 2025 EMD Millipore. All rights reserved.
+                                      </div>
+                                  </div>
+                              </td>
+                              
+                              <!-- Right Margin -->
+                              <td width='15%'>&nbsp;</td>
+                          </tr>
+                      </table>
+                      </body>
+                      </html>"
+                  );
+
+                  IfError(SubmitForm('b-form'),
+                      "",
+                      Back(ScreenTransition.Fade);
+                      ResetForm('b-form');
+                  );
+
+                  Office365Outlook.SendEmailV2(
+                      "M268816@ONE.MERCKGROUP.COM",
+                      "A bug report was submitted for the FE Production DMS.",
+                      EmailBody,
+                      {
+                          Cc: 'b-f-user-value'.Selected.Email
+                      }
+                  );
               Image: =gblSVG.Submit
               HoverFill: =ColorFade(varColorYes, 0%)
               LayoutMinHeight: =10
@@ -89,10 +215,10 @@
               RadiusTopLeft: =Self.Height / 2
               RadiusTopRight: =Self.Height / 2
               Width: =Self.Height
-        - b_cancel:
+        - b-cancel:
             Control: Image
             Properties:
-              OnSelect: =ResetForm(b_form)
+              OnSelect: =ResetForm('b-form')
               Image: =gblSVG.Cancel
               HoverFill: =ColorFade(varColorNo, 0%)
               LayoutMinHeight: =10
@@ -101,7 +227,7 @@
               RadiusTopLeft: =Self.Height / 2
               RadiusTopRight: =Self.Height / 2
               Width: =Self.Height
-    - b_body:
+    - b-body:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -120,7 +246,7 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - b_form_parent:
+        - b-form-parent:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
@@ -134,7 +260,7 @@
               LayoutMode: =LayoutMode.Auto
               Width: =Parent.Width * 0.50
             Children:
-            - b_form:
+            - b-form:
                 Control: Form
                 Layout: horizontal
                 Properties:
@@ -146,7 +272,7 @@
                   X: =1-1
                   Y: =1-1
                 Children:
-                - User_DataCard1:
+                - b-f-user-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
@@ -155,22 +281,22 @@
                       Default: =ThisItem.User
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,User)
                       Required: =true
-                      Update: =DataCardValue6.Selected
+                      Update: ='b-f-user-value'.Selected
                       DisplayMode: =Parent.DisplayMode
-                      Height: =Parent.Height / 5
+                      Height: =Parent.Height  * 0.1
                       Width: =Parent.Width
                     Children:
-                    - StarVisible13:
+                    - b-f-user-star:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey13.Height
+                          Height: ='b-f-user-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey13.Y
+                          Y: ='b-f-user-key'.Y
                     - ErrorMessage13:
                         Control: Label
                         Layout: horizontal
@@ -186,8 +312,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue6.Y + DataCardValue6.Height
-                    - DataCardValue6:
+                          Y: ='b-f-user-value'.Y + 'b-f-user-value'.Height
+                    - b-f-user-value:
                         Control: Classic/ComboBox
                         Layout: horizontal
                         Properties:
@@ -198,13 +324,17 @@
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =RGBA(255, 255, 255, 1)
+                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
                           DisplayMode: =Parent.DisplayMode
-                          Height: =100
+                          Height: =50
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =RGBA(255, 255, 255, 1)
+                          SelectionColor: =RGBA(255, 255, 255, 1)
                           Width: =(Parent.Width - 60) * 0.6
-                          X: =DataCardKey13.X + DataCardKey13.Width
+                          X: ='b-f-user-key'.X + 'b-f-user-key'.Width
                           Y: =10
-                    - DataCardKey13:
+                    - b-f-user-key:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -214,8 +344,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + (DataCardValue6.Height / 2) - (Self.Height / 2)
-                - Title_DataCard1:
+                          Y: =10 + ('b-f-user-value'.Height / 2) - (Self.Height / 2)
+                - b-f-title-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: horizontal
@@ -225,24 +355,24 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Title)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Title)
                       Required: =true
-                      Update: =DataCardValue3.Text
+                      Update: ='b-f-title-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
-                      Y: =1
+                      Y: =2
                     Children:
-                    - StarVisible11:
+                    - b-f-title-star:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey7.Height
+                          Height: ='b-f-title-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey7.Y
-                    - ErrorMessage11:
+                          Y: ='b-f-title-key'.Y
+                    - b-f-title-error:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -257,8 +387,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue3.Y + DataCardValue3.Height
-                    - DataCardValue3:
+                          Y: ='b-f-title-value'.Y + 'b-f-title-value'.Height
+                    - b-f-title-value:
                         Control: Classic/TextInput
                         Layout: horizontal
                         Properties:
@@ -275,9 +405,9 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: =DataCardKey7.X + DataCardKey7.Width
+                          X: ='b-f-title-key'.X + 'b-f-title-key'.Width
                           Y: =10
-                    - DataCardKey7:
+                    - b-f-title-key:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -287,8 +417,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + (DataCardValue3.Height / 2) - (Self.Height / 2)
-                - Environment_DataCard1:
+                          Y: =10 + ('b-f-title-value'.Height / 2) - (Self.Height / 2)
+                - b-f-environment-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
@@ -297,25 +427,25 @@
                       Default: =ThisItem.Environment
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Environment)
                       Required: =true
-                      Update: =DataCardValue5.Selected
+                      Update: ='b-f-environment-value'.Selected
                       DisplayMode: =DisplayMode.View
                       Height: '=Parent.Height / 3   '
                       Visible: =false
                       Width: =Parent.Width
-                      Y: =2
+                      Y: =9
                     Children:
-                    - StarVisible12:
+                    - b-f-environment-star:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey8.Height
+                          Height: ='b-f-environment-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey8.Y
-                    - ErrorMessage12:
+                          Y: ='b-f-environment-key'.Y
+                    - b-f-environment-error:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -330,8 +460,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue5.Y + DataCardValue5.Height
-                    - DataCardValue5:
+                          Y: ='b-f-environment-value'.Y + 'b-f-environment-value'.Height
+                    - b-f-environment-value:
                         Control: Classic/ComboBox
                         Layout: horizontal
                         Properties:
@@ -342,13 +472,17 @@
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =RGBA(255, 255, 255, 1)
+                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
                           DisplayMode: =Parent.DisplayMode
                           Height: =100
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =RGBA(255, 255, 255, 1)
+                          SelectionColor: =RGBA(255, 255, 255, 1)
                           Width: =(Parent.Width - 60) * 0.6
-                          X: =DataCardKey8.X + DataCardKey8.Width
+                          X: ='b-f-environment-key'.X + 'b-f-environment-key'.Width
                           Y: =10
-                    - DataCardKey8:
+                    - b-f-environment-key:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -358,8 +492,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + (DataCardValue5.Height / 2) - (Self.Height / 2)
-                - Problem Type_DataCard1:
+                          Y: =10 + ('b-f-environment-value'.Height / 2) - (Self.Height / 2)
+                - b-f-type-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
@@ -368,24 +502,24 @@
                       Default: =ThisItem.'Problem Type'
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Problem Type')
                       Required: =true
-                      Update: =DataCardValue11.Selected
+                      Update: ='b-f-type-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
-                      Y: =3
+                      Y: =4
                     Children:
-                    - StarVisible14:
+                    - b-f-type-star:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey14.Height
+                          Height: ='b-f-type-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey14.Y
-                    - ErrorMessage14:
+                          Y: ='b-f-type-key'.Y
+                    - b-f-type-error:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -400,8 +534,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue11.Y + DataCardValue11.Height
-                    - DataCardValue11:
+                          Y: ='b-f-type-value'.Y + 'b-f-type-value'.Height
+                    - b-f-type-value:
                         Control: Classic/ComboBox
                         Layout: horizontal
                         Properties:
@@ -412,13 +546,17 @@
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =RGBA(255, 255, 255, 1)
+                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
                           DisplayMode: =Parent.DisplayMode
                           Height: =100
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =RGBA(255, 255, 255, 1)
+                          SelectionColor: =RGBA(255, 255, 255, 1)
                           Width: =(Parent.Width - 60) * 0.6
-                          X: =DataCardKey14.X + DataCardKey14.Width
+                          X: ='b-f-type-key'.X + 'b-f-type-key'.Width
                           Y: =10
-                    - DataCardKey14:
+                    - b-f-type-key:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -428,8 +566,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + (DataCardValue11.Height / 2) - (Self.Height / 2)
-                - Expected_Result_DataCard1:
+                          Y: =10 + ('b-f-type-value'.Height / 2) - (Self.Height / 2)
+                - b-f-expected-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: horizontal
@@ -439,24 +577,24 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Expected_Result)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Expected_Result)
                       Required: =true
-                      Update: =DataCardValue12.Text
+                      Update: ='b-f-expected-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
-                      Y: =4
+                      Y: =5
                     Children:
-                    - StarVisible15:
+                    - b-f-expected-star:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey15.Height
+                          Height: ='b-f-expected-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey15.Y
-                    - ErrorMessage15:
+                          Y: ='b-f-expected-key'.Y
+                    - b-f-expected-error:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -471,8 +609,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue12.Y + DataCardValue12.Height
-                    - DataCardValue12:
+                          Y: ='b-f-expected-value'.Y + 'b-f-expected-value'.Height
+                    - b-f-expected-value:
                         Control: Classic/TextInput
                         Layout: horizontal
                         Properties:
@@ -490,20 +628,20 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: =DataCardKey15.X + DataCardKey15.Width
+                          X: ='b-f-expected-key'.X + 'b-f-expected-key'.Width
                           Y: =10
-                    - DataCardKey15:
+                    - b-f-expected-key:
                         Control: Label
                         Layout: horizontal
                         Properties:
-                          Text: =Parent.DisplayName
+                          Text: ="Expected Result"
                           AutoHeight: =true
                           Height: =34
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + (DataCardValue12.Height / 2) - (Self.Height / 2)
-                - Actual_Result_DataCard1:
+                          Y: =10 + ('b-f-expected-value'.Height / 2) - (Self.Height / 2)
+                - b-f-actual-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: horizontal
@@ -513,24 +651,24 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Actual_Result)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Actual_Result)
                       Required: =true
-                      Update: =DataCardValue14.Text
+                      Update: ='b-f-actual-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 5
                       Width: =Parent.Width
-                      Y: =5
+                      Y: =6
                     Children:
-                    - StarVisible17:
+                    - b-f-actual-star:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey17.Height
+                          Height: ='b-f-actual-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey17.Y
-                    - ErrorMessage17:
+                          Y: ='b-f-actual-key'.Y
+                    - b-f-actual-error:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -545,8 +683,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue14.Y + DataCardValue14.Height
-                    - DataCardValue14:
+                          Y: ='b-f-actual-value'.Y + 'b-f-actual-value'.Height
+                    - b-f-actual-value:
                         Control: Classic/TextInput
                         Layout: horizontal
                         Properties:
@@ -564,20 +702,20 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: =DataCardKey17.X + DataCardKey17.Width
+                          X: ='b-f-actual-key'.X + 'b-f-actual-key'.Width
                           Y: =10
-                    - DataCardKey17:
+                    - b-f-actual-key:
                         Control: Label
                         Layout: horizontal
                         Properties:
-                          Text: =Parent.DisplayName
+                          Text: ="Actual Result"
                           AutoHeight: =true
                           Height: =34
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + (DataCardValue14.Height / 2) - (Self.Height / 2)
-                - Status_DataCard1:
+                          Y: =10 + ('b-f-actual-value'.Height / 2) - (Self.Height / 2)
+                - b-f-status-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
@@ -586,25 +724,25 @@
                       Default: =ThisItem.Status
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Status)
                       Required: =true
-                      Update: =DataCardValue16.Selected
+                      Update: ='b-f-status-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 7.2
                       Visible: =false
                       Width: =Parent.Width
-                      Y: =6
+                      Y: =9
                     Children:
-                    - StarVisible19:
+                    - b-f-status-star:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: =DataCardKey19.Height
+                          Height: ='b-f-status-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =DataCardKey19.Y
-                    - ErrorMessage19:
+                          Y: ='b-f-status-key'.Y
+                    - b-f-status-error:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -619,8 +757,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =DataCardValue16.Y + DataCardValue16.Height
-                    - DataCardValue16:
+                          Y: ='b-f-status-value'.Y + 'b-f-status-value'.Height
+                    - b-f-status-value:
                         Control: Classic/ComboBox
                         Layout: horizontal
                         Properties:
@@ -631,12 +769,16 @@
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =RGBA(255, 255, 255, 1)
+                          ChevronHoverFill: =RGBA(255, 255, 255, 1)
                           DisplayMode: =Parent.DisplayMode
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =RGBA(255, 255, 255, 1)
+                          SelectionColor: =RGBA(255, 255, 255, 1)
                           Width: =(Parent.Width - 60) * 0.6
-                          X: =DataCardKey19.X + DataCardKey19.Width
+                          X: ='b-f-status-key'.X + 'b-f-status-key'.Width
                           Y: =10
-                    - DataCardKey19:
+                    - b-f-status-key:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -646,4 +788,72 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + (DataCardValue16.Height / 2) - (Self.Height / 2)
+                          Y: =10 + ('b-f-status-value'.Height / 2) - (Self.Height / 2)
+                - b-f-line-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Line"
+                      Default: =ThisItem.Line
+                      DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Line')
+                      MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, 'Line')
+                      Required: =true
+                      Update: ='b-f-line-value'.Text
+                      DisplayMode: =DisplayMode.View
+                      Height: =50
+                      Width: =227
+                      WidthFit: =true
+                      Y: =1
+                    Children:
+                    - b-f-line-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: ='b-f-line-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='b-f-line-key'.Y
+                    - b-f-line-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='b-f-line-value'.Y + 'b-f-line-value'.Height
+                    - b-f-line-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =varProductionLine
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: ='b-f-line-key'.X + 'b-f-line-key'.Width
+                          Y: =10
+                    - b-f-line-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + ('b-f-line-value'.Height / 2) - (Self.Height / 2)

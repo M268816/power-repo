@@ -38,7 +38,7 @@
         - d_collect:
             Control: Classic/Button
             Properties:
-              OnSelect: |+
+              OnSelect: |-
                 =UpdateContext({locLoading:{Visible: true, Value: 1, Text: "Starting"}});
 
                 /*Set Shift*/
