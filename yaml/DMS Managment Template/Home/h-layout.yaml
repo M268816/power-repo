@@ -1,0 +1,276 @@
+- h-layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - h-collect:
+        Control: Classic/Button
+        Properties:
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - h-sequential-collect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - h-update:
+        Control: Classic/Button
+        Properties:
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - h-header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - h-logo:
+            Control: Image
+            Properties:
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              Width: ='h-n-title'.Width
+        - h-title:
+            Control: Label
+            Properties:
+              Text: ="Page Title"
+              Color: =gTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - h-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - h-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - h-user-img:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - h-main:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - h-navigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - h-n-title:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - h-n-separator-0:
+                Control: Rectangle
+                Properties:
+                  Fill: =gTheme.Pri_Complement
+                  Height: =Round(gPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - h-n-gallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =cNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gPadding
+                  TemplateSize: =40
+                Children:
+                - h-n-g-button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =100
+                      RadiusBottomRight: =100
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =100
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - h-n-legal:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - h-body:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =11
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - h-section-0:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gTheme.Foreground
+                  FillPortions: =0
+                  Height: =500
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingRight: =
+                Children:
+                - h-s0-title:
+                    Control: Label
+                    Properties:
+                      Text: ="Section Zero"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Start
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Secondary
+                      Height: ='h-title'.Height / 2
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
+                - h-s0-content:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="Lorem ipsum odor amet, consectetuer adipiscing elit. Ac vitae lacus blandit dis pellentesque sed. Sagittis penatibus ante phasellus consequat sociosqu faucibus malesuada tellus habitasse. Sem aenean orci, malesuada fames erat morbi dis. Fringilla vehicula magnis vel habitant vitae non viverra massa. Imperdiet nulla at maximus pharetra; gravida imperdiet volutpat nullam laoreet. Fames vivamus vulputate primis netus ad libero. Tempor proin ornare viverra, congue enim ullamcorper. Sodales nam ligula ipsum suspendisse nam eros congue efficitur. Tempus lectus vel consectetur cubilia ornare maximus auctor ut nulla.
+
+                        Orci felis aptent interdum interdum finibus per praesent mattis habitant. Torquent et vivamus maecenas nunc ornare ante vulputate. Molestie class nascetur lorem diam nec congue ut montes lacinia. Bibendum dignissim volutpat donec, pellentesque donec nam curabitur. Cras nibh arcu donec elementum ultricies venenatis elementum. Magnis imperdiet blandit litora ex tellus tempus rhoncus nisi. Consequat amet dui natoque varius vivamus taciti finibus ornare."
+                      Color: =gTheme.Text_On_Light
+                      FillPortions: =1
+                      Overflow: =Overflow.Scroll
+                      PaddingBottom: =gPadding
+                      PaddingLeft: =gPadding
+                      PaddingRight: =gPadding
+                      PaddingTop: =gPadding

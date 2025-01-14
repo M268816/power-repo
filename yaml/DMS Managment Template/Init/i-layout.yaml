@@ -1,0 +1,150 @@
+- i-layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Height: =Parent.Height
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - i-init:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =// Navigation Setup
+            ClearCollect(cNavigation,
+                {Screen: Home, Label: "Home", Position: 0},
+                {Screen: Home, Label: "Home", Position: 0},
+                {Screen: Home, Label: "Home", Position: 0},
+                {Screen: Home, Label: "Home", Position: 0}
+            );
+
+            // Create and Set Theme Colors and Mode
+            Set(gThemeMode,
+                {
+                    Light:
+                    {
+                        Mode: "Light",
+                        Text_Dark: ColorValue("#000000"),
+                        Text_On_Dark: ColorValue("#FFFFFF"),
+                        Text_Light: ColorValue("#FFFFFF"),
+                        Text_On_Light: ColorValue("#000000"),
+                        Background: ColorValue("#FFFFFF"),
+                        Midground: ColorValue("#EEEEEE"),
+                        Foreground: ColorValue("#DDDDDD"),
+                        Primary: ColorValue("#503291"),
+                        Pri_Complement: ColorValue("#2DBECD"),
+                        Secondary: ColorValue("#0f69af"),
+                        Sec_Complement: ColorValue("#FFDBC9"),
+                        Accept: ColorValue("#149B5f"),
+                        Deny: ColorValue("#e61e50"),
+                        Accent: ColorValue("#FFC832"),
+                        Chart_Black: "#121212",
+                        Chart_White: "#FFFFFF",
+                        Chart_Red: "#e61e50",
+                        Chart_Blue: "#503291",
+                        Chart_Accent: "#FFC832",
+                        Chart_Dim: "#787878"
+                    },
+                    Dark:
+                    {
+                        Mode: "Dark",
+                        Text_Dark: ColorValue("#000000"),
+                        Text_On_Dark: ColorValue("#000000"),
+                        Text_Light: ColorValue("#FFFFFF"),
+                        Text_On_Light: ColorValue("#FFFFFF"),
+                        Background: ColorValue("#121212"),
+                        Midground: ColorValue("#232323"),
+                        Foreground: ColorValue("#343434"),
+                        Primary: ColorValue("#565656"),
+                        Pri_Complement: ColorValue("#ec9d99"),
+                        Secondary: ColorValue("#676767"),
+                        Sec_Complement: ColorValue("#af9ecf"),
+                        Accept: ColorValue("#98d3b2"),
+                        Deny: ColorValue("#f68da5"),
+                        Accent: ColorValue("#ffdf85"),
+                        Chart_Black: "#FFFFFF",
+                        Chart_White: "#121212",
+                        Chart_Red: "#f68da5",
+                        Chart_Blue: "#0f69af",
+                        Chart_Accent: "#ffdf85",
+                        Chart_Dim: "#565656"
+                    }
+                }
+            );
+            // Setter: Set(gTheme, gThemeMode.Light);
+            // Getter: gTheme.Mode;
+            Set(gTheme, gThemeMode.Light);
+
+            // Global Variables
+            Set(gPadding, Round(App.Width * 0.005,0));
+            Set(gTime,
+                {
+                    Today:Today(),
+                    Now:Now()
+                }
+            );
+            Set(gDataSources,
+                {
+                    Production: [{ID:0},{ID:1},{ID:2}],
+                    Downtime: [{ID:0},{ID:1},{ID:2}],
+                    Rejects: [{ID:0},{ID:1},{ID:2}]
+                }
+            );
+            Set(gLists,
+                {
+                    Shifts: [
+                        "C","A","B"
+                    ],
+                    Lines: [
+                        "XL1", "XL2", "XL3", "XL4", "XL5",
+                        "XLT", "XLT2", "XLT3",
+                        "SSC", "SSC2"
+                    ],
+                    Downtime_Reasons: [
+                        "Reason 1","Reason 2","Reason 3","Reason 4",
+                        "Reason 5","Reason 6","Reason 7","Reason 8",
+                    ]
+                }
+            );
+
+            // Popup Manager
+            ClearCollect(rPopups,
+                {
+                    Display_Text: "Not Loading",
+                    Value: -1,
+                    Popup: Blank(),
+                    Visible: false
+                }
+            );
+            // Setter: Patch(rPopups,First(rPopups),{Value: 10});
+            // Getter: First(rPopups).Value
+
+            // Default Collections
+            ClearCollect(cProduciton,{ID:0});
+            ClearCollect(cDowntime,{ID:0});
+            ClearCollect(cRejects,{ID:0});
+            ClearCollect(cBatchRecordErrors,{ID:0});
+
+            If(INIT, Navigate(Home));
+          Text: ="init"
+          AlignInContainer: =AlignInContainer.Center
+          Height: =100
+          Visible: =!INIT
+          Width: =100
+    - i-spinner:
+        Control: Spinner
+        Properties:
+          AccessibleLabel: ="Loading"
+          Appearance: ='Spinner.Appearance'.Primary
+          BasePaletteColor: =RGBA(5, 102, 178, 1)
+          Label: ="Initializing"
+          LabelPosition: ='Spinner.LabelPosition'.After
+          SpinnerSize: ='Spinner.SpinnerSize'.Huge
+          Height: =Parent.Height
+          Width: =Parent.Width
