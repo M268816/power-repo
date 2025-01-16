@@ -237,25 +237,51 @@ Collect(cProduction,
 
 ## Records
 
-When we only need to store a single record. Instead of using a collection, we
-use the Set() function like we would set a variable. We structure the variable
-just like we would structure a record in a collection. Using single records this
-way allows us to use dot notation to pull in data more readily. This method also
-ensure we are using as little memory as possible with the app, as setting a
-record variable is less intensive than setting up a collection for a single
-record.
+Single record collections are useful for creating mutable variables accessible
+with dot notation. To use collections this way, preface the collection with 'r'
+or 'record'. Then, be sure to only ever init the collection, then change its
+variables with the Patch() function. There is a drawback to this method, to use
+the dot notation, you need to use the First() function to access the record.
+
+- Mutable Records
+    - Use ClearCollect() for initialization.
+    - Prefix the collection with 'r' or 'record'
+    - Use camel case.
+    - Set new values with Patch()
+    - Get values with First()
+```cpp
+ClearCollect(rPopups,
+    {
+        Display_Text: "Not Loading",
+        Value: -1,
+        Popup: "",
+        Visible: false
+    }
+);
+// Setter: Patch(rPopups,First(rPopups),{Value: 10});
+// Getter: First(rPopups).Value
+```
+
+When we only need to store a single immutable record. Instead of using a
+collection, we use the Set() function like we would set a variable. We structure
+the variable just like we would structure a record in a collection. Using single
+records this way allows us to use dot notation to pull in data more readily.
+This method also ensure we are using as little memory as possible with the app,
+as setting a record variable is less intensive than setting up a collection for
+a single record. The downside to this, is that Set() records must be updated in
+their entirety, as the Patch() function will not work with Set().
 - Records
     - Use Set() for initialization.
     - Prefix the record with 'r' or 'record'
     - Use camel case.
 ```cpp
+// To set AND update this record.
 Set(rOEE,
     {
         OEE2: 0.5,
         Amount_Built: 100,
         Goal: 200,
         Rejects: 5
-
     }
 );
 ```

@@ -1,0 +1,2 @@
+Properties:
+  OnVisible: =Select('f-update')

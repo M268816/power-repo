@@ -1,4 +1,4 @@
-- f-popups:
+- d-popups:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -16,7 +16,7 @@
       Visible: =First(rPopups).Visible
       Width: =Parent.Width
     Children:
-    - f-pop-loading:
+    - d-pop-loading:
         Control: GroupContainer
         Variant: verticalAutoLayoutContainer
         Properties:
@@ -40,7 +40,7 @@
           RadiusTopRight: =0
           Width: =Parent.Width * 0.25
         Children:
-        - f-pop-load-spinner:
+        - d-pop-load-spinner:
             Control: Spinner
             Properties:
               FontWeight: =FontWeight.Normal
@@ -51,7 +51,7 @@
               FillPortions: =1
               LayoutMinHeight: =10
               LayoutMinWidth: =10
-        - f-pop-load-progress:
+        - d-pop-load-progress:
             Control: Progress
             Properties:
               Indeterminate: =First(rPopups).Value = -1

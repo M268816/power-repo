@@ -57,13 +57,13 @@
         - h-logo:
             Control: Image
             Properties:
-              ImagePosition: =ImagePosition.Fill
+              Image: =If(gTheme.Mode = "Light", logo1, logo2)
               LayoutMinHeight: =10
               Width: ='h-n-title'.Width
         - h-title:
             Control: Label
             Properties:
-              Text: ="Page Title"
+              Text: ="App Title"
               Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
@@ -190,10 +190,10 @@
                       Fill: =gTheme.Accent
                       FontWeight: =FontWeight.Normal
                       Height: =Parent.TemplateHeight
-                      RadiusBottomLeft: =100
-                      RadiusBottomRight: =100
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
                       RadiusTopLeft: =100
-                      RadiusTopRight: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
                       Size: =Self.Height / 4
                       Width: =Parent.TemplateWidth
             - h-n-legal:
@@ -216,7 +216,7 @@
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              FillPortions: =11
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
               LayoutDirection: =LayoutDirection.Vertical
               LayoutGap: =gPadding
               LayoutMinHeight: =10

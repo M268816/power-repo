@@ -135,14 +135,14 @@
               DropShadow: =DropShadow.Regular
               Fill: =gTheme.Foreground
               FillPortions: =0
-              Height: =Parent.Height * 0.8
+              Height: =If(App.Width > Index(App.SizeBreakpoints,3).Value, Parent.Height * 0.8, Parent.Height * 0.95)
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
               LayoutMinHeight: =10
               LayoutMode: =LayoutMode.Auto
               LayoutOverflowY: =LayoutOverflow.Scroll
               PaddingRight: =
-              Width: =Parent.Width * 0.35
+              Width: =If(App.Width > Index(App.SizeBreakpoints,3).Value, Parent.Width * 0.35, Parent.Width * 0.7)
             Children:
             - b-form-title:
                 Control: Label
@@ -158,7 +158,7 @@
                   Width: =Parent.Width
             - b-form:
                 Control: Form
-                Layout: horizontal
+                Layout: vertical
                 Properties:
                   DataSource: =BugReports
                   DefaultMode: =FormMode.New
@@ -174,7 +174,7 @@
                 - b-f-user-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
-                    Layout: horizontal
+                    Layout: vertical
                     Properties:
                       DataField: ="User"
                       Default: =ThisItem.User
@@ -183,11 +183,12 @@
                       Update: ='b-f-user-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
-                      Width: =Parent.Width
+                      Width: =672
+                      WidthFit: =true
                     Children:
                     - b-f-user-star:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
@@ -199,7 +200,7 @@
                           Y: ='b-f-user-key'.Y
                     - b-f-user-error:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
@@ -216,7 +217,7 @@
                           Y: ='b-f-user-value'.Y + 'b-f-user-value'.Height
                     - b-f-user-value:
                         Control: Classic/ComboBox
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["DisplayName"]
@@ -236,12 +237,13 @@
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           PressedColor: =RGBA(255, 255, 255, 1)
                           SelectionColor: =RGBA(255, 255, 255, 1)
+                          Size: =Self.Height / 4
                           Width: =(Parent.Width - 60) * 0.6
                           X: ='b-f-user-key'.X + 'b-f-user-key'.Width
                           Y: =10
                     - b-f-user-key:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
@@ -254,7 +256,7 @@
                 - b-f-title-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
-                    Layout: horizontal
+                    Layout: vertical
                     Properties:
                       DataField: ="Title"
                       Default: =ThisItem.Title
@@ -264,12 +266,13 @@
                       Update: ='b-f-title-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
-                      Width: =Parent.Width
+                      Width: =672
+                      WidthFit: =true
                       Y: =2
                     Children:
                     - b-f-title-star:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
@@ -281,7 +284,7 @@
                           Y: ='b-f-title-key'.Y
                     - b-f-title-error:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
@@ -297,7 +300,7 @@
                           Y: ='b-f-title-value'.Y + 'b-f-title-value'.Height
                     - b-f-title-value:
                         Control: Classic/TextInput
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
@@ -313,12 +316,13 @@
                           RadiusBottomRight: =0
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
+                          Size: =Self.Height / 3
                           Width: =(Parent.Width - 60) * 0.6
                           X: ='b-f-title-key'.X + 'b-f-title-key'.Width
                           Y: =10
                     - b-f-title-key:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="Enter a short description."
                           AutoHeight: =true
@@ -331,7 +335,7 @@
                 - b-f-environment-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
-                    Layout: horizontal
+                    Layout: vertical
                     Properties:
                       DataField: ="Environment"
                       Default: =ThisItem.Environment
@@ -341,12 +345,13 @@
                       DisplayMode: =DisplayMode.View
                       Height: '=Parent.Height / 3   '
                       Visible: =false
-                      Width: =Parent.Width
-                      Y: =9
+                      Width: =672
+                      WidthFit: =true
+                      Y: =7
                     Children:
                     - b-f-environment-star:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
@@ -357,7 +362,7 @@
                           Y: ='b-f-environment-key'.Y
                     - b-f-environment-error:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
@@ -373,7 +378,7 @@
                           Y: ='b-f-environment-value'.Y + 'b-f-environment-value'.Height
                     - b-f-environment-value:
                         Control: Classic/ComboBox
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           DefaultSelectedItems: =LookUp(Choices([@BugReports].Environment), Value = "Encap DMS Management")
                           DisplayFields: =["Value"]
@@ -394,7 +399,7 @@
                           Y: =10
                     - b-f-environment-key:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
@@ -406,7 +411,7 @@
                 - b-f-type-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
-                    Layout: horizontal
+                    Layout: vertical
                     Properties:
                       DataField: ="ProblemType"
                       Default: =ThisItem.'Problem Type'
@@ -414,13 +419,14 @@
                       Required: =true
                       Update: ='b-f-type-value'.Selected
                       DisplayMode: =Parent.DisplayMode
-                      Height: =Parent.Height / 5
-                      Width: =Parent.Width
-                      Y: =4
+                      Height: =50
+                      Width: =672
+                      WidthFit: =true
+                      Y: =3
                     Children:
                     - b-f-type-star:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
@@ -432,7 +438,7 @@
                           Y: ='b-f-type-key'.Y
                     - b-f-type-error:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
@@ -448,7 +454,7 @@
                           Y: ='b-f-type-value'.Y + 'b-f-type-value'.Height
                     - b-f-type-value:
                         Control: Classic/ComboBox
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["Value"]
@@ -463,16 +469,17 @@
                           Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
                           Fill: =gTheme.Background
-                          Height: =100
+                          Height: =50
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           PressedColor: =RGBA(255, 255, 255, 1)
                           SelectionColor: =RGBA(255, 255, 255, 1)
+                          Size: =Self.Height / 4
                           Width: =(Parent.Width - 60) * 0.6
                           X: ='b-f-type-key'.X + 'b-f-type-key'.Width
                           Y: =10
                     - b-f-type-key:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
@@ -485,7 +492,7 @@
                 - b-f-expected-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
-                    Layout: horizontal
+                    Layout: vertical
                     Properties:
                       DataField: ="Expected_Result"
                       Default: =ThisItem.Expected_Result
@@ -494,13 +501,14 @@
                       Required: =true
                       Update: ='b-f-expected-value'.Text
                       DisplayMode: =Parent.DisplayMode
-                      Height: =Parent.Height / 5
-                      Width: =Parent.Width
-                      Y: =5
+                      Height: =50
+                      Width: =672
+                      WidthFit: =true
+                      Y: =4
                     Children:
                     - b-f-expected-star:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
@@ -512,7 +520,7 @@
                           Y: ='b-f-expected-key'.Y
                     - b-f-expected-error:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
@@ -528,7 +536,7 @@
                           Y: ='b-f-expected-value'.Y + 'b-f-expected-value'.Height
                     - b-f-expected-value:
                         Control: Classic/TextInput
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
@@ -550,7 +558,7 @@
                           Y: =10
                     - b-f-expected-key:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="Expected Result"
                           AutoHeight: =true
@@ -563,7 +571,7 @@
                 - b-f-actual-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
-                    Layout: horizontal
+                    Layout: vertical
                     Properties:
                       DataField: ="Actual_Result"
                       Default: =ThisItem.Actual_Result
@@ -572,13 +580,14 @@
                       Required: =true
                       Update: ='b-f-actual-value'.Text
                       DisplayMode: =Parent.DisplayMode
-                      Height: =Parent.Height / 5
-                      Width: =Parent.Width
-                      Y: =6
+                      Height: =50
+                      Width: =672
+                      WidthFit: =true
+                      Y: =5
                     Children:
                     - b-f-actual-star:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
@@ -590,7 +599,7 @@
                           Y: ='b-f-actual-key'.Y
                     - b-f-actual-error:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
@@ -606,7 +615,7 @@
                           Y: ='b-f-actual-value'.Y + 'b-f-actual-value'.Height
                     - b-f-actual-value:
                         Control: Classic/TextInput
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
@@ -628,7 +637,7 @@
                           Y: =10
                     - b-f-actual-key:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="Actual Result"
                           AutoHeight: =true
@@ -641,7 +650,7 @@
                 - b-f-status-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
-                    Layout: horizontal
+                    Layout: vertical
                     Properties:
                       DataField: ="Status"
                       Default: =ThisItem.Status
@@ -651,12 +660,13 @@
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 7.2
                       Visible: =false
-                      Width: =Parent.Width
-                      Y: =9
+                      Width: =672
+                      WidthFit: =true
+                      Y: =6
                     Children:
                     - b-f-status-star:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
@@ -667,7 +677,7 @@
                           Y: ='b-f-status-key'.Y
                     - b-f-status-error:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
@@ -683,7 +693,7 @@
                           Y: ='b-f-status-value'.Y + 'b-f-status-value'.Height
                     - b-f-status-value:
                         Control: Classic/ComboBox
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           DefaultSelectedItems: =LookUp(Choices([@BugReports].Status), Value = "Open")
                           DisplayFields: =["Value"]
@@ -703,7 +713,7 @@
                           Y: =10
                     - b-f-status-key:
                         Control: Label
-                        Layout: horizontal
+                        Layout: vertical
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
@@ -715,6 +725,7 @@
                 - b-f-line-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
+                    Layout: vertical
                     Properties:
                       DataField: ="Line"
                       Default: =ThisItem.Line
@@ -724,12 +735,13 @@
                       Update: ='b-f-line-value'.Text
                       DisplayMode: =DisplayMode.View
                       Height: =50
-                      Width: =227
+                      Width: =672
                       WidthFit: =true
                       Y: =1
                     Children:
                     - b-f-line-star:
                         Control: Label
+                        Layout: vertical
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
@@ -740,6 +752,7 @@
                           Y: ='b-f-line-key'.Y
                     - b-f-line-error:
                         Control: Label
+                        Layout: vertical
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
@@ -755,8 +768,9 @@
                           Y: ='b-f-line-value'.Y + 'b-f-line-value'.Height
                     - b-f-line-value:
                         Control: Classic/TextInput
+                        Layout: vertical
                         Properties:
-                          Default: ="DMS Menagment Template"
+                          Default: ="DMS Management Template"
                           DelayOutput: =true
                           MaxLength: =Parent.MaxLength
                           Tooltip: =Parent.DisplayName
@@ -764,6 +778,7 @@
                           Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
                           Fill: =gTheme.Background
+                          Height: =50
                           PaddingLeft: =5
                           RadiusBottomLeft: =0
                           RadiusBottomRight: =0
@@ -774,8 +789,9 @@
                           Y: =5
                     - b-f-line-key:
                         Control: Label
+                        Layout: vertical
                         Properties:
-                          Text: ="Affected Application"
+                          Text: ="Effected Application"
                           Color: =gTheme.Text_On_Light
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
@@ -805,7 +821,136 @@
                 - b-form-submit:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: "=Set(EmailBody,\r\n    \"<!DOCTYPE html>\r\n    <html>\r\n    <head>\r\n        <style>\r\n            body {\r\n                font-family: Arial, sans-serif;\r\n                color: #333333;\r\n                margin: 0;\r\n                padding: 0; /* Removed padding to prevent extra space */\r\n            }\r\n            .email-container {\r\n                border: 1px solid #dddddd;\r\n                border-radius: 5px;\r\n                overflow: hidden;\r\n                width: 100%; /* Ensure the table uses full width */\r\n            }\r\n            .email-header {\r\n                background-color: #5585b5;\r\n                color: #ffffff;\r\n                padding: 20px;\r\n                text-align: center;\r\n            }\r\n            .email-header h1 {\r\n                margin: 0;\r\n                font-size: 24px;\r\n            }\r\n            .email-body {\r\n                padding: 20px;\r\n            }\r\n            .bug-report-table {\r\n                width: 100%;\r\n                border-collapse: collapse;\r\n            }\r\n            .bug-report-table th, .bug-report-table td {\r\n                padding: 12px;\r\n                text-align: left;\r\n                vertical-align: top;\r\n                border-bottom: 1px solid #dddddd;\r\n            }\r\n            .bug-report-table th {\r\n                background-color: #f5f5f5;\r\n                width: 150px;\r\n            }\r\n            .footer {\r\n                text-align: center;\r\n                color: #aaaaaa;\r\n                font-size: 12px;\r\n                padding: 10px;\r\n            }\r\n            /* Inline styles may be more reliable in emails */\r\n        </style>\r\n    </head>\r\n    <body>\r\n    <table width='100%' cellpadding='0' cellspacing='0' border='0'>\r\n        <tr>\r\n            <!-- Left Margin -->\r\n            <td width='15%'>&nbsp;</td>\r\n            \r\n            <!-- Main Content -->\r\n            <td width='70%'>\r\n                <div class='email-container'>\r\n                    <!-- Email Header -->\r\n                    <div class='email-header'>\r\n                        <h1>DMS Bug Report System</h1>\r\n                    </div>\r\n        \r\n                    <!-- Email Body -->\r\n                    <div class='email-body'>\r\n                        <table class='bug-report-table'>\r\n                            <tr>\r\n                                <th>Title</th>\r\n                                <td>\"& 'b-f-title-value'.Text &\"</td>\r\n                            </tr>\r\n                            <tr>\r\n                                <th>Environment</th>\r\n                                <td>\"& 'b-f-environment-value'.Selected.Value &\"</td>\r\n                            </tr>\r\n                            <tr>\r\n                                <th>Problem Type</th>\r\n                                <td>\"& 'b-f-type-value'.Selected.Value &\"</td>\r\n                            </tr>\r\n                            <tr>\r\n                                <th>Expected Result</th>\r\n                                <td>\"& 'b-f-expected-value'.Text &\"</td>\r\n                            </tr>\r\n                            <tr>\r\n                                <th>Actual Result</th>\r\n                                <td>\"& 'b-f-actual-value'.Text &\"</td>\r\n                            </tr>\r\n                            <tr>\r\n                                <th>Status</th>\r\n                                <td>\"& 'b-f-status-value'.Selected.Value &\"</td>\r\n                            </tr>\r\n                        </table>\r\n                    </div>\r\n        \r\n                    <!-- Email Footer -->\r\n                    <div class='footer'>\r\n                        &copy; 2025 EMD Millipore. All rights reserved.\r\n                    </div>\r\n                </div>\r\n            </td>\r\n            \r\n            <!-- Right Margin -->\r\n            <td width='15%'>&nbsp;</td>\r\n        </tr>\r\n    </table>\r\n    </body>\r\n    </html>\"\r\n);\r\n\r\nIfError(SubmitForm('b-form'),\r\n    Notify(\"Submission Error. Check that all required fields are populated.\",NotificationType.Error),\r\n    \r\n    Office365Outlook.SendEmailV2(\r\n        \"M268816@ONE.MERCKGROUP.COM\",\r\n        \"A bug report was submitted for the DMS Management Template?\",\r\n        EmailBody,\r\n        {\r\n            Cc: 'b-f-user-value'.Selected.Email\r\n        }\r\n    );\r\n    \r\n    ResetForm('b-form');\r\n\r\n    Back(ScreenTransition.Fade);\r\n\r\n);"
+                      OnSelect: |-
+                        =Set(EmailBody,
+                            "<!DOCTYPE html>
+                            <html>
+                            <head>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        color: #333333;
+                                        margin: 0;
+                                        padding: 0; /* Removed padding to prevent extra space */
+                                    }
+                                    .email-container {
+                                        border: 1px solid #dddddd;
+                                        border-radius: 5px;
+                                        overflow: hidden;
+                                        width: 100%; /* Ensure the table uses full width */
+                                    }
+                                    .email-header {
+                                        background-color: #5585b5;
+                                        color: #ffffff;
+                                        padding: 20px;
+                                        text-align: center;
+                                    }
+                                    .email-header h1 {
+                                        margin: 0;
+                                        font-size: 24px;
+                                    }
+                                    .email-body {
+                                        padding: 20px;
+                                    }
+                                    .bug-report-table {
+                                        width: 100%;
+                                        border-collapse: collapse;
+                                    }
+                                    .bug-report-table th, .bug-report-table td {
+                                        padding: 12px;
+                                        text-align: left;
+                                        vertical-align: top;
+                                        border-bottom: 1px solid #dddddd;
+                                    }
+                                    .bug-report-table th {
+                                        background-color: #f5f5f5;
+                                        width: 150px;
+                                    }
+                                    .footer {
+                                        text-align: center;
+                                        color: #aaaaaa;
+                                        font-size: 12px;
+                                        padding: 10px;
+                                    }
+                                    /* Inline styles may be more reliable in emails */
+                                </style>
+                            </head>
+                            <body>
+                            <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                <tr>
+                                    <!-- Left Margin -->
+                                    <td width='15%'>&nbsp;</td>
+                                    
+                                    <!-- Main Content -->
+                                    <td width='70%'>
+                                        <div class='email-container'>
+                                            <!-- Email Header -->
+                                            <div class='email-header'>
+                                                <h1>DMS Bug Report System</h1>
+                                            </div>
+                                
+                                            <!-- Email Body -->
+                                            <div class='email-body'>
+                                                <table class='bug-report-table'>
+                                                    <tr>
+                                                        <th>Title</th>
+                                                        <td>"& 'b-f-title-value'.Text &"</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Environment</th>
+                                                        <td>"& 'b-f-environment-value'.Selected.Value &"</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Problem Type</th>
+                                                        <td>"& 'b-f-type-value'.Selected.Value &"</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Expected Result</th>
+                                                        <td>"& 'b-f-expected-value'.Text &"</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Actual Result</th>
+                                                        <td>"& 'b-f-actual-value'.Text &"</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Status</th>
+                                                        <td>"& 'b-f-status-value'.Selected.Value &"</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                
+                                            <!-- Email Footer -->
+                                            <div class='footer'>
+                                                &copy; 2025 EMD Millipore. All rights reserved.
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Right Margin -->
+                                    <td width='15%'>&nbsp;</td>
+                                </tr>
+                            </table>
+                            </body>
+                            </html>"
+                        );
+
+                        IfError(SubmitForm('b-form'),
+                            Notify("Submission Error. Check that all required fields are populated.",NotificationType.Error),
+                            
+                            Office365Outlook.SendEmailV2(
+                                "M268816@ONE.MERCKGROUP.COM",
+                                "A bug report was submitted for the DMS Management Template?",
+                                EmailBody,
+                                {
+                                    Cc: 'b-f-user-value'.Selected.Email
+                                }
+                            );
+                            
+                            ResetForm('b-form');
+
+                            Back(ScreenTransition.Fade);
+
+                        );
                       Text: ="Submit"
                       BorderColor: =gTheme.Primary
                       BorderThickness: =1
@@ -814,11 +959,13 @@
                       FontWeight: =FontWeight.Normal
                       HoverColor: =gTheme.Text_On_Dark
                       HoverFill: =gTheme.Accept
+                      LayoutMinHeight: =1
                       RadiusBottomLeft: =0
                       RadiusBottomRight: =0
                       RadiusTopLeft: =0
                       RadiusTopRight: =0
                       Size: =Self.Height / 3
+                      Width: =Parent.Width * 0.28
                 - b-form-cancel:
                     Control: Classic/Button
                     Properties:
@@ -831,8 +978,10 @@
                       FontWeight: =FontWeight.Normal
                       HoverColor: =gTheme.Text_On_Dark
                       HoverFill: =gTheme.Deny
+                      LayoutMinHeight: =1
                       RadiusBottomLeft: =0
                       RadiusBottomRight: =0
                       RadiusTopLeft: =0
                       RadiusTopRight: =0
                       Size: =Self.Height / 3
+                      Width: =Parent.Width * 0.28

@@ -1,4 +1,4 @@
-- f-layout:
+- d-layout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -14,19 +14,19 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-    - f-collect:
+    - d-collect:
         Control: Classic/Button
         Properties:
           Text: ="collect"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - f-sequential-collect:
+    - d-sequential-collect:
         Control: Timer
         Properties:
           Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - f-update:
+    - d-update:
         Control: Classic/Button
         Properties:
           OnSelect: |-
@@ -40,7 +40,7 @@
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - f-header:
+    - d-header:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -62,13 +62,13 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - f-logo:
+        - d-logo:
             Control: Image
             Properties:
               Image: =If(gTheme.Mode = "Light", logo1, logo2)
               LayoutMinHeight: =10
-              Width: ='f-n-title'.Width
-        - f-title:
+              Width: ='d-n-title'.Width
+        - d-title:
             Control: Label
             Properties:
               Text: ="App Title"
@@ -76,8 +76,8 @@
               FillPortions: =1
               LayoutMinHeight: =10
               LayoutMinWidth: =10
-              Size: =Self.Height / 3
-        - f-mode:
+              Size: =Round(Self.Height / 3,0)
+        - d-mode:
             Control: Classic/Icon
             Variant: HalfFilledCircle
             Properties:
@@ -93,7 +93,7 @@
               PaddingTop: =4
               Rotation: =If(gTheme.Mode = "Light", 0, 180)
               Width: =Self.Height
-        - f-bugs:
+        - d-bugs:
             Control: Image
             Properties:
               OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
@@ -107,7 +107,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-        - f-user-img:
+        - d-user-img:
             Control: Image
             Properties:
               Image: =User().Image
@@ -120,7 +120,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-    - f-main:
+    - d-main:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -136,7 +136,7 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - f-navigation:
+        - d-navigation:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
@@ -158,22 +158,22 @@
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - f-n-title:
+            - d-n-title:
                 Control: Label
                 Properties:
                   Text: =App.ActiveScreen.Name
                   Align: =Align.Center
                   Color: =gTheme.Text_On_Light
                   LayoutMinWidth: =10
-                  Size: =Self.Height / 3
-            - f-n-separator-0:
+                  Size: =Round(Self.Height / 3,0)
+            - d-n-separator-0:
                 Control: Rectangle
                 Properties:
                   Fill: =gTheme.Pri_Complement
                   Height: =Round(gPadding/2,0)
                   LayoutMinWidth: =10
                   Width: =10
-            - f-n-gallery:
+            - d-n-gallery:
                 Control: Gallery
                 Variant: galleryVertical
                 Properties:
@@ -187,7 +187,7 @@
                   TemplatePadding: =gPadding
                   TemplateSize: =40
                 Children:
-                - f-n-g-button:
+                - d-n-g-button:
                     Control: Classic/Button
                     Properties:
                       OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
@@ -202,9 +202,9 @@
                       RadiusBottomRight: =100
                       RadiusTopLeft: =100
                       RadiusTopRight: =100
-                      Size: =Self.Height / 4
+                      Size: =Round(Self.Height / 4,0)
                       Width: =Parent.TemplateWidth
-            - f-n-legal:
+            - d-n-legal:
                 Control: Label
                 Properties:
                   Text: |-
@@ -216,9 +216,9 @@
                   Color: =gTheme.Text_On_Light
                   Height: =200
                   LayoutMinWidth: =10
-                  Size: =Self.Height / 24
+                  Size: =RoundDown(Self.Height / 24,0)
                   VerticalAlign: =VerticalAlign.Bottom
-        - f-filter-parent:
+        - d-filter-parent:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
@@ -240,7 +240,7 @@
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - f-filters:
+            - d-filters:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
@@ -258,7 +258,7 @@
                   PaddingLeft: =gPadding
                   PaddingRight: =gPadding
                 Children:
-                - f-f-title:
+                - d-d-title:
                     Control: Label
                     Properties:
                       Text: ="Filters"
@@ -267,17 +267,17 @@
                       Color: =gTheme.Text_Light
                       Fill: =gTheme.Secondary
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 4
+                      Size: =Round(Self.Height / 4,0)
                       Width: =Parent.Width
-                - f-date-label:
+                - d-date-label:
                     Control: Label
                     Properties:
                       Text: ="Date"
                       Align: =Align.Center
                       Color: =gTheme.Text_On_Light
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 4
-                - f-date:
+                      Size: =Round(Self.Height / 4,0)
+                - d-date:
                     Control: Classic/DatePicker
                     Properties:
                       BorderThickness: =1
@@ -287,23 +287,23 @@
                       IconBackground: =gTheme.Sec_Complement
                       IconFill: =gTheme.Text_On_Light
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 5
-                - f-f-separator-0:
+                      Size: =Round(Self.Height / 5,0)
+                - d-d-separator-0:
                     Control: Rectangle
                     Properties:
                       Fill: =gTheme.Pri_Complement
                       Height: =Round(gPadding/2,0)
                       LayoutMinWidth: =10
                       Width: =10
-                - f-line-label:
+                - d-line-label:
                     Control: Label
                     Properties:
                       Text: ="Line"
                       Align: =Align.Center
                       Color: =gTheme.Text_On_Light
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 4
-                - f-line:
+                      Size: =Round(Self.Height / 4,0)
+                - d-line:
                     Control: Classic/DropDown
                     Properties:
                       Items: =gLists.Lines
@@ -312,15 +312,15 @@
                       Color: =gTheme.Text_On_Light
                       Fill: =gTheme.Background
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 5
-                - f-f-separator-1:
+                      Size: =Round(Self.Height / 5,0)
+                - d-d-separator-1:
                     Control: Rectangle
                     Properties:
                       Fill: =gTheme.Pri_Complement
                       Height: =Round(gPadding/2,0)
                       LayoutMinWidth: =10
                       Width: =10
-        - f-body:
+        - d-body:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
@@ -343,7 +343,7 @@
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - f-section-0:
+            - d-section-0:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
@@ -359,7 +359,7 @@
                   LayoutOverflowY: =LayoutOverflow.Scroll
                   PaddingRight: =
                 Children:
-                - f-s0-title:
+                - d-s0-title:
                     Control: Label
                     Properties:
                       Text: ="Section Zero"
@@ -367,10 +367,10 @@
                       AlignInContainer: =AlignInContainer.Start
                       Color: =gTheme.Text_Light
                       Fill: =gTheme.Secondary
-                      Height: ='f-title'.Height / 2
+                      Height: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 'd-title'.Height, Round('d-title'.Height/2,0))
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 3
+                      Size: =Round(Self.Height / 3,0)
                       Width: =Parent.Width
                 - Table1:
                     Control: Table
@@ -394,7 +394,7 @@
                           FieldName: ="Percent"
                           FieldType: ="n"
                           Order: =2
-            - f-section-1:
+            - d-section-1:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
@@ -410,7 +410,7 @@
                   LayoutOverflowY: =LayoutOverflow.Scroll
                   PaddingRight: =
                 Children:
-                - f-s1-title:
+                - d-s1-title:
                     Control: Label
                     Properties:
                       Text: ="Section One"
@@ -418,12 +418,12 @@
                       AlignInContainer: =AlignInContainer.Start
                       Color: =gTheme.Text_Light
                       Fill: =gTheme.Secondary
-                      Height: ='f-title'.Height / 2
+                      Height: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 'd-title'.Height, Round('d-title'.Height/2,0))
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 3
+                      Size: =Round(Self.Height / 3,0)
                       Width: =Parent.Width
-                - f-s1-chart:
+                - d-s1-chart:
                     Control: LineChart
                     Properties:
                       Items: =lData
@@ -436,7 +436,7 @@
                       X: =40
                       XLabelAngle: =0
                       Y: =70
-            - f-section-2:
+            - d-section-2:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
@@ -452,7 +452,7 @@
                   LayoutOverflowY: =LayoutOverflow.Scroll
                   PaddingRight: =
                 Children:
-                - f-s2-title:
+                - d-s2-title:
                     Control: Label
                     Properties:
                       Text: ="Section Two"
@@ -460,12 +460,12 @@
                       AlignInContainer: =AlignInContainer.Start
                       Color: =gTheme.Text_Light
                       Fill: =gTheme.Secondary
-                      Height: ='f-title'.Height / 2
+                      Height: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 'd-title'.Height, Round('d-title'.Height/2,0))
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
                       Size: =Self.Height / 3
                       Width: =Parent.Width
-                - f-s2-chart:
+                - d-s2-chart:
                     Control: Image
                     Properties:
                       Image: |-
