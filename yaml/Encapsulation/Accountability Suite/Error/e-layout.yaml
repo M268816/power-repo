@@ -1,187 +1,131 @@
-- e_layout:
+- e-layout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
       DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical
-      LayoutGap: =
       LayoutMode: =LayoutMode.Auto
       RadiusBottomLeft: =0
       RadiusBottomRight: =0
       RadiusTopLeft: =0
       RadiusTopRight: =0
       Width: =Parent.Width
-      X: =
     Children:
-    - e_header:
+    - e-send-emails:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =UpdateContext({locLoading: true});
+
+            flow_send_email_v2.Run(
+                DataCardValue2.Selected.Email,
+                DataCardValue6.Selected.Email,
+                User().Email,
+                {
+                    contentBytes: First(DataCardValue9.Attachments).Value,
+                    name: First(DataCardValue9.Attachments).Name
+                },
+                Text(DataCardValue8.SelectedDate),
+                Text(DataCardValue1.Text),
+                Text(DataCardValue7.Selected.Value),
+                Text(DataCardValue3.Selected.Value),
+                Text(DataCardValue4.Selected.Value),
+                DataCardValue5.Text
+            );
+
+            SubmitForm('e-form');
+
+            UpdateContext({locLoading: false});
+          Text: ="Send Emails"
+          Color: =RGBA(255, 255, 255, 1)
+          HoverColor: =RGBA(255, 255, 255, 1)
+          Visible: =false
+          X: =1-1
+          Y: =1-1
+    - e-header:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          Fill: =varColor1
+          Fill: =gTheme.Primary
           LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =varPadding
-          PaddingLeft: =varPadding
-          PaddingRight: =varPadding
-          PaddingTop: =varPadding
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - e_send_emails:
-            Control: Classic/Button
-            Properties:
-              OnSelect: |-
-                =UpdateContext({locLoading: true});
-                /*
-                Office365Outlook.SendEmailV2(
-                    DataCardValue2.Selected.Email,
-                    "Accountability reported an error you have made.",
-                    "
-                    <head>
-                        <Style></Style>
-                    </head>
-                    <body  style=""margin: auto; text-align: center"" >
-                        <h2>An error was found by Accountability.</h2>
-                        <h3>You and your supervisor have been notified.</h3>
-                        <h3>This email is for training purposes only.</h3>
-                        <Div>
-                            <p>
-                                Affected Person: <br />
-                                "& DataCardValue2.Selected.DisplayName &"
-                            </p>
-                            <p>
-                                Date of occurance: <br />
-                                "& DateValue(DataCardValue8.SelectedDate) &"
-                            </p>
-                            <p>
-                                WJ: <br />
-                                "& DataCardValue1.Text &"
-                            </p>
-                            <p>
-                                Production Line: <br />
-                                "& DataCardValue7.Selected.Value &"
-                            </p>
-                            <p>
-                                Production Area of the error: <br />
-                                "& DataCardValue3.Selected.Value &"
-                            </p>
-                            <p>
-                                Error type: <br />
-                                "& DataCardValue4.Selected.Value &"
-                            </p>
-                            <p>
-                                Comments: <br />
-                                "& DataCardValue5.Text &"
-                            </p>
-                            <p>
-                                This email may have an attachment that demonstrates the error.
-                            </p>
-                        </Div>
-                    </body>
-                    ",
-                    {
-                        /*Sends Email to Supervisor*//*
-                        Cc: DataCardValue6.Selected.Email,
-                        Bcc: User().Email,
-
-                        Attachments: ForAll(
-                            DataCardValue9.Attachments,
-                            {
-                                ContentBytes: Value,
-                                Name: Name
-                            }
-                        )
-                    }
-                );
-                */
-
-                flow_send_email_v2.Run(
-                    DataCardValue2.Selected.Email,
-                    DataCardValue6.Selected.Email,
-                    User().Email,
-                    {
-                        contentBytes: First(DataCardValue9.Attachments).Value,
-                        name: First(DataCardValue9.Attachments).Name
-                    },
-                    Text(DataCardValue8.SelectedDate),
-                    Text(DataCardValue1.Text),
-                    Text(DataCardValue7.Selected.Value),
-                    Text(DataCardValue3.Selected.Value),
-                    Text(DataCardValue4.Selected.Value),
-                    DataCardValue5.Text
-                );
-
-                SubmitForm(e_e_form);
-
-                UpdateContext({locLoading: false});
-              Text: ="Send Emails"
-              Visible: =false
-              X: =1-1
-              Y: =1-1
-        - e_logo:
+        - e-logo:
             Control: Image
             Properties:
-              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
+              Image: =If(gTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: ='e-n-title'.Width
+        - e-title:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
-              Width: =10
-        - e_h_title:
-            Control: Text
-            Properties:
-              Align: ='TextCanvas.Align'.Center
-              FontColor: =varColor5
-              Size: =24
-              Text: ="Accountability Suite"
-              VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
-              FillPortions: =6
-              LayoutMinHeight: =8
               LayoutMinWidth: =10
-        - e_h_nav:
-            Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+              Size: =Self.Height / 3
+        - e-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
             Properties:
-              AlignInContainer: =AlignInContainer.SetByContainer
-              DropShadow: =DropShadow.None
-              FillPortions: =0
-              LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =varPadding
-              LayoutJustifyContent: =LayoutJustifyContent.Center
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
               LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              LayoutMode: =LayoutMode.Auto
-              RadiusBottomLeft: =0
-              RadiusBottomRight: =0
-              RadiusTopLeft: =0
-              RadiusTopRight: =0
-              Width: =e_h_n_bugs.Width + varPadding * 2
-            Children:
-            - e_h_n_bugs:
-                Control: Image
-                Properties:
-                  OnSelect: =Navigate(Bugs)
-                  Image: |-
-                    ="data:image/svg+xml;utf8, " & EncodeUrl("
-
-                    <svg id='Icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'><defs><style>.cls-1{fill:" & varHexAccent & ";}</style></defs><path class='cls-1' d='M80.07,33.73a24.48,24.48,0,1,0,24.48,24.48A24.51,24.51,0,0,0,80.07,33.73ZM65,47.65a1.45,1.45,0,0,1,1.7-1.16l5.62,1.06a8.34,8.34,0,0,1,7.46-4.65h.47a8.37,8.37,0,0,1,7.47,4.65l5.62-1.06a1.45,1.45,0,0,1,.54,2.85l-5.35,1a8.46,8.46,0,0,1,0,.87.85.85,0,0,1-.85.85H72.28a.85.85,0,0,1-.85-.85,6.35,6.35,0,0,1,0-.87l-5.35-1A1.45,1.45,0,0,1,65,47.65Zm28.88,19.7a1.45,1.45,0,0,1-.27,2.88,1.24,1.24,0,0,1-.27,0l-5.62-1.06a7.74,7.74,0,0,1-3.43,3.79c-1.88.82-6.8.8-8.67-.07a7.64,7.64,0,0,1-3.3-3.72L66.67,70.2a1.24,1.24,0,0,1-.27,0A1.46,1.46,0,0,1,65,69a1.44,1.44,0,0,1,1.16-1.69l5.35-1a6.35,6.35,0,0,1,0-.87v-5.3H66.16a1.45,1.45,0,1,1,0-2.9h5.27V56.06A1.09,1.09,0,0,1,72.52,55H87.46a1.09,1.09,0,0,1,1.09,1.09v1.21h5.32a1.45,1.45,0,0,1,0,2.9H88.55v5.3a8.46,8.46,0,0,1,0,.87Z'/><path class='cls-1' d='M69.91-.08a70,70,0,0,0-66,93.27c.13.38.7,1.8.82,2.12a15.3,15.3,0,0,0,25.62,5c.37-.4,2.29-2.41,2.29-2.41L47.45,83.05a2,2,0,0,1,2.92.12,38.81,38.81,0,0,0,6.27,6,2,2,0,0,1,.2,3L43.62,105.34s-3,2.72-3.65,3.29a16.13,16.13,0,0,0,5,26.69c.49.21,2.5.88,3,1.05A70,70,0,1,0,69.91-.08ZM80.07,92a33.81,33.81,0,1,1,33.81-33.81A33.85,33.85,0,0,1,80.07,92Z'/></svg>
-
-
-
-                    ")
-                  Height: =Parent.Height * 0.75
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Width: =Self.Height
-                  X: =Parent.Width * 0.99 - Self.Width
-                  Y: =Parent.Height/2 - Self.Height/2
-    - e_body:
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - e-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - e-user-img:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - e-main:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -197,190 +141,151 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - e_nav:
+        - e-navigation:
             Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+            Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              Fill: =varColor3
+              Fill: =gTheme.Midground
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
-              LayoutGap: =varPadding
+              LayoutGap: =gPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =varPadding
-              PaddingLeft: =varPadding
-              PaddingRight: =varPadding
-              PaddingTop: =varPadding
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - e_n_title:
-                Control: Text
+            - e-n-title:
+                Control: Label
                 Properties:
-                  Align: ='TextCanvas.Align'.Center
-                  Size: =Self.Height / 6
-                  Text: ="Batch Error Entry"
-                  VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
-                  Weight: ='TextCanvas.Weight'.Semibold
-                  FillPortions: =1
-                  LayoutMinHeight: =10
+                  Text: ="Batch Error Reporting"
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
                   LayoutMinWidth: =10
-            - e_n_seperator:
+                  Size: =Self.Height / 3
+            - e-n-separator-0:
                 Control: Rectangle
                 Properties:
-                  Height: =1
+                  Fill: =gTheme.Pri_Complement
+                  Height: =Round(gPadding/2,0)
                   LayoutMinWidth: =10
-            - e_n_home:
-                Control: Classic/Button
+                  Width: =10
+            - e-n-gallery:
+                Control: Gallery
+                Variant: galleryVertical
                 Properties:
-                  OnSelect: =Navigate(Main);
-                  Text: ="Home"
-                  Color: =varColor0
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 6
-            - e_n_batch:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Error);
-                  Text: ="Batch Errors"
-                  Color: =varColor0
-                  DisplayMode: =DisplayMode.Disabled
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 6
-            - e_n_plug:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Plug);
-                  Text: ="Plug Lot Tracker"
-                  Color: =varColor0
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 6
-            - e_n_lookup:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Lookup);
-                  Text: ="Info Lookup"
-                  Color: =varColor0
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 6
-            - e_n_burst:
-                Control: Classic/Button
-                Properties:
-                  OnSelect: =Navigate(Burst);
-                  Text: ="Enter Burst Data"
-                  Color: =varColor0
-                  Fill: =varColorAccent
-                  FillPortions: =1
-                  FontWeight: =FontWeight.Normal
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 6
-            - e_n_footer:
-                Control: GroupContainer
-                Variant: manualLayoutContainer
-                Properties:
+                  Items: =cNavigation
                   AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.None
-                  FillPortions: =4
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gPadding
+                  TemplateSize: =40
                 Children:
-                - e_n_f_text:
-                    Control: Text
+                - e-n-g-button:
+                    Control: Classic/Button
                     Properties:
-                      Align: ='TextCanvas.Align'.Center
-                      Size: =8
-                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
-                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
-                      Height: =Parent.Height
-                      Width: =Parent.Width
-        - e_main:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - e-n-legal:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - e-body:
             Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+            Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              FillPortions: =9
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
               LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =varPadding*4
+              LayoutGap: =gPadding
+              LayoutJustifyContent: =LayoutJustifyContent.Center
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =Self.LayoutGap
-              PaddingLeft: =Self.LayoutGap*8
-              PaddingRight: =Self.LayoutGap*8
-              PaddingTop: =Self.LayoutGap
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - e_errors:
+            - e-form-parent:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.Regular
-                  Fill: =varColor4
+                  Fill: =gTheme.Foreground
+                  FillPortions: =0
+                  Height: =500
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =varPadding
+                  LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingRight: =
                 Children:
-                - e_e_title:
+                - e-form-title:
                     Control: Label
                     Properties:
-                      Text: ="Batch Record Errors/ FYIs"
+                      Text: ="Batch Record Error Form"
                       Align: =Align.Center
-                      AlignInContainer: =AlignInContainer.Stretch
-                      Color: =varColor5
-                      Fill: =varColor2
-                      FillPortions: =1
-                      Height: =Parent.Height * 0.90
+                      AlignInContainer: =AlignInContainer.Start
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Secondary
+                      Height: ='e-title'.Height / 2
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 4
-                      Visible: =!locLoading
-                      Width: =Parent.Width * 0.90
-                      X: =Parent.Width/2 - Self.Width/2
-                      Y: =Parent.Height/2 - Self.Height/2
-                - e_e_form:
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
+                - e-form:
                     Control: Form
                     Layout: vertical
                     Properties:
                       OnFailure: =Notify("Failure", NotificationType.Error)
                       OnSuccess: |-
                         =Notify("Success", NotificationType.Success);
-                        ResetForm(e_e_form);
+                        ResetForm('e-form');
                       DataSource: =ErrorTracking
                       DefaultMode: =FormMode.New
                       AlignInContainer: =AlignInContainer.SetByContainer
-                      FillPortions: =10
+                      FillPortions: =11
                       Height: =Parent.Height * 0.90 - Self.Y
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
@@ -406,6 +311,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey2.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -417,6 +323,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -436,8 +343,14 @@
                               SelectMultiple: =false
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -447,6 +360,7 @@
                             Properties:
                               Text: ="Person Responsible for the Error"
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =Self.Width / 48
                               Width: =Parent.Width - 60
@@ -472,6 +386,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey6.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -483,6 +398,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -514,7 +430,13 @@
                               SelectMultiple: =false
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Color: =gTheme.Text_On_Light
+                              Fill: =gTheme.Background
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -524,6 +446,7 @@
                             Properties:
                               Text: =Parent.DisplayName
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -549,6 +472,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey8.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -560,6 +484,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -577,7 +502,10 @@
                               StartYear: =1899
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
+                              IconFill: =RGBA(255, 255, 255, 1)
                               IsEditable: =true
                               PaddingBottom: =0
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
@@ -590,6 +518,7 @@
                             Properties:
                               Text: ="Date of Error"
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -616,6 +545,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey1.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -627,6 +557,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -644,7 +575,9 @@
                               MaxLength: =Parent.MaxLength
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               PaddingLeft: =5
                               RadiusBottomLeft: =0
                               RadiusBottomRight: =0
@@ -659,6 +592,7 @@
                             Properties:
                               Text: ="Batch Record WJ (For FYI Tickets Enter ""FYI"" into this field.)"
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =Self.Width / 48
                               Width: =Parent.Width - 60
@@ -684,6 +618,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey7.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -695,6 +630,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -714,8 +650,14 @@
                               SelectMultiple: =false
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -725,6 +667,7 @@
                             Properties:
                               Text: =Parent.DisplayName
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -750,6 +693,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey3.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -761,6 +705,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -780,8 +725,14 @@
                               SelectMultiple: =false
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -791,6 +742,7 @@
                             Properties:
                               Text: ="Production Area the Error Occurred"
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -816,6 +768,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey4.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -827,6 +780,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -846,8 +800,14 @@
                               SelectMultiple: =false
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -857,6 +817,7 @@
                             Properties:
                               Text: ="Type of Error Found"
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -883,6 +844,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey5.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -894,6 +856,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -911,8 +874,10 @@
                               MaxLength: =Parent.MaxLength
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
                               EnableSpellCheck: =true
+                              Fill: =gTheme.Background
                               Height: =100
                               Mode: =TextMode.MultiLine
                               PaddingLeft: =5
@@ -929,6 +894,7 @@
                             Properties:
                               Text: ="Additional Comments"
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -953,6 +919,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey9.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -964,6 +931,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -981,12 +949,16 @@
                               MaxAttachments: =1
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               Height: =100
+                              ItemColor: =RGBA(255, 255, 255, 1)
                               PaddingBottom: =5
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                               PaddingRight: =5
                               PaddingTop: =5
+                              PressedColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -996,6 +968,7 @@
                             Properties:
                               Text: =Parent.DisplayName
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -1021,6 +994,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey32.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -1032,6 +1006,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -1051,8 +1026,14 @@
                               SelectMultiple: =false
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -1062,6 +1043,7 @@
                             Properties:
                               Text: ="Person's Shift"
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -1087,6 +1069,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey34.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -1098,6 +1081,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -1117,8 +1101,14 @@
                               SelectMultiple: =false
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -1128,6 +1118,7 @@
                             Properties:
                               Text: ="Shift the Error was found and reported."
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
@@ -1153,6 +1144,7 @@
                             Properties:
                               Text: ="*"
                               Align: =Align.Center
+                              Color: =gTheme.Text_On_Light
                               Height: =DataCardKey25.Height
                               Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                               Width: =30
@@ -1164,6 +1156,7 @@
                               Live: =Live.Assertive
                               Text: =Parent.Error
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =10
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -1183,8 +1176,14 @@
                               SelectMultiple: =false
                               Tooltip: =Parent.DisplayName
                               BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                              ChevronFill: =RGBA(255, 255, 255, 1)
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              Color: =gTheme.Text_On_Light
                               DisplayMode: =Parent.DisplayMode
+                              Fill: =gTheme.Background
                               PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                              PressedColor: =RGBA(255, 255, 255, 1)
+                              SelectionColor: =RGBA(255, 255, 255, 1)
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               X: =30
@@ -1194,60 +1193,13 @@
                             Properties:
                               Text: =Parent.DisplayName
                               AutoHeight: =true
+                              Color: =gTheme.Text_On_Light
                               Height: =34
                               Size: =DataCardKey2.Size
                               Width: =Parent.Width - 60
                               Wrap: =false
                               X: =30
                               Y: =10
-                - e_button_parent:
-                    Control: GroupContainer
-                    Variant: horizontalAutoLayoutContainer
-                    Properties:
-                      AlignInContainer: =AlignInContainer.SetByContainer
-                      DropShadow: =DropShadow.None
-                      LayoutAlignItems: =LayoutAlignItems.Stretch
-                      LayoutGap: =varPadding
-                      LayoutJustifyContent: =LayoutJustifyContent.Center
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                      LayoutMode: =LayoutMode.Auto
-                      PaddingBottom: =Self.LayoutGap
-                      PaddingLeft: =Self.LayoutGap
-                      PaddingRight: =Self.LayoutGap
-                      PaddingTop: =Self.LayoutGap
-                      RadiusBottomLeft: =0
-                      RadiusBottomRight: =0
-                      RadiusTopLeft: =0
-                      RadiusTopRight: =0
-                      Visible: =!locLoading
-                    Children:
-                    - e_submit:
-                        Control: Classic/Button
-                        Properties:
-                          OnSelect: |-
-                            =Select(e_send_emails);
-                            //SubmitForm(e_e_form);
-                          Text: ="Submit"
-                          Fill: =varColorYes
-                          FillPortions: =1
-                          Height: =10
-                          LayoutMinWidth: =10
-                          Width: =Parent.Width / 3
-                          X: =Parent.Width - Self.Width * 1.5
-                          Y: =Parent.Height/2 - Self.Height/2
-                    - e_cancel:
-                        Control: Classic/Button
-                        Properties:
-                          OnSelect: =ResetForm(e_e_form);
-                          Text: ="Cancel"
-                          Fill: =Color.IndianRed
-                          FillPortions: =1
-                          Height: =10
-                          LayoutMinWidth: =10
-                          Width: =Parent.Width / 3
-                          X: =Parent.Width * 0.30 - Self.Width/2
-                          Y: =Parent.Height/2 - Self.Height/2
                 - e_sending:
                     Control: GroupContainer
                     Variant: manualLayoutContainer
@@ -1255,6 +1207,7 @@
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DropShadow: =DropShadow.None
                       Fill: =Color.White
+                      FillPortions: =11
                       Height: =Parent.Height
                       LayoutMinHeight: =1
                       LayoutMinWidth: =1
@@ -1275,63 +1228,94 @@
                           Width: =Self.Height
                           X: =Parent.Width/2 - Self.Width/2
                           Y: =Parent.Height/2 - Self.Height/2
-            - e_info:
+                - e-form-buttons:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.Bold
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutGap: =gPadding*2
+                      LayoutJustifyContent: =LayoutJustifyContent.End
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      PaddingBottom: =gPadding
+                      PaddingLeft: =gPadding
+                      PaddingRight: =gPadding
+                      PaddingTop: =gPadding
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - e-form-submit:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: =Select('e-send-emails');
+                          Text: ="Submit"
+                          Color: =gTheme.Text_On_Light
+                          Fill: =gTheme.Background
+                          FontWeight: =FontWeight.Normal
+                          Height: =10
+                          HoverFill: =gTheme.Accept
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Size: =Round(Self.Height/3,0)
+                          Width: =Parent.Width * 0.25
+                    - e-form-cancel:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: =ResetForm('e-form');
+                          Text: ="Cancel"
+                          Color: =gTheme.Text_On_Dark
+                          Fill: =gTheme.Secondary
+                          FontWeight: =FontWeight.Normal
+                          HoverFill: =gTheme.Deny
+                          LayoutMinHeight: =10
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Size: =Round(Self.Height/3,0)
+                          Width: =Parent.Width * 0.25
+            - e-info-parent:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.Regular
-                  Fill: =varColor4
-                  Height: =Parent.Height * 0.75
+                  Fill: =gTheme.Foreground
+                  FillPortions: =0
+                  Height: =500
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =varPadding
-                  LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingRight: =
                 Children:
-                - e_i_title:
+                - e-info-title:
                     Control: Label
                     Properties:
                       Text: ="Instructions"
                       Align: =Align.Center
-                      Color: =varColor5
-                      Fill: =varColor2
-                      FillPortions: =1
-                      Height: =Parent.Height * 0.90
+                      AlignInContainer: =AlignInContainer.Start
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Secondary
+                      Height: ='e-title'.Height / 2
                       LayoutMinHeight: =10
-                      Size: =Self.Height / 4
-                      Width: =10
-                      X: =Parent.Width/2 - Self.Width/2
-                      Y: =Parent.Height/2 - Self.Height/2
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
                 - e_i_text:
                     Control: Label
                     Properties:
-                      Text: |-
-                        ="A new video demonstrating receiving the scan and using the form is now available. You can also enlarge the video for easier viewing.
-
-                          Prepare and complete accountability for a batch record completely before starting the error process.
-
-                          Copy all errors with the accountability printer.
-
-                          Stamp the copied error with the ""COPY"" stamp.
-
-                          Highlight the error on the copied paper.
-
-                          Using the printer, scan and email yourself the copied, stamped, and highlighted error. With the built in scan and email prompts.
-
-                          *NOTE* Make sure to do this with one error at a time. Combining all pages within one email, will combine all errors in one document. Do not do this! We need to keep the documents sperate as to send only the affected person their own error. However, multiple pages to demonstrate the error can be scanned together for a single error.
-
-                          Save the scanned document from the email to a folder you can easily access, for example ""//OneDrive/Documents/Scans"".
-
-                          Name the file something recognizable, for example, ""Person's Name - Error Date.pdf"".
-
-                          Enter in all the information about the error in the form to the left. Then, use the dialog box within the attachment field to attach the error to the record.
-                              
-                          Select the ""Submit"" button at the bottom to submit the information to the database.
-
-                          An email will be sent to the person responsible and their supervisor, you will also receive a copy of the email to confirm your entry was correct."
+                      Text: "=\"A new video demonstrating receiving the scan and using the form is now available. You can also enlarge the video for easier viewing.\n\nPrepare and complete accountability for a batch record completely before starting the error process.\n\nCopy all errors with the accountability printer.\n\nStamp the copied error with the \"\"COPY\"\" stamp.\n\nHighlight the error on the copied paper.\n\nUsing the printer, scan and email yourself the copied, stamped, and highlighted error. With the built in scan and email prompts.\n\n*NOTE* Make sure to do this with one error at a time. Combining all pages within one email, will combine all errors in one document. Do not do this! We need to keep the documents separate as to send only the affected person their own error. However, multiple pages to demonstrate the error can be scanned together for a single error.\n\nSave the scanned document from the email to a folder you can easily access, for example \"\"//OneDrive/Documents/Scans\"\".\n\nName the file something recognizable, for example, \"\"Person's Name - Error Date.pdf\"\".\n\nEnter in all the information about the error in the form to the left. Then, use the dialog box within the attachment field to attach the error to the record.\n    \nSelect the \"\"Submit\"\" button at the bottom to submit the information to the database.\n\nAn email will be sent to the person responsible and their supervisor, you will also receive a copy of the email to confirm your entry was correct.\""
                       AutoHeight: =true
-                      FillPortions: =10
+                      Color: =gTheme.Text_On_Light
+                      FillPortions: =11
                       Height: =Parent.Height
                       LayoutMinWidth: =10
                       Overflow: =Overflow.Scroll
@@ -1343,15 +1327,39 @@
                       Width: =Parent.Width
                       X: =1-1
                       Y: =64.47559999999999
-                - e_demo:
-                    Control: Classic/Button
+                - e-info-buttons:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
                     Properties:
-                      OnSelect: =Navigate(Demo);
-                      Text: ="View Demo"
-                      Color: =varColor0
-                      Fill: =varColorAccent
-                      FillPortions: =1
-                      FontWeight: =FontWeight.Normal
+                      DropShadow: =DropShadow.Bold
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutGap: =gPadding*2
+                      LayoutJustifyContent: =LayoutJustifyContent.Center
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 4
+                      LayoutMode: =LayoutMode.Auto
+                      PaddingBottom: =gPadding
+                      PaddingLeft: =gPadding
+                      PaddingRight: =gPadding
+                      PaddingTop: =gPadding
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - e-info-submit:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: =Navigate(Demo);
+                          Text: ="Watch Demo"
+                          Color: =gTheme.Text_On_Light
+                          Fill: =gTheme.Background
+                          FontWeight: =FontWeight.Normal
+                          Height: =10
+                          HoverFill: =gTheme.Accept
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Size: =Round(Self.Height/3,0)
+                          Width: =Parent.Width * 0.4

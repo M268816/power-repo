@@ -1,6 +1,0 @@
-Properties:
-  OnVisible: |-
-    =UpdateContext({
-        locEditForm: false,
-        locPopup:false
-        });

@@ -1,5 +1,0 @@
-Properties:
-  OnVisible: |-
-    =UpdateContext({
-        locLoading: false
-        });

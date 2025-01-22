@@ -1,5 +1,0 @@
-Properties:
-  OnVisible: |-
-    =Set(varLoading, {Visible: true, Value: 0, Text: "Starting"});
-
-    If(varInit, Select(init_start););

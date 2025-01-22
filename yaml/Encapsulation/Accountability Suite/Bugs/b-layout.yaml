@@ -14,24 +14,6 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-    - b-collect:
-        Control: Classic/Button
-        Properties:
-          Text: ="collect"
-          AlignInContainer: =AlignInContainer.Start
-          Visible: =false
-    - b-sequential-collect:
-        Control: Timer
-        Properties:
-          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
-          AlignInContainer: =AlignInContainer.Start
-          Visible: =false
-    - b-update:
-        Control: Classic/Button
-        Properties:
-          Text: ="update"
-          AlignInContainer: =AlignInContainer.Start
-          Visible: =false
     - b-header:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
@@ -92,6 +74,19 @@
               PaddingRight: =4
               PaddingTop: =4
               Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - b-user-img:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
     - b-main:
         Control: GroupContainer
@@ -255,7 +250,7 @@
                       Height: =50
                       Width: =672
                       WidthFit: =true
-                      Y: =3
+                      Y: =2
                     Children:
                     - b-f-title-star:
                         Control: Label
@@ -325,7 +320,7 @@
                     Layout: horizontal
                     Properties:
                       DataField: ="Environment"
-                      Default: =LookUp(Choices([@BugReports].Environment),Value = "Encap DMS Management")
+                      Default: =LookUp(Choices([@BugReports].Environment),Value = "Accountability Suite")
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Environment)
                       Required: =true
                       Update: ='b-f-environment-value'.Selected
@@ -722,9 +717,10 @@
                       Update: ='b-f-line-value'.Text
                       DisplayMode: =DisplayMode.View
                       Height: =50
+                      Visible: =false
                       Width: =672
                       WidthFit: =true
-                      Y: =2
+                      Y: =3
                     Children:
                     - b-f-line-star:
                         Control: Label
@@ -757,7 +753,7 @@
                         Control: Classic/TextInput
                         Layout: horizontal
                         Properties:
-                          Default: =gLine
+                          Default: ="None"
                           DelayOutput: =true
                           MaxLength: =Parent.MaxLength
                           Tooltip: =Parent.DisplayName
@@ -808,140 +804,7 @@
                 - b-form-submit:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: |-
-                        =Set(EmailBody,
-                          "<!DOCTYPE html>
-                          <html>
-                          <head>
-                              <style>
-                                  body {
-                                      font-family: Arial, sans-serif;
-                                      color: #333333;
-                                      margin: 0;
-                                      padding: 0; /* Removed padding to prevent extra space */
-                                  }
-                                  .email-container {
-                                      border: 1px solid #dddddd;
-                                      border-radius: 5px;
-                                      overflow: hidden;
-                                      width: 100%; /* Ensure the table uses full width */
-                                  }
-                                  .email-header {
-                                      background-color: #5585b5;
-                                      color: #ffffff;
-                                      padding: 20px;
-                                      text-align: center;
-                                  }
-                                  .email-header h1 {
-                                      margin: 0;
-                                      font-size: 24px;
-                                  }
-                                  .email-body {
-                                      padding: 20px;
-                                  }
-                                  .bug-report-table {
-                                      width: 100%;
-                                      border-collapse: collapse;
-                                  }
-                                  .bug-report-table th, .bug-report-table td {
-                                      padding: 12px;
-                                      text-align: left;
-                                      vertical-align: top;
-                                      border-bottom: 1px solid #dddddd;
-                                  }
-                                  .bug-report-table th {
-                                      background-color: #f5f5f5;
-                                      width: 150px;
-                                  }
-                                  .footer {
-                                      text-align: center;
-                                      color: #aaaaaa;
-                                      font-size: 12px;
-                                      padding: 10px;
-                                  }
-                                  /* Inline styles may be more reliable in emails */
-                              </style>
-                          </head>
-                          <body>
-                          <table width='100%' cellpadding='0' cellspacing='0' border='0'>
-                              <tr>
-                                  <!-- Left Margin -->
-                                  <td width='15%'>&nbsp;</td>
-                                  
-                                  <!-- Main Content -->
-                                  <td width='70%'>
-                                      <div class='email-container'>
-                                          <!-- Email Header -->
-                                          <div class='email-header'>
-                                              <h1>DMS Bug Report System</h1>
-                                          </div>
-                              
-                                          <!-- Email Body -->
-                                          <div class='email-body'>
-                                              <table class='bug-report-table'>
-                                                  <tr>
-                                                      <th>Title</th>
-                                                      <td>"& 'b-f-title-value'.Text &"</td>
-                                                  </tr>
-                                                  <tr>
-                                                      <th>Environment</th>
-                                                      <td>"& 'b-f-environment-value'.Selected.Value &"</td>
-                                                  </tr>
-                                                  <tr>
-                                                      <th>Line</th>
-                                                      <td>"& 'b-f-line-value'.Text &"</td>
-                                                  </tr>
-                                                  <tr>
-                                                      <th>Problem Type</th>
-                                                      <td>"& 'b-f-type-value'.Selected.Value &"</td>
-                                                  </tr>
-                                                  <tr>
-                                                      <th>Expected Result</th>
-                                                      <td>"& 'b-f-expected-value'.Text &"</td>
-                                                  </tr>
-                                                  <tr>
-                                                      <th>Actual Result</th>
-                                                      <td>"& 'b-f-actual-value'.Text &"</td>
-                                                  </tr>
-                                                  <tr>
-                                                      <th>Status</th>
-                                                      <td>"& 'b-f-status-value'.Selected.Value &"</td>
-                                                  </tr>
-                                              </table>
-                                          </div>
-                              
-                                          <!-- Email Footer -->
-                                          <div class='footer'>
-                                              &copy; 2025 EMD Millipore. All rights reserved.
-                                          </div>
-                                      </div>
-                                  </td>
-                                  
-                                  <!-- Right Margin -->
-                                  <td width='15%'>&nbsp;</td>
-                              </tr>
-                          </table>
-                          </body>
-                          </html>"
-                      );
-
-                      IfError(SubmitForm('b-form'),
-                          Notify("Submission Error. Check that all required fields are populated.",NotificationType.Error),
-                          
-                          Office365Outlook.SendEmailV2(
-                              "M268816@ONE.MERCKGROUP.COM",
-                              "A bug report was submitted for the " & APP_NAME,
-                              EmailBody,
-                              {
-                                  Cc: 'b-f-user-value'.Selected.Email
-                              }
-                          );
-                          
-                          ResetForm('b-form');
-
-                          Back(ScreenTransition.Fade);
-
-                      );
+                      OnSelect: "=Set(EmailBody,\n    \"<!DOCTYPE html>\n    <html>\n    <head>\n        <style>\n            body {\n                font-family: Arial, sans-serif;\n                color: #333333;\n                margin: 0;\n                padding: 0; /* Removed padding to prevent extra space */\n            }\n            .email-container {\n                border: 1px solid #dddddd;\n                border-radius: 5px;\n                overflow: hidden;\n                width: 100%; /* Ensure the table uses full width */\n            }\n            .email-header {\n                background-color: #5585b5;\n                color: #ffffff;\n                padding: 20px;\n                text-align: center;\n            }\n            .email-header h1 {\n                margin: 0;\n                font-size: 24px;\n            }\n            .email-body {\n                padding: 20px;\n            }\n            .bug-report-table {\n                width: 100%;\n                border-collapse: collapse;\n            }\n            .bug-report-table th, .bug-report-table td {\n                padding: 12px;\n                text-align: left;\n                vertical-align: top;\n                border-bottom: 1px solid #dddddd;\n            }\n            .bug-report-table th {\n                background-color: #f5f5f5;\n                width: 150px;\n            }\n            .footer {\n                text-align: center;\n                color: #aaaaaa;\n                font-size: 12px;\n                padding: 10px;\n            }\n            /* Inline styles may be more reliable in emails */\n        </style>\n    </head>\n    <body>\n    <table width='100%' cellpadding='0' cellspacing='0' border='0'>\n        <tr>\n            <!-- Left Margin -->\n            <td width='15%'>&nbsp;</td>\n            \n            <!-- Main Content -->\n            <td width='70%'>\n                <div class='email-container'>\n                    <!-- Email Header -->\n                    <div class='email-header'>\n                        <h1>DMS Bug Report System</h1>\n                    </div>\n        \n                    <!-- Email Body -->\n                    <div class='email-body'>\n                        <table class='bug-report-table'>\n                            <tr>\n                                <th>Title</th>\n                                <td>\"& 'b-f-title-value'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Environment</th>\n                                <td>\"& 'b-f-environment-value'.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Line</th>\n                                <td>\"& 'b-f-line-value'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Problem Type</th>\n                                <td>\"& 'b-f-type-value'.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Expected Result</th>\n                                <td>\"& 'b-f-expected-value'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Actual Result</th>\n                                <td>\"& 'b-f-actual-value'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Status</th>\n                                <td>\"& 'b-f-status-value'.Selected.Value &\"</td>\n                            </tr>\n                        </table>\n                    </div>\n        \n                    <!-- Email Footer -->\n                    <div class='footer'>\n                        &copy; 2025 EMD Millipore. All rights reserved.\n                    </div>\n                </div>\n            </td>\n            \n            <!-- Right Margin -->\n            <td width='15%'>&nbsp;</td>\n        </tr>\n    </table>\n    </body>\n    </html>\"\n);\n\nIfError(SubmitForm('b-form'),\n    Notify(\"Submission Error. Check that all required fields are populated.\",NotificationType.Error),\n    \n    Office365Outlook.SendEmailV2(\n        \"M268816@ONE.MERCKGROUP.COM\",\n        \"A bug report was submitted for the \" & APP_NAME,\n        EmailBody,\n        {\n            Cc: 'b-f-user-value'.Selected.Email\n        }\n    );\n    \n    ResetForm('b-form');\n\n    Back(ScreenTransition.Fade);\n\n);"
                       Text: ="Submit"
                       BorderColor: =gTheme.Primary
                       BorderThickness: =1

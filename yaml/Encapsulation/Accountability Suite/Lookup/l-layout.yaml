@@ -1,0 +1,338 @@
+- l-layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - l-collect:
+        Control: Classic/Button
+        Properties:
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - l-sequential-collect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - l-update:
+        Control: Classic/Button
+        Properties:
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - l-header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - l-logo:
+            Control: Image
+            Properties:
+              Image: =If(gTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: ='l-n-title'.Width
+        - l-title:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - l-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - l-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - l-user-img:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - l-main:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - l-navigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - l-n-title:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - l-n-separator-0:
+                Control: Rectangle
+                Properties:
+                  Fill: =gTheme.Pri_Complement
+                  Height: =Round(gPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - l-n-gallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =cNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gPadding
+                  TemplateSize: =40
+                Children:
+                - l-n-g-button:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - l-n-legal:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - l-body:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - l-lookup-parent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gTheme.Foreground
+                  FillPortions: =0
+                  Height: =550
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gPadding
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingBottom: =gPadding
+                  PaddingLeft: =gPadding
+                  PaddingRight: =gPadding
+                Children:
+                - l-lookup-title:
+                    Control: Label
+                    Properties:
+                      Text: ="Personnel Lookup"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Center
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Secondary
+                      Height: ='l-title'.Height / 2
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
+                - l-lookup:
+                    Control: TextInput
+                    Properties:
+                      OnChange: |-
+                        =Set(lUserLookup,
+                            If(!IsBlank('l-lookup'.Value), 
+                                Office365Users.SearchUser({searchTerm:'l-lookup'.Value, top:1}),
+                                Blank()
+                            )
+                        );
+                      Fill: =gTheme.Background
+                      FontColor: =gTheme.Text_On_Light
+                      Placeholder: ="Name or UID"
+                      TriggerOutput: ='TextInputCanvas.TriggerOutput'.Delayed
+                      Type: ='TextInputCanvas.Type'.Text
+                      AlignInContainer: =AlignInContainer.Center
+                      Height: =40
+                      Width: =Parent.Width * 0.6
+                - Image1:
+                    Control: Image
+                    Properties:
+                      Image: |-
+                        =If(!IsBlankOrError(First(lUserLookup).Mail),
+                            Office365Users.UserPhotoV2(First(lUserLookup).Id),
+                            defaultuserimg
+                        )
+                      AlignInContainer: =AlignInContainer.Center
+                      RadiusBottomLeft: =50
+                      RadiusBottomRight: =50
+                      RadiusTopLeft: =50
+                      RadiusTopRight: =50
+                - l-lookup-name:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="Name: " & First(lUserLookup).DisplayName
+                      Color: =gTheme.Text_On_Light
+                - l-lookup-uid:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="UID: " & First(lUserLookup).MailNickname
+                      Color: =gTheme.Text_On_Light
+                - l-lookup-email:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="Email: " & First(lUserLookup).Mail
+                      Color: =gTheme.Text_On_Light
+                - l-lookup-department:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="Department: " & First(lUserLookup).Department
+                      Color: =gTheme.Text_On_Light
+                - l-lookup-supervisor:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="Supervisor: " & IfError(Office365Users.ManagerV2((First(lUserLookup).Id)).displayName, "")
+                      Color: =gTheme.Text_On_Light
+                - l-lookup-manager:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="Manager: " & IfError(Office365Users.ManagerV2(Office365Users.ManagerV2((First(lUserLookup).Id)).id).displayName, "")
+                      Color: =gTheme.Text_On_Light
+                - l-lookup-department-head:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        ="Department Head: " & IfError(Office365Users.ManagerV2(Office365Users.ManagerV2(Office365Users.ManagerV2((First(lUserLookup).Id)).id).id).displayName,"")
+                      Color: =gTheme.Text_On_Light

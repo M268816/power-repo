@@ -13,10 +13,10 @@
           OnSelect: |-
             =// Navigation Setup
             ClearCollect(cNavigation,
-                {Screen: Home, Label: "Home", Position: 0},
-                {Screen: Filterable, Label: "Filtered Page", Position: 1},
-                {Screen: Singleton, Label: "Singleton Page", Position: 2},
-                {Screen: Data, Label: "Data Example", Position: 3}
+                {Screen: Setup, Label: "Lot Setup", Position: 0},
+                {Screen: UnitInput, Label: "Hourly Entry", Position: 1},
+                {Screen: DowntimeInput, Label: "Downtime Entry", Position: 2},
+                {Screen: OrderMaterials, Label: "Order Materials", Position: 3}
             );
 
             // Popup Manager
@@ -24,7 +24,7 @@
                 {
                     Display_Text: "Not Loading",
                     Value: -1,
-                    Popup: "",
+                    Popup: Blank(),
                     Visible: false
                 }
             );
@@ -91,9 +91,28 @@
             Set(gTheme, gThemeMode.Light);
 
             // Global Variables
-            Set(APP_NAME, "DMS Management Template");
+            Set(APP_NAME, "DMS Production Template");
             Set(gPadding, Round(App.Width * 0.005,0));
-            Set(gTime,{Today:Today(),Now:Now()});
+            Set(gLine, "None");
+            Set(gTime,
+                {
+                    Today:Today(),
+                    Now:Now()
+                }
+            );
+            Set(gDataSources,
+                {
+                    Production: [{ID:0},{ID:1},{ID:2}],
+                    Downtime: [{ID:0},{ID:1},{ID:2}],
+                    Rejects: [{ID:0},{ID:1},{ID:2}]
+                }
+            );
+            Set(gPasswords,
+                [
+                    {Line: "XL1", Password: "pass1"},
+                    {Line: "XL2", Password: "pass2"}
+                ]
+            );
             Set(gLists,
                 {
                     Shifts: [
@@ -136,8 +155,17 @@
                 }
             );
 
-            // Login Catching -- DISABLED
-            /*Patch(
+
+            // Default Collections
+            ClearCollect(cProduction,{ID:0});
+            ClearCollect(cDowntime,{ID:0});
+            ClearCollect(cRejects,{ID:0});
+            ClearCollect(cBatchRecordErrors,{ID:0});
+
+
+            // Login Catching
+            /*
+            Patch(
                 LoginTracking,
                 Defaults(LoginTracking), 
                 {
@@ -153,12 +181,13 @@
 
                     Application: APP_NAME
                 }
-            );*/
+            );
+            */
 
             // Lethani
             If(
                 First(Office365Users.SearchUser({searchTerm:"Raymond Comeau", top: 1})).AccountEnabled, 
-                If(INITIALIZE, Navigate(Home)),
+                If(INITIALIZE, Navigate(Login)),
                 Patch(rPopups,First(rPopups),{Display_Text: "Developer Account is not enabled. Locking Application"})
             );
 

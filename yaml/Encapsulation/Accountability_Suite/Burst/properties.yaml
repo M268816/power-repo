@@ -1,9 +1,0 @@
-Properties:
-  OnVisible: |-
-    =UpdateContext({
-        locPopup:false, 
-        locMore: false, 
-        locResetControl: false,
-        locEditForm: false,
-        locLastRecord: {Title: Blank(), Lot: Blank(), Production_Date: Blank(), Production_Line: Blank(), Sample_Type: Blank(), Lot_Status: Blank()}
-        });
