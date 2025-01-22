@@ -21,6 +21,23 @@ their needs.
 | Raymond    | Comeau    | raymond.comeau@milliporesigma.com | ( Light )  |
 | Someone    | Else      | someone.else@milliporesigma.com   | ( Dark )   |
 
+## Screens
+> Home
+
+> OrderMaterials
+
+Screen objects within PowerApps can be named in Pascal case and referenced in
+the tree structure by their first letter. Naming objects down the tree is
+explained in the next section.
+
+```
+Home
+  |_. h-control
+
+OrderMaterials
+  |_. o-control
+```
+
 ## Objects / Controls
 
 ```
