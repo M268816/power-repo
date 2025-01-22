@@ -71,7 +71,7 @@
         - o-title:
             Control: Label
             Properties:
-              Text: ="Create a new Reject Entry"
+              Text: ="Order Materials"
               Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10

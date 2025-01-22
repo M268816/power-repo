@@ -71,7 +71,7 @@
         - r-title:
             Control: Label
             Properties:
-              Text: ="Create a new Hourly Entry"
+              Text: ="Create a new Reject Entry"
               Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10

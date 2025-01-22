@@ -20,7 +20,7 @@
           Text: ="collect"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - d-sequential-collect:
+    - d-sequentiad-collect:
         Control: Timer
         Properties:
           Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
@@ -71,7 +71,7 @@
         - d-title:
             Control: Label
             Properties:
-              Text: ="Create a new Hourly Entry"
+              Text: ="Create a new Downtime Entry"
               Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
