@@ -1,4 +1,4 @@
-# MilliporeSigma Encapsulation Applications
+# MilliporeSigma PowerApp Repository
 
 ## PowerApps Packages
 

@@ -71,7 +71,7 @@
         - h-title:
             Control: Label
             Properties:
-              Text: ="App Title"
+              Text: =APP_NAME&" for "& gLine
               Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
@@ -107,19 +107,6 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-        - h-user-img:
-            Control: Image
-            Properties:
-              Image: =User().Image
-              Fill: =RGBA(0, 0, 0, 1)
-              ImagePosition: =ImagePosition.Fill
-              LayoutMinHeight: =10
-              PaddingLeft: =
-              RadiusBottomLeft: =Self.Width
-              RadiusBottomRight: =Self.RadiusBottomLeft
-              RadiusTopLeft: =Self.RadiusBottomLeft
-              RadiusTopRight: =Self.RadiusBottomLeft
-              Width: =Self.Height
     - h-main:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
@@ -143,6 +130,7 @@
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
               Fill: =gTheme.Midground
+              FillPortions: =3
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
               LayoutGap: =gPadding
@@ -164,6 +152,7 @@
                   Text: =App.ActiveScreen.Name
                   Align: =Align.Center
                   Color: =gTheme.Text_On_Light
+                  Height: ='h-title'.Height
                   LayoutMinWidth: =10
                   Size: =Self.Height / 3
             - h-n-separator-0:
@@ -184,8 +173,8 @@
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LoadingSpinner: =LoadingSpinner.Data
-                  TemplatePadding: =gPadding
-                  TemplateSize: =40
+                  TemplatePadding: =0
+                  TemplateSize: =IfError(Self.Height /  (Self.AllItemsCount*2),0)
                 Children:
                 - h-n-g-button:
                     Control: Classic/Button
@@ -197,13 +186,15 @@
                       DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
                       Fill: =gTheme.Accent
                       FontWeight: =FontWeight.Normal
-                      Height: =Parent.TemplateHeight
-                      RadiusBottomLeft: =100
-                      RadiusBottomRight: =100
-                      RadiusTopLeft: =100
-                      RadiusTopRight: =100
-                      Size: =Self.Height / 4
-                      Width: =Parent.TemplateWidth
+                      Height: =Parent.TemplateHeight - gPadding
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =50
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Round(Self.Height/6,0)
+                      Width: =Parent.TemplateWidth - gPadding
+                      X: =Center(Parent.TemplateWidth, Self.Width)
+                      Y: =Center(Parent.TemplateHeight, Self.Height)
             - h-n-legal:
                 Control: Label
                 Properties:
@@ -225,6 +216,7 @@
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
               Fill: =gTheme.Background
+              FillPortions: =3
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
               LayoutGap: =gPadding
@@ -246,7 +238,6 @@
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   Fill: =gTheme.Foreground
-                  FillPortions: =0
                   Height: =Parent.Height * 0.5
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
@@ -261,11 +252,12 @@
                 - h-h-title:
                     Control: Label
                     Properties:
-                      Text: ="Filters"
+                      Text: ="Overview"
                       Align: =Align.Center
                       AlignInContainer: =AlignInContainer.Center
                       Color: =gTheme.Text_Light
                       Fill: =gTheme.Secondary
+                      Height: ='h-title'.Height
                       LayoutMinWidth: =10
                       Size: =Self.Height / 4
                       Width: =Parent.Width
@@ -326,14 +318,12 @@
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 6, 10)
-              LayoutAlignItems: =LayoutAlignItems.Center
-              LayoutDirection: =LayoutDirection.Vertical
+              FillPortions: =18
+              LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutGap: =gPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              LayoutOverflowY: =LayoutOverflow.Scroll
               PaddingBottom: =gPadding
               PaddingLeft: =gPadding
               PaddingRight: =gPadding
@@ -350,7 +340,6 @@
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.Regular
                   Fill: =gTheme.Foreground
-                  FillPortions: =0
                   Height: =500
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
@@ -367,138 +356,9 @@
                       AlignInContainer: =AlignInContainer.Start
                       Color: =gTheme.Text_Light
                       Fill: =gTheme.Secondary
-                      Height: ='h-title'.Height / 2
+                      Height: ='h-title'.Height
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
                       Size: =Self.Height / 3
                       Width: =Parent.Width
-                - Table1:
-                    Control: Table
-                    Variant: pcfdataset
-                    Properties:
-                      Items: =lData
-                    Children:
-                    - Float1:
-                        Control: PowerAppsOneGridTemplate_dataField
-                        Variant: textualColumn
-                        Properties:
-                          FieldDisplayName: ="Float"
-                          FieldName: ="Float"
-                          FieldType: ="n"
-                          Order: =1
-                    - Percent1:
-                        Control: PowerAppsOneGridTemplate_dataField
-                        Variant: textualColumn
-                        Properties:
-                          FieldDisplayName: ="Percent"
-                          FieldName: ="Percent"
-                          FieldType: ="n"
-                          Order: =2
-            - h-section-1:
-                Control: GroupContainer
-                Variant: verticalAutoLayoutContainer
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.Regular
-                  Fill: =gTheme.Midground
-                  FillPortions: =0
-                  Height: =500
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutMinWidth: =10
-                  LayoutMode: =LayoutMode.Auto
-                  LayoutOverflowY: =LayoutOverflow.Scroll
-                  PaddingRight: =
-                Children:
-                - h-s1-title:
-                    Control: Label
-                    Properties:
-                      Text: ="Section One"
-                      Align: =Align.Center
-                      AlignInContainer: =AlignInContainer.Start
-                      Color: =gTheme.Text_Light
-                      Fill: =gTheme.Secondary
-                      Height: ='h-title'.Height / 2
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                      Size: =Self.Height / 3
-                      Width: =Parent.Width
-                - h-s1-chart:
-                    Control: LineChart
-                    Properties:
-                      Items: =lData
-                      Color: =gTheme.Text_On_Light
-                      FillPortions: =1
-                      PaddingBottom: =gPadding
-                      PaddingLeft: =gPadding
-                      PaddingRight: =gPadding
-                      PaddingTop: =gPadding
-                      X: =40
-                      XLabelAngle: =0
-                      Y: =70
-            - h-section-2:
-                Control: GroupContainer
-                Variant: verticalAutoLayoutContainer
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.Regular
-                  Fill: =gTheme.Midground
-                  FillPortions: =0
-                  Height: =500
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutMinWidth: =10
-                  LayoutMode: =LayoutMode.Auto
-                  LayoutOverflowY: =LayoutOverflow.Scroll
-                  PaddingRight: =
-                Children:
-                - h-s2-title:
-                    Control: Label
-                    Properties:
-                      Text: ="Section Two"
-                      Align: =Align.Center
-                      AlignInContainer: =AlignInContainer.Start
-                      Color: =gTheme.Text_Light
-                      Fill: =gTheme.Secondary
-                      Height: ='h-title'.Height / 2
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                      Size: =Self.Height / 3
-                      Width: =Parent.Width
-                - h-s2-chart:
-                    Control: Image
-                    Properties:
-                      Image: |-
-                        ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
-                        With({thisData: Index(lData,1).Percent},
-                            EncodeUrl(
-                                "{
-                                    type: 'radialGauge',
-                                    data: {
-                                        datasets: [{
-                                            data: ["& thisData &"],
-                                            backgroundColor: getGradientFillHelper('horizontal', [
-                                                '"& gTheme.Chart_Blue &"',
-                                                '"& gTheme.Chart_Blue &"',
-                                                '"& gTheme.Chart_Blue &"',
-                                                '"& gTheme.Chart_Red &"',
-                                                '"& gTheme.Chart_Red &"',
-                                                '"& gTheme.Chart_Red &"'
-                                            ]),
-                                        }]
-                                    },
-                                    options: {
-                                        domain: [0, "& If(thisData <= 100, 100, thisData) &"],
-                                        trackColor: '"& gTheme.Chart_White &"', 
-                                        centerPercentage: 90,
-                                        centerArea: {
-                                            text: (val) => val + '%',
-                                            fontColor: '"& gTheme.Chart_Black &"'
-                                        },
-                                    }
-                                }"
-                            )
-                        )
-                      FillPortions: =1
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
+                      
