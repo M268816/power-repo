@@ -6,7 +6,7 @@ adhere to them.
 
 ## Databases or data sources
 
-when using outside data sources, it's good practice to first create the database
+When using outside data sources, it's good practice to first create the database
 you want to pull the information from. Once the initial data base structure is
 built, it makes linking to PowerApps a much simpler process.
 
@@ -41,7 +41,7 @@ OrderMaterials
 ## Objects / Controls
 
 ```
-<Screen>-<Parent>-<Object>-<Iteration>"
+<Screen>-<Parent>-<Object>-<Iteration>
 ```
 
 Because the complexity of object trees can increase quickly naming objects in
@@ -335,7 +335,7 @@ ForAll(DataSource,
 );
 
 // Create a sub-collection, a modified/filtered version.
-ForAll(Filter(cTopLevelData, DateTime = Today()),
+ForAll(Filter(cTopLevelData, DateTime = gTime.Today),
     Collect(cLowerLevelData,
         {
             id: ThisRecord.Id,
