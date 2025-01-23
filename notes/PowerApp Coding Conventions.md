@@ -239,16 +239,22 @@ used to create static lists, dictionaries, arrays, or tables of variables.
     - Prefix the collection with 'c' or 'collect'
     - Camel case.
 ```cpp
-Collect(cProduction,
-    {
-        Id: 1,
-        Line: "",
-        Unit_Start: 1,
-        Unit_End: 50,
-        Date_Start: "2024-01-31 8:00 AM",
-        Date_End: "2024-01-31 9:00 AM",
-        Shift: "A",
-    }
+// Clear the collection for new data
+Clear(cProduction);
+// For all Records in this data
+ForAll(EncapsulationProductionData,
+    //Collect each record into cProduction
+    Collect(cProduction,
+        {
+            Id: ThisRecord.Id,
+            Line: ThisRecord.Line,
+            Unit_Start: ThisRecord.Unit_Start,
+            Unit_End: ThisRecord.Unit_End,
+            Date_Start: ThisRecord.Date_Start,
+            Date_End: ThisRecord.Date_End,
+            Shift: ThisRecord.Shift_Letter,
+        }
+    )
 );
 ```
 
