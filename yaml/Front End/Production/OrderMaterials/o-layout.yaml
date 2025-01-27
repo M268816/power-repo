@@ -1,148 +1,121 @@
-- m_layout:
+- o-layout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
       DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical
-      LayoutGap: =
       LayoutMode: =LayoutMode.Auto
       RadiusBottomLeft: =0
       RadiusBottomRight: =0
       RadiusTopLeft: =0
       RadiusTopRight: =0
       Width: =Parent.Width
-      X: =
     Children:
-    - m_header:
+    - o-collect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Clear(cMaterials);
+            ForAll(
+                Filter('Material Requests',
+                    Line.Value = 'o-form-line-value'.Selected.Value,
+                    Picked = false,
+                    Created >= gTime.Today
+                ),
+                Collect(cMaterials,
+                    {
+                        created: ThisRecord.Created,
+                        requester: ThisRecord.'Requester Name'.DisplayName,
+                        unit: ThisRecord.Units.Value,
+                        quantity: ThisRecord.'Quantity Requested',
+                        component: ThisRecord.'Component Part Number',
+                        type: ThisRecord.'Request Type'.Value,
+                        workorder: ThisRecord.'Work Order'
+                    }
+                )
+            );
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - o-header:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          Fill: =varColor1
+          Fill: =gTheme.Primary
           LayoutAlignItems: =LayoutAlignItems.Stretch
-          LayoutGap: =locPadding*2
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =locPadding
-          PaddingLeft: =locPadding
-          PaddingRight: =locPadding
-          PaddingTop: =locPadding
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - m_update:
-            Control: Classic/Button
-            Properties:
-              OnSelect: |-
-                =ClearCollect(
-                    collectMaterials,
-                    ForAll(
-                        Table(
-                            ParseJSON(
-                                flow_get_materials.Run(
-                                    Text(
-                                        m_m_r_f_line_value.Selected.Value
-                                        //varProductionLine
-                                        )
-                                    ).output
-                                )
-                            ),
-                        {
-                            ID: Value(Value._ID),
-                            line: Text(Value._line),
-                            workorder: Text(Value._workorder),
-                            component: Text(Value._component),
-                            quantity: Value(Value._quantity),
-                            type: Text(Value._type),
-                            unit: Text(Value._unit),
-                            requester: Value._requester,
-                            delivered: Boolean(Value._delivered),
-                            created: DateTimeValue(Value._created)
-                        }
-                    )
-                );
-              Text: ="Update"
-              Visible: =false
-        - m_exit:
+        - o-back:
             Control: Image
             Properties:
-              OnSelect: =Back()
-              Image: =gblSVG.Back
-              HoverFill: =ColorFade(varColorAccent, 75%)
+              OnSelect: =Back(ScreenTransition.Fade)
+              Image: =gIcons.Back
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
               LayoutMinHeight: =10
-              RadiusBottomLeft: =Self.Height / 2
-              RadiusBottomRight: =Self.Height / 2
-              RadiusTopLeft: =Self.Height / 2
-              RadiusTopRight: =Self.Height / 2
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-        - m_logo:
-            Control: Image
-            Properties:
-              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
-              LayoutMinHeight: =10
-              Width: =Self.Height * 3
-        - m_h_title:
+        - o-title:
             Control: Label
             Properties:
-              Text: ="Front End Digital Daily Management System"
-              Align: =Align.Center
-              Color: =varColor5
+              Text: ="Order Materials"
+              Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Size: =Self.Height / 3
-        - m_h_padding:
-            Control: GroupContainer
-            Variant: manualLayoutContainer
+        - o-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
             Properties:
-              DropShadow: =DropShadow.None
-              FillPortions: =0
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
               LayoutMinHeight: =10
-              RadiusBottomLeft: =0
-              RadiusBottomRight: =0
-              RadiusTopLeft: =0
-              RadiusTopRight: =0
-              Width: =m_exit.Width + m_logo.Width - m_h_submit.Width - m_h_cancel.Width
-        - m_h_submit:
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - o-bugs:
             Control: Image
             Properties:
-              OnSelect: |-
-                =IfError(SubmitForm(m_m_r_form), UpdateContext({locError: true}));
-              Image: =gblSVG.Submit
-              Height: =Parent.Height * 0.75
-              HoverFill: =ColorFade(varColorYes, 0%)
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
               LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              RadiusBottomLeft: =Self.Height / 2
-              RadiusBottomRight: =Self.Height / 2
-              RadiusTopLeft: =Self.Height / 2
-              RadiusTopRight: =Self.Height / 2
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-              X: =Parent.Width * 0.99 - Self.Width - m_h_cancel.Width - Parent.Width * 0.015
-              Y: =Parent.Height/2 - Self.Height/2
-        - m_h_cancel:
-            Control: Image
-            Properties:
-              OnSelect: =ResetForm(m_m_r_form);
-              Image: =gblSVG.Cancel
-              Height: =Parent.Height * 0.75
-              HoverFill: =ColorFade(varColorNo, 0%)
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              RadiusBottomLeft: =Self.Height / 2
-              RadiusBottomRight: =Self.Height / 2
-              RadiusTopLeft: =Self.Height / 2
-              RadiusTopRight: =Self.Height / 2
-              Width: =Self.Height
-              X: =Parent.Width * 0.99 - Self.Width
-              Y: =Parent.Height/2 - Self.Height/2
-    - m_body:
+    - o-main:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -150,104 +123,105 @@
           DropShadow: =DropShadow.None
           FillPortions: =11
           LayoutAlignItems: =LayoutAlignItems.Center
-          LayoutGap: =locPadding * 2
+          LayoutGap: =gPadding
           LayoutJustifyContent: =LayoutJustifyContent.Center
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =Self.LayoutGap*2
-          PaddingLeft: =Self.LayoutGap*4
-          PaddingRight: =Self.LayoutGap*4
-          PaddingTop: =Self.LayoutGap*2
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - m_m_request:
+        - o-form-parent:
             Control: GroupContainer
-            Variant: manualLayoutContainer
+            Variant: horizontalAutoLayoutContainer
             Properties:
               DropShadow: =DropShadow.Regular
-              Fill: =varColor4
-              Height: =Parent.Height - Self.Y - Self.Width * 0.02
-              RadiusBottomLeft: =8
-              RadiusBottomRight: =8
-              RadiusTopLeft: =8
-              RadiusTopRight: =8
-              Width: =Parent.Width * 0.47
-              X: =Parent.Width/4 - Self.Width/2
-              Y: =Parent.Height * 0.02
+              Fill: =gTheme.Midground
+              FillPortions: =5
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutMinHeight: =10
+              LayoutMinWidth: '=10  '
+              LayoutMode: =LayoutMode.Auto
             Children:
-            - m_m_r_form:
+            - o-form:
                 Control: Form
                 Layout: vertical
                 Properties:
                   OnFailure: =UpdateContext({locError:true});
-                  OnSuccess: =ResetForm(m_m_r_form);
+                  OnSuccess: =ResetForm('o-form');
                   DataSource: ='Material Requests'
                   DefaultMode: =FormMode.New
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  FillPortions: =11
                   Height: =Parent.Height
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
                   Width: =Parent.Width
                   X: =Parent.Width - Parent.Width
                   Y: =Parent.Height - Parent.Height
                 Children:
-                - m_m_r_f_line_datacard:
+                - o-form-line-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Properties:
                       DataField: ="Line"
-                      Default: =LookUp(Choices('Material Requests'.Line), Value = varProductionLine)
+                      Default: =LookUp(Choices('Material Requests'.Line), Value = gLine)
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,Line)
                       Required: =true
-                      Update: =m_m_r_f_line_value.Selected
+                      Update: ='o-form-line-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width/2
                     Children:
-                    - m_m_r_f_line_star:
+                    - o-form-line-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_line_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-line-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_line_title.Y
-                    - m_m_r_f_line_error:
+                          Y: ='o-form-line-key'.Y
+                    - o-form-line-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_line_value.Y + m_m_r_f_line_value.Height
-                    - m_m_r_f_line_value:
+                          Y: ='o-form-line-value'.Y + 'o-form-line-value'.Height
+                    - o-form-line-value:
                         Control: Classic/ComboBox
                         Properties:
-                          OnChange: =Select(m_update);
+                          OnChange: =Select('o-collect');
                           DefaultSelectedItems: =Parent.Default
                           DisplayFields: =["Value"]
                           Items: |-
                             =Filter(
                                 Choices([@'Material Requests'].Line),
                                 Or(        
+                                    Value = "1/2",
                                     Value = "3/4",
                                     Value = "EF",
                                     Value = "GH",
                                     Value = "JK",
+                                    Value = "LM",
                                     Value = "NO",
                                     Value = "PQ",
+                                    Value = "RS",
                                     Value = "WX",
                                     Value = "YZ"
                                     )
@@ -255,27 +229,28 @@
                           SearchFields: =["Value"]
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
-                          ChevronBackground: =varColor1
-                          ChevronFill: =varColorAccent
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
+                          FontWeight: =FontWeight.Lighter
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_line_title.Y + m_m_r_f_line_title.Height + 5
-                    - m_m_r_f_line_title:
+                          Y: ='o-form-line-key'.Y + 'o-form-line-key'.Height + 5
+                    - o-form-line-key:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_workorder_datacard:
+                - o-form-workorder-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Properties:
@@ -284,69 +259,61 @@
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,'Work Order')
                       MaxLength: =DataSourceInfo([@'Material Requests'], DataSourceInfo.MaxLength, 'Work Order')
                       Required: =true
-                      Update: =m_m_r_f_workorder_value.Text
+                      Update: ='o-form-workorder-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width/2
                       X: =1
                     Children:
-                    - m_m_r_f_workorder_star:
+                    - o-form-workorder-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_workorder_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-workorder-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_workorder_title.Y
-                    - m_m_r_f_workorder_error:
+                          Y: ='o-form-workorder-key'.Y
+                    - o-form-workorder-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_workorder_value.Y + m_m_r_f_workorder_value.Height
-                    - m_m_r_f_workorder_value:
+                          Y: ='o-form-workorder-value'.Y + 'o-form-workorder-value'.Height
+                    - o-form-workorder-value:
                         Control: Classic/TextInput
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
                           MaxLength: =Parent.MaxLength
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
                           PaddingLeft: =5
-                          RadiusBottomLeft: =0
-                          RadiusBottomRight: =0
-                          RadiusTopLeft: =0
-                          RadiusTopRight: =0
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_workorder_title.Y + m_m_r_f_workorder_title.Height + 5
-                    - m_m_r_f_workorder_title:
+                          Y: ='o-form-workorder-key'.Y + 'o-form-workorder-key'.Height + 5
+                    - o-form-workorder-key:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_type_datacard:
+                - o-form-type-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Properties:
@@ -354,40 +321,36 @@
                       Default: =ThisItem.'Request Type'
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,'Request Type')
                       Required: =true
-                      Update: =m_m_r_f_type_value.Selected
+                      Update: ='o-form-type-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width/2
                       Y: =1
                     Children:
-                    - m_m_r_f_type_star:
+                    - o-form-type-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_type_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-type-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_type_title.Y
-                    - m_m_r_f_type_error:
+                          Y: ='o-form-type-key'.Y
+                    - o-form-type-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_type_value.Y + m_m_r_f_type_value.Height
-                    - m_m_r_f_type_value:
+                          Y: ='o-form-type-value'.Y + 'o-form-type-value'.Height
+                    - o-form-type-value:
                         Control: Classic/ComboBox
                         Properties:
                           DefaultSelectedItems: =Parent.Default
@@ -397,27 +360,27 @@
                           SearchFields: =["Value"]
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
-                          ChevronBackground: =varColor1
-                          ChevronFill: =varColorAccent
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_type_title.Y + m_m_r_f_type_title.Height + 5
-                    - m_m_r_f_type_title:
+                          Y: ='o-form-type-key'.Y + 'o-form-type-key'.Height + 5
+                    - o-form-type-key:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_component_datacard:
+                - o-form-component-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Properties:
@@ -426,70 +389,62 @@
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,'Component Part Number')
                       MaxLength: =DataSourceInfo([@'Material Requests'], DataSourceInfo.MaxLength, 'Component Part Number')
                       Required: =true
-                      Update: =m_m_r_f_component_value.Text
+                      Update: ='o-form-component-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width/2
                       X: =1
                       Y: =1
                     Children:
-                    - m_m_r_f_component_star:
+                    - o-form-component-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_component_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-component-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_component_title.Y
-                    - m_m_r_f_component_error:
+                          Y: ='o-form-component-key'.Y
+                    - o-form-component-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_component_value.Y + m_m_r_f_component_value.Height
-                    - m_m_r_f_component_value:
+                          Y: ='o-form-component-value'.Y + 'o-form-component-value'.Height
+                    - o-form-component-value:
                         Control: Classic/TextInput
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
                           MaxLength: =Parent.MaxLength
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
                           PaddingLeft: =5
-                          RadiusBottomLeft: =0
-                          RadiusBottomRight: =0
-                          RadiusTopLeft: =0
-                          RadiusTopRight: =0
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_component_title.Y + m_m_r_f_component_title.Height + 5
-                    - m_m_r_f_component_title:
+                          Y: ='o-form-component-key'.Y + 'o-form-component-key'.Height + 5
+                    - o-form-component-key:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_quantity_datacard:
+                - o-form-quantity-card:
                     Control: TypedDataCard
                     Variant: numberEditCard
                     Properties:
@@ -497,110 +452,98 @@
                       Default: =ThisItem.'Quantity Requested'
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,'Quantity Requested')
                       Required: =true
-                      Update: =Value(m_m_r_f_quantity_value.Text)
+                      Update: =Value('o-form-quantity-value'.Text)
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width/2
                       Y: =2
                     Children:
-                    - m_m_r_f_quantity_star:
+                    - o-form-quantity-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_quantity_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-quantity-title'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_quantity_title.Y
-                    - m_m_r_f_quantity_error:
+                          Y: ='o-form-quantity-title'.Y
+                    - o-form-quantity-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_quantity_value.Y + m_m_r_f_quantity_value.Height
-                    - m_m_r_f_quantity_value:
+                          Y: ='o-form-quantity-value'.Y + 'o-form-quantity-value'.Height
+                    - o-form-quantity-value:
                         Control: Classic/TextInput
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
                           Format: =TextFormat.Number
                           PaddingLeft: =5
-                          RadiusBottomLeft: =0
-                          RadiusBottomRight: =0
-                          RadiusTopLeft: =0
-                          RadiusTopRight: =0
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_quantity_title.Y + m_m_r_f_quantity_title.Height + 5
-                    - m_m_r_f_quantity_title:
+                          Y: ='o-form-quantity-title'.Y + 'o-form-quantity-title'.Height + 5
+                    - o-form-quantity-title:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_units_datacard:
+                - o-form-units-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Properties:
                       DataField: ="Units"
                       Default: =ThisItem.Units
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,Units)
-                      Update: =m_m_r_f_units_value.Selected
+                      Update: ='o-form-units-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width/2
                       X: =1
                       Y: =2
                     Children:
-                    - m_m_r_f_units_star:
+                    - o-form-units-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_units_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-units-title'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_units_title.Y
-                    - m_m_r_f_units_error:
+                          Y: ='o-form-units-title'.Y
+                    - o-form-units-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_units_value.Y + m_m_r_f_units_value.Height
-                    - m_m_r_f_units_value:
+                          Y: ='o-form-units-value'.Y + 'o-form-units-value'.Height
+                    - o-form-units-value:
                         Control: Classic/ComboBox
                         Properties:
                           DefaultSelectedItems: =Parent.Default
@@ -610,27 +553,27 @@
                           SearchFields: =["Value"]
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
-                          ChevronBackground: =varColor1
-                          ChevronFill: =varColorAccent
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_units_title.Y + m_m_r_f_units_title.Height + 5
-                    - m_m_r_f_units_title:
+                          Y: ='o-form-units-title'.Y + 'o-form-units-title'.Height + 5
+                    - o-form-units-title:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_requester_datacard:
+                - o-form-requester-card:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Properties:
@@ -638,40 +581,36 @@
                       Default: =ThisItem.'Requester Name'
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,'Requester Name')
                       Required: =true
-                      Update: =m_m_r_f_requester_value.Selected
+                      Update: ='o-form-requester-value'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width/2
                       Y: =3
                     Children:
-                    - m_m_r_f_requester_star:
+                    - o-form-requester-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_requester_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-requester-title'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_requester_title.Y
-                    - m_m_r_f_requester_error:
+                          Y: ='o-form-requester-title'.Y
+                    - o-form-requester-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_requester_value.Y + m_m_r_f_requester_value.Height
-                    - m_m_r_f_requester_value:
+                          Y: ='o-form-requester-value'.Y + 'o-form-requester-value'.Height
+                    - o-form-requester-value:
                         Control: Classic/ComboBox
                         Properties:
                           DefaultSelectedItems: =Parent.Default
@@ -681,27 +620,25 @@
                           SearchFields: =["DisplayName"]
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
-                          ChevronBackground: =varColor1
-                          ChevronFill: =varColorAccent
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_requester_title.Y + m_m_r_f_requester_title.Height + 5
-                    - m_m_r_f_requester_title:
+                          Y: ='o-form-requester-title'.Y + 'o-form-requester-title'.Height + 5
+                    - o-form-requester-title:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_minutes_datacard:
+                - o-form-minutes-card:
                     Control: TypedDataCard
                     Variant: numberEditCard
                     Properties:
@@ -709,70 +646,62 @@
                       Default: =ThisItem.'Minutes Until Line Down'
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,'Minutes Until Line Down')
                       Required: =true
-                      Update: =Value(m_m_r_f_minutes_value.Text)
+                      Update: =Value('o-form-minutes-value'.Text)
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width/2
                       X: =1
                       Y: =3
                     Children:
-                    - m_m_r_f_minutes_star:
+                    - o-form-minutes-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_minutes_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-minutes-title'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_minutes_title.Y
-                    - m_m_r_f_minutes_error:
+                          Y: ='o-form-minutes-title'.Y
+                    - o-form-minutes-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_minutes_value.Y + m_m_r_f_minutes_value.Height
-                    - m_m_r_f_minutes_value:
+                          Y: ='o-form-minutes-value'.Y + 'o-form-minutes-value'.Height
+                    - o-form-minutes-value:
                         Control: Classic/TextInput
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
                           Format: =TextFormat.Number
                           PaddingLeft: =5
-                          RadiusBottomLeft: =0
-                          RadiusBottomRight: =0
-                          RadiusTopLeft: =0
-                          RadiusTopRight: =0
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_minutes_title.Y + m_m_r_f_minutes_title.Height + 5
-                    - m_m_r_f_minutes_title:
+                          Y: ='o-form-minutes-title'.Y + 'o-form-minutes-title'.Height + 5
+                    - o-form-minutes-title:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_comments_datacard:
+                - o-form-comment-card:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Properties:
@@ -780,77 +709,69 @@
                       Default: =ThisItem.'Comments  about this request'
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,'Comments  about this request')
                       MaxLength: =DataSourceInfo([@'Material Requests'], DataSourceInfo.MaxLength, 'Comments  about this request')
-                      Update: =m_m_r_f_comments_value.Text
+                      Update: ='o-form-comment-value'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height/5
                       Width: =Parent.Width
                       WidthFit: =true
                       Y: =4
                     Children:
-                    - m_m_r_f_comments_star:
+                    - o-form-comment-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_comments_title.Height
+                          Color: =gTheme.Text_On_Light
+                          Height: ='o-form-comment-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_comments_title.Y
-                    - m_m_r_f_comments_error:
+                          Y: ='o-form-comment-key'.Y
+                    - o-form-comment-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_comments_value.Y + m_m_r_f_comments_value.Height
-                    - m_m_r_f_comments_value:
+                          Y: ='o-form-comment-value'.Y + 'o-form-comment-value'.Height
+                    - o-form-comment-value:
                         Control: Classic/TextInput
                         Properties:
                           Default: =Parent.Default
                           DelayOutput: =true
                           MaxLength: =Parent.MaxLength
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
+                          Fill: =gTheme.Background
                           PaddingLeft: =5
-                          RadiusBottomLeft: =0
-                          RadiusBottomRight: =0
-                          RadiusTopLeft: =0
-                          RadiusTopRight: =0
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_comments_title.Y + m_m_r_f_comments_title.Height + 5
-                    - m_m_r_f_comments_title:
+                          Y: ='o-form-comment-key'.Y + 'o-form-comment-key'.Height + 5
+                    - o-form-comment-key:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
+                          Color: =gTheme.Text_On_Light
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-                - m_m_r_f_delivered_datacard:
+                - o-form-delivered-card:
                     Control: TypedDataCard
                     Variant: toggleEditCard
                     Properties:
                       DataField: ="Picked"
                       Default: =ThisItem.Delivered
                       DisplayName: =DataSourceInfo([@'Material Requests'],DataSourceInfo.DisplayName,Delivered)
-                      Update: =m_m_r_f_delivered_value.Value
+                      Update: ='o-form-delivered-value'.Value
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Visible: =false
@@ -858,79 +779,230 @@
                       X: =1
                       Y: =4
                     Children:
-                    - m_m_r_f_delivered_star:
+                    - o-form-delivered-star:
                         Control: Label
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Font: =Font.Verdana
-                          Height: =m_m_r_f_delivered_title.Height
+                          Height: ='o-form-delivered-key'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: =m_m_r_f_delivered_title.Y
-                    - m_m_r_f_delivered_error:
+                          Y: ='o-form-delivered-key'.Y
+                    - o-form-delivered-error:
                         Control: Label
                         Properties:
                           Live: =Live.Assertive
                           Text: =Parent.Error
                           AutoHeight: =true
-                          Font: =Font.Verdana
                           Height: =10
-                          PaddingBottom: =0
-                          PaddingLeft: =0
-                          PaddingRight: =0
-                          PaddingTop: =0
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: =m_m_r_f_delivered_value.Y + m_m_r_f_delivered_value.Height
-                    - m_m_r_f_delivered_value:
+                          Y: ='o-form-delivered-value'.Y + 'o-form-delivered-value'.Height
+                    - o-form-delivered-value:
                         Control: Classic/Toggle
                         Properties:
                           Default: =Parent.Default
                           Tooltip: =Parent.DisplayName
-                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
                           DisplayMode: =Parent.DisplayMode
-                          Font: =Font.Verdana
                           X: =30
-                          Y: =m_m_r_f_delivered_title.Y + m_m_r_f_delivered_title.Height + 5
-                    - m_m_r_f_delivered_title:
+                          Y: ='o-form-delivered-key'.Y + 'o-form-delivered-key'.Height + 5
+                    - o-form-delivered-key:
                         Control: Label
                         Properties:
                           Text: =Parent.DisplayName
                           AutoHeight: =true
-                          Font: =Font.Verdana
                           Height: =34
                           Width: =Parent.Width - 60
                           Wrap: =false
                           X: =30
                           Y: =10
-        - m_m_view:
+            - o-buttons:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gPadding * 4
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gPadding
+                  PaddingLeft: =gPadding
+                  PaddingRight: =gPadding
+                  PaddingTop: =gPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - o-form-submit:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =SubmitForm('o-form');
+                      Text: ="Submit"
+                      BorderColor: =gTheme.Primary
+                      BorderThickness: =1
+                      Color: =gTheme.Text_On_Light
+                      Fill: =gTheme.Background
+                      FontWeight: =FontWeight.Normal
+                      HoverColor: =gTheme.Text_On_Dark
+                      HoverFill: =gTheme.Accept
+                      LayoutMinHeight: =1
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width * 0.2
+                - o-form-cancel:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =ResetForm('o-form');
+                      Text: ="Cancel"
+                      BorderColor: =gTheme.Primary
+                      BorderThickness: =1
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Primary
+                      FontWeight: =FontWeight.Normal
+                      HoverColor: =gTheme.Text_On_Dark
+                      HoverFill: =gTheme.Deny
+                      LayoutMinHeight: =1
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width * 0.2
+        - o-gallery-parent:
             Control: GroupContainer
-            Variant: manualLayoutContainer
+            Variant: verticalAutoLayoutContainer
             Properties:
               DropShadow: =DropShadow.Regular
-              Height: =Parent.Height * 0.96
-              RadiusBottomLeft: =8
-              RadiusBottomRight: =8
-              RadiusTopLeft: =8
-              RadiusTopRight: =8
-              Width: =Parent.Width * 0.47
-              X: =(Parent.Width/4) *3 - Self.Width/2
-              Y: =Parent.Height * 0.02
+              Fill: =gTheme.Midground
+              FillPortions: =7
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutMinHeight: =10
+              LayoutMinWidth: '=10  '
+              LayoutMode: =LayoutMode.Auto
             Children:
-            - m_m_v_gallery:
+            - o-gallery-header:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gTheme.Secondary
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - o-galler-header-created:
+                    Control: Label
+                    Properties:
+                      Text: ="Created"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      FillPortions: =1
+                      Height: =50
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/5,0)
+                      Width: =50
+                - o-galler-header-requester:
+                    Control: Label
+                    Properties:
+                      Text: ="Requested By"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      FillPortions: =1
+                      Height: =50
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/5,0)
+                      Width: =50
+                - o-galler-header-unit:
+                    Control: Label
+                    Properties:
+                      Text: ="Unit Type"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      FillPortions: =0.5
+                      Height: =50
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/5,0)
+                      Width: =50
+                - o-galler-header-quantity:
+                    Control: Label
+                    Properties:
+                      Text: ="Amount"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      FillPortions: =0.5
+                      Height: =50
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/5,0)
+                      Width: =50
+                - o-galler-header-component:
+                    Control: Label
+                    Properties:
+                      Text: ="Component"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      FillPortions: =1
+                      Height: =50
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/5,0)
+                      Width: =50
+                - o-galler-header-type:
+                    Control: Label
+                    Properties:
+                      Text: ="Request Type"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      FillPortions: =1
+                      Height: =50
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/5,0)
+                      Width: =50
+                - o-galler-header-workorder:
+                    Control: Label
+                    Properties:
+                      Text: ="Workorder"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      FillPortions: =1
+                      Height: =50
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/5,0)
+                      Width: =50
+            - o-gallery:
                 Control: Gallery
                 Variant: galleryVertical
                 Properties:
                   Items: |-
                     =Sort(
-                        collectMaterials,
+                        cMaterials,
                         created,
                         SortOrder.Ascending
                         )
                   DelayItemLoading: =true
+                  FillPortions: =11
                   Height: =Parent.Height - Self.Y
                   Layout: =Layout.Vertical
                   LoadingSpinner: =LoadingSpinner.Data
@@ -938,216 +1010,108 @@
                   ShowScrollbar: =false
                   TemplatePadding: =0
                   TemplateSize: =Self.Height / 10
-                  Transition: =Transition.Push
                   Width: =Parent.Width
                   X: =Parent.Width - Parent.Width
-                  Y: =m_m_v_header.Y + m_m_v_header.Height
                 Children:
-                - m_m_v_g_workorder:
-                    Control: Label
+                - o-gallery-data:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
                     Properties:
-                      OnSelect: =Select(Parent)
-                      Text: =ThisItem.workorder
-                      Align: =Align.Center
-                      Fill: =varColor4
-                      Font: =Font.Verdana
-                      Height: =Parent.TemplateHeight - m_m_v_g_seperator.Height
-                      Size: =Parent.Width / 72
-                      Width: =Parent.Width / 7
-                      X: =Parent.TemplateWidth - Parent.TemplateWidth
-                      Y: =Parent.TemplateHeight - Parent.TemplateHeight
-                - m_m_v_g_type:
-                    Control: Label
-                    Properties:
-                      OnSelect: =Select(Parent)
-                      Text: =ThisItem.type
-                      Align: =Align.Center
-                      Fill: =varColor4
-                      Font: =Font.Verdana
-                      Height: =Parent.TemplateHeight - m_m_v_g_seperator.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_g_workorder.Width
-                      X: =m_m_v_g_workorder.X + (m_m_v_g_workorder.Width * 1)
-                      Y: =Parent.TemplateHeight - Parent.TemplateHeight
-                - m_m_v_g_component:
-                    Control: Label
-                    Properties:
-                      OnSelect: =Select(Parent)
-                      Text: =ThisItem.component
-                      Align: =Align.Center
-                      Fill: =varColor4
-                      Font: =Font.Verdana
-                      Height: =Parent.TemplateHeight - m_m_v_g_seperator.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_g_workorder.Width
-                      X: =m_m_v_g_workorder.X + (m_m_v_g_workorder.Width * 2)
-                      Y: =Parent.TemplateHeight - Parent.TemplateHeight
-                - m_m_v_g_quantity:
-                    Control: Label
-                    Properties:
-                      OnSelect: =Select(Parent)
-                      Text: =ThisItem.quantity
-                      Align: =Align.Center
-                      Fill: =varColor4
-                      Font: =Font.Verdana
-                      Height: =Parent.TemplateHeight - m_m_v_g_seperator.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_g_workorder.Width
-                      X: =m_m_v_g_workorder.X + (m_m_v_g_workorder.Width * 3)
-                      Y: =Parent.TemplateHeight - Parent.TemplateHeight
-                - m_m_v_g_unit:
-                    Control: Label
-                    Properties:
-                      OnSelect: =Select(Parent)
-                      Text: =ThisItem.unit
-                      Align: =Align.Center
-                      Fill: =varColor4
-                      Font: =Font.Verdana
-                      Height: =Parent.TemplateHeight - m_m_v_g_seperator.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_g_workorder.Width
-                      X: =m_m_v_g_workorder.X + (m_m_v_g_workorder.Width * 4)
-                      Y: =Parent.TemplateHeight - Parent.TemplateHeight
-                - m_m_v_g_requester:
-                    Control: Label
-                    Properties:
-                      OnSelect: =Select(Parent)
-                      Text: =ThisItem.requester
-                      Align: =Align.Center
-                      Fill: =varColor4
-                      Font: =Font.Verdana
-                      Height: =Parent.TemplateHeight - m_m_v_g_seperator.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_g_workorder.Width
-                      X: =m_m_v_g_workorder.X + (m_m_v_g_workorder.Width * 5)
-                      Y: =Parent.TemplateHeight - Parent.TemplateHeight
-                - m_m_v_g_created:
-                    Control: Label
-                    Properties:
-                      OnSelect: =Select(Parent)
-                      Text: =ThisItem.created
-                      Align: =Align.Center
-                      Fill: =varColor4
-                      Font: =Font.Verdana
-                      Height: =Parent.TemplateHeight - m_m_v_g_seperator.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_g_workorder.Width
-                      X: =m_m_v_g_workorder.X + (m_m_v_g_workorder.Width * 6)
-                      Y: =Parent.TemplateHeight - Parent.TemplateHeight
-                - m_m_v_g_seperator:
+                      Height: =Parent.TemplateHeight - 'o-gallery-separator'.Height
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMode: =LayoutMode.Auto
+                      Width: =Parent.TemplateWidth
+                    Children:
+                    - o-gallery-created:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.created
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Round(Self.Height/5,0)
+                          Width: =50
+                    - o-gallery-requester:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.requester
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Round(Self.Height/5,0)
+                          Width: =50
+                    - o-gallery-unit:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.unit
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =0.5
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Round(Self.Height/5,0)
+                          Width: =50
+                    - o-gallery-quantity:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.quantity
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =0.5
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Round(Self.Height/5,0)
+                          Width: =50
+                    - o-gallery-component:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.component
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Round(Self.Height/5,0)
+                          Width: =50
+                    - o-gallery-type:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.type
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Round(Self.Height/5,0)
+                          Width: =50
+                    - o-gallery-workorder:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.workorder
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Round(Self.Height/5,0)
+                          Width: =50
+                - o-gallery-separator:
                     Control: Rectangle
                     Properties:
                       OnSelect: =Select(Parent)
-                      Fill: =varColorAccent
+                      Fill: =gTheme.Sec_Complement
                       Height: =Parent.TemplateHeight * 0.05
                       Width: =Parent.TemplateWidth
                       X: =Parent.TemplateWidth - Parent.TemplateWidth
                       Y: =Parent.TemplateHeight - Self.Height
-            - m_m_v_header:
-                Control: GroupContainer
-                Variant: manualLayoutContainer
-                Properties:
-                  DropShadow: =DropShadow.None
-                  Fill: =varColor3
-                  Height: =Parent.Height * 0.05
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                  Width: =Parent.Width
-                  X: =Parent.Width - Parent.Width
-                  Y: =Parent.Height - Parent.Height
-                Children:
-                - m_m_v_h_created:
-                    Control: Label
-                    Properties:
-                      Text: ="Created"
-                      Align: =Align.Center
-                      Color: =varColor0
-                      Font: =Font.Verdana
-                      FontWeight: =FontWeight.Bold
-                      Height: =Parent.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_h_workorder.Width
-                      X: =m_m_v_h_workorder.X + (m_m_v_h_workorder.Width * 6)
-                      Y: =Parent.Height - Parent.Height
-                - m_m_v_h_requester:
-                    Control: Label
-                    Properties:
-                      Text: ="Requested By"
-                      Align: =Align.Center
-                      Color: =varColor0
-                      Font: =Font.Verdana
-                      FontWeight: =FontWeight.Bold
-                      Height: =Parent.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_h_workorder.Width
-                      X: =m_m_v_h_workorder.X + (m_m_v_h_workorder.Width * 5)
-                      Y: =Parent.Height - Parent.Height
-                - m_m_v_h_units:
-                    Control: Label
-                    Properties:
-                      Text: ="Unit Type"
-                      Align: =Align.Center
-                      Color: =varColor0
-                      Font: =Font.Verdana
-                      FontWeight: =FontWeight.Bold
-                      Height: =Parent.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_h_workorder.Width
-                      X: =m_m_v_h_workorder.X + (m_m_v_h_workorder.Width * 4)
-                      Y: =Parent.Height - Parent.Height
-                - m_m_v_h_quantity:
-                    Control: Label
-                    Properties:
-                      Text: ="Quantity"
-                      Align: =Align.Center
-                      Color: =varColor0
-                      Font: =Font.Verdana
-                      FontWeight: =FontWeight.Bold
-                      Height: =Parent.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_h_workorder.Width
-                      X: =m_m_v_h_workorder.X + (m_m_v_h_workorder.Width * 3)
-                      Y: =Parent.Height - Parent.Height
-                - m_m_v_h_component:
-                    Control: Label
-                    Properties:
-                      Text: |-
-                        ="Component #"
-                      Align: =Align.Center
-                      Color: =varColor0
-                      Font: =Font.Verdana
-                      FontWeight: =FontWeight.Bold
-                      Height: =Parent.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_h_workorder.Width
-                      X: =m_m_v_h_workorder.X + (m_m_v_h_workorder.Width * 2)
-                      Y: =Parent.Height - Parent.Height
-                - m_m_v_h_type:
-                    Control: Label
-                    Properties:
-                      Text: ="Request Type"
-                      Align: =Align.Center
-                      Color: =varColor0
-                      Font: =Font.Verdana
-                      FontWeight: =FontWeight.Bold
-                      Height: =Parent.Height
-                      Size: =Parent.Width / 72
-                      Width: =m_m_v_h_workorder.Width
-                      X: =m_m_v_h_workorder.X + (m_m_v_h_workorder.Width * 1)
-                      Y: =Parent.Height - Parent.Height
-                - m_m_v_h_workorder:
-                    Control: Label
-                    Properties:
-                      Text: |-
-                        ="Workorder #"
-                      Align: =Align.Center
-                      Color: =varColor0
-                      Font: =Font.Verdana
-                      FontWeight: =FontWeight.Bold
-                      Height: =Parent.Height
-                      Size: =Parent.Width / 72
-                      Width: =Parent.Width / 7
-                      X: =Parent.Width - Parent.Width
-                      Y: =Parent.Height - Parent.Height
