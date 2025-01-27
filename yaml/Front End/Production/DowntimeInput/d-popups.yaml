@@ -1,270 +1,316 @@
-- d_popups_parent:
+- d-popups:
     Control: GroupContainer
-    Variant: manualLayoutContainer
+    Variant: horizontalAutoLayoutContainer
     Properties:
       Fill: =RGBA(0, 0, 0, 0.5)
       Height: =Parent.Height
-      Visible: =locPopups.Visible
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      LayoutMode: =LayoutMode.Auto
+      LayoutOverflowY: =LayoutOverflow.Scroll
+      Visible: =First(rPopups).Visible
       Width: =Parent.Width
-      X: =1-1
-      Y: =1-1
     Children:
-    - d_error_editor:
+    - d-pop-editor:
         Control: GroupContainer
         Variant: manualLayoutContainer
         Properties:
-          BorderColor: =Color.Red
-          BorderThickness: =3
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gTheme.Pri_Complement
+          BorderThickness: =If(gTheme.Mode = "Light", 0,1)
           DropShadow: =DropShadow.Regular
-          Fill: =varColor4
-          Height: =Parent.Height / 2
-          RadiusBottomLeft: =8
-          RadiusBottomRight: =8
-          RadiusTopLeft: =8
-          RadiusTopRight: =8
-          Visible: =locPopups.Value = "editor"
-          Width: =Parent.Width / 3
+          Fill: =gTheme.Midground
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          Visible: =First(rPopups).Popup = "editor"
+          Width: =Parent.Width * 0.3
           X: =Parent.Width/2 - Self.Width/2
           Y: =Parent.Height/2 - Self.Height/2
         Children:
-        - d_e_e_confirm:
+        - d-pop-editor-confirm:
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                =Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
               Text: ="Okay"
-              Color: =varColor0
-              Fill: =varColorAccent
+              Color: =gTheme.Text_On_Light
+              Fill: =gTheme.Background
+              FontWeight: =FontWeight.Normal
               Height: =Parent.Height / 8
-              HoverFill: =ColorFade(Self.Fill, -20%)
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Round(Self.Height/3,0)
               Width: =Parent.Width / 3
               X: =Parent.Width / 2 - Self.Width / 2
-              Y: =d_e_e_text.Height
-        - d_e_e_text:
+              Y: ='d-pop-editor-text'.Height
+        - d-pop-editor-text:
             Control: Label
             Properties:
-              Text: ="Editing an entry requires records of the editor and the reason."
+              Text: ="Editing an entry requires records of the editor and a reason for the edit."
               Align: =Align.Center
+              Color: =gTheme.Text_On_Light
               Height: =Parent.Height / 1.5
-              Size: =Parent.Width / 22
               Width: =Parent.Width
               X: =1-1
               Y: =1-1
-    - d_error_time:
+    - d-pop-time:
         Control: GroupContainer
         Variant: manualLayoutContainer
         Properties:
-          BorderColor: =Color.Red
-          BorderThickness: =3
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gTheme.Pri_Complement
+          BorderThickness: =If(gTheme.Mode = "Light", 0,1)
           DropShadow: =DropShadow.Regular
-          Fill: =varColor4
-          Height: =Parent.Height / 2
-          RadiusBottomLeft: =8
-          RadiusBottomRight: =8
-          RadiusTopLeft: =8
-          RadiusTopRight: =8
-          Visible: =locPopups.Value = "time"
-          Width: =Parent.Width / 3
+          Fill: =gTheme.Midground
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          Visible: =First(rPopups).Popup = "time"
+          Width: =Parent.Width * 0.3
           X: =Parent.Width/2 - Self.Width/2
           Y: =Parent.Height/2 - Self.Height/2
         Children:
-        - d_e_t_confirm:
+        - d-pop-time-confirm:
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                =Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
               Text: ="Okay"
-              Color: =varColor0
-              Fill: =varColorAccent
+              Color: =gTheme.Text_On_Light
+              Fill: =gTheme.Background
+              FontWeight: =FontWeight.Normal
               Height: =Parent.Height / 8
-              HoverFill: =ColorFade(Self.Fill, -20%)
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Round(Self.Height/3,0)
               Width: =Parent.Width / 3
               X: =Parent.Width / 2 - Self.Width / 2
-              Y: =d_e_t_text.Height
-        - d_e_t_text:
+              Y: ='d-pop-time-text'.Height
+        - d-pop-time-text:
             Control: Label
             Properties:
               Text: ="Ending time must be later than starting time."
               Align: =Align.Center
+              Color: =gTheme.Text_On_Light
               Height: =Parent.Height / 1.5
-              Size: =Parent.Width / 22
               Width: =Parent.Width
               X: =1-1
               Y: =1-1
-    - d_error_sum:
+    - d-pop-sum:
         Control: GroupContainer
         Variant: manualLayoutContainer
         Properties:
-          BorderColor: =Color.Red
-          BorderThickness: =3
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gTheme.Pri_Complement
+          BorderThickness: =If(gTheme.Mode = "Light", 0,1)
           DropShadow: =DropShadow.Regular
-          Fill: =varColor4
-          Height: =Parent.Height / 2
-          RadiusBottomLeft: =8
-          RadiusBottomRight: =8
-          RadiusTopLeft: =8
-          RadiusTopRight: =8
-          Visible: =locPopups.Value = "sum"
-          Width: =Parent.Width / 3
+          Fill: =gTheme.Midground
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          Visible: =First(rPopups).Popup = "sum"
+          Width: =Parent.Width * 0.3
           X: =Parent.Width/2 - Self.Width/2
           Y: =Parent.Height/2 - Self.Height/2
         Children:
-        - d_e_s_confirm:
+        - d-pop-sum-confirm:
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                =Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
               Text: ="Okay"
-              Color: =varColor0
-              Fill: =varColorAccent
+              Color: =gTheme.Text_On_Light
+              Fill: =gTheme.Background
+              FontWeight: =FontWeight.Normal
               Height: =Parent.Height / 8
-              HoverFill: =ColorFade(Self.Fill, -20%)
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Round(Self.Height/3,0)
               Width: =Parent.Width / 3
               X: =Parent.Width / 2 - Self.Width / 2
-              Y: =d_e_s_text.Height
-        - d_e_s_text:
+              Y: ='d-pop-sum-ext'.Height
+        - d-pop-sum-ext:
             Control: Label
             Properties:
-              Text: ="Downtime selected exceeds 60 minutes for a defined hour slot. Make sure you do not have over-lapping downtime occurances."
+              Text: ="Downtime selected exceeds 60 minutes for a defined hour slot. Make sure you do not have over-lapping downtime."
               Align: =Align.Center
+              Color: =gTheme.Text_On_Light
               Height: =Parent.Height / 1.5
-              Size: =Parent.Width / 22
               Width: =Parent.Width
               X: =1-1
               Y: =1-1
-    - d_error_overlap:
+    - d-pop-overlap:
         Control: GroupContainer
         Variant: manualLayoutContainer
         Properties:
-          BorderColor: =Color.Red
-          BorderThickness: =3
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gTheme.Pri_Complement
+          BorderThickness: =If(gTheme.Mode = "Light", 0,1)
           DropShadow: =DropShadow.Regular
-          Fill: =varColor4
-          Height: =Parent.Height / 2
-          RadiusBottomLeft: =8
-          RadiusBottomRight: =8
-          RadiusTopLeft: =8
-          RadiusTopRight: =8
-          Visible: =locPopups.Value = "overlap"
-          Width: =Parent.Width / 3
+          Fill: =gTheme.Midground
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          Visible: =First(rPopups).Popup = "overlap"
+          Width: =Parent.Width * 0.3
           X: =Parent.Width/2 - Self.Width/2
           Y: =Parent.Height/2 - Self.Height/2
         Children:
-        - d_e_o_confirm:
+        - d-pop-overlap-confirm:
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                =Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
               Text: ="Okay"
-              Color: =varColor0
-              Fill: =varColorAccent
+              Color: =gTheme.Text_On_Light
+              Fill: =gTheme.Background
               Height: =Parent.Height / 8
-              HoverFill: =ColorFade(Self.Fill, -20%)
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Round(Self.Height/3,0)
               Width: =Parent.Width / 3
               X: =Parent.Width / 2 - Self.Width / 2
-              Y: =d_e_o_text.Height
-        - d_e_o_text:
+              Y: ='d-pop-overlap-text'.Height
+        - d-pop-overlap-text:
             Control: Label
             Properties:
               Text: ="Either your starting time, or ending time, overlaps with previously entered downtime. Please do not overlap downtime reasons."
               Align: =Align.Center
+              Color: =gTheme.Text_On_Light
               Height: =Parent.Height / 1.5
-              Size: =Parent.Width / 22
               Width: =Parent.Width
               X: =1-1
               Y: =1-1
-    - d_error_delete:
+    - d-pop-delete:
         Control: GroupContainer
         Variant: manualLayoutContainer
         Properties:
-          BorderColor: =Color.Red
-          BorderThickness: =3
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gTheme.Pri_Complement
+          BorderThickness: =If(gTheme.Mode = "Light", 0,1)
           DropShadow: =DropShadow.Regular
-          Fill: =varColor4
-          Height: =Parent.Height / 2
-          RadiusBottomLeft: =8
-          RadiusBottomRight: =8
-          RadiusTopLeft: =8
-          RadiusTopRight: =8
-          Visible: =locPopups.Value = "delete"
-          Width: =Parent.Width / 3
+          Fill: =gTheme.Midground
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          Visible: =First(rPopups).Popup = "delete"
+          Width: =Parent.Width * 0.3
           X: =Parent.Width/2 - Self.Width/2
           Y: =Parent.Height/2 - Self.Height/2
         Children:
-        - d_e_d_submit:
+        - d-pop-delete-submit:
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =RemoveIf(FE_Downtime, ID = varDowntimeID);
-                RemoveIf(collectDowntime, ID = varDowntimeID);
-                ResetForm(d_m_form);
-                Reset(d_e_d_input);
-                UpdateContext({locPopups: {Visible: false, Value: Blank()}});
-                Navigate(Hourly);
+                =RemoveIf(FE_Downtime, ID = gDowntimeID);
+                ResetForm('d-form');
+                Reset('d-pop-delete-input');
+                Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
+                Navigate(Home);
               Text: ="Delete"
-              Color: =varColor0
-              DisplayMode: =If(d_e_d_input.Text = Text(Year(Today())), DisplayMode.Edit, DisplayMode.Disabled)
-              Fill: =varColorAccent
+              DisplayMode: =If('d-pop-delete-input'.Text = Text(Year(Today())), DisplayMode.Edit, DisplayMode.Disabled)
               Height: =Parent.Height / 8
-              HoverFill: =ColorFade(Self.Fill, -20%)
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Round(Self.Height/3,0)
               Width: =Parent.Width / 3
               X: =Parent.Width / 2 + Parent.Width * 0.02
-              Y: =d_e_d_input.Height + d_e_d_input.Y + Parent.Width * 0.02
-        - d_e_d_cancel:
+              Y: ='d-pop-delete-input'.Height + 'd-pop-delete-input'.Y + Parent.Width * 0.02
+        - d-pop-delete-cancel:
             Control: Classic/Button
             Properties:
               OnSelect: |-
-                =Reset(d_e_d_input);
-                UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                =Reset('d-pop-delete-input');
+                Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
               Text: ="Cancel"
-              Color: =varColor5
-              Fill: =varColorNo
               Height: =Parent.Height / 8
-              HoverFill: =ColorFade(Self.Fill, -20%)
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Round(Self.Height/3,0)
               Width: =Parent.Width / 3
               X: =Parent.Width / 2 - Self.Width - Parent.Width * 0.02
-              Y: =d_e_d_input.Height + d_e_d_input.Y + Parent.Width * 0.02
-        - d_e_d_text:
+              Y: ='d-pop-delete-input'.Height + 'd-pop-delete-input'.Y + Parent.Width * 0.02
+        - d-pop-delete-text:
             Control: Label
             Properties:
               Text: |-
                 ="You are about to permanently delete this record.
                 Please enter the password to continue."
               Align: =Align.Center
+              Color: =gTheme.Text_On_Light
               Height: =Parent.Height * 0.50
-              Size: =Parent.Width / 22
               Width: =Parent.Width
               X: =1-1
               Y: =1-1
-        - d_e_d_input:
+        - d-pop-delete-input:
             Control: Classic/TextInput
             Properties:
               Default: =Blank()
-              Align: =Align.Center
+              Color: =gTheme.Text_On_Light
+              Fill: =gTheme.Background
               Mode: =TextMode.Password
-              Size: =Self.Width / 16
               Width: =Parent.Width/2
               X: =Parent.Width/2 - Self.Width/2
-              Y: =d_e_d_text.Y + d_e_d_text.Height + Parent.Width * 0.02
-    - d_help_reasons:
+              Y: ='d-pop-delete-text'.Y + 'd-pop-delete-text'.Height + Parent.Width * 0.02
+    - d-pop-help-2:
         Control: GroupContainer
-        Variant: manualLayoutContainer
+        Variant: verticalAutoLayoutContainer
         Properties:
-          BorderColor: =varColor1
-          BorderThickness: =3
+          AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.Regular
-          Fill: =varColor5
-          Height: =Parent.Height * 0.80
-          RadiusBottomLeft: =8
-          RadiusBottomRight: =8
-          RadiusTopLeft: =8
-          RadiusTopRight: =8
-          Visible: =locPopups.Value = "help"
-          Width: =Parent.Width * 0.60
-          X: =Parent.Width/2 - Self.Width/2
-          Y: =Parent.Height/2 - Self.Height/2
+          Fill: =gTheme.Midground
+          FillPortions: =0
+          Height: =Parent.Height * 0.8
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutMode: =LayoutMode.Auto
+          Visible: =First(rPopups).Popup = "help"
+          Width: =If(App.Width > Index(App.SizeBreakpoints,3).Value, Parent.Width * 0.35, Parent.Width * 0.7)
         Children:
-        - d_h_r_gallery:
+        - d-pop-help-header:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gTheme.Secondary
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutJustifyContent: =LayoutJustifyContent.End
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - d-pop-help-close:
+                Control: Classic/Icon
+                Variant: CancelBadge
+                Properties:
+                  OnSelect: |-
+                    =Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
+                  Color: =gTheme.Deny
+                  Height: =Parent.Height * 0.075
+                  Icon: =Icon.CancelBadge
+                  LayoutMinHeight: =10
+                  Width: =Self.Height
+                  X: =Parent.Width-Self.Width - Parent.Width *0.01
+                  Y: =Parent.Width * 0.005
+        - d-pop-help-gallery:
             Control: Gallery
             Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
             Properties:
@@ -356,7 +402,7 @@
                     },
                     {
                         reason: "Staffing",
-                        description: "Time lost due a line running, but understaffed or missing opertors, causing slower line speed."
+                        description: "Time lost due a line running, but understaffed or missing operators, causing slower line speed."
                     },
                     {
                         reason: "Tester Issues",
@@ -379,69 +425,42 @@
                         description: "Waiting on a mechanic to arrive for a maintenance problem and the line has stopped running."
                     }
                 ]
+              AlignInContainer: =AlignInContainer.SetByContainer
               DelayItemLoading: =true
+              FillPortions: =11
               Height: =Parent.Height - Self.Y
               Layout: =Layout.Vertical
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
               LoadingSpinner: =LoadingSpinner.Data
               TemplatePadding: =0
               TemplateSize: =Parent.Height / 10
               Width: =Parent.Width
-              Y: =d_h_r_banner.Height + d_h_r_banner.Y
             Children:
-            - d_h_r_g_reason:
+            - d-pop-help-reason:
                 Control: Label
                 Properties:
                   OnSelect: =Select(Parent)
                   Text: =ThisItem.reason
-                  Color: =varColor1
-                  Height: =Self.Size * 1.8
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  Size: =12
-                  VerticalAlign: =VerticalAlign.Top
-                  Width: =Parent.TemplateWidth - 173
-                  X: =Parent.TemplateWidth * 0.02
-                  Y: =Parent.TemplateHeight * 0.05
-            - d_h_r_g_description:
+                  Color: =gTheme.Pri_Complement
+                  Height: =Parent.TemplateHeight * 0.3
+                  Width: =Parent.TemplateWidth - Self.X
+                  X: =gPadding
+            - d-pop-help-description:
                 Control: Label
                 Properties:
                   OnSelect: =Select(Parent)
                   Text: =ThisItem.description
-                  Color: =varColor0
-                  Height: =Parent.TemplateHeight - Self.Y - d_h_r_g_seperator.Height
-                  PaddingBottom: =0
-                  PaddingLeft: =0
-                  PaddingRight: =0
-                  PaddingTop: =0
-                  Size: =10
-                  VerticalAlign: =VerticalAlign.Top
-                  Width: =Parent.TemplateWidth * 0.95 - Self.X
-                  X: =Parent.TemplateWidth * 0.05
-                  Y: =d_h_r_g_reason.Y + d_h_r_g_reason.Height
-            - d_h_r_g_seperator:
+                  Color: =gTheme.Text_On_Light
+                  Height: =Parent.TemplateHeight - Self.Y - 'd-pop-help-separator'.Height
+                  Size: =Round(Self.Height/5,0)
+                  Width: =Parent.TemplateWidth - Self.X
+                  X: =gPadding*4
+                  Y: ='d-pop-help-reason'.Height
+            - d-pop-help-separator:
                 Control: Rectangle
                 Properties:
-                  Fill: =varColorYes
+                  Fill: =gTheme.Sec_Complement
                   Height: =Parent.TemplateHeight * 0.05
                   Width: =Parent.TemplateWidth
                   Y: =Parent.TemplateHeight - Self.Height
-        - d_h_r_banner:
-            Control: Rectangle
-            Properties:
-              Fill: =varColor4
-              Height: =d_h_r_close.Y * 2 + d_h_r_close.Height
-              Width: =Parent.Width
-        - d_h_r_close:
-            Control: Classic/Icon
-            Variant: CancelBadge
-            Properties:
-              OnSelect: |-
-                =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
-              Color: =varColorNo
-              Height: =Parent.Height * 0.075
-              Icon: =Icon.CancelBadge
-              Width: =Self.Height
-              X: =Parent.Width-Self.Width - Parent.Width *0.01
-              Y: =Parent.Width * 0.005

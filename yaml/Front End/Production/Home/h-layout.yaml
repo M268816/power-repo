@@ -749,7 +749,7 @@
                                     ThisItem.Goal*2, ThisItem.Goal)
                                 )
                               Align: =Align.Center
-                              Color: =Color.Black
+                              Color: =gTheme.Text_On_Light
                               Fill: =RGBA(0,0,0,0)
                               FillPortions: =1
                               Font: =Font.Verdana
@@ -939,12 +939,12 @@
                                 Patch(rPopups,First(rPopups),{Visible: true, Popup: "lot" });,
 
                                 Set(gDowntimeForm, FormMode.New);
-                                Set(varDowntimeID, Blank());
+                                Set(gDowntimeID, Blank());
                                 Navigate(DowntimeInput, ScreenTransition.Fade);
                             ),
 
                             Set(gDowntimeForm, FormMode.Edit);
-                            Set(varDowntimeID, 'h-downtime-gallery'.Selected.ID);
+                            Set(gDowntimeID, 'h-downtime-gallery'.Selected.ID);
                             Navigate(DowntimeInput, ScreenTransition.Fade);
                         );
                       Items: |-
@@ -1008,7 +1008,7 @@
                                   OnSelect: =Select('h-downtime-gallery')
                                   Text: =TimeValue(ThisItem.Started)
                                   Align: =Align.Center
-                                  Color: =Color.Black
+                                  Color: =gTheme.Text_On_Light
                                   Fill: =RGBA(0,0,0,0)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -1025,7 +1025,7 @@
                                   OnSelect: =Select('h-downtime-gallery')
                                   Text: =TimeValue(ThisItem.Ended)
                                   Align: =Align.Center
-                                  Color: =Color.Black
+                                  Color: =gTheme.Text_On_Light
                                   Fill: =RGBA(0,0,0,0.25)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -1057,7 +1057,7 @@
                                   OnSelect: =Select('h-downtime-gallery')
                                   Text: =ThisItem.Catalog
                                   Align: =Align.Center
-                                  Color: =Color.Black
+                                  Color: =gTheme.Text_On_Light
                                   Fill: =RGBA(0,0,0,0)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -1074,7 +1074,7 @@
                                   OnSelect: =Select('h-downtime-gallery')
                                   Text: =ThisItem.Lot
                                   Align: =Align.Center
-                                  Color: =Color.Black
+                                  Color: =gTheme.Text_On_Light
                                   Fill: =RGBA(0,0,0,0)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -1107,7 +1107,7 @@
                               OnSelect: =Select('h-downtime-gallery')
                               Text: =ThisItem.Total_Downtime
                               Align: =Align.Center
-                              Color: =If(Value(Self.Text) > 60, Color.White, Color.Black)
+                              Color: =gTheme.Text_On_Light
                               Fill: =RGBA(0,0,0,0)
                               FillPortions: =1
                               Font: =Font.Verdana
@@ -1123,7 +1123,7 @@
                               OnSelect: =Select('h-downtime-gallery')
                               Text: =ThisItem.Reason
                               Align: =Align.Center
-                              Color: =Color.Black
+                              Color: =gTheme.Text_On_Light
                               Fill: =RGBA(0,0,0,0)
                               FillPortions: =1
                               Font: =Font.Verdana

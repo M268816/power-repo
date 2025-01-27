@@ -1,0 +1,1191 @@
+- d-layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - d-collect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =/*Downtime Collection*/
+            Clear(cDowntime);
+            ForAll(
+                Filter(FE_Downtime,
+                    Ended <= DateAdd(gTime.Today, 23, TimeUnit.Hours),
+                    Started >= DateAdd(gTime.Today, -1, TimeUnit.Hours),
+                    Or(
+                        Line.Value = gLotSetup.'0'.Line,
+                        Line.Value = gLotSetup.'1'.Line
+                    )
+                ),
+                Collect(cDowntime,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Started: ThisRecord.Started,
+                        Ended: ThisRecord.Ended,
+                        Reason: ThisRecord.Reason.Value,
+                        Total_Downtime: Value(ThisRecord.Total_Downtime),
+                        Comments: ThisRecord.Comments,
+                        Shift_Letter: ThisRecord.Shift_Letter,
+                        Record_Editor: ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - d-header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - d-back:
+            Control: Image
+            Properties:
+              OnSelect: =Back(ScreenTransition.Fade)
+              Image: =gIcons.Back
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - d-title:
+            Control: Label
+            Properties:
+              Text: ="Create a new Downtime Entry"
+              Color: =gTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - d-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - d-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - d-main:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Center
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - d-form-parent:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.Regular
+              Fill: =gTheme.Midground
+              FillPortions: =9
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutGap: =gPadding * 2
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+            Children:
+            - d-form:
+                Control: Form
+                Layout: vertical
+                Properties:
+                  OnSuccess: |-
+                    =ResetForm('d-form');
+                    If('d-form'.Mode = FormMode.Edit, Select('d-collect'), Navigate(Home));
+                    Notify("Submission Success", NotificationType.Success);
+                  DataSource: =FE_Downtime
+                  DefaultMode: =gDowntimeForm
+                  Item: |-
+                    =If(
+                        'd-form'.Mode = FormMode.Edit,
+                        LookUp(FE_Downtime, gDowntimeID = ID)
+                    )
+                  Height: =Parent.Height
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Width: =Parent.Width
+                  X: =1-1
+                  Y: =1-1
+                Children:
+                - d-form-catalog-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Catalog"
+                      Default: |-
+                        =If('d-form'.Mode = FormMode.New,
+                            If(IsBlank(gLotSetup.'0'.Catalog), gLotSetup.'1'.Catalog, gLotSetup.'0'.Catalog),
+                            ThisItem.Catalog
+                        )
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Catalog)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Catalog)
+                      Update: ='d-form-catalog-value'.Text
+                      DisplayMode: =If(gDowntimeForm = FormMode.New, DisplayMode.Disabled, DisplayMode.Edit)
+                      Height: |-
+                        =//If(d_m_form.Mode = FormMode.New, Parent.Height/4, Parent.Height/5)
+                        Parent.Height * 0.03
+                      Width: =Parent.Width/2
+                    Children:
+                    - d-form-catalog-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-catalog-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='d-form-catalog-key'.Y
+                    - d-form-catalog-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-catalog-value'.Y
+                    - d-form-catalog-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =If('d-form'.Mode = FormMode.New, DisplayMode.View, DisplayMode.Edit)
+                          Fill: =gTheme.Background
+                          Height: =Parent.Height * 0.5
+                          PaddingLeft: =5
+                          Width: ='d-form-lot-value'.Width
+                          X: =Parent.Width/2 - Self.Width/2
+                          Y: ='d-form-catalog-key'.Height
+                    - d-form-catalog-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: =Parent.Height * 0.450
+                          Width: ='d-form-line-key'.Width
+                          Wrap: =false
+                          X: ='d-form-line-key'.X
+                          Y: ='d-form-line-key'.Y
+                - d-form-lot-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Title"
+                      Default: |-
+                        =If('d-form'.Mode = FormMode.New,
+                            If(IsBlank(gLotSetup.'0'.Lot), gLotSetup.'1'.Lot, gLotSetup.'0'.Lot),
+                            ThisItem.Lot
+                        )
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Lot)
+                      MaxLength: =DataSourceInfo([@FE_Downtime],DataSourceInfo.MaxLength,Lot)
+                      Update: ='d-form-lot-value'.Text
+                      DisplayMode: =If(gDowntimeForm = FormMode.New, DisplayMode.Disabled, DisplayMode.Edit)
+                      Height: |-
+                        =//If(d_m_form.Mode = FormMode.New, Parent.Height/4, Parent.Height/5)
+                        Parent.Height * 0.10
+                      Width: =Parent.Width/2
+                      X: =1
+                    Children:
+                    - d-form-lot-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-lot-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='d-form-lot-key'.Y
+                    - d-form-lot-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-lot-value'.Y
+                    - d-form-lot-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =If('d-form'.Mode = FormMode.New, DisplayMode.View, DisplayMode.Edit)
+                          Height: =Parent.Height * 0.5
+                          PaddingLeft: =5
+                          Width: =Parent.Width * 0.40
+                          X: =Parent.Width/2 - Self.Width/2
+                          Y: ='d-form-lot-key'.Height
+                    - d-form-lot-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: =Parent.Height * 0.45
+                          Width: ='d-form-line-key'.Width
+                          Wrap: =false
+                          X: ='d-form-line-key'.X
+                          Y: ='d-form-line-key'.Y
+                - d-form-started-card:
+                    Control: TypedDataCard
+                    Variant: dateTimeEditCard
+                    Properties:
+                      DataField: ="Started"
+                      Default: |-
+                        =If(
+                            'd-form'.Mode = FormMode.Edit,
+                            ThisItem.Started,
+                            Switch(
+                                varShiftSelect,
+                                "A Shift", DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),7,0,0),
+                                "B Shift", DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),4,0,0),
+                                "C Shift", DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),23,0,0),
+                                DateTime(Year(locNowDay),Month(locNowDay),Day(locNowDay),0,0,0)
+                            )
+                        )
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Started)
+                      Required: =true
+                      Update: |-
+                        ='d-form-started-date'.SelectedDate + 
+                        Time(
+                            If(
+                                'd-form-started-ampm'.Selected.Value = "PM", 
+                                12, 
+                                0
+                                ) 
+                            + Mod(
+                                Value('d-form-started-hour'.Selected.Value), 
+                                12
+                                ), 
+                            Value('d-form-started-minute'.Selected.Value),
+                           0
+                            )
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =If('d-form'.Mode = FormMode.New, (Parent.Height - 'd-form-catalog-card'.Height)/3, (Parent.Height - 'd-form-catalog-card'.Height)/4)
+                      Width: =Parent.Width/2
+                      Y: =2
+                    Children:
+                    - d-form-started-ampm:
+                        Control: Classic/DropDown
+                        Properties:
+                          Default: "=Switch(\n    gShift,\n    \"A\",\n    Switch(\n        Value('d-form-started-hour'.SelectedText.Value),\n        1, \"PM\",\n        2, \"PM\",\n        3, \"PM\",\n        12, \"PM\",\n        \"AM\"\n    ),\n        \n    \"B\",\n    Switch(\n        Value('d-form-started-hour'.SelectedText.Value),\n        12, \"AM\",\n        \"PM\"\n    ),\n    \n    \"C\",\n    Switch(\n        Value('d-form-started-hour'.SelectedText.Value),\n        11, \"PM\",\n        \"AM\"\n    )\n)"
+                          Items: =["AM","PM"]
+                          Tooltip: =Parent.DisplayName
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =DisplayMode.View
+                          Fill: =gTheme.Background
+                          Height: ='d-form-started-hour'.Height
+                          Width: ='d-form-started-hour'.Width
+                          X: ='d-form-started-minute'.X + 'd-form-started-minute'.Width + 'd-form-started-separator'.Width
+                          Y: ='d-form-started-hour'.Y
+                    - d-form-started-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-started-date'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          X: ='d-form-started-date'.X - Self.Width
+                          Y: ='d-form-started-date'.Y
+                    - d-form-started-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-started-hour'.Y
+                    - d-form-started-minute:
+                        Control: Classic/DropDown
+                        Properties:
+                          Default: =Text(Minute(Parent.Default),"00")
+                          Items: =["00","05","10","15","20","25","30","35","40","45","50","55"]
+                          Tooltip: =Parent.DisplayName
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          Height: ='d-form-started-hour'.Height
+                          Width: ='d-form-started-hour'.Width
+                          X: ='d-form-started-hour'.X + 'd-form-started-hour'.Width + 'd-form-started-separator'.Width
+                          Y: ='d-form-started-hour'.Y
+                    - d-form-started-separator:
+                        Control: Label
+                        Properties:
+                          Text: =":"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-started-hour'.Height
+                          Width: =10
+                          Wrap: =false
+                          X: ='d-form-started-hour'.X + 'd-form-started-hour'.Width
+                          Y: ='d-form-started-hour'.Y
+                    - d-form-started-hour:
+                        Control: Classic/DropDown
+                        Properties:
+                          Default: =Text(If(Mod(Hour(Parent.Default), 12) = 0, 12, Mod(Hour(Parent.Default), 12)),"00")
+                          Items: |-
+                            =Switch(
+                                gShift,
+                                "A",
+                                ["07","08","09","10","11","12","01","02"],
+                                "B",
+                                ["03","04","05","06","07","08","09","10"],
+                                "C",
+                                ["11","12","01","02","03","04","05","06"],
+                                ["01","02","03","04","05","06","07","08","09","10","11","12"]
+                            )
+                          Tooltip: =Parent.DisplayName
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          Height: ='d-form-started-date'.Height
+                          Width: ='d-form-started-date'.Width / 2
+                          X: ='d-form-started-date'.X + 'd-form-started-date'.Width + 10
+                          Y: ='d-form-started-date'.Y
+                    - d-form-started-date:
+                        Control: Classic/DatePicker
+                        Properties:
+                          DefaultDate: |-
+                            =If(
+                                'd-form'.Mode = FormMode.Edit,
+                                Parent.Default,
+                                Switch(
+                                    gShift,
+                                    "C",
+                                    If(
+                                        'd-form-started-hour'.SelectedText.Value = "11",
+                                        DateAdd(gTime.Now, -1, TimeUnit.Days),
+                                        gTime.Now
+                                    ),
+                                    gTime.Now
+                                )
+                            )
+                          EndYear: =Year(Today())+100
+                          StartYear: =1899
+                          Tooltip: =Parent.DisplayName
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode.View
+                          Fill: =gTheme.Background
+                          Height: ='d-form-line-value-h'.Height
+                          IsEditable: =true
+                          Width: =Parent.Width * 0.30
+                          X: =Parent.Width/2 - (Self.Width*2.5)/2
+                          Y: ='d-form-started-key'.Y + 'd-form-started-key'.Height + 5
+                    - d-form-started-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          Align: =Align.Center
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-line-key'.Height
+                          Width: ='d-form-line-key'.Width
+                          Wrap: =false
+                          X: ='d-form-line-key'.X
+                          Y: ='d-form-line-key'.Y
+                - d-form-ended-card:
+                    Control: TypedDataCard
+                    Variant: dateTimeEditCard
+                    Properties:
+                      DataField: ="Ended"
+                      Default: |-
+                        =If(
+                            'd-form'.Mode = FormMode.Edit,
+                            ThisItem.Ended,
+                            Switch(
+                                gShift,
+                                "A", DateTime(Year(gTime.Now),Month(gTime.Now),Day(gTime.Now),8,0,0),
+                                "B", DateTime(Year(gTime.Now),Month(gTime.Now),Day(gTime.Now),5,0,0),
+                                "C", DateTime(Year(gTime.Now),Month(gTime.Now),Day(gTime.Now),0,0,0),
+                                DateTime(Year(gTime.Now),Month(gTime.Now),Day(gTime.Now),0,0,0)
+                            )
+                        )
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Ended)
+                      Required: =true
+                      Update: |-
+                        ='d-form-ended-date'.SelectedDate + 
+                        Time(
+                            If(
+                                'd-form-ended-ampm'.Selected.Value = "PM", 
+                                12, 
+                                0
+                                ) 
+                            + Mod(
+                                Value('d-form-ended-hour'.Selected.Value), 
+                                12
+                                ), 
+                            Value('d-form-ended-minute'.Selected.Value),
+                           0
+                            )
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =If('d-form'.Mode = FormMode.New, (Parent.Height - 'd-form-catalog-card'.Height)/3, (Parent.Height - 'd-form-catalog-card'.Height)/4)
+                      Width: =Parent.Width/2
+                      X: =1
+                      Y: =2
+                    Children:
+                    - d-form-ended-ampm:
+                        Control: Classic/DropDown
+                        Properties:
+                          Default: "=/*Check the selected time per varShiftSelect and change*/\nSwitch(\n    gShift,\n    \"A\",\n    Switch(\n        Value('d-form-ended-hour'.SelectedText.Value),\n        1, \"PM\",\n        2, \"PM\",\n        3, \"PM\",\n        12, \"PM\",\n        \"AM\"\n    ),\n        \n    \"B\",\n    Switch(\n        Value('d-form-ended-hour'.SelectedText.Value),\n        12, \"AM\",\n        \"PM\"\n    ),\n    \n    \"C\",\n    Switch(\n        Value('d-form-ended-hour'.SelectedText.Value),\n        11, \"PM\",\n        \"AM\"\n    )\n)"
+                          Items: =["AM","PM"]
+                          Tooltip: =Parent.DisplayName
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =DisplayMode.View
+                          Fill: =gTheme.Background
+                          Height: ='d-form-ended-hour'.Height
+                          Width: ='d-form-ended-hour'.Width
+                          X: ='d-form-ended-minute'.X + 'd-form-ended-minute'.Width + 'd-form-ended-separator'.Width
+                          Y: ='d-form-ended-hour'.Y
+                    - d-form-ended-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-ended-date'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          X: ='d-form-ended-date'.X - Self.Width
+                          Y: ='d-form-ended-date'.Y
+                    - d-form-ended-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-ended-hour'.Y
+                    - d-form-ended-minute:
+                        Control: Classic/DropDown
+                        Properties:
+                          Default: =Text(Minute(Parent.Default),"00")
+                          Items: =["00","05","10","15","20","25","30","35","40","45","50","55"]
+                          Tooltip: =Parent.DisplayName
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          Height: ='d-form-ended-hour'.Height
+                          Width: ='d-form-ended-hour'.Width
+                          X: ='d-form-ended-hour'.X + 'd-form-ended-hour'.Width + 'd-form-ended-separator'.Width
+                          Y: ='d-form-ended-hour'.Y
+                    - d-form-ended-separator:
+                        Control: Label
+                        Properties:
+                          Text: =":"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-ended-hour'.Height
+                          Width: =10
+                          Wrap: =false
+                          X: ='d-form-ended-hour'.X + 'd-form-ended-hour'.Width
+                          Y: ='d-form-ended-hour'.Y
+                    - d-form-ended-hour:
+                        Control: Classic/DropDown
+                        Properties:
+                          Default: =Text(If(Mod(Hour(Parent.Default), 12) = 0, 12, Mod(Hour(Parent.Default), 12)),"00")
+                          Items: |-
+                            =Switch(
+                                gShift,
+                                "A",
+                                ["07","08","09","10","11","12","01","02","03"],
+                                "B",
+                                ["03","04","05","06","07","08","09","10","11"],
+                                "C",
+                                ["11","12","01","02","03","04","05","06","07"],
+                                ["01","02","03","04","05","06","07","08","09","10","11","12"]
+                            )
+                          Tooltip: =Parent.DisplayName
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          Height: ='d-form-ended-date'.Height
+                          Width: ='d-form-ended-date'.Width / 2
+                          X: ='d-form-ended-date'.X + 'd-form-ended-date'.Width + 10
+                          Y: ='d-form-ended-date'.Y
+                    - d-form-ended-date:
+                        Control: Classic/DatePicker
+                        Properties:
+                          DefaultDate: |-
+                            =If(
+                                'd-form'.Mode = FormMode.Edit,
+                                Parent.Default,
+                                Switch(
+                                    gShift,
+                                    "C",
+                                    If(
+                                        'd-form-ended-hour'.SelectedText.Value = "11",
+                                        DateAdd(gTime.Now, -1, TimeUnit.Days),
+                                        gTime.Now
+                                    ),
+                                    gTime.Now
+                                )
+                            )
+                          EndYear: =Year(Today())+100
+                          StartYear: =1899
+                          Tooltip: =Parent.DisplayName
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode.View
+                          Fill: =gTheme.Background
+                          Height: ='d-form-line-value-h'.Height
+                          IsEditable: =true
+                          Width: =Parent.Width * 0.30
+                          X: =Parent.Width/2 - (Self.Width*2.5)/2
+                          Y: ='d-form-ended-key'.Y + 'd-form-ended-key'.Height + 5
+                    - d-form-ended-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          Align: =Align.Center
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-line-key'.Height
+                          Width: ='d-form-line-key'.Width
+                          Wrap: =false
+                          X: ='d-form-line-key'.X
+                          Y: ='d-form-line-key'.Y
+                - d-form-line-card:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Line"
+                      Default: =ThisItem.Line
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Line)
+                      Required: =true
+                      Update: ='d-form-line-value-h'.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =If('d-form'.Mode = FormMode.New, (Parent.Height - 'd-form-catalog-card'.Height)/3, (Parent.Height - 'd-form-catalog-card'.Height)/4)
+                      Width: =Parent.Width/2
+                      Y: =1
+                    Children:
+                    - d-form-line-value:
+                        Control: Label
+                        Properties:
+                          Text: ='d-form-line-value-h'.Selected.Value
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: =Parent.Height * 0.4
+                          Size: =Round(Self.Height/3,0)
+                          Width: =Self.Size * 1.5 * Len(Self.Text)
+                          X: =Center(Parent.Width, Self.Width)
+                          Y: ='d-form-line-key'.Y + 'd-form-line-key'.Height
+                    - d-form-line-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-line-value-h'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          X: ='d-form-line-value-h'.X - Self.Width
+                          Y: ='d-form-line-value-h'.Y
+                    - d-form-line-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-line-value-h'.Y
+                    - d-form-line-value-h:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: |-
+                            =If('d-form'.Mode = FormMode.New,
+                                {Value: gLine},
+                                Parent.Default
+                            )
+                          DisplayFields: =["Value"]
+                          IsSearchable: =false
+                          Items: =Choices([@FE_Downtime].Line)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =DisplayMode.View
+                          Height: =Parent.Height * 0.4
+                          Visible: =false
+                          Width: =Self.Size * Len(Self.Selected.Value)
+                          X: =Center(Parent.Width, Self.Width)
+                          Y: ='d-form-line-key'.Y + 'd-form-line-key'.Height
+                    - d-form-line-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: =Parent.Height * 0.30
+                          Width: =Parent.Width
+                          Wrap: =false
+                          X: =1-1
+                          Y: =1-1
+                - d-form-reason-card:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Reason"
+                      Default: =ThisItem.Reason
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Reason)
+                      Required: =true
+                      Update: ='d-form-reason-value'.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =If('d-form'.Mode = FormMode.New, (Parent.Height - 'd-form-catalog-card'.Height)/3, (Parent.Height - 'd-form-catalog-card'.Height)/4)
+                      Width: =Parent.Width/2
+                      X: =1
+                      Y: =1
+                    Children:
+                    - d-form-reason-help:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: |-
+                            =If(
+                                IsBlank('d-form-reason-value'.Selected.Value),
+                                Blank(),
+                                Concatenate("This Reason is for: ", First(Filter('d-pop-help-gallery'.AllItems, reason = 'd-form-reason-value'.Selected.Value)).description)
+                            )
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: =Parent.Height * 0.2
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width
+                          Y: ='d-form-reason-value'.Y + 'd-form-reason-value'.Height + 5
+                    - d-form-reason-help-button:
+                        Control: Classic/Icon
+                        Variant: Cancel
+                        Properties:
+                          OnSelect: |-
+                            =Patch(rPopups,First(rPopups),{Visible: true, Popup: "help"});
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-reason-value'.Height / 2
+                          Icon: =Icon.QuestionMark
+                          Width: =Self.Height
+                          X: ='d-form-reason-value'.Width + 'd-form-reason-value'.X + Parent.Width * 0.02
+                          Y: =('d-form-reason-value'.Y + 'd-form-reason-value'.Height/2) - Self.Height/2
+                    - d-form-reason-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-line-star'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          X: ='d-form-reason-value'.X - Self.Width
+                          Y: ='d-form-line-star'.Y
+                    - d-form-reason-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-reason-value'.Y
+                    - d-form-reason-value:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          IsSearchable: =false
+                          Items: |-
+                            =Filter(Choices([@FE_Downtime].Reason),
+                                Not(
+                                    Value = "Engineering DT" ||
+                                    Value = "Engineering Verifications" ||
+                                    Value = "Other" ||
+                                    Value = "Preventive Maintenance - Planned" ||
+                                    Value = "Planned Downtime" ||
+                                    Value = "Short Staffed Over Target" ||
+                                    Value = "Short Staffed Under Target" ||
+                                    Value = "Waiting For Parts" ||
+                                    Value = "Waiting on Labels"
+                                    )
+                            )
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          Height: ='d-form-line-value-h'.Height
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Min(Max(Self.Size*20, Len(Self.Selected.Value) * Self.Size), Self.Size * 40)
+                          X: =Parent.Width/2 - Self.Width/2
+                          Y: ='d-form-line-value-h'.Y
+                    - d-form-reason-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='d-form-line-key'.Height
+                          Width: ='d-form-line-key'.Width
+                          Wrap: =false
+                          X: ='d-form-line-key'.X
+                          Y: ='d-form-line-key'.Y
+                - d-form-comment-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Comments"
+                      Default: =ThisItem.Comments
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Comments)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Comments)
+                      Update: ='d-form-comment-value'.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =If('d-form'.Mode = FormMode.New, (Parent.Height - 'd-form-catalog-card'.Height)/3, (Parent.Height - 'd-form-catalog-card'.Height)/4)
+                      Width: =683
+                      WidthFit: =true
+                      Y: =3
+                    Children:
+                    - d-form-comment-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: ='d-form-comment-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='d-form-comment-key'.Y
+                    - d-form-comment-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-comment-value'.Y
+                    - d-form-comment-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          Height: ='d-form-line-value-h'.Height * 1.2
+                          Mode: =TextMode.MultiLine
+                          PaddingLeft: =5
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-comment-key'.Y + 'd-form-comment-key'.Height + 5
+                    - d-form-comment-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          Align: =Align.Center
+                          AutoHeight: =true
+                          Height: ='d-form-line-key'.Height
+                          Width: =Parent.Width
+                          Wrap: =false
+                          X: ='d-form-line-key'.X
+                          Y: ='d-form-line-key'.Y
+                - d-form-edit-person-card:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Edit_Person"
+                      Default: =ThisItem.Record_Editor
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Record_Editor)
+                      Update: ='d-form-edit-person-value'.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =If('d-form'.Mode = FormMode.New, (Parent.Height - 'd-form-catalog-card'.Height)/3, (Parent.Height - 'd-form-catalog-card'.Height)/4)
+                      Visible: =If('d-form'.Mode = FormMode.New, false, true)
+                      Width: =Parent.Width/2
+                      Y: =4
+                    Children:
+                    - d-form-edit-person-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: ='d-form-edit-person-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='d-form-edit-person-key'.Y
+                    - d-form-edit-person-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-edit-person-value'.Y
+                    - d-form-edit-person-value:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["DisplayName"]
+                          Items: =Choices([@FE_Downtime].Record_Editor)
+                          SearchFields: =["DisplayName"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          DisplayMode: =Parent.DisplayMode
+                          Height: ='d-form-line-value-h'.Height
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Min(Max(Self.Size*20, Len(Self.Selected.DisplayName) * Self.Size), Self.Size * 40)
+                          X: =Parent.Width/2 - Self.Width/2
+                          Y: ='d-form-line-value-h'.Y
+                    - d-form-edit-person-key:
+                        Control: Label
+                        Properties:
+                          Text: ="Editor"
+                          Align: =Align.Center
+                          AutoHeight: =true
+                          Height: ='d-form-line-key'.Height
+                          Width: ='d-form-line-key'.Width
+                          Wrap: =false
+                          X: ='d-form-line-key'.X
+                          Y: ='d-form-line-key'.Y
+                - d-form-edit-reason-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Edit_Reason"
+                      Default: =ThisItem.Edit_Reason
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Edit_Reason)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Edit_Reason)
+                      Update: ='d-form-edit-reason-value'.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =If('d-form'.Mode = FormMode.New, (Parent.Height - 'd-form-catalog-card'.Height)/3, (Parent.Height - 'd-form-catalog-card'.Height)/4)
+                      Visible: =If('d-form'.Mode = FormMode.New, false, true)
+                      Width: =Parent.Width/2
+                      X: =1
+                      Y: =4
+                    Children:
+                    - d-form-edit-reason-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: ='d-form-edit-reason-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='d-form-edit-reason-key'.Y
+                    - d-form-edit-reason-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: "='d-form-edit-reason-value'.Y "
+                    - d-form-edit-reason-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          DisplayMode: =Parent.DisplayMode
+                          Height: ='d-form-line-value-h'.Height
+                          Mode: =TextMode.MultiLine
+                          PaddingLeft: =5
+                          Width: =Parent.Width * 0.75
+                          X: =Parent.Width/2 - Self.Width/2
+                          Y: ='d-form-edit-reason-key'.Y + 'd-form-edit-reason-key'.Height + 5
+                    - d-form-edit-reason-key:
+                        Control: Label
+                        Properties:
+                          Text: ="Reason for editing the record."
+                          Align: =Align.Center
+                          AutoHeight: =true
+                          Height: ='d-form-line-key'.Height
+                          Width: ='d-form-line-key'.Width
+                          Wrap: =false
+                          X: ='d-form-line-key'.X
+                          Y: ='d-form-line-key'.Y
+                - d-form-shift-card:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Shift_Letter"
+                      Default: |-
+                        ={
+                            Value:
+                                Switch(varShiftSelect,
+                                "A Shift", "A",
+                                "B Shift", "B",
+                                "C Shift", "C",
+                                "A"
+                            )
+                        }
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Shift_Letter)
+                      Required: =true
+                      Update: ='d-form-shift-value'.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Visible: =false
+                      Width: =683
+                      X: =1
+                      Y: =4
+                    Children:
+                    - d-form-shift-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: ='d-form-shift-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='d-form-shift-key'.Y
+                    - d-form-shift-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-shift-value'.Y + 'd-form-shift-value'.Height
+                    - d-form-shift-value:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@FE_Downtime].Shift_Letter)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='d-form-shift-key'.Y + 'd-form-shift-key'.Height + 5
+                    - d-form-shift-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+        - d-buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =gPadding * 4
+              LayoutJustifyContent: =LayoutJustifyContent.End
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - d-form-delete:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(rPopups,First(rPopups),{Visible: true, Popup: "delete"});
+                  Text: ="Delete"
+                  BorderColor: =gTheme.Primary
+                  BorderThickness: =1
+                  Color: =gTheme.Text_On_Light
+                  Fill: =gTheme.Background
+                  FontWeight: =FontWeight.Normal
+                  HoverColor: =gTheme.Text_On_Dark
+                  HoverFill: =gTheme.Deny
+                  LayoutMinHeight: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width * 0.15
+            - d-form-submit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: "=UpdateContext({\r\n    \r\n    locSelectedEndTime:\r\n        DateTime(\r\n            Year('d-form-ended-date'.SelectedDate),\r\n            Month('d-form-ended-date'.SelectedDate),\r\n            Day('d-form-ended-date'.SelectedDate),\r\n            If('d-form-ended-ampm'.Selected.Value = \"PM\", 12, 0) + Mod(Value('d-form-ended-hour'.SelectedText.Value), 12),\r\n            Value('d-form-ended-minute'.SelectedText.Value),\r\n            0\r\n        ),\r\n\r\n    locSelectedStartTime:\r\n        DateTime(\r\n            Year('d-form-started-date'.SelectedDate),\r\n            Month('d-form-started-date'.SelectedDate),\r\n            Day('d-form-started-date'.SelectedDate),\r\n            If('d-form-started-ampm'.Selected.Value = \"PM\", 12, 0) + Mod(Value('d-form-started-hour'.SelectedText.Value), 12),\r\n            Value('d-form-started-minute'.SelectedText.Value),\r\n            0\r\n        )\r\n\r\n});\r\n\r\n/*Super Hacknied variable to check for overlapping Time, clear the collection*/\r\nClear(hackFoundTime);\r\n\r\n/*Super Hacknied time check*/\r\nForAll(\r\n    /*For all downtime data, filtered by current line*/\r\n    Filter(cDowntime, Line = gLine),\r\n    If(\r\n        Or(\r\n            /*If the selected times are between recorded times*/\r\n            And(\r\n                locSelectedStartTime >= DateTimeValue(Started),\r\n                locSelectedStartTime < TimeValue(Ended)\r\n            ),\r\n            /*Or if the the selected end time is between the recorded start and end time */\r\n            And(\r\n                locSelectedEndTime > DateTimeValue(Started),\r\n                locSelectedEndTime <= DateTimeValue(Ended)\r\n            ),\r\n            /*Or if the selected start time is between the recorded start and end time*/\r\n            And(\r\n                locSelectedStartTime >= DateTimeValue(Started),\r\n                locSelectedStartTime < DateTimeValue(Ended)\r\n            ),\r\n            /*Or the selected times are encompassing a recorded time*/\r\n            And(\r\n                locSelectedStartTime <= DateTimeValue(Started),\r\n                locSelectedEndTime >= DateTimeValue(Ended)\r\n            )\r\n        ),\r\n        \r\n        /*collect a true statement*/\r\n        Collect(hackFoundTime, {set: true}),\r\n        \r\n        /*collect a false statement*/\r\n        Collect(hackFoundTime, {set: false})\r\n    )\r\n);\r\n\r\n\r\n/*If anything in the hack is true then return true*/\r\nIf(true in hackFoundTime, Set(varFoundTime, true), Set(varFoundTime, false));\r\n\r\nIf(\r\n    /*If the strting hour is between an already reported time*/\r\n    And('d-form'.Mode = FormMode.New, varFoundTime),\r\n    /*Show the error*/\r\n    Patch(rPopups,First(rPopups),{Visible: true, Popup: \"overlap\"});,\r\n\r\n    /*If in edit mode editor and reason is needed*/\r\n    And('d-form'.Mode = FormMode.Edit, Or('d-form-edit-person-value'.Selected.DisplayName = Blank(), 'd-form-edit-reason-value'.Text = \"\")),\r\n    /*Show the error*/\r\n    Patch(rPopups,First(rPopups),{Visible: true, Popup: \"editor\"});,\r\n    \r\n    /*Hour ended must be later than hour started*/\r\n    locSelectedEndTime <= locSelectedStartTime,\r\n    /*Show the error*/\r\n    Patch(rPopups,First(rPopups),{Visible: true, Popup: \"time\"});,\r\n    \r\n    /*If the sum of downtime exceeds total minutes for the selected time range*/\r\n    Sum(\r\n        Sum(\r\n            Filter(cDowntime, Hour(Started) = Hour('d-form-started-card'.Update), Hour(Ended) = Hour('d-form-started-card'.Update)+1),\r\n            Total_Downtime*1\r\n        ),\r\n        DateDiff('d-form-started-card'.Update, 'd-form-ended-card'.Update, TimeUnit.Minutes)\r\n    )\r\n    <\r\n    Sum(\r\n        Filter(cDowntime, Hour(Started) = Hour('d-form-started-card'.Update), Hour(Ended) = Hour('d-form-started-card'.Update)+1),\r\n        Total_Downtime*1\r\n    ),    \r\n    /*Show the error*/\r\n    Patch(rPopups,First(rPopups),{Visible: true, Popup: \"sum\"});,\r\n    \r\n    /*Otherwise, submit the form*/\r\n    SubmitForm('d-form');\r\n);"
+                  Text: ="Submit"
+                  BorderColor: =gTheme.Primary
+                  BorderThickness: =1
+                  Color: =gTheme.Text_On_Light
+                  Fill: =gTheme.Background
+                  FontWeight: =FontWeight.Normal
+                  HoverColor: =gTheme.Text_On_Dark
+                  HoverFill: =gTheme.Accept
+                  LayoutMinHeight: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width * 0.15
+            - d-form-cancel:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Cancel"
+                  BorderColor: =gTheme.Primary
+                  BorderThickness: =1
+                  Color: =gTheme.Text_Light
+                  Fill: =gTheme.Primary
+                  FontWeight: =FontWeight.Normal
+                  HoverColor: =gTheme.Text_On_Dark
+                  HoverFill: =gTheme.Deny
+                  LayoutMinHeight: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width * 0.15
