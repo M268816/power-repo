@@ -1,0 +1,230 @@
+- h-popups:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =First(rPopups).Visible
+      Width: =Parent.Width
+    Children:
+    - h-popup-choose-line:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gTheme.Sec_Complement
+          BorderThickness: =If(gTheme.Mode = "Light",0,1)
+          Fill: =gTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutMode: =LayoutMode.Auto
+          Visible: =First(rPopups).Popup = "line"
+          Width: =Parent.Width * 0.3
+          X: =40
+          Y: =40
+        Children:
+        - h-popup-cl-text:
+            Control: Label
+            Properties:
+              Text: ="Select a side for the Hourly Entry"
+              Align: =Align.Center
+              Color: =gTheme.Text_On_Light
+              FillPortions: =2
+              Height: =Parent.Height * 0.50
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Round(Self.Height/10,0)
+              Width: =Parent.Width * 0.80
+              X: =Parent.Width/2 - Self.Width/2
+              Y: =Parent.Height * 0.10
+        - h-popup-cl-buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =gPadding * 4
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - h-popup-choose-line-0:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
+
+                    Set(gUnitForm, FormMode.New);
+                    Set(gSelectedSide, Left(gLine,1));
+                    Set(gSelectedSideID, 0);
+
+                    Navigate(locNavigateTo, ScreenTransition.Fade);
+                  Text: ="Side " & Left(gLine,1)
+                  Color: =gTheme.Text_Dark
+                  DisplayMode: =If(IsBlank(gLotSetup.'0'.Catalog), DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =gTheme.Accent
+                  FontWeight: =FontWeight.Normal
+                  Height: =Parent.Height * 0.20
+                  HoverColor: =ColorFade(Self.Color, 0.1)
+                  HoverFill: =ColorFade(Self.Fill, -30%)
+                  Size: =Round(Self.Height / 4,0)
+                  Width: =Parent.Width * 0.3
+                  X: =Center(Parent.Width,Self.Width) - Self.Width
+                  Y: =(Parent.Height / 4) * 3 - Self.Height/2
+            - h-popup-choose-line-1:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(rPopups,First(rPopups),{Visible: false, Popup: Blank()});
+
+                    Set(gUnitForm, FormMode.New);
+                    Set(gSelectedSide, Right(gLine,1));
+                    Set(gSelectedSideID, 1);
+
+                    Navigate(locNavigateTo, ScreenTransition.Fade);
+                  Text: ="Side " & Right(gLine,1)
+                  Color: =gTheme.Text_Dark
+                  DisplayMode: =If(IsBlank(gLotSetup.'1'.Catalog), DisplayMode.Disabled, DisplayMode.Edit)
+                  Fill: =gTheme.Accent
+                  FontWeight: =FontWeight.Normal
+                  Height: =Parent.Height * 0.20
+                  HoverColor: =ColorFade(Self.Color, 0.1)
+                  HoverFill: =ColorFade(Self.Fill, -30%)
+                  Size: =Round(Self.Height / 4,0)
+                  Width: =Parent.Width * 0.3
+                  X: =Center(Parent.Width,Self.Width) - Self.Width
+                  Y: =(Parent.Height / 4) * 3 - Self.Height/2
+    - h-popup-lot-error:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gTheme.Sec_Complement
+          BorderThickness: =If(gTheme.Mode = "Light",0,1)
+          Fill: =gTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutMode: =LayoutMode.Auto
+          Visible: =First(rPopups).Popup = "lot"
+          Width: =Parent.Width * 0.3
+          X: =40
+          Y: =40
+        Children:
+        - h-popup-le-text:
+            Control: Label
+            Properties:
+              Text: ="Please enter your lot and catalog information."
+              Align: =Align.Center
+              Color: =gTheme.Text_On_Light
+              FillPortions: =2
+              Height: =Parent.Height * 0.50
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Round(Self.Height/10,0)
+              Width: =Parent.Width * 0.80
+              X: =Parent.Width/2 - Self.Width/2
+              Y: =Parent.Height * 0.10
+        - h-popup-le-buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =gPadding * 4
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - h-popup-le-confirm:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(rPopups,First(rPopups),{Visible: false});
+                  Text: ="Okay"
+                  Color: =gTheme.Text_Dark
+                  Fill: =gTheme.Accent
+                  Height: =Parent.Height * 0.20
+                  HoverColor: =ColorFade(Self.Color, 0.1)
+                  HoverFill: =ColorFade(Self.Fill, -30%)
+                  Size: =Round(Self.Height / 3,0)
+                  Width: =Parent.Width * 0.4
+                  X: =Parent.Width/2 - Self.Width/2
+                  Y: =(Parent.Height / 4) * 3 - Self.Height/2
+    - h-pop-loading:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gTheme.Sec_Complement
+          BorderThickness: =If(gTheme.Mode = "Light",0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =First(rPopups).Popup = "loading"
+          Width: =Parent.Width * 0.3
+        Children:
+        - h-pop-load-spinner:
+            Control: Spinner
+            Properties:
+              FontWeight: =FontWeight.Normal
+              Label: =First(rPopups).Display_Text
+              LabelPosition: ='Spinner.LabelPosition'.Below
+              SpinnerSize: ='Spinner.SpinnerSize'.Medium
+              AlignInContainer: =AlignInContainer.Stretch
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+        - h-pop-load-progress:
+            Control: Progress
+            Properties:
+              Indeterminate: =First(rPopups).Value = -1
+              Thickness: ='Progress.Thickness'.Medium
+              Value: =First(rPopups).Value
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Width: =

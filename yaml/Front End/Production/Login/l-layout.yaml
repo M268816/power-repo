@@ -1,0 +1,162 @@
+- l-layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - l-header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - l-logo:
+            Control: Image
+            Properties:
+              Image: =If(gTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: ='l-mode'.Width + 'l-bugs'.Width + gPadding
+        - l-title:
+            Control: Label
+            Properties:
+              Text: =APP_NAME & " Login"
+              Color: =gTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - l-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - l-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - l-main:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Center
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - l-login-parent:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.Regular
+              Fill: =gTheme.Foreground
+              FillPortions: =0
+              Height: =Parent.Height * 0.5
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gPadding * 7
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingRight: =
+              Width: =Parent.Width * 0.4
+            Children:
+            - l-login-title:
+                Control: Label
+                Properties:
+                  Text: ="Scan Password"
+                  Align: =Align.Center
+                  Color: =gTheme.Text_Light
+                  Fill: =gTheme.Secondary
+                  Height: ='l-title'.Height
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width
+            - l-password:
+                Control: Classic/TextInput
+                Properties:
+                  OnChange: =Select('l-login')
+                  Default: =Blank()
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  Fill: =gTheme.Background
+                  Height: ='l-login-title'.Height
+                  Mode: =TextMode.Password
+                  Size: =Round(Self.Height/3,0)
+                  Width: =Parent.Width * 0.6
+            - l-login:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: "=If('l-password'.Text in ShowColumns(gPasswords,Password),\r\n    \r\n    Set(gLine, LookUp(gPasswords,Password='l-password'.Text).Line);\r\n    Notify(\"Login Successful\", NotificationType.Success);\r\n    Navigate(Setup, ScreenTransition.Fade);,\r\n    \r\n    Notify(\"Incorrect password entered\", NotificationType.Error);\r\n);"
+                  Text: ="Login"
+                  BorderThickness: =1
+                  Color: =gTheme.Text_Dark
+                  Fill: =gTheme.Accent
+                  FontWeight: =FontWeight.Normal
+                  Height: ='l-login-title'.Height
+                  RadiusBottomLeft: =Self.RadiusTopLeft
+                  RadiusBottomRight: =Self.RadiusTopLeft
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =Self.RadiusTopLeft
+                  Size: =Self.Height / 4
+                  Width: =Parent.Width * 0.3

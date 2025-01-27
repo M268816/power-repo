@@ -1,8 +1,0 @@
-- Login:
-    Control: Screen
-    Properties:
-      OnVisible: |-
-        =UpdateContext({
-                locPopups: {Visible: false, Value: Blank()},
-                locPadding: Self.Width * 0.005
-            });

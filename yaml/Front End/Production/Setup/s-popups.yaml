@@ -1,0 +1,110 @@
+- s-popups:
+    Control: GroupContainer
+    Variant: manualLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =First(rPopups).Visible
+      Width: =Parent.Width
+    Children:
+    - s-pop-confirm:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          BorderColor: =gTheme.Sec_Complement
+          BorderThickness: =If(gTheme.Mode = "Light",0,1)
+          DropShadow: =DropShadow.Bold
+          Fill: =gTheme.Background
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Width: =Parent.Width * 0.3
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - s-pop-c-title:
+            Control: Label
+            Properties:
+              Text: ="Confirm Lot Setup"
+              Color: =gTheme.Text_Light
+              Fill: =gTheme.Secondary
+              FillPortions: =1
+              Font: =Font.Verdana
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - s-pop-c-body:
+            Control: Label
+            Properties:
+              Text: ="By continuing you are confirming the following setup information is correct."
+              Color: =gTheme.Text_On_Light
+              FillPortions: =3
+              Font: =Font.Verdana
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              PaddingLeft: =gPadding * 2
+              Size: =Self.Height / 12
+              VerticalAlign: =VerticalAlign.Top
+        - s-pop-c-buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutGap: =gPadding
+              LayoutJustifyContent: =LayoutJustifyContent.End
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingRight: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - s-pop-c-confirm:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(rPopups,First(rPopups),{Visible: false});
+                    Navigate(Home, ScreenTransition.Fade);
+                  Text: ="Confirm"
+                  Color: =gTheme.Text_On_Light
+                  Fill: =gTheme.Midground
+                  FontWeight: =FontWeight.Normal
+                  Height: =Parent.Height * 0.7
+                  HoverFill: =ColorFade(gTheme.Accept, -20%)
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width * 0.3
+            - s-pop-c-cancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(rPopups,First(rPopups),{Visible: false});
+                  Text: ="Cancel"
+                  Color: =gTheme.Text_On_Dark
+                  Fill: =gTheme.Primary
+                  FontWeight: =FontWeight.Normal
+                  Height: =Parent.Height * 0.7
+                  HoverFill: =gTheme.Deny
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width * 0.3

@@ -1,0 +1,1258 @@
+- s-layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - s-header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - s-back:
+            Control: Image
+            Properties:
+              OnSelect: =Back(ScreenTransition.Fade)
+              Image: =gIcons.Back
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - s-title:
+            Control: Label
+            Properties:
+              Text: =APP_NAME & " - Lot Setup for " & gLine
+              Color: =gTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - s-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - s-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - s-main:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Center
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - s-setup-parent:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              FillPortions: =9
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutGap: =gPadding * 2
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - s-lot-setup-0:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gTheme.Midground
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.9
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gPadding
+                  LayoutMinHeight: =1
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gPadding
+                  PaddingLeft: =gPadding
+                  PaddingRight: =gPadding
+                  Width: =Parent.Width * 0.25
+                Children:
+                - o-ls0-title:
+                    Control: Label
+                    Properties:
+                      Text: ="Line " & Left(gLine,1)
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Secondary
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
+                      X: =1-1
+                      Y: =1-1
+                - o-ls0-operator-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-operator-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Operator"
+                          Align: =Align.Center
+                          AlignInContainer: =AlignInContainer.Stretch
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-operator-0:
+                        Control: Classic/ComboBox
+                        Properties:
+                          OnChange: =
+                          DisplayFields: =["DisplayName"]
+                          Items: =Choices(FE_Production.Operator_1)
+                          SearchFields: =["DisplayName"]
+                          SelectMultiple: =false
+                          AlignInContainer: =AlignInContainer.Stretch
+                          BorderThickness: =0
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                          Color: =gTheme.Text_On_Light
+                          Fill: =gTheme.Background
+                          FillPortions: =2
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          PaddingBottom: =Self.Width * 0.01
+                          PaddingLeft: =Self.Width * 0.01
+                          PaddingRight: =Self.Width * 0.01
+                          PaddingTop: =Self.Width * 0.01
+                          Size: =Self.Height / 4
+                          Width: =Parent.Width*0.85
+                - o-ls0-lot-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-lot-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Lot"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-lot:
+                        Control: TextInput
+                        Properties:
+                          OnChange: |-
+                            =If(
+                                Not(
+                                    And(
+                                        Not(IsNumeric(Left(Self.Value,1))),
+                                        IsNumeric(Right(Self.Value,5)),
+                                        Len(Self.Value) <= 9
+                                    )
+                                ),
+                                Notify("Lot not Recognized.", NotificationType.Error);
+                                Reset(Self);
+                            );
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="A0AA00000"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          Width: =Parent.Width * 0.85
+                - o-ls0-catalog-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-catalog-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Catalog"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-catalog:
+                        Control: TextInput
+                        Properties:
+                          OnChange: |-
+                            =If(Not(Left(Self.Value,4) in gLists.Valid_Catalogs),
+                                Notify("Catalog not Recognized.", NotificationType.Error); Reset(Self);
+                            );
+                          Align: =Align.Left
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Mode: ='TextInputCanvas.Mode'.SingleLine
+                          Placeholder: ="000000AAAAAA"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-master-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-master-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Master Roll"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-master:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="0000AA"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-cast-date-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-cast-date-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Cast Date"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-cast-date:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="A0A000?AA"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-cast-roll-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-cast-roll-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Cast Roll"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-cast-roll:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="????"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-poly-lot-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-poly-lot-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Poly Lot"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-poly-lot:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="??????????"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-mem-type-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-mem-type-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Membrane Type"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-mem-type:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="AAAA00000"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-pleat-count-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-pleat-count-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Pleats Per Pack"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-pleat-count:
+                        Control: TextInput
+                        Properties:
+                          OnChange: =
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="127"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-pleat-height-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-pleat-height-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Pleat Height"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-pleat-height:
+                        Control: TextInput
+                        Properties:
+                          OnChange: =
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="0.200 - 0.455"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-pleat-speed-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-pleater-speed-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Pleater Speed"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-pleater-speed:
+                        Control: TextInput
+                        Properties:
+                          OnChange: =
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="40 - 125"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls0-hourly-goal-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls0-hourly-goal-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Hourly Pack Goal"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Fill: =gTheme.Foreground
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls0-title'.Y + 'o-ls0-title'.Height + Parent.Height * 0.05
+                    - o-ls0-hourly-goal:
+                        Control: TextInput
+                        Properties:
+                          OnChange: =Set(varHourlyGoal, Self.Value)
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Value: |-
+                            =If(IsBlank('o-ls0-catalog'.Value),
+                                "",
+                                IfError(RoundUp(('o-ls0-pleater-speed'.Value / 'o-ls0-pleat-count'.Value) * 60, 0),0)
+                                // Text(LookUp(FE-Constraints, And(Catalog = 'o-ls0-catalog'.Value, Line.Value = varProductionLine)).Goal)
+                            )
+                          DisplayMode: =DisplayMode.Disabled
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+            - s-lot-setup-1:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gTheme.Midground
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.9
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gPadding
+                  LayoutMinHeight: =1
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gPadding
+                  PaddingLeft: =gPadding
+                  PaddingRight: =gPadding
+                  Width: =Parent.Width * 0.25
+                Children:
+                - o-ls1-title:
+                    Control: Label
+                    Properties:
+                      Text: ="Line " & Right(gLine,1)
+                      Align: =Align.Center
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Secondary
+                      FillPortions: =1
+                      Font: =Font.Verdana
+                      Height: =50
+                      LayoutMinHeight: =1
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width
+                      X: =1-1
+                      Y: =1-1
+                - o-ls1-operator-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-operator-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Operator"
+                          Align: =Align.Center
+                          AlignInContainer: =AlignInContainer.Stretch
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-operator-1:
+                        Control: Classic/ComboBox
+                        Properties:
+                          OnChange: =
+                          DisplayFields: =["DisplayName"]
+                          Items: =Choices(FE_Production.Operator_2)
+                          SearchFields: =["DisplayName"]
+                          SelectMultiple: =false
+                          AlignInContainer: =AlignInContainer.Stretch
+                          BorderThickness: =0
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          ChevronHoverBackground: =ColorFade(Self.ChevronBackground, -20%)
+                          Color: =gTheme.Text_On_Light
+                          Fill: =gTheme.Background
+                          FillPortions: =2
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          PaddingBottom: =Self.Width * 0.01
+                          PaddingLeft: =Self.Width * 0.01
+                          PaddingRight: =Self.Width * 0.01
+                          PaddingTop: =Self.Width * 0.01
+                          Size: =Self.Height / 4
+                          Width: =Parent.Width*0.85
+                - o-ls1-lot-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-lot-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Lot"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-lot:
+                        Control: TextInput
+                        Properties:
+                          OnChange: |-
+                            =If(
+                                Not(
+                                    And(
+                                        Not(IsNumeric(Left(Self.Value,1))),
+                                        IsNumeric(Right(Self.Value,5)),
+                                        Len(Self.Value) <= 9
+                                    )
+                                ),
+                                Notify("Lot not Recognized.", NotificationType.Error);
+                                Reset(Self);
+                            );
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="A0AA00000"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          Width: =Parent.Width * 0.85
+                - o-ls1-catalog-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-catalog-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Catalog"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-catalog:
+                        Control: TextInput
+                        Properties:
+                          OnChange: |-
+                            =If(Not(Left(Self.Value,4) in gLists.Valid_Catalogs),
+                                Notify("Catalog not Recognized.", NotificationType.Error); Reset(Self);
+                            );
+                          Align: =Align.Left
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Mode: ='TextInputCanvas.Mode'.SingleLine
+                          Placeholder: ="000000AAAAAA"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-master-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-master-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Master Roll"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-master:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="0000AA"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-cast-date-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-cast-date-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Cast Date"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-cast-date:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="A0A000?AA"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-cast-roll-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-cast-roll-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Cast Roll"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-cast-roll:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="????"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-poly-lot-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-poly-lot-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Poly Lot"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-poly-lot:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="??????????"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-mem-type-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-mem-type-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Membrane Type"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-mem-type:
+                        Control: TextInput
+                        Properties:
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="AAAA00000"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-pleat-count-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-pleat-count-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Pleats Per Pack"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-pleat-count:
+                        Control: TextInput
+                        Properties:
+                          OnChange: =
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="127"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-pleat-height-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-pleat-height-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Pleat Height"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-pleat-height:
+                        Control: TextInput
+                        Properties:
+                          OnChange: =
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="0.200 - 0.455"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-pleat-speed-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-pleater-speed-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Pleater Speed"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-pleater-speed:
+                        Control: TextInput
+                        Properties:
+                          OnChange: =
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Placeholder: ="40 - 125"
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+                - o-ls1-hourly-goal-parent:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - o-ls1-hourly-goal-label:
+                        Control: Label
+                        Properties:
+                          Text: ="Hourly Pack Goal"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Fill: =gTheme.Foreground
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =50
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =Self.Width * 0.05
+                          PaddingTop: =0
+                          Size: =Round(Self.Height / 4,0)
+                          Width: =Parent.Width * 0.85
+                          X: =1-1
+                          Y: ='o-ls1-title'.Y + 'o-ls1-title'.Height + Parent.Height * 0.05
+                    - o-ls1-hourly-goal:
+                        Control: TextInput
+                        Properties:
+                          OnChange: =Set(varHourlyGoal, Self.Value)
+                          Fill: =gTheme.Background
+                          FontColor: =gTheme.Text_On_Light
+                          FontSize: =Round(Self.Height / 2.5,0)
+                          Value: |-
+                            =If(IsBlank('o-ls1-catalog'.Value),
+                                "",
+                                IfError(RoundUp(('o-ls1-pleater-speed'.Value / 'o-ls1-pleat-count'.Value) * 60, 0),0)
+                                // Text(LookUp(FE-Constraints, And(Catalog = 'o-ls1-catalog'.Value, Line.Value = varProductionLine)).Goal)
+                            )
+                          DisplayMode: =DisplayMode.Disabled
+                          FillPortions: =2
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Width: =Parent.Width * 0.85
+        - s-confirm:
+            Control: Classic/Button
+            Properties:
+              OnSelect: "=Patch(rPopups,First(rPopups),{Visible: true});\n\nSet(gLotSetup,\n    {\n        '0':{\n            Operator: 'o-operator-0'.Selected,\n            Line: Upper(Left(gLine,1)),\n            Master_Roll: Upper('o-ls0-master'.Value),\n            Cast_Date: Upper('o-ls0-cast-date'.Value),\n            Cast_Roll: Upper('o-ls0-cast-roll'.Value),\n            Poly_Lot: Upper('o-ls0-poly-lot'.Value),\n            Membrane_Type: Upper('o-ls0-mem-type'.Value),\n            Lot: Upper('o-ls0-lot'.Value),\n            Catalog: Upper('o-ls0-catalog'.Value),\n            Pleat_Count: Upper('o-ls0-pleat-count'.Value),\n            Pleat_Height: Upper('o-ls0-pleat-height'.Value),\n            Pleater_Speed: Upper('o-ls0-pleater-speed'.Value),\n            Hourly_Goal: Upper('o-ls0-hourly-goal'.Value)\n        },\n        \n        '1':{\n            Operator: 'o-operator-1'.Selected,\n            Line: Upper(Right(gLine,1)),\n            Master_Roll: Upper('o-ls1-master'.Value),\n            Cast_Date: Upper('o-ls1-cast-date'.Value),\n            Cast_Roll: Upper('o-ls1-cast-roll'.Value),\n            Poly_Lot: Upper('o-ls1-poly-lot'.Value),\n            Membrane_Type: Upper('o-ls1-mem-type'.Value),\n            Lot: Upper('o-ls1-lot'.Value),\n            Catalog: Upper('o-ls1-catalog'.Value),\n            Pleat_Count: Upper('o-ls1-pleat-count'.Value),\n            Pleat_Height: Upper('o-ls1-pleat-height'.Value),\n            Pleater_Speed: Upper('o-ls1-pleater-speed'.Value),\n            Hourly_Goal: Upper('o-ls1-hourly-goal'.Value)\n        }\n    }\n);"
+              Text: ="Confirm Setup"
+              BorderThickness: =1
+              Color: =gTheme.Text_Dark
+              DisplayMode: |-
+                =If(
+                    Or(
+                        And(IsBlank('o-operator-0'.Selected), IsBlank('o-operator-1'.Selected)),
+                        And(IsBlank('o-ls0-lot'.Value), IsBlank('o-ls1-lot'.Value)),
+                        And(IsBlank('o-ls0-catalog'.Value), IsBlank('o-ls1-catalog'.Value)),
+                        And(IsBlank('o-ls0-master'.Value), IsBlank('o-ls1-master'.Value)),
+                        And(IsBlank('o-ls0-cast-date'.Value), IsBlank('o-ls1-cast-date'.Value)),
+                        And(IsBlank('o-ls0-pleat-count'.Value), IsBlank('o-ls1-pleat-count'.Value)),
+                        And(IsBlank('o-ls0-pleat-height'.Value), IsBlank('o-ls1-pleat-height'.Value)),
+                        And(IsBlank('o-ls0-pleater-speed'.Value), IsBlank('o-ls1-pleater-speed'.Value)),
+                        And(Value('o-ls0-hourly-goal'.Value) = 0, Value('o-ls1-hourly-goal'.Value) = 0)
+                    ),
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
+              Fill: =gTheme.Accent
+              FillPortions: =1
+              FontWeight: =FontWeight.Normal
+              Height: ='l-login-title'.Height
+              RadiusBottomLeft: =Self.RadiusTopLeft
+              RadiusBottomRight: =Self.RadiusTopLeft
+              RadiusTopLeft: =4
+              RadiusTopRight: =Self.RadiusTopLeft
+              Size: =Self.Height / 4
+              Width: =Parent.Width * 0.3
