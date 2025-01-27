@@ -325,7 +325,7 @@
                     Layout: horizontal
                     Properties:
                       DataField: ="Environment"
-                      Default: =LookUp(Choices([@BugReports].Environment),Value = "Encap DMS Management")
+                      Default: =LookUp(Choices([@BugReports].Environment),Value = "FE DMS Production")
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Environment)
                       Required: =true
                       Update: ='b-f-environment-value'.Selected
