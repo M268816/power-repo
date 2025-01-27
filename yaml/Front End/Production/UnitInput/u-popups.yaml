@@ -1,0 +1,124 @@
+- u-popups:
+    Control: GroupContainer
+    Variant: manualLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =First(rPopups).Visible
+      Width: =Parent.Width
+    Children:
+    - u-pop-delete-parent:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          BorderColor: =gTheme.Secondary
+          BorderThickness: =If(gTheme.Mode = "light",0,1)
+          DropShadow: =DropShadow.Regular
+          Fill: =gTheme.Background
+          Height: =Parent.Height * 0.25
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =gPadding
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =First(rPopups).Popup = "delete"
+          Width: =Parent.Width * 0.25
+          X: =Center(Parent.Width,Self.Width)
+          Y: =Center(Parent.Height,Self.Height)
+        Children:
+        - u-pop-delete-title:
+            Control: Label
+            Properties:
+              Text: |-
+                ="Caution: Deleting Record"
+              Color: =gTheme.Text_Light
+              Fill: =gTheme.Secondary
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 5
+        - u-pop-delete-input:
+            Control: TextInput
+            Properties:
+              FontSize: =Self.Height / 5
+              Placeholder: ="Enter Password"
+              AlignInContainer: =AlignInContainer.Center
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Width: =Parent.Width * 0.65
+        - u-pop-delete-buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =gPadding * 3
+              LayoutJustifyContent: =LayoutJustifyContent.End
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - u-pop-delete-submit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =RemoveIf(FE_Production,
+                        Switch(gSelectedSideID,
+                            0, ID = gSelectedUnitID_0,
+                            1, ID = gSelectedUnitID_1
+                        )
+                    );
+
+                    Reset('u-pop-delete-input');
+
+                    UpdateContext({locPopups: {Visible: false, Value: ""}});
+
+                    Navigate(Home);
+                  Text: ="Delete"
+                  Color: =gTheme.Text_On_Light
+                  DisplayMode: =If('u-pop-delete-input'.Value = Text(Year(Today())), DisplayMode.Edit, DisplayMode.Disabled)
+                  Fill: =gTheme.Midground
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Normal
+                  HoverFill: =gTheme.Deny
+                  LayoutMinHeight: =10
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Round(Self.Height / 3,0)
+                  Width: =Parent.Width * 0.3
+            - u-pop-delete-cancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(rPopups,First(rPopups),{Visible: false, Popup: ""});
+                  Text: ="Cancel"
+                  Color: =gTheme.Text_Light
+                  Fill: =gTheme.Secondary
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Normal
+                  LayoutMinHeight: =10
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Round(Self.Height / 3,0)
+                  Width: =Parent.Width * 0.3
