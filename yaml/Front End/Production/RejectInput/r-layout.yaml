@@ -1,0 +1,1305 @@
+- r-layout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - r-collect:
+        Control: Classic/Button
+        Properties:
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - r-sequential-collect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - r-update:
+        Control: Classic/Button
+        Properties:
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - r-header:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - r-back:
+            Control: Image
+            Properties:
+              OnSelect: =Back(ScreenTransition.Fade)
+              Image: =gIcons.Back
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - r-title:
+            Control: Label
+            Properties:
+              Text: ="Create a new Reject Entry"
+              Color: =gTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - r-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - r-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - r-main:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Center
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - r-form-parent:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.Regular
+              Fill: =gTheme.Midground
+              FillPortions: =9
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutGap: =gPadding * 2
+              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+            Children:
+            - r-form:
+                Control: Form
+                Layout: vertical
+                Properties:
+                  OnSuccess: |-
+                    =Notify("Submission Success", NotificationType.Success);
+                    ResetForm('r-form');
+                    Navigate(Home);
+                  DataSource: =FE_Rejects
+                  DefaultMode: =FormMode.New
+                Children:
+                - r-form-line-card:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Line"
+                      Default: |-
+                        =LookUp(
+                            Choices([@FE_Rejects].Line),
+                            If(gSelectedSideID = 0,
+                                Value = gLotSetup.'0'.Line,
+                                Value = gLotSetup.'1'.Line
+                            )
+                        )
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Line)
+                      Required: =true
+                      Update: ='r-form-line-value'.Selected
+                      DisplayMode: =DisplayMode.Disabled
+                      Height: =Parent.Height / 4
+                      Width: =450
+                      WidthFit: =true
+                    Children:
+                    - r-form-line-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-line-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-line-key'.Y
+                    - r-form-line-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-line-value'.Y + 'r-form-line-value'.Height
+                    - r-form-line-value:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@FE_Rejects].Line)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =DisplayMode.Disabled
+                          Fill: =gTheme.Background
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-line-key'.Y + 'r-form-line-key'.Height + 5
+                    - r-form-line-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-lot-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Title"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Lot, gLotSetup.'1'.Lot)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Title)
+                      MaxLength: =DataSourceInfo([@FE_Rejects], DataSourceInfo.MaxLength, Title)
+                      Update: ='r-form-lot-value'.Text
+                      DisplayMode: =DisplayMode.Disabled
+                      Height: =Parent.Height / 4
+                      Width: =450
+                      WidthFit: =true
+                      X: =2
+                    Children:
+                    - r-form-lot-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-lot-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-lot-key'.Y
+                    - r-form-lot-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-lot-value'.Y + 'r-form-lot-value'.Height
+                    - r-form-lot-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =DisplayMode.Disabled
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-lot-key'.Y + 'r-form-lot-key'.Height + 5
+                    - r-form-lot-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-catalog-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Catalog"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Catalog, gLotSetup.'1'.Catalog)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Catalog)
+                      MaxLength: =DataSourceInfo([@FE_Rejects], DataSourceInfo.MaxLength, Catalog)
+                      Required: =true
+                      Update: ='r-form-catalog-value'.Text
+                      DisplayMode: =DisplayMode.Disabled
+                      Height: =Parent.Height / 4
+                      Width: =450
+                      WidthFit: =true
+                      X: =4
+                    Children:
+                    - r-form-catalog-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-catalog-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-catalog-key'.Y
+                    - r-form-catalog-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-catalog-value'.Y + 'r-form-catalog-value'.Height
+                    - r-form-catalog-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =DisplayMode.Disabled
+                          Fill: =gTheme.Background
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-catalog-key'.Y + 'r-form-catalog-key'.Height + 5
+                    - r-form-catalog-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-master-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Master_Roll"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Master_Roll, gLotSetup.'1'.Master_Roll)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Master_Roll)
+                      MaxLength: =DataSourceInfo([@FE_Rejects], DataSourceInfo.MaxLength, Master_Roll)
+                      Update: ='r-form-master-value'.Text
+                      DisplayMode: =DisplayMode.Disabled
+                      Height: =Parent.Height / 4
+                      Width: =Parent.Width / 5
+                      WidthFit: =true
+                      Y: =1
+                    Children:
+                    - r-form-master-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-master-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-master-key'.Y
+                    - r-form-master-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-master-value'.Y + 'r-form-master-value'.Height
+                    - r-form-master-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-master-key'.Y + 'r-form-master-key'.Height + 5
+                    - r-form-master-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-cast-date-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Cast_Date"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Cast_Date, gLotSetup.'1'.Cast_Date)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Cast_Date)
+                      MaxLength: =DataSourceInfo([@FE_Rejects], DataSourceInfo.MaxLength, Cast_Date)
+                      Update: ='r-form-cast-date-value'.Text
+                      DisplayMode: =DisplayMode.Disabled
+                      Height: =Parent.Height / 4
+                      Width: =Parent.Width / 5
+                      WidthFit: =true
+                      X: =1
+                      Y: =1
+                    Children:
+                    - r-form-cast-date-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          Height: ='r-form-cast-date-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-cast-date-key'.Y
+                    - r-form-cast-date-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-cast-date-value'.Y + 'r-form-cast-date-value'.Height
+                    - r-form-cast-date-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-cast-date-key'.Y + 'r-form-cast-date-key'.Height + 5
+                    - r-form-cast-date-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-cast-roll-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Cast_Roll"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Cast_Roll, gLotSetup.'1'.Cast_Roll)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Cast_Roll)
+                      MaxLength: =DataSourceInfo([@FE_Rejects], DataSourceInfo.MaxLength, Cast_Roll)
+                      Update: ='r-form-cast-roll-value'.Text
+                      DisplayMode: =DisplayMode.Disabled
+                      Height: =Parent.Height / 4
+                      Width: =Parent.Width / 5
+                      WidthFit: =true
+                      X: =2
+                      Y: =1
+                    Children:
+                    - r-form-cast-roll-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-cast-roll-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-cast-roll-key'.Y
+                    - r-form-cast-roll-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-cast-roll-value'.Y + 'r-form-cast-roll-value'.Height
+                    - r-form-cast-roll-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-cast-roll-key'.Y + 'r-form-cast-roll-key'.Height + 5
+                    - r-form-cast-roll-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-poly-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Poly_Lot"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Poly_Lot, gLotSetup.'1'.Poly_Lot)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Poly_Lot)
+                      MaxLength: =DataSourceInfo([@FE_Rejects], DataSourceInfo.MaxLength, Poly_Lot)
+                      Update: ='r-form-poly-value'.Text
+                      DisplayMode: =DisplayMode.Disabled
+                      Height: =Parent.Height / 4
+                      Width: =Parent.Width / 5
+                      WidthFit: =true
+                      X: =3
+                      Y: =1
+                    Children:
+                    - r-form-poly-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-poly-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-poly-key'.Y
+                    - r-form-poly-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-poly-value'.Y + 'r-form-poly-value'.Height
+                    - r-form-poly-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-poly-key'.Y + 'r-form-poly-key'.Height + 5
+                    - r-form-poly-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-amount-card:
+                    Control: TypedDataCard
+                    Variant: numberEditCard
+                    Properties:
+                      DataField: ="Reject_Amount"
+                      Default: =ThisItem.Reject_Amount
+                      DisplayName: ="Reject Amount"
+                      Update: =Value('r-form-amount-value'.Text)
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height / 4
+                      Width: =450
+                      WidthFit: =true
+                      Y: =2
+                    Children:
+                    - r-form-amount-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-amount-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-amount-key'.Y
+                    - r-form-amount-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-amount-value'.Y + 'r-form-amount-value'.Height
+                    - r-form-amount-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          Format: =TextFormat.Number
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-amount-key'.Y + 'r-form-amount-key'.Height + 5
+                    - r-form-amount-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-pleat-count-card:
+                    Control: TypedDataCard
+                    Variant: numberEditCard
+                    Properties:
+                      DataField: ="Pleats_Per_Pack"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Pleat_Count, gLotSetup.'1'.Pleat_Count)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Pleats_Per_Pack)
+                      Update: =Value('r-form-pleat-count-value'.Text)
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Visible: =false
+                      Width: =450
+                      X: =2
+                      Y: =2
+                    Children:
+                    - r-form-pleat-count-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: ='r-form-pleat-count-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-pleat-count-key'.Y
+                    - r-form-pleat-count-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-pleat-count-value'.Y + 'r-form-pleat-count-value'.Height
+                    - r-form-pleat-count-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Format: =TextFormat.Number
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-pleat-count-key'.Y + 'r-form-pleat-count-key'.Height + 5
+                    - r-form-pleat-count-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-reason-card:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Reject_Reason"
+                      Default: =ThisItem.Reject_Reason
+                      DisplayName: ="Reject Reason"
+                      Required: =true
+                      Update: ='r-form-reason-value'.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height / 4
+                      Width: =450
+                      WidthFit: =true
+                      X: =2
+                      Y: =2
+                    Children:
+                    - r-form-reason-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-reason-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-reason-key'.Y
+                    - r-form-reason-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-reason-value'.Y + 'r-form-reason-value'.Height
+                    - r-form-reason-value:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@FE_Rejects].Reject_Reason)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-reason-key'.Y + 'r-form-reason-key'.Height + 5
+                    - r-form-reason-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-pleat-height-card:
+                    Control: TypedDataCard
+                    Variant: numberEditCard
+                    Properties:
+                      DataField: ="Pleat_Height"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Pleat_Height, gLotSetup.'1'.Pleat_Height)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Pleat_Height)
+                      Update: =Value('r-form-pleat-height-value'.Text)
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Visible: =false
+                      Width: =450
+                      X: =4
+                      Y: =2
+                    Children:
+                    - r-form-pleat-height-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: ='r-form-pleat-height-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-pleat-height-key'.Y
+                    - r-form-pleat-height-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-pleat-height-value'.Y + 'r-form-pleat-height-value'.Height
+                    - r-form-pleat-height-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Format: =TextFormat.Number
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-pleat-height-key'.Y + 'r-form-pleat-height-key'.Height + 5
+                    - r-form-pleat-height-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-location-card:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Reject_Location"
+                      Default: =ThisItem.Reject_Location
+                      DisplayName: ="Reject Location"
+                      Required: =true
+                      Update: ='r-form-location-value'.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height / 4
+                      Width: =450
+                      WidthFit: =true
+                      X: =4
+                      Y: =2
+                    Children:
+                    - r-form-location-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-location-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-location-key'.Y
+                    - r-form-location-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-location-value'.Y + 'r-form-location-value'.Height
+                    - r-form-location-value:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@FE_Rejects].Reject_Location)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gTheme.Secondary
+                          ChevronFill: =gTheme.Background
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-location-key'.Y + 'r-form-location-key'.Height + 5
+                    - r-form-location-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-comments-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Comments"
+                      Default: =ThisItem.Comments
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Comments)
+                      MaxLength: =DataSourceInfo([@FE_Rejects], DataSourceInfo.MaxLength, Comments)
+                      Update: ='r-form-comments-value'.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height / 4
+                      Width: =450
+                      WidthFit: =true
+                      Y: =3
+                    Children:
+                    - r-form-comments-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-comments-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-comments-key'.Y
+                    - r-form-comments-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-comments-value'.Y + 'r-form-comments-value'.Height
+                    - r-form-comments-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gTheme.Background
+                          Height: =Parent.Height * 0.4
+                          Mode: =TextMode.MultiLine
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-comments-key'.Y + 'r-form-comments-key'.Height + 5
+                    - r-form-comments-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-person-card:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Person"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Operator, gLotSetup.'1'.Operator)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Person)
+                      Required: =true
+                      Update: ='r-form-person-value'.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Visible: =false
+                      Width: =450
+                      X: =2
+                      Y: =4
+                    Children:
+                    - r-form-person-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: ='r-form-person-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-person-key'.Y
+                    - r-form-person-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-person-value'.Y + 'r-form-person-value'.Height
+                    - r-form-person-value:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["DisplayName"]
+                          Items: =Choices([@FE_Rejects].Person)
+                          SearchFields: =["DisplayName"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-person-key'.Y + 'r-form-person-key'.Height + 5
+                    - r-form-person-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - r-form-membrane-card:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Properties:
+                      DataField: ="Membrane_Type"
+                      Default: =If(gSelectedSideID = 0, gLotSetup.'0'.Membrane_Type, gLotSetup.'1'.Membrane_Type)
+                      DisplayName: =DataSourceInfo([@FE_Rejects],DataSourceInfo.DisplayName,Membrane_Type)
+                      MaxLength: =DataSourceInfo([@FE_Rejects], DataSourceInfo.MaxLength, Membrane_Type)
+                      Update: ='r-form-membrane-value'.Text
+                      DisplayMode: =DisplayMode.Disabled
+                      Height: =Parent.Height / 4
+                      Width: =Parent.Width / 5
+                      WidthFit: =true
+                      X: =4
+                      Y: =1
+                    Children:
+                    - r-form-membrane-star:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Light
+                          Height: ='r-form-membrane-key'.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: ='r-form-membrane-key'.Y
+                    - r-form-membrane-error:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-membrane-value'.Y + 'r-form-membrane-value'.Height
+                    - r-form-membrane-value:
+                        Control: Classic/TextInput
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gTheme.Text_On_Light
+                          DisabledColor: =gTheme.Text_On_Light
+                          DisabledFill: =gTheme.Midground
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: ='r-form-membrane-key'.Y + 'r-form-membrane-key'.Height + 5
+                    - r-form-membrane-key:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+        - r-buttons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =gPadding * 4
+              LayoutJustifyContent: =LayoutJustifyContent.End
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - r-form-submit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: =SubmitForm('r-form');
+                  Text: ="Submit"
+                  BorderColor: =gTheme.Primary
+                  BorderThickness: =1
+                  Color: =gTheme.Text_On_Light
+                  Fill: =gTheme.Background
+                  FontWeight: =FontWeight.Normal
+                  HoverColor: =gTheme.Text_On_Dark
+                  HoverFill: =gTheme.Accept
+                  LayoutMinHeight: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width * 0.15
+            - r-form-cancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: =ResetForm('r-form');
+                  Text: ="Cancel"
+                  BorderColor: =gTheme.Primary
+                  BorderThickness: =1
+                  Color: =gTheme.Text_Light
+                  Fill: =gTheme.Primary
+                  FontWeight: =FontWeight.Normal
+                  HoverColor: =gTheme.Text_On_Dark
+                  HoverFill: =gTheme.Deny
+                  LayoutMinHeight: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Height / 3
+                  Width: =Parent.Width * 0.15
