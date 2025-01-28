@@ -53,7 +53,7 @@
     - d-update:
         Control: Classic/Button
         Properties:
-          OnSelect: "=/*Update Code*/\nPatch(rPopups,First(rPopups),{Value: 40, Display_Text: \"Updating Filters\"});\n\n/*Clear collections for top downtime reasons*/\nClear(collectTopDowntime);\nClear(collectHasReason);\n\nUpdateContext({\n    locStartDate: 'd-start-date'.SelectedDate,\n    locEndDate: 'd-end-date'.SelectedDate\n});\n\n/*Create a Default filter*/\nUpdateContext({\n    locDefaultDowntimeFilter:\n        Filter(\n                cDowntime,\n                And(\n                    'DateTime' >= DateAdd(DateValue(locStartDate), -1, TimeUnit.Hours),\n                    'DateTime' <= DateAdd(DateValue(locEndDate), 23, TimeUnit.Hours)\n                ),\n                If(\n                    'd-shift'.Selected.Value = \"All\",\n                    Shift = Shift,\n                    Shift = 'd-shift'.Selected.Value\n                ),\n                If(\n                    'd-line'.Selected.Value = \"All\",\n                    Line = Line,\n                    Line = 'd-line'.Selected.Value\n                )\n            )\n});\n\n\nSet(test_reasons, Distinct(Filter(collectDowntime, Not(reason = \"\")), reason));\n\n/*For all downtime reasons, collect the total sum of downtime, if downtime is greater than 0, add to has reason collection*/\nPatch(rPopups,First(rPopups),{Value: 50, Display_Text: \"Collecting Top Downtime\"});\nForAll(\n    //collectDowntimeReasons,\n    test_reasons,\n    If(\n        Sum(\n            Filter(\n                locDefaultDowntimeFilter,\n                //reason = Downtime_Reason\n                Reason = Reason\n            ),\n            Downtime_Minutes\n        ) > 0,\n        Collect(\n            collectHasReason,\n            //{Downtime_Reason: Downtime_Reason}\n            {Downtime_Reason: Value}\n        )\n    )\n);\n\n/*For all downtime that has an amount/reason, collect the total sum of downtime, sort by total amount*/\nForAll(\n    collectHasReason,\n    Collect(\n        collectTopDowntime,\n        {\n            Downtime_Reason: Downtime_Reason,\n            \n            Downtime_Total: Sum(\n                Filter(\n                    locDefaultDowntimeFilter,\n                    Reason = Downtime_Reason\n                ),\n                Downtime_Minutes\n            ),\n            \n            Downtime_Comments:\n                Concat(\n                    Filter(\n                        locDefaultDowntimeFilter,\n                        !IsBlankOrError(Comments),\n                        Reason = Downtime_Reason\n                ),\n                    Comments,\n                    \" ¶ \"\n                )\n        }\n    )\n);\n\n/*Garbage collection*/\nUpdateContext({\n    locDefaultDowntimeFilter: Blank()\n});\n\n/*End*/\nPatch(rPopups,First(rPopups),{Visible: false, Value: -1, Display_Text: \"Finishing Up\"});"
+          OnSelect: "=/*Update Code*/\nPatch(rPopups,First(rPopups),{Value: 40, Display_Text: \"Updating Filters\"});\n\n/*Clear collections for top downtime reasons*/\nClear(collectTopDowntime);\nClear(collectHasReason);\n\nUpdateContext({\n    locStartDate: 'd-start-date'.SelectedDate,\n    locEndDate: 'd-end-date'.SelectedDate\n});\n\n/*Create a Default filter*/\nUpdateContext({\n    locDefaultDowntimeFilter:\n        Filter(\n                cDowntime,\n                And(\n                    DateTime >= DateAdd(DateValue(locStartDate), -1, TimeUnit.Hours),\n                    DateTime <= DateAdd(DateValue(locEndDate), 23, TimeUnit.Hours)\n                ),\n                If(\n                    'd-shift'.Selected.Value = \"All\",\n                    Shift = Shift,\n                    Shift = 'd-shift'.Selected.Value\n                ),\n                If(\n                    'd-line'.Selected.Value = \"All\",\n                    Line = Line,\n                    Line = 'd-line'.Selected.Value\n                )\n            )\n});\n\n\nSet(lDistinctReasons, Distinct(Filter(cDowntime, Not(Reason = \"\")), Reason));\n\n/*For all downtime reasons, collect the total sum of downtime, if downtime is greater than 0, add to has reason collection*/\nPatch(rPopups,First(rPopups),{Value: 50, Display_Text: \"Collecting Top Downtime\"});\nForAll(\n    lDistinctReasons,\n    If(\n        Sum(\n            Filter(\n                locDefaultDowntimeFilter,\n                Reason = Reason\n            ),\n            Downtime_Minutes\n        ) > 0,\n        Collect(\n            collectHasReason,\n            {Downtime_Reason: Value}\n        )\n    )\n);\n\n/*For all downtime that has an amount/reason, collect the total sum of downtime, sort by total amount*/\nForAll(\n    collectHasReason,\n    Collect(\n        collectTopDowntime,\n        {\n            Downtime_Reason: Downtime_Reason,\n            \n            Downtime_Total: Sum(\n                Filter(\n                    locDefaultDowntimeFilter,\n                    Reason = Downtime_Reason\n                ),\n                Downtime_Minutes\n            ),\n            \n            Downtime_Comments:\n                Concat(\n                    Filter(\n                        locDefaultDowntimeFilter,\n                        !IsBlankOrError(Comments),\n                        Reason = Downtime_Reason\n                ),\n                    Comments,\n                    \" ¶ \"\n                )\n        }\n    )\n);\n\n/*Garbage collection*/\nUpdateContext({\n    locDefaultDowntimeFilter: Blank()\n});\n\n/*End*/\nPatch(rPopups,First(rPopups),{Visible: false, Value: -1, Display_Text: \"Finishing Up\"});"
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
@@ -844,7 +844,7 @@
                           Text: ="Line"
                           Align: =Align.Center
                           Color: =gTheme.Text_Dark
-                          FillPortions: =1
+                          FillPortions: =0.5
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
@@ -869,7 +869,7 @@
                           Text: ="Time"
                           Align: =Align.Center
                           Color: =gTheme.Text_Dark
-                          FillPortions: =1
+                          FillPortions: =2
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
@@ -908,7 +908,7 @@
                           Text: ="Comments"
                           Align: =Align.Center
                           Color: =gTheme.Text_Dark
-                          FillPortions: =2.5
+                          FillPortions: =3
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
@@ -955,7 +955,7 @@
                               Text: =ThisItem.Line
                               Align: =Align.Center
                               Color: =gTheme.Text_On_Light
-                              FillPortions: =1
+                              FillPortions: =0.5
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinHeight: =5
@@ -984,12 +984,10 @@
                             Control: Label
                             Properties:
                               OnSelect: =Select('d-d-gallery');
-                              Text: |-
-                                =DateValue(ThisItem.DateTime) &"
-                                "& TimeValue(ThisItem.DateTime)
+                              Text: =DateTimeValue(ThisItem.DateTime)
                               Align: =Align.Center
                               Color: =gTheme.Text_On_Light
-                              FillPortions: =1
+                              FillPortions: =2
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinHeight: =5
@@ -1037,7 +1035,7 @@
                               Text: =ThisItem.Comments
                               Align: =Align.Center
                               Color: =gTheme.Text_On_Light
-                              FillPortions: =2.5
+                              FillPortions: =3
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinHeight: =5

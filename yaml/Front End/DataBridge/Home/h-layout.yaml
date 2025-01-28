@@ -29,7 +29,14 @@
             );
             UpdateContext({
                 lStartDate: DateAdd(gTime.Today, -1, TimeUnit.Hours),
-                lEndDate: DateAdd(gTime.Today, 23, TimeUnit.Hours)
+                lEndDate: DateAdd(gTime.Today, 23, TimeUnit.Hours),
+                lShift:
+                    If(
+                        Hour(gTime.Now) >= 23, "C",
+                        Hour(gTime.Now) >= 15, "B",
+                        Hour(gTime.Now) >= 7, "A",
+                        "C"
+                    )
             });
             UpdateContext({
                 lCountOfDays: DateDiff(lStartDate,lEndDate)
@@ -107,7 +114,8 @@
                                    IsEmpty(
                                     Filter(cProduction,
                                         Side in thisLine,
-                                        'Date' >= gTime.Today
+                                        'Date' >= gTime.Today,
+                                        Shift = lShift
                                     )
                                    ),
                                    "Not Running",
