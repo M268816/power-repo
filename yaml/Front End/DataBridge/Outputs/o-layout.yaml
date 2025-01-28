@@ -2,14 +2,89 @@
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical
-      LayoutGap: =
       LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
       Width: =Parent.Width
-      X: =
     Children:
+    - o-collect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: "=/*Start*/\r\nPatch(rPopups,First(rPopups),{Visible: true, Value: 10, Display_Text: \"Loading\"});\r\n\r\n/*Update Dates Variables*/\r\nUpdateContext({\r\n    locEndDate: 'o-end-date'.SelectedDate,\r\n    locStartDate: 'o-start-date'.SelectedDate\r\n    \r\n});\r\n\r\n/*Collect Production*/\r\nPatch(rPopups,First(rPopups),{Value: 20, Display_Text: \"Collecting Production Data\"});\r\nClearCollect(cProduction,\r\n    ForAll(\r\n        Filter(Sort(Roll_Data_Filtered_SPL, Date, SortOrder.Descending),\r\n            Date <= locEndDate,\r\n            Date >= locStartDate\r\n        ),\r\n        {\r\n            ID: ThisRecord.ID,\r\n            Side: Upper(ThisRecord.Pleater),\r\n            Shift: ThisRecord.Shift,\r\n            Lot: ThisRecord.Lot_No,\r\n            Catalog: ThisRecord.Catalog,\r\n            Pleats_Per_Pack: ThisRecord.PleatPerPack,\r\n            Pleat_Height: ThisRecord.Pleat_Height,\r\n            Date: ThisRecord.Date,\r\n            Unit_Starting: ThisRecord.'Begin Cart #',\r\n            Unit_Ending: ThisRecord.'End Cart #',\r\n            Amount_Built: ThisRecord.'End Cart #' - ThisRecord.'Begin Cart #' + 1,\r\n            Reject_Pleats: ThisRecord.Total_Reject_Pleats\r\n        }\r\n    )\r\n);\r\n\r\n/*Update*/\r\nSelect('o-update');"
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - o-update:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(rPopups,First(rPopups),{Value: 30, Display_Text: "Updating Ouput Data"});
+
+            /*Join and Create Output Table*/
+            ClearCollect(
+                collectLocalOutputData,
+                ForAll(
+                    gLists.Lines,
+                    {
+                        line: Value,
+                        total:
+                            /*Filter and Sum to get total amount built, per line, per selected shift*/
+                            Sum(
+                                Filter(
+                                    cProduction,
+                                    Side in Value,
+                                    If(
+                                        'o-shift'.Selected.Value = "All",
+                                        Shift = Shift,
+                                        Shift = 'o-shift'.Selected.Value
+                                    )
+                                ),
+                                Amount_Built
+                            ),
+                        pleats:
+                            Sum(
+                                Filter(
+                                    cProduction,
+                                    Side in Value,
+                                    If(
+                                        'o-shift'.Selected.Value = "All",
+                                        Shift = Shift,
+                                        Shift = 'o-shift'.Selected.Value
+                                    )
+                                ),
+                                Reject_Pleats
+                            ),
+                        perpack:
+                            IfError(
+                                Average(
+                                    Filter(
+                                        cProduction,
+                                        Side in Value,
+                                        If(
+                                            'o-shift'.Selected.Value = "All",
+                                            Shift = Shift,
+                                            Shift = 'o-shift'.Selected.Value
+                                        )
+                                    ),
+                                    Pleats_Per_Pack
+                                ),
+                                ""
+                            )
+                    }
+                )
+            );
+
+            Patch(rPopups,First(rPopups),{Visible: false, Value: -1, Display_Text: "Finishing Up"});
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
     - o-header:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
@@ -18,232 +93,85 @@
           DropShadow: =DropShadow.None
           Fill: =gTheme.Primary
           LayoutAlignItems: =LayoutAlignItems.Stretch
-          LayoutGap: =varPadding
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =varPadding/2
-          PaddingLeft: =varPadding
-          PaddingRight: =varPadding
-          PaddingTop: =varPadding/2
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - o-collect:
-            Control: Classic/Button
-            Properties:
-              OnSelect: |-
-                =/*Start*/
-                Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
-
-                /*Update Dates Variables*/
-                UpdateContext({
-                    locEndDate: 'o-end-date'.SelectedDate,
-                    locStartDate: 'o-start-date'.SelectedDate
-                    
-                });
-
-                /*Collect Production*/
-                Set(varLoading,{Visible: true, Value: 10, Text: "Collecting Production Data"});
-                ClearCollect(collectProduction,
-                    ForAll(
-                        Filter(Sort(Roll_Data_Filtered_SPL, Date, SortOrder.Descending),
-                            Date <= locEndDate,
-                            Date >= locStartDate
-                        ),
-                        {
-                            id: Value(ThisRecord.ID),
-                            shift: Text(ThisRecord.Shift),
-                            line: Text(Upper(ThisRecord.Pleater)),
-                            date: DateValue(ThisRecord.Date),
-                            lot: Text(ThisRecord.Lot_No),
-                            catalog: Text(ThisRecord.Catalog),
-                            amount_built: Value(ThisRecord.'End Cart #') - Value(ThisRecord.'Begin Cart #') + 1,
-                            unit_starting: Value(ThisRecord.'Begin Cart #'),
-                            unit_ending: Value(ThisRecord.'End Cart #'),
-                            reject_pleats: Value(ThisRecord.Total_Reject_Pleats),
-                            pleats_per_pack: Value(ThisRecord.PleatPerPack),
-                            pleats_height: Value(ThisRecord.Pleat_Height)
-                        }
-                    )
-                );
-
-                /*Update*/
-                Set(varLoading,{Visible: true, Value: 100, Text: "Finishing Collection"});
-                Select('o-update');
-              Text: ="collect"
-              Visible: =false
-              Width: =10
-              X: =20
-              Y: =20
-        - o-update:
-            Control: Classic/Button
-            Properties:
-              OnSelect: |-
-                =
-                /*Continued from o_collect*/
-                Set(varLoading,{Visible: true, Value: 10, Text: "Updating Values"});
-
-                /*Join and Create Output Table*/
-                Set(varLoading,{Visible: true, Value: 45, Text: "Collecting Output Data"});
-                ClearCollect(
-                    collectLocalOutputData,
-                    ForAll(
-                        collectLineSchema,
-                        {
-                            line: SCH_Line,
-                            total:
-                                /*Filter and Sum to get total amount built, per line, per selected shift*/
-                                Sum(
-                                    Filter(
-                                        collectProduction,
-                                        line in SCH_Line,
-                                        If(
-                                            'o-shift'.Selected.Value = "All",
-                                            shift = shift,
-                                            shift = 'o-shift'.Selected.Value
-                                        )
-                                    ),
-                                    amount_built
-                                ),
-                            pleats:
-                                Sum(
-                                    Filter(
-                                        collectProduction,
-                                        line in SCH_Line,
-                                        If(
-                                            'o-shift'.Selected.Value = "All",
-                                            shift = shift,
-                                            shift = 'o-shift'.Selected.Value
-                                        )
-                                    ),
-                                    reject_pleats
-                                ),
-                            perpack:
-                                IfError(
-                                    Average(
-                                        Filter(
-                                            collectProduction,
-                                            line in SCH_Line,
-                                            If(
-                                                'o-shift'.Selected.Value = "All",
-                                                shift = shift,
-                                                shift = 'o-shift'.Selected.Value
-                                            )
-                                        ),
-                                        pleats_per_pack
-                                    ),
-                                    ""
-                                )
-                        }
-                    )
-                );
-
-
-
-                /*Garbage Collecting*/
-                Set(varLoading,{Visible: true, Value: 95, Text: "Finishing Up"});
-
-
-                /*End*/
-                Set(varLoading,{Visible: true, Value: 100, Text: "Completed"});
-                Set(varLoading,{Visible: false, Value: -1, Text: "Not Loading"});
-              Text: ="update"
-              Visible: =false
-              Width: =10
-              X: =20
-              Y: =20
         - o-logo:
             Control: Image
             Properties:
-              OnSelect: =Back()
-              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
-              ImagePosition: =ImagePosition.Stretch
-              LayoutMinHeight: =1
-              LayoutMinWidth: '=1   '
-              PaddingBottom: =1
-              PaddingTop: =1
-              Width: =Min(Parent.Width * 0.128, 170)
+              Image: =If(gTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: ='o-n-title'.Width
         - o-title:
             Control: Label
             Properties:
-              Text: ="FE Durapore Daily Management System"
-              Align: =Align.Center
-              Color: =gTheme.Text_Header
+              Text: ="App Title"
+              Color: =gTheme.Text_Light
               FillPortions: =1
-              LayoutMinHeight: =1
-              LayoutMinWidth: =1
-              Size: =Self.Height / 2
-        - o-o-nav:
-            Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - o-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
             Properties:
-              AlignInContainer: =AlignInContainer.SetByContainer
-              DropShadow: =DropShadow.None
-              FillPortions: =0
-              LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =varPadding/2
-              LayoutJustifyContent: =LayoutJustifyContent.End
-              LayoutMinHeight: =1
-              LayoutMinWidth: =1
-              LayoutMode: =LayoutMode.Auto
-              RadiusBottomLeft: =0
-              RadiusBottomRight: =0
-              RadiusTopLeft: =0
-              RadiusTopRight: =0
-              Width: ='o-logo'.Width
-            Children:
-            - o-darkmode:
-                Control: Classic/Icon
-                Variant: HalfFilledCircle
-                Properties:
-                  OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light));
-                  Tooltip: ="Toggle Light/Dark modes."
-                  Color: =gTheme.Text_Dark
-                  Icon: =Icon.HalfFilledCircle
-                  LayoutMinHeight: =1
-                  LayoutMinWidth: =1
-                  PaddingBottom: =5
-                  PaddingLeft: =5
-                  PaddingRight: =5
-                  PaddingTop: =5
-                  Rotation: =If(gTheme.Mode = "Light", 180, 0)
-                  Width: =Self.Height
-            - o-bugs:
-                Control: Image
-                Properties:
-                  OnSelect: =Navigate(Bugs)
-                  Image: =gblAppIcons.Bug
-                  AlignInContainer: =AlignInContainer.Stretch
-                  HoverFill: =gTheme.Accept
-                  LayoutMinHeight: '=1   '
-                  RadiusBottomLeft: =Self.Height / 2
-                  RadiusBottomRight: =Self.Height / 2
-                  RadiusTopLeft: =Self.Height / 2
-                  RadiusTopRight: =Self.Height / 2
-                  Width: =Self.Height
-            - o-user-img:
-                Control: Image
-                Properties:
-                  Image: |
-                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
-                  AlignInContainer: =AlignInContainer.Stretch
-                  LayoutMinHeight: '=1   '
-                  LayoutMinWidth: =1
-                  RadiusBottomLeft: =Self.Height / 2
-                  RadiusBottomRight: =Self.Height / 2
-                  RadiusTopLeft: =Self.Height / 2
-                  RadiusTopRight: =Self.Height / 2
-                  Width: =Self.Height
-    - o-body:
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - o-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - o-user-img:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - o-main:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          FillPortions: =15
+          FillPortions: =11
           LayoutAlignItems: =LayoutAlignItems.Stretch
           LayoutMinHeight: =10
           LayoutMinWidth: =10
@@ -253,517 +181,468 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - o-nav:
+        - o-navigation:
             Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+            Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
-              BorderColor: =gTheme.Pri_Complement
-              BorderThickness: |-
-                =//If(gTheme.Mode = "Light", 0, 1)
-                0
               DropShadow: =DropShadow.None
-              Fill: =gTheme.Background_1
-              FillPortions: =0
+              Fill: =gTheme.Midground
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
-              LayoutGap: =varPadding
+              LayoutGap: =gPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =varPadding
-              PaddingLeft: =varPadding
-              PaddingRight: =varPadding
-              PaddingTop: =varPadding
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
-              Width: =150
             Children:
             - o-n-title:
-                Control: Text
+                Control: Label
                 Properties:
-                  Align: ='TextCanvas.Align'.Center
-                  FontColor: =gTheme.Text_Dark
-                  Size: =Self.Height / 3
                   Text: =App.ActiveScreen.Name
-                  VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
-                  Weight: ='TextCanvas.Weight'.Semibold
-                  FillPortions: =1
-            - o-n-separator:
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - o-n-separator-0:
                 Control: Rectangle
                 Properties:
-                  Fill: =gTheme.Accent
-                  Height: =1
-                  LayoutMinWidth: =15
-                  Width: =Parent.Width * 0.95
+                  Fill: =gTheme.Pri_Complement
+                  Height: =Round(gPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
             - o-n-gallery:
                 Control: Gallery
                 Variant: galleryVertical
                 Properties:
-                  Items: =collectNavigation
+                  Items: =cNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
                   DelayItemLoading: =true
-                  FillPortions: =13
                   Layout: =Layout.Vertical
-                  LayoutMinHeight: =1
-                  LayoutMinWidth: =1
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
                   LoadingSpinner: =LoadingSpinner.Data
-                  ShowScrollbar: =false
-                  TemplatePadding: =0
-                  TemplateSize: |-
-                    =//IfError((Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount,0)
-                    IfError(Parent.Height * 0.05,0)
+                  TemplatePadding: =gPadding
+                  TemplateSize: =40
                 Children:
-                - o-n-button:
+                - o-n-g-button:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: =Navigate(ThisItem.ScreenName);
-                      Text: =ThisItem.Title
-                      Color: =gTheme.Text_Accent
-                      DisabledColor: =ColorFade(Self.Color, 75%)
-                      DisabledFill: =ColorFade(Self.Fill, 75%)
-                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
                       Fill: =gTheme.Accent
                       FontWeight: =FontWeight.Normal
-                      Height: =Parent.TemplateHeight - varPadding
-                      Size: =Self.Width / 16
-                      Width: =Parent.TemplateWidth - Self.BorderThickness
-                      X: =Center(Parent.TemplateWidth, Self.Width)
-                      Y: =Center(Parent.TemplateHeight, Self.Height)
-            - o-n-footer:
-                Control: GroupContainer
-                Variant: manualLayoutContainer
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =100
+                      RadiusBottomRight: =100
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =100
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - o-n-legal:
+                Control: Label
                 Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.None
-                  FillPortions: =2
-                  LayoutMinHeight: =1
-                  LayoutMinWidth: =1
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                Children:
-                - o-n-f-text:
-                    Control: Text
-                    Properties:
-                      Align: ='TextCanvas.Align'.Center
-                      Size: =8
-                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
-                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
-                      Height: =Parent.Height
-                      Width: =Parent.Width
-        - o-main:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - o-filter-parent:
             Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+            Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              Fill: =gTheme.Background_0
-              FillPortions: =11
+              Fill: =gTheme.Background
               LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =varPadding
-              LayoutJustifyContent: =LayoutJustifyContent.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =varPadding
-              PaddingLeft: =varPadding
-              PaddingRight: =varPadding
-              PaddingTop: =varPadding
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - o-controls:
+            - o-filters:
                 Control: GroupContainer
-                Variant: horizontalAutoLayoutContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =gTheme.Foreground
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.6
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gPadding
+                  PaddingLeft: =gPadding
+                  PaddingRight: =gPadding
+                Children:
+                - o-f-title:
+                    Control: Label
+                    Properties:
+                      Text: ="Filters"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Center
+                      Color: =gTheme.Text_Light
+                      Fill: =gTheme.Secondary
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width
+                - o-start-date-label:
+                    Control: Label
+                    Properties:
+                      Text: ="Start Date"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_On_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =gPadding
+                      PaddingRight: =gPadding
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                - o-start-date:
+                    Control: Classic/DatePicker
+                    Properties:
+                      BorderThickness: =1
+                      Color: =gTheme.Text_On_Light
+                      Fill: =gTheme.Background
+                      FocusedBorderThickness: =1
+                      IconBackground: =gTheme.Sec_Complement
+                      IconFill: =gTheme.Text_On_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =gPadding
+                      PaddingRight: =gPadding
+                      Size: =Self.Height / 5
+                - o-end-date-label:
+                    Control: Label
+                    Properties:
+                      Text: ="End Date"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_On_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =gPadding
+                      PaddingRight: =gPadding
+                      PaddingTop: =0
+                      Size: =Self.Height / 4
+                - o-end-date:
+                    Control: Classic/DatePicker
+                    Properties:
+                      BorderThickness: =1
+                      Color: =gTheme.Text_On_Light
+                      Fill: =gTheme.Background
+                      FocusedBorderThickness: =1
+                      IconBackground: =gTheme.Sec_Complement
+                      IconFill: =gTheme.Text_On_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =gPadding
+                      PaddingRight: =gPadding
+                      Size: =Self.Height / 5
+                - o-update-date:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Select('o-collect');
+                      Text: ="Update Date Range"
+                      Tooltip: ="Updates date range of the downtime data."
+                      Color: =gTheme.Text_Dark
+                      Fill: =gTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =0
+                      PaddingLeft: =gPadding
+                      PaddingRight: =gPadding
+                      PaddingTop: =0
+                      Size: =Self.Width / 16
+                - o-f-separator-0:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gTheme.Pri_Complement
+                      Height: =Round(gPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - o-shift-label:
+                    Control: Label
+                    Properties:
+                      Text: ="Shift"
+                      Align: =Align.Center
+                      Color: =gTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - o-shift:
+                    Control: Classic/DropDown
+                    Properties:
+                      OnChange: =Select('o-update');
+                      Items: =Table(["All"],gLists.Shifts)
+                      ChevronBackground: =gTheme.Sec_Complement
+                      ChevronFill: =gTheme.Text_Dark
+                      Color: =gTheme.Text_On_Light
+                      Fill: =gTheme.Background
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 5
+                - o-f-separator-1:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gTheme.Pri_Complement
+                      Height: =Round(gPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+        - o-body:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 6, 10)
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - o-outputs:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   BorderColor: =gTheme.Sec_Complement
                   BorderThickness: |-
                     =//If(gTheme.Mode = "Light", 0, 1)
                     0
-                  Fill: =gTheme.Background_2
+                  DropShadow: =DropShadow.Semilight
+                  Fill: =gTheme.Foreground
                   FillPortions: =0
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  Height: =575
+                  LayoutAlignItems: =LayoutAlignItems.Center
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =varPadding
-                  LayoutMinHeight: =10
+                  LayoutMinHeight: =1
                   LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
-                  PaddingBottom: =varPadding
-                  PaddingLeft: =varPadding
-                  PaddingRight: =varPadding
-                  PaddingTop: =varPadding
-                  Width: =150
+                  PaddingBottom: =
                 Children:
-                - o-start-date-title:
-                    Control: Text
-                    Properties:
-                      Align: ='TextCanvas.Align'.Center
-                      FontColor: =gTheme.Text_Dark
-                      Size: =Self.Height / 3
-                      Text: ="Starting Date"
-                      FillPortions: =1
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                - o-start-date:
-                    Control: DatePicker
-                    Properties:
-                      Fill: =gTheme.Background_0
-                      FontColor: =gTheme.Text_Dark
-                      FontSize: =Self.Height / 3
-                      Format: ="Short"
-                      SelectedDate: =varNowDay
-                      FillPortions: =1
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                - o-separator-0:
-                    Control: Rectangle
-                    Properties:
-                      Fill: =gTheme.Accent
-                      Height: =1
-                      LayoutMinWidth: =10
-                - o-end-date-title:
-                    Control: Text
-                    Properties:
-                      Align: ='TextCanvas.Align'.Center
-                      FontColor: =gTheme.Text_Dark
-                      Size: =Self.Height / 3
-                      Text: ="Ending Date"
-                      FillPortions: =1
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                - o-end-date:
-                    Control: DatePicker
-                    Properties:
-                      Fill: =gTheme.Background_0
-                      FontColor: =gTheme.Text_Dark
-                      FontSize: =Self.Height / 3
-                      Format: ="Short"
-                      SelectedDate: =varNowDay
-                      FillPortions: =1
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                - o-separator-1:
-                    Control: Rectangle
-                    Properties:
-                      Fill: =gTheme.Accent
-                      Height: =1
-                      LayoutMinWidth: =10
-                - o-button:
-                    Control: Classic/Button
-                    Properties:
-                      OnSelect: =Select('o-collect');
-                      Text: ="Update Date Range"
-                      Tooltip: ="Updates date range of the pleater output pack data."
-                      Color: =gTheme.Text_Accent
-                      Fill: =gTheme.Accent
-                      FillPortions: =1
-                      FontWeight: =FontWeight.Normal
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                      Size: =Self.Width / 16
-                - o-separator-2:
-                    Control: Rectangle
-                    Properties:
-                      Fill: =gTheme.Accent
-                      Height: =1
-                      LayoutMinWidth: =10
-                - o-shift-title:
-                    Control: Text
-                    Properties:
-                      Align: ='TextCanvas.Align'.Center
-                      FontColor: =gTheme.Text_Dark
-                      Size: =Self.Height / 3
-                      Text: ="Shift"
-                      FillPortions: =1
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                - o-shift:
-                    Control: Classic/DropDown
-                    Properties:
-                      OnChange: =Select('o-update');
-                      Items: =["All", "A", "B", "C"]
-                      BorderColor: =RGBA(0,0,0,0)
-                      ChevronBackground: =gTheme.Primary
-                      ChevronFill: =gTheme.Text_Header
-                      Color: =gTheme.Text_Dark
-                      Fill: =gTheme.Background_0
-                      FillPortions: =1
-                      HoverFill: =gTheme.Sec_Complement
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                      Size: =Self.Height / 4
-                - o-separator-3:
-                    Control: Rectangle
-                    Properties:
-                      Fill: =gTheme.Accent
-                      Height: =1
-                      LayoutMinWidth: =10
-                - o-c-footer:
+                - o-o-header:
                     Control: GroupContainer
                     Variant: manualLayoutContainer
                     Properties:
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DropShadow: =DropShadow.None
-                      FillPortions: =10
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
+                      Fill: =gTheme.Secondary
+                      FillPortions: =0.5
+                      LayoutMinHeight: =1
                       RadiusBottomLeft: =0
                       RadiusBottomRight: =0
                       RadiusTopLeft: =0
                       RadiusTopRight: =0
-            - o-section:
-                Control: GroupContainer
-                Variant: verticalAutoLayoutContainer
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.None
-                  FillPortions: =8
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =varPadding
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  LayoutMode: =LayoutMode.Auto
-                  LayoutOverflowY: =LayoutOverflow.Scroll
-                  PaddingBottom: =varPadding
-                  PaddingLeft: =varPadding
-                  PaddingRight: =varPadding
-                  PaddingTop: =varPadding
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                Children:
-                - o-last-update:
-                    Control: GroupContainer
-                    Variant: manualLayoutContainer
-                    Properties:
-                      AlignInContainer: =AlignInContainer.SetByContainer
-                      DropShadow: =DropShadow.Regular
-                      Fill: =gTheme.Pri_Complement
-                      FillPortions: =0
-                      Height: =Parent.Height * 0.05
-                      RadiusBottomLeft: =8
-                      RadiusBottomRight: =8
-                      RadiusTopLeft: =8
-                      RadiusTopRight: =8
+                      Width: =Parent.Width
                     Children:
-                    - o-lu-text:
+                    - o-o-title_1:
                         Control: Label
                         Properties:
-                          Text: |-
-                            ="Last Database Update: " & gLastDBUpdate
+                          Text: ="Outputs"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_Light
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          Size: =Self.Height / 2
+                          Width: =Parent.Width
+                - o-o-columns:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.None
+                      Fill: =gTheme.Sec_Complement
+                      FillPortions: =0.5
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - o-o-c-line:
+                        Control: Label
+                        Properties:
+                          Text: ="Line"
                           Align: =Align.Center
                           Color: =gTheme.Text_Dark
+                          FillPortions: =1
+                          Font: =Font.Verdana
                           Height: =Parent.Height
-                          Width: =Parent.Width
-                - o-outputs:
-                    Control: GroupContainer
-                    Variant: verticalAutoLayoutContainer
-                    Properties:
-                      AlignInContainer: =AlignInContainer.SetByContainer
-                      BorderColor: =gTheme.Sec_Complement
-                      BorderThickness: |-
-                        =//If(gTheme.Mode = "Light", 0, 1)
-                        0
-                      DropShadow: =DropShadow.Semilight
-                      Fill: =gTheme.Background_1
-                      FillPortions: =0
-                      Height: =575
-                      LayoutAlignItems: =LayoutAlignItems.Center
-                      LayoutDirection: =LayoutDirection.Vertical
-                      LayoutMinHeight: =1
-                      LayoutMinWidth: =10
-                      LayoutMode: =LayoutMode.Auto
-                      PaddingBottom: =
-                    Children:
-                    - o-o-header:
-                        Control: GroupContainer
-                        Variant: manualLayoutContainer
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Width / 18
+                          Width: =Parent.Width / 2
+                    - o-o-c-outputs:
+                        Control: Label
                         Properties:
-                          AlignInContainer: =AlignInContainer.SetByContainer
-                          DropShadow: =DropShadow.None
-                          Fill: =gTheme.Secondary
-                          FillPortions: =0.5
-                          LayoutMinHeight: =1
-                          RadiusBottomLeft: =0
-                          RadiusBottomRight: =0
-                          RadiusTopLeft: =0
-                          RadiusTopRight: =0
-                          Width: =Parent.Width
-                        Children:
-                        - o-o-title:
-                            Control: Label
-                            Properties:
-                              Text: ="Outputs"
-                              Align: =Align.Center
-                              Color: =gTheme.Text_Header
-                              Font: =Font.Verdana
-                              Height: =Parent.Height
-                              Size: =Self.Height / 2
-                              Width: =Parent.Width
-                    - o-o-columns:
+                          Text: ="Total Pack Output"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_Dark
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Width / 18
+                          Width: =Parent.Width / 2
+                          X: ='o-o-c-line'.X + 'o-o-c-line'.Width
+                    - o-o-c-reject:
+                        Control: Label
+                        Properties:
+                          Text: ="Reject Packs"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_Dark
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Width / 18
+                          Width: =Parent.Width / 2
+                          X: ='o-o-c-line'.X + 'o-o-c-line'.Width
+                - o-o-gallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      Items: =collectLocalOutputData
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DelayItemLoading: =true
+                      FillPortions: =6.5
+                      Layout: =Layout.Vertical
+                      LayoutMinHeight: =1
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Self.Height / 11
+                      Width: =Parent.Width
+                    Children:
+                    - o-o-g-columns:
                         Control: GroupContainer
                         Variant: horizontalAutoLayoutContainer
                         Properties:
                           DropShadow: =DropShadow.None
-                          Fill: =gTheme.Sec_Complement
-                          FillPortions: =0.5
+                          Fill: =RGBA(0,0,0,0)
+                          Height: =Parent.TemplateHeight
                           LayoutAlignItems: =LayoutAlignItems.Stretch
-                          LayoutMinHeight: =1
-                          LayoutMinWidth: =1
                           LayoutMode: =LayoutMode.Auto
                           RadiusBottomLeft: =0
                           RadiusBottomRight: =0
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
+                          Width: =Parent.TemplateWidth
                         Children:
-                        - o-o-c-line:
+                        - o-o-g-line:
                             Control: Label
                             Properties:
-                              Text: ="Line"
+                              Text: =ThisItem.line
                               Align: =Align.Center
-                              Color: =gTheme.Text_Accent
+                              Color: =gTheme.Text_On_Light
                               FillPortions: =1
                               Font: =Font.Verdana
-                              Height: =Parent.Height
+                              Height: =10
                               LayoutMinHeight: =10
                               LayoutMinWidth: =10
-                              Size: =Self.Width / 18
-                              Width: =Parent.Width / 2
-                        - o-o-c-outputs:
+                              Size: =Self.Width / 16
+                              Width: =10
+                        - o-o-g-outputs:
                             Control: Label
                             Properties:
-                              Text: ="Total Pack Output"
+                              Text: =ThisItem.total*1
                               Align: =Align.Center
-                              Color: =gTheme.Text_Accent
+                              Color: =gTheme.Text_On_Light
                               FillPortions: =1
                               Font: =Font.Verdana
-                              Height: =Parent.Height
+                              Height: =10
                               LayoutMinHeight: =10
                               LayoutMinWidth: =10
-                              Size: =Self.Width / 18
-                              Width: =Parent.Width / 2
-                              X: ='o-o-c-line'.X + 'o-o-c-line'.Width
-                        - o-o-c-reject:
+                              Size: =Self.Width / 16
+                              Width: =10
+                              X: ='o-o-g-line'.X + 'o-o-g-line'.Width
+                        - o-o-g-pleats:
                             Control: Label
                             Properties:
-                              Text: ="Reject Packs"
+                              Text: =IfError(Round(ThisItem.pleats/ThisItem.perpack,0),0)
                               Align: =Align.Center
-                              Color: =gTheme.Text_Accent
+                              Color: =gTheme.Text_On_Light
                               FillPortions: =1
                               Font: =Font.Verdana
-                              Height: =Parent.Height
+                              Height: =10
                               LayoutMinHeight: =10
                               LayoutMinWidth: =10
-                              Size: =Self.Width / 18
-                              Width: =Parent.Width / 2
-                              X: ='o-o-c-line'.X + 'o-o-c-line'.Width
-                    - o-o-gallery:
-                        Control: Gallery
-                        Variant: galleryVertical
+                              Size: =Self.Width / 16
+                              Width: =10
+                              X: ='o-o-g-line'.X + 'o-o-g-line'.Width
+                    - o-o-g-seperator:
+                        Control: Rectangle
                         Properties:
-                          Items: =collectLocalOutputData
-                          AlignInContainer: =AlignInContainer.SetByContainer
-                          DelayItemLoading: =true
-                          FillPortions: =6.5
-                          Layout: =Layout.Vertical
-                          LayoutMinHeight: =1
-                          LoadingSpinner: =LoadingSpinner.Data
-                          TemplatePadding: =0
-                          TemplateSize: =Self.Height / 11
-                          Width: =Parent.Width
-                        Children:
-                        - o-o-g-columns:
-                            Control: GroupContainer
-                            Variant: horizontalAutoLayoutContainer
-                            Properties:
-                              DropShadow: =DropShadow.None
-                              Fill: =RGBA(0,0,0,0)
-                              Height: =Parent.TemplateHeight
-                              LayoutAlignItems: =LayoutAlignItems.Stretch
-                              LayoutMode: =LayoutMode.Auto
-                              RadiusBottomLeft: =0
-                              RadiusBottomRight: =0
-                              RadiusTopLeft: =0
-                              RadiusTopRight: =0
-                              Width: =Parent.TemplateWidth
-                            Children:
-                            - o-o-g-line:
-                                Control: Label
-                                Properties:
-                                  Text: =ThisItem.line
-                                  Align: =Align.Center
-                                  Color: =gTheme.Text_Dark
-                                  FillPortions: =1
-                                  Font: =Font.Verdana
-                                  Height: =10
-                                  LayoutMinHeight: =10
-                                  LayoutMinWidth: =10
-                                  Size: =Self.Width / 16
-                                  Width: =10
-                            - o-o-g-outputs:
-                                Control: Label
-                                Properties:
-                                  Text: =ThisItem.total*1
-                                  Align: =Align.Center
-                                  Color: =gTheme.Text_Dark
-                                  FillPortions: =1
-                                  Font: =Font.Verdana
-                                  Height: =10
-                                  LayoutMinHeight: =10
-                                  LayoutMinWidth: =10
-                                  Size: =Self.Width / 16
-                                  Width: =10
-                                  X: ='o-o-g-line'.X + 'o-o-g-line'.Width
-                            - o-o-g-pleats:
-                                Control: Label
-                                Properties:
-                                  Text: =IfError(Round(ThisItem.pleats/ThisItem.perpack,0),0)
-                                  Align: =Align.Center
-                                  Color: =gTheme.Text_Dark
-                                  FillPortions: =1
-                                  Font: =Font.Verdana
-                                  Height: =10
-                                  LayoutMinHeight: =10
-                                  LayoutMinWidth: =10
-                                  Size: =Self.Width / 16
-                                  Width: =10
-                                  X: ='o-o-g-line'.X + 'o-o-g-line'.Width
-                        - o-o-g-separator:
-                            Control: Rectangle
-                            Properties:
-                              OnSelect: =Select(Parent)
-                              Fill: =gTheme.Accent
-                              Height: =Parent.TemplateHeight * 0.025
-                              Width: =Parent.Width
-                              Y: =Parent.TemplateHeight - Self.Height
-                    - o-o-copy:
-                        Control: Classic/Button
-                        Properties:
-                          OnSelect: |-
-                            =IfError(  
-                                Copy(
-                                    Concat(
-                                        collectLocalOutputData,
-                                        If(IsBlankOrError(total), 0, total),
-                                        Char(9)
-                                    )
-                                ),
-                                /*New bug with teams, cannot copy so show error*/
-                                Notify("Cannot copy data from new Teams, or other embeded tools. Please open this app in a web browser.", NotificationType.Error)
-                            );
-                          Text: ="Copy Outputs"
-                          Tooltip: ="Used to copy the above data for pasting into DOR."
-                          Color: =gTheme.Text_Accent
+                          OnSelect: =Select(Parent)
                           Fill: =gTheme.Accent
-                          FillPortions: =0.5
-                          Font: =Font.Verdana
-                          LayoutMinHeight: =1
-                          Size: =Self.Width / 20
-                          Width: =Parent.Width * 0.50
+                          Height: =Parent.TemplateHeight * 0.025
+                          Width: =Parent.Width
+                          Y: =Parent.TemplateHeight - Self.Height
+                - o-o-copy:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: |-
+                        =IfError(  
+                            Copy(
+                                Concat(
+                                    collectLocalOutputData,
+                                    If(IsBlankOrError(total), 0, total),
+                                    Char(9)
+                                )
+                            ),
+                            /*New bug with teams, cannot copy so show error*/
+                            Notify("Cannot copy data from new Teams, or other embeded tools. Please open this app in a web browser.", NotificationType.Error)
+                        );
+                      Text: ="Copy Outputs"
+                      Tooltip: ="Used to copy the above data for pasting into DOR."
+                      Color: =gTheme.Text_Dark
+                      Fill: =gTheme.Accent
+                      FillPortions: =0.5
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      Size: =Self.Width / 20
+                      Width: =Parent.Width * 0.50
