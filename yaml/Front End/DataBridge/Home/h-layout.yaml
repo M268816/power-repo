@@ -2,14 +2,200 @@
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gTheme.Background
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical
-      LayoutGap: =
       LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
       Width: =Parent.Width
-      X: =
     Children:
+    - h-collect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(rPopups,First(rPopups),{Visible: true, Value: 10, Display_Text:"Updating Variables", Popup:"loading"});
+            /*Update Time*/
+            Set(gTime,
+                {
+                    Now: Now(),
+                    Today: Today()
+
+                }
+            );
+            UpdateContext({
+                lStartDate: DateAdd(gTime.Today, -1, TimeUnit.Hours),
+                lEndDate: DateAdd(gTime.Today, 23, TimeUnit.Hours)
+            });
+            UpdateContext({
+                lCountOfDays: DateDiff(lStartDate,lEndDate)
+            });
+
+            Patch(rPopups,First(rPopups),{Value: 20, Display_Text:"Collecting Production Data"});
+            /*Collect Production Data*/
+            Clear(cProduction);
+            ForAll(
+                Filter(Sort(Roll_Data_Filtered_SPL, 'Date', SortOrder.Descending),
+                    'Date' >= gTime.Today
+                ),
+                Collect(cProduction,
+                    {
+                        ID: ThisRecord.ID,
+                        Side: Upper(ThisRecord.Pleater),
+                        Shift: ThisRecord.Shift,
+                        Lot: ThisRecord.Lot_No,
+                        Catalog: ThisRecord.Catalog,
+                        Pleats_Per_Pack: ThisRecord.PleatPerPack,
+                        Pleat_Height: ThisRecord.Pleat_Height,
+                        Date: ThisRecord.Date,
+                        Unit_Starting: ThisRecord.'Begin Cart #',
+                        Unit_Ending: ThisRecord.'End Cart #',
+                        Amount_Built: ThisRecord.'End Cart #' - ThisRecord.'Begin Cart #' + 1,
+                        Reject_Pleats: ThisRecord.Total_Reject_Pleats
+                    }
+                )
+            );
+
+            /*Collect Downtime Data*/
+            Patch(rPopups,First(rPopups),{Value: 30, Display_Text:"Collecting Downtime Data"});
+            Clear(cDowntime);
+            ForAll(
+                Filter(FE_Express_DT_Events,
+                    'DateTime' >= lStartDate,
+                    'DateTime' <= lEndDate
+                ),
+                Collect(cDowntime,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Pleater,
+                        Shift: ThisRecord.' Shift',
+                        DateTime: ThisRecord.DateTime,
+                        Reason: ThisRecord.' Downtime Reason',
+                        Downtime_Minutes: ThisRecord.' Downtime Minutes'
+                    }
+                )
+            );
+
+            Select('h-update');
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - h-update:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(rPopups,First(rPopups),{Value: 40, Display_Text:"Checking Line Status"});
+
+            UpdateContext({lLines:[
+                "12", "GH", "NO", "WX",
+                "34", "JK", "PQ", "YZ",
+                "EF", "LM", "RS"
+                ]});
+
+            Clear(cKanban);
+            ForAll(lLines,
+                With({thisLine:ThisRecord.Value},
+                    Collect(cKanban,
+                        {
+                            Line: thisLine,
+                            Status:
+                                If(
+                                   IsEmpty(
+                                    Filter(cProduction,
+                                        Side in thisLine,
+                                        'Date' >= gTime.Today
+                                    )
+                                   ),
+                                   "Not Running",
+                                   "Running" 
+                                )
+                        }
+                    )
+                )
+            );
+
+            Patch(rPopups,First(rPopups),{Value: 50, Display_Text:"Collecting TPS OEE"});
+            With(
+                {
+                    thisRuntime:
+                        CountRows(
+                            Distinct(
+                                Filter(cProduction, 'Date' >= gTime.Today),
+                                Side
+                            )
+                        )
+                        * 8
+                        * CountRows(Distinct(Filter(cProduction, 'Date' >= gTime.Today),Shift)),
+                    thisDowntime:
+                        Sum(
+                            Filter(cDowntime,
+                                'DateTime' >= DateAdd(gTime.Today, -1, TimeUnit.Hours),
+                                'DateTime' < DateAdd(gTime.Today, 23, TimeUnit.Hours),
+                                Reason in gLists.Downtime_Reasons_Unplanned
+                            ),
+                            Downtime_Minutes
+                        ),
+                    thisTotaltime:
+                        CountRows(
+                            Distinct(
+                                Filter(cProduction, 'Date' >= gTime.Today),
+                                Side
+                            )
+                        ) * 24,
+                    thisTotalUnits:
+                        Sum(
+                            Filter(cProduction,
+                                'Date' >= DateAdd(gTime.Today, -1, TimeUnit.Hours),
+                                'Date' < DateAdd(gTime.Today, 23, TimeUnit.Hours)
+                            ),
+                            Amount_Built + RoundUp((Reject_Pleats/Pleats_Per_Pack),0)
+                        ),
+                    thisGoodUnits:
+                        Sum(
+                            Filter(cProduction,
+                                'Date' >= DateAdd(gTime.Today, -1, TimeUnit.Hours),
+                                'Date' < DateAdd(gTime.Today, 23, TimeUnit.Hours)
+                            ),
+                            Amount_Built
+                        ),
+                    thisIdealTime:
+                        120/
+                        Min(
+                            Filter(cProduction,
+                                'Date' >= gTime.Today
+                            ),
+                            Pleats_Per_Pack
+                        )/60
+                },
+                Set(rAvailability,
+                    IfError(
+                        (thisRuntime - thisDowntime) / thisTotaltime,
+                        0
+                    )
+                );
+                Set(rPerformance,
+                    IfError(
+                        (thisIdealTime * thisTotalUnits) / (thisRuntime - thisDowntime),
+                        0
+                    )
+                );
+                Set(rQuality,
+                    IfError(
+                        thisGoodUnits/thisTotalUnits,
+                        0
+                    )
+                );
+                Set(rOEE1, rAvailability * rPerformance * rQuality);
+            );
+
+            Patch(rPopups,First(rPopups),{Visible: false, Value: -1, Display_Text:"Finishing Up", Popup: ""});
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
     - h-header:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
@@ -17,17 +203,16 @@
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
           Fill: =gTheme.Primary
-          FillPortions: =0
-          Height: =50
           LayoutAlignItems: =LayoutAlignItems.Stretch
-          LayoutGap: =varPadding
+          LayoutGap: =gPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
           LayoutMinHeight: =10
           LayoutMinWidth: =10
           LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =varPadding/2
-          PaddingLeft: =varPadding
-          PaddingRight: =varPadding
-          PaddingTop: =varPadding/2
+          PaddingBottom: =gPadding
+          PaddingLeft: =gPadding
+          PaddingRight: =gPadding
+          PaddingTop: =gPadding
           RadiusBottomLeft: =0
           RadiusBottomRight: =0
           RadiusTopLeft: =0
@@ -36,93 +221,68 @@
         - h-logo:
             Control: Image
             Properties:
-              OnSelect: =Back()
-              Image: =LOGO_MSIG_SBlue_FIT_ALPHA
-              ImagePosition: =ImagePosition.Stretch
-              LayoutMinHeight: =1
-              LayoutMinWidth: '=1   '
-              PaddingBottom: =1
-              PaddingTop: =1
-              Width: =Min(Parent.Width * 0.128, 170)
+              Image: =If(gTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: ='h-n-title'.Width
         - h-title:
             Control: Label
             Properties:
-              Text: ="FE Durapore Daily Management System"
-              Align: =Align.Center
-              Color: =gTheme.Text_Header
+              Text: =APP_NAME
+              Color: =gTheme.Text_Light
               FillPortions: =1
-              LayoutMinHeight: =1
-              LayoutMinWidth: =1
-              Size: =Self.Height / 2
-        - h-h-nav:
-            Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - h-mode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
             Properties:
-              AlignInContainer: =AlignInContainer.SetByContainer
-              DropShadow: =DropShadow.None
-              FillPortions: =0
-              LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutGap: =varPadding/2
-              LayoutJustifyContent: =LayoutJustifyContent.End
-              LayoutMinHeight: =1
-              LayoutMinWidth: =1
-              LayoutMode: =LayoutMode.Auto
-              RadiusBottomLeft: =0
-              RadiusBottomRight: =0
-              RadiusTopLeft: =0
-              RadiusTopRight: =0
-              Width: ='h-logo'.Width
-            Children:
-            - h-darkmode:
-                Control: Classic/Icon
-                Variant: HalfFilledCircle
-                Properties:
-                  OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light));
-                  Tooltip: ="Toggle Light/Dark modes."
-                  Color: =gTheme.Text_Dark
-                  Icon: =Icon.HalfFilledCircle
-                  LayoutMinHeight: =1
-                  LayoutMinWidth: =1
-                  PaddingBottom: =5
-                  PaddingLeft: =5
-                  PaddingRight: =5
-                  PaddingTop: =5
-                  Rotation: =If(gTheme.Mode = "Dark", 180, 0)
-                  Width: =Self.Height
-            - h-bugs:
-                Control: Image
-                Properties:
-                  OnSelect: =Navigate(Bugs)
-                  Image: =gblAppIcons.Bug
-                  Tooltip: ="Report a bug, or request a feature."
-                  AlignInContainer: =AlignInContainer.Stretch
-                  HoverFill: =gTheme.Accept
-                  LayoutMinHeight: '=1   '
-                  RadiusBottomLeft: =Self.Height / 2
-                  RadiusBottomRight: =Self.Height / 2
-                  RadiusTopLeft: =Self.Height / 2
-                  RadiusTopRight: =Self.Height / 2
-                  Width: =Self.Height
-            - h-user-img:
-                Control: Image
-                Properties:
-                  Image: |
-                    =If(IsBlankOrError(User().Image), gblAppIcons.Employee, User().Image)
-                  AlignInContainer: =AlignInContainer.Stretch
-                  LayoutMinHeight: '=1   '
-                  LayoutMinWidth: =1
-                  RadiusBottomLeft: =Self.Height / 2
-                  RadiusBottomRight: =Self.Height / 2
-                  RadiusTopLeft: =Self.Height / 2
-                  RadiusTopRight: =Self.Height / 2
-                  Width: =Self.Height
-    - h-body:
+              OnSelect: =If(gTheme.Mode = "Light", Set(gTheme, gThemeMode.Dark),Set(gTheme, gThemeMode.Light))
+              Color: =gTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - h-bugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gIcons.Bug
+              HoverFill: =gTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - h-user-img:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - h-main:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           DropShadow: =DropShadow.None
-          FillPortions: =15
+          FillPortions: =11
           LayoutAlignItems: =LayoutAlignItems.Stretch
           LayoutMinHeight: =10
           LayoutMinWidth: =10
@@ -132,209 +292,423 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - h-nav:
+        - h-navigation:
             Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+            Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
-              BorderColor: =gTheme.Pri_Complement
-              BorderThickness: |-
-                =//If(gTheme.Mode = "Light", 0, 1)
-                0
               DropShadow: =DropShadow.None
-              Fill: =gTheme.Background_1
-              FillPortions: =0
+              Fill: =gTheme.Midground
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
-              LayoutGap: =varPadding
+              LayoutGap: =gPadding
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =varPadding
-              PaddingLeft: =varPadding
-              PaddingRight: =varPadding
-              PaddingTop: =varPadding
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
-              Width: =150
             Children:
             - h-n-title:
-                Control: Text
+                Control: Label
                 Properties:
-                  Align: ='TextCanvas.Align'.Center
-                  FontColor: =gTheme.Text_Dark
-                  Size: =Self.Height / 3
                   Text: =App.ActiveScreen.Name
-                  VerticalAlign: ='TextCanvas.VerticalAlign'.Middle
-                  Weight: ='TextCanvas.Weight'.Semibold
-                  FillPortions: =1
-            - h-n-separator:
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - h-n-separator-0:
                 Control: Rectangle
                 Properties:
-                  Fill: =gTheme.Accent
-                  Height: =1
-                  LayoutMinWidth: =15
-                  Width: =Parent.Width * 0.95
+                  Fill: =gTheme.Pri_Complement
+                  Height: =Round(gPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
             - h-n-gallery:
                 Control: Gallery
                 Variant: galleryVertical
                 Properties:
-                  Items: =collectNavigation
+                  Items: =cNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
                   DelayItemLoading: =true
-                  FillPortions: =13
                   Layout: =Layout.Vertical
-                  LayoutMinHeight: =1
-                  LayoutMinWidth: =1
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
                   LoadingSpinner: =LoadingSpinner.Data
-                  ShowScrollbar: =false
-                  TemplatePadding: =0
-                  TemplateSize: |-
-                    =//IfError((Self.Height - ((Self.AllItemsCount+1) * Self.TemplatePadding)) / Self.AllItemsCount,0)
-                    IfError(Parent.Height * 0.05,0)
+                  TemplatePadding: =gPadding
+                  TemplateSize: =40
                 Children:
-                - h-n-button:
+                - h-n-g-button:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: =Navigate(ThisItem.ScreenName);
-                      Text: =ThisItem.Title
-                      Color: =gTheme.Text_Accent
-                      DisabledColor: =ColorFade(Self.Color, 75%)
-                      DisabledFill: =ColorFade(Self.Fill, 75%)
-                      DisplayMode: =If(App.ActiveScreen = ThisItem.ScreenName, DisplayMode.Disabled, DisplayMode.Edit)
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
                       Fill: =gTheme.Accent
                       FontWeight: =FontWeight.Normal
-                      Height: =28
-                      Size: =Self.Width / 16
-                      Width: =Parent.TemplateWidth - Self.BorderThickness
-                      X: =Center(Parent.TemplateWidth, Self.Width)
-                      Y: =Center(Parent.TemplateHeight, Self.Height)
-            - h-n-footer:
-                Control: GroupContainer
-                Variant: manualLayoutContainer
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - h-n-legal:
+                Control: Label
                 Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.None
-                  FillPortions: =2
-                  LayoutMinHeight: =1
-                  LayoutMinWidth: =1
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                Children:
-                - h-n-f-text:
-                    Control: Text
-                    Properties:
-                      Align: ='TextCanvas.Align'.Center
-                      FontColor: =gTheme.Text_Dark
-                      Size: =8
-                      Text: ="MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
-                      VerticalAlign: ='TextCanvas.VerticalAlign'.Bottom
-                      Height: =Parent.Height
-                      Width: =Parent.Width
-        - h-main:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - h-body:
             Control: GroupContainer
-            Variant: horizontalAutoLayoutContainer
+            Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              Fill: =gTheme.Background_0
-              FillPortions: =11
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
               LayoutAlignItems: =LayoutAlignItems.Center
               LayoutDirection: =LayoutDirection.Vertical
-              LayoutGap: =varPadding
-              LayoutMinHeight: =1
-              LayoutMinWidth: =1
+              LayoutGap: =gPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
               LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =varPadding
-              PaddingLeft: =varPadding
-              PaddingRight: =varPadding
-              PaddingTop: =varPadding
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingBottom: =gPadding
+              PaddingLeft: =gPadding
+              PaddingRight: =gPadding
+              PaddingTop: =gPadding
               RadiusBottomLeft: =0
               RadiusBottomRight: =0
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - h-last-update:
+            - h-APQ-parent:
                 Control: GroupContainer
-                Variant: manualLayoutContainer
+                Variant: horizontalAutoLayoutContainer
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.Regular
-                  Fill: =gTheme.Pri_Complement
+                  DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =Parent.Height * 0.05
-                  RadiusBottomLeft: =8
-                  RadiusBottomRight: =8
-                  RadiusTopLeft: =8
-                  RadiusTopRight: =8
+                  Height: =Parent.Height * 0.3
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gPadding * 2
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gPadding
+                  PaddingLeft: =gPadding
+                  PaddingRight: =gPadding
+                  PaddingTop: =gPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width * 0.65
                 Children:
-                - h-lu-text:
-                    Control: Label
+                - h-Availability:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
                     Properties:
-                      Text: |-
-                        ="Last Database Update: " &
-                        First(
-                            Sort(
-                                ShowColumns(
-                                    Filter(Roll_Data_Filtered_SPL,Date >= DateAdd(varToday, -5, TimeUnit.Days)),
-                                    Modified,
-                                    Date
-                                ),
-                                Modified,
-                                SortOrder.Descending
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gTheme.Sec_Complement
+                      BorderThickness: =If(gTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Regular
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - h-a-title:
+                        Control: Label
+                        Properties:
+                          Text: ="Availability"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Dark
+                          Fill: =gTheme.Secondary
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 3
+                    - h-a-chart:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                            With({thisData: Round(rAvailability*100,2)},
+                                EncodeUrl(
+                                    "{
+                                        type: 'radialGauge',
+                                        data: {
+                                            datasets: [{
+                                                data: ["& thisData &"],
+                                                backgroundColor: getGradientFillHelper('horizontal', [
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Red &"',
+                                                    '"& gTheme.Chart_Red &"',
+                                                    '"& gTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                        },
+                                        options: {
+                                            domain: [0, "& If(thisData <= 100, 100, thisData) &"],
+                                            trackColor: '"& gTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                                text: (val) => val + '%',
+                                                fontColor: '"& gTheme.Chart_Black &"'
+                                            },
+                                        }
+                                    }"
+                                )
                             )
-                        ).Modified
-                      Align: =Align.Center
-                      Color: =gTheme.Text_Dark
-                      Height: =Parent.Height
-                      Width: =Parent.Width
-            - h-construction:
-                Control: Image
-                Properties:
-                  Image: ='under-construction'
-            - h-welcome-parent:
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                - h-Performance:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gTheme.Sec_Complement
+                      BorderThickness: =If(gTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Regular
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - h-p-title:
+                        Control: Label
+                        Properties:
+                          Text: ="Performance"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Dark
+                          Fill: =gTheme.Secondary
+                          Size: =Self.Height / 3
+                    - h-p-chart:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                            With({thisData: Round(rPerformance*100,2)},
+                                EncodeUrl(
+                                    "{
+                                        type: 'radialGauge',
+                                        data: {
+                                            datasets: [{
+                                                data: ["& thisData &"],
+                                                backgroundColor: getGradientFillHelper('horizontal', [
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Red &"',
+                                                    '"& gTheme.Chart_Red &"',
+                                                    '"& gTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                        },
+                                        options: {
+                                            domain: [0, "& If(thisData <= 100, 100, thisData) &"],
+                                            trackColor: '"& gTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                                text: (val) => val + '%',
+                                                fontColor: '"& gTheme.Chart_Black &"'
+                                            },
+                                        }
+                                    }"
+                                )
+                            )
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                - h-Quality:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gTheme.Sec_Complement
+                      BorderThickness: =If(gTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Regular
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - h-q-title:
+                        Control: Label
+                        Properties:
+                          Text: ="Quality"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Dark
+                          Fill: =gTheme.Secondary
+                          Size: =Self.Height / 3
+                    - h-q-chart:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                            With({thisData: Round(rQuality*100,2)},
+                                EncodeUrl(
+                                    "{
+                                        type: 'radialGauge',
+                                        data: {
+                                            datasets: [{
+                                                data: ["& thisData &"],
+                                                backgroundColor: getGradientFillHelper('horizontal', [
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Red &"',
+                                                    '"& gTheme.Chart_Red &"',
+                                                    '"& gTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                        },
+                                        options: {
+                                            domain: [0, "& If(thisData <= 100, 100, thisData) &"],
+                                            trackColor: '"& gTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                                text: (val) => val + '%',
+                                                fontColor: '"& gTheme.Chart_Black &"'
+                                            },
+                                        }
+                                    }"
+                                )
+                            )
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                - h-OEE1:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gTheme.Sec_Complement
+                      BorderThickness: =If(gTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Regular
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - h-o-title:
+                        Control: Label
+                        Properties:
+                          Text: ="TPS OEE"
+                          Align: =Align.Center
+                          Color: =gTheme.Text_On_Dark
+                          Fill: =gTheme.Secondary
+                          Size: =Self.Height / 3
+                    - h-o-chart:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                            With({thisData: Round(rOEE1*100,2)},
+                                EncodeUrl(
+                                    "{
+                                        type: 'radialGauge',
+                                        data: {
+                                            datasets: [{
+                                                data: ["& thisData &"],
+                                                backgroundColor: getGradientFillHelper('horizontal', [
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Blue &"',
+                                                    '"& gTheme.Chart_Red &"',
+                                                    '"& gTheme.Chart_Red &"',
+                                                    '"& gTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                        },
+                                        options: {
+                                            domain: [0, "& If(thisData <= 100, 100, thisData) &"],
+                                            trackColor: '"& gTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                                text: (val) => val + '%',
+                                                fontColor: '"& gTheme.Chart_Black &"'
+                                            },
+                                        }
+                                    }"
+                                )
+                            )
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+            - h-kanban:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   BorderColor: =gTheme.Sec_Complement
-                  BorderThickness: |-
-                    =//If(gTheme.Mode = "Light", 0, 1)
-                    0
-                  Fill: =gTheme.Background_1
+                  BorderThickness: =If(gTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gTheme.Midground
                   FillPortions: =0
-                  Height: =Parent.Height * 0.3333
+                  Height: =Parent.Height * 0.6
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutMode: =LayoutMode.Auto
-                  Width: =Parent.Width* 0.25
+                  Width: =Parent.Width * 0.35
                 Children:
-                - h-w-title:
+                - h-k-title:
                     Control: Label
                     Properties:
-                      Text: ="Welcome, " & User().FullName
+                      Text: ="Kanban"
                       Align: =Align.Center
-                      Color: =gTheme.Text_Light
+                      Color: =gTheme.Text_On_Dark
                       Fill: =gTheme.Secondary
-                      FillPortions: =1
-                      LayoutMinHeight: =1
-                      LayoutMinWidth: =1
+                      LayoutMinWidth: =10
                       Size: =Self.Height / 3
-                - h-w-content:
-                    Control: Label
+                - h-k-gallery:
+                    Control: Gallery
+                    Variant: BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0
                     Properties:
-                      Text: |-
-                        ="        This application is currently in development. You can find the bug report button on each screen in the top banner. If you happen to come across any  faults with the system please send out a report so it may be addressed. You can also send reports for requests for additional functionality.
-
-                                The navigation on the left allows you to display the outputs of each pleater line's built packs, pull reports from the pleaters downtime collection system, and analyze OEE2 data and their weekly trends."
-                      BorderColor: =RGBA(0,0,0,0)
-                      Color: =gTheme.Text_Dark
-                      Fill: =RGBA(0,0,0,0)
-                      FillPortions: =7
-                      LayoutMinHeight: =1
-                      LayoutMinWidth: =1
-                      Overflow: =Overflow.Scroll
-                      Size: =Self.Height / 24
+                      Items: =cKanban
+                      WrapCount: =4
+                      DelayItemLoading: =true
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Parent.Width / 3
+                    Children:
+                    - h-k-gallery-status:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =ThisItem.Status
+                          Align: =Align.Center
+                          Height: =Parent.TemplateHeight * 0.25
+                          Size: =Self.Height / 3
+                          Width: =Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight - Self.Height
+                    - h-k-gallery-line:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =ThisItem.Line
+                          Align: =Align.Center
+                          Fill: =If(ThisItem.Status = "Running", gTheme.Accent, gTheme.Deny)
+                          Height: =Parent.TemplateHeight
+                          Size: =Self.Height / 3
+                          Width: =Parent.TemplateWidth
