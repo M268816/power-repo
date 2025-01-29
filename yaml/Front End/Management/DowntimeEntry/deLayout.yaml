@@ -1,0 +1,1237 @@
+- deLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - deCollect:
+        Control: Classic/Button
+        Properties:
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - deSequentialCollect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - deUpdate:
+        Control: Classic/Button
+        Properties:
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - deHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - deBack:
+            Control: Image
+            Properties:
+              OnSelect: =Back(ScreenTransition.Fade)
+              Image: =gblIcons.Back
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - deTitle:
+            Control: Label
+            Properties:
+              Text: ="Singleton"
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - deMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - deBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - deUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - deMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - deFormParent:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              BorderColor: =gblTheme.Sec_Complement
+              BorderThickness: =If(gblTheme.Mode = "Light",0,1)
+              DropShadow: =DropShadow.Regular
+              Fill: =gblTheme.Midground
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutMinHeight: =10
+              LayoutMode: =LayoutMode.Auto
+              Width: =Parent.Width * 0.35
+            Children:
+            - deForm:
+                Control: Form
+                Layout: vertical
+                Properties:
+                  OnSuccess: =ResetForm(deForm)
+                  DataSource: =FE_Downtime
+                  DefaultMode: =FormMode.New
+                  FillPortions: =11
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =Parent.Width
+                Children:
+                - deFormLineCard:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: vertical
+                    Properties:
+                      DataField: ="Line"
+                      Default: =ThisItem.Line
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Line)
+                      Required: =true
+                      Update: =deFormLineValue.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =560
+                      WidthFit: =true
+                    Children:
+                    - deFormLineStar:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Height: =deFormLineKey.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =deFormLineKey.Y
+                    - deFormLineError:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormLineValue.Y + deFormLineValue.Height
+                    - deFormLineValue:
+                        Control: Classic/ComboBox
+                        Layout: vertical
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@FE_Downtime].Line)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormLineKey.Y + deFormLineKey.Height + 5
+                    - deFormLineKey:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - deFormShiftCard:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: vertical
+                    Properties:
+                      DataField: ="Shift_Letter"
+                      Default: =ThisItem.Shift_Letter
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Shift_Letter)
+                      Required: =true
+                      Update: =deFormShiftValue.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =560
+                      WidthFit: =true
+                      Y: =1
+                    Children:
+                    - deFormShiftStar:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Height: =deFormShiftKey.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =deFormShiftKey.Y
+                    - deFormShiftError:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormShiftValue.Y + deFormShiftValue.Height
+                    - deFormShiftValue:
+                        Control: Classic/ComboBox
+                        Layout: vertical
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@FE_Downtime].Shift_Letter)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormShiftKey.Y + deFormShiftKey.Height + 5
+                    - deFormShiftKey:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - deFormLotCard:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: vertical
+                    Properties:
+                      DataField: ="Title"
+                      Default: =ThisItem.Lot
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Title)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Title)
+                      Required: =true
+                      Update: =deFormLotValue.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =560
+                      WidthFit: =true
+                      Y: =2
+                    Children:
+                    - deFormLotStar:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Height: =deFormLotKey.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =deFormLotKey.Y
+                    - deFormLotError:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormLotValue.Y + deFormLotValue.Height
+                    - deFormLotValue:
+                        Control: Classic/TextInput
+                        Layout: vertical
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormLotKey.Y + deFormLotKey.Height + 5
+                    - deFormLotKey:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - deFormCatalogCard:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: vertical
+                    Properties:
+                      DataField: ="Catalog"
+                      Default: =ThisItem.Catalog
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Catalog)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Catalog)
+                      Required: =true
+                      Update: =deFormCatalogValue.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =560
+                      WidthFit: =true
+                      Y: =3
+                    Children:
+                    - deFormCatalogStar:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Height: =deFormCatalogKey.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =deFormCatalogKey.Y
+                    - deFormCatalogError:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormCatalogValue.Y + deFormCatalogValue.Height
+                    - deFormCatalogValue:
+                        Control: Classic/TextInput
+                        Layout: vertical
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormCatalogKey.Y + deFormCatalogKey.Height + 5
+                    - deFormCatalogKey:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - deFormReasonCard:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: vertical
+                    Properties:
+                      DataField: ="Reason"
+                      Default: =ThisItem.Reason
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Reason)
+                      Required: =true
+                      Update: =deFormReasonValue.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =560
+                      WidthFit: =true
+                      Y: =4
+                    Children:
+                    - deFormReasonStar:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Height: =deFormReasonKey.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =deFormReasonKey.Y
+                    - deFormReasonError:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormReasonValue.Y + deFormReasonValue.Height
+                    - deFormReasonValue:
+                        Control: Classic/ComboBox
+                        Layout: vertical
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@FE_Downtime].Reason)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormReasonKey.Y + deFormReasonKey.Height + 5
+                    - deFormReasonKey:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - deFormStartedCard:
+                    Control: TypedDataCard
+                    Variant: dateTimeEditCard
+                    Layout: vertical
+                    Properties:
+                      DataField: ="Started"
+                      Default: =gTime.Now
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Started)
+                      Required: =true
+                      Update: =If(Not IsBlank(deFormStartedDate.SelectedDate), DateTime(Year(deFormStartedDate.SelectedDate), Month(deFormStartedDate.SelectedDate), Day(deFormStartedDate.SelectedDate), Value(deFormStartedHour.Selected.Value), Value(deFormStartedMinute.Selected.Value), 0))
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =560
+                      WidthFit: =true
+                      Y: =5
+                    Children:
+                    - deFormStartedAMPM:
+                        Control: Classic/DropDown
+                        Layout: vertical
+                        Properties:
+                          Default: |-
+                            =Text(
+                                If(Hour(Parent.Default) >= 12, "PM", "AM"),
+                                "00"
+                            )
+                          Items: =["AM", "PM"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          Height: =deFormStartedHour.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =deFormStartedHour.Width
+                          X: =deFormStartedMinute.X + deFormStartedMinute.Width + deFormStartedSeparator.Width
+                          Y: =deFormStartedHour.Y
+                    - deFormStartedStar:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Height: =deFormStartedKey.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =deFormStartedKey.Y
+                    - deFormStartedError:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormStartedHour.Y + deFormStartedHour.Height
+                    - deFormStartedMinute:
+                        Control: Classic/DropDown
+                        Layout: vertical
+                        Properties:
+                          Default: =Text(Minute(Parent.Default),"00")
+                          Items: =["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          Height: =deFormStartedHour.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =deFormStartedHour.Width
+                          X: =deFormStartedHour.X + deFormStartedHour.Width + deFormStartedSeparator.Width
+                          Y: =deFormStartedHour.Y
+                    - deFormStartedSeparator:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =":"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          FontWeight: =FontWeight.Bold
+                          Height: =deFormStartedHour.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Width: =10
+                          Wrap: =false
+                          X: =deFormStartedHour.X + deFormStartedHour.Width
+                          Y: =deFormStartedHour.Y
+                    - deFormStartedHour:
+                        Control: Classic/DropDown
+                        Layout: vertical
+                        Properties:
+                          Default: |-
+                            =Text(
+                                Switch(Hour(Parent.Default),
+                                    0, 1,
+                                    12, 12,
+                                    Mod(Hour(Parent.Default),12)
+                                ),
+                                "00"
+                            )
+                          Items: =["01","02","03","04","05","06","07","08","09","10","11","12"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          Height: =deFormStartedDate.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =deFormStartedDate.Width / 2 - 10
+                          X: =deFormStartedDate.X + deFormStartedDate.Width + 10
+                          Y: =deFormStartedDate.Y
+                    - deFormStartedDate:
+                        Control: Classic/DatePicker
+                        Layout: vertical
+                        Properties:
+                          DefaultDate: =Parent.Default
+                          EndYear: =Year(Today())+100
+                          StartYear: =1899
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          IconBackground: =gblTheme.Secondary
+                          IconFill: =gblTheme.Background
+                          IsEditable: =true
+                          PaddingBottom: =0
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width * 0.358
+                          X: =30
+                          Y: =deFormStartedKey.Y + deFormStartedKey.Height + 5
+                    - deFormStartedKey:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - deFormEndedCard:
+                    Control: TypedDataCard
+                    Variant: dateTimeEditCard
+                    Layout: vertical
+                    Properties:
+                      DataField: ="Ended"
+                      Default: =DateAdd(gTime.Now, 1, TimeUnit.Hours)
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Ended)
+                      Required: =true
+                      Update: =If(Not IsBlank(deFormEndedDate.SelectedDate), DateTime(Year(deFormEndedDate.SelectedDate), Month(deFormEndedDate.SelectedDate), Day(deFormEndedDate.SelectedDate), Value(deFormEndedHour.Selected.Value), Value(deFormEndedMinute.Selected.Value), 0))
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =560
+                      WidthFit: =true
+                      Y: =6
+                    Children:
+                    - deFormEndedAMPM:
+                        Control: Classic/DropDown
+                        Layout: vertical
+                        Properties:
+                          Default: |-
+                            =Text(
+                                If(Hour(Parent.Default) >= 12, "PM", "AM"),
+                                "00"
+                            )
+                          Items: =["AM", "PM"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          Height: =deFormEndedHour.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =deFormEndedHour.Width
+                          X: =deFormEndedMinute.X + deFormEndedMinute.Width + deFormEndedSeparator.Width
+                          Y: =deFormEndedHour.Y
+                    - deFormEndedStar:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Height: =deFormEndedKey.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =deFormEndedKey.Y
+                    - deFormEndedError:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormEndedHour.Y + deFormEndedHour.Height
+                    - deFormEndedMinute:
+                        Control: Classic/DropDown
+                        Layout: vertical
+                        Properties:
+                          Default: =Text(Minute(Parent.Default),"00")
+                          Items: =["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          Height: =deFormEndedHour.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =deFormEndedHour.Width
+                          X: =deFormEndedHour.X + deFormEndedHour.Width + deFormEndedSeparator.Width
+                          Y: =deFormEndedHour.Y
+                    - deFormEndedSeparator:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =":"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          FontWeight: =FontWeight.Bold
+                          Height: =deFormEndedHour.Height
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Width: =10
+                          Wrap: =false
+                          X: =deFormEndedHour.X + deFormEndedHour.Width
+                          Y: =deFormEndedHour.Y
+                    - deFormEndedHour:
+                        Control: Classic/DropDown
+                        Layout: vertical
+                        Properties:
+                          Default: |-
+                            =Text(
+                                Switch(Hour(Parent.Default),
+                                    0, 1,
+                                    12, 12,
+                                    Mod(Hour(Parent.Default),12)
+                                ),
+                                "00"
+                            )
+                          Items: =["01","02","03","04","05","06","07","08","09","10","11","12"]
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          Height: =deFormEndedDate.Height
+                          PaddingBottom: =5
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PaddingRight: =5
+                          PaddingTop: =5
+                          Width: =deFormEndedDate.Width / 2 - 10
+                          X: =deFormEndedDate.X + deFormEndedDate.Width + 10
+                          Y: =deFormEndedDate.Y
+                    - deFormEndedDate:
+                        Control: Classic/DatePicker
+                        Layout: vertical
+                        Properties:
+                          DefaultDate: =Parent.Default
+                          EndYear: =Year(Today())+100
+                          StartYear: =1899
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          IconBackground: =gblTheme.Secondary
+                          IconFill: =gblTheme.Background
+                          IsEditable: =true
+                          PaddingBottom: =0
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =Parent.Width * 0.358
+                          X: =30
+                          Y: =deFormEndedKey.Y + deFormEndedKey.Height + 5
+                    - deFormEndedKey:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+                - deFormCommentCard:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: vertical
+                    Properties:
+                      DataField: ="Comments"
+                      Default: =ThisItem.Comments
+                      DisplayName: =DataSourceInfo([@FE_Downtime],DataSourceInfo.DisplayName,Comments)
+                      MaxLength: =DataSourceInfo([@FE_Downtime], DataSourceInfo.MaxLength, Comments)
+                      Update: =deFormCommentValue.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =100
+                      Width: =50
+                      WidthFit: =true
+                      Y: =7
+                    Children:
+                    - deFormCommentStar:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Height: =deFormCommentKey.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =deFormCommentKey.Y
+                    - deFormCommentError:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormCommentValue.Y + deFormCommentValue.Height
+                    - deFormCommentValue:
+                        Control: Classic/TextInput
+                        Layout: vertical
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          Color: =gblTheme.Text_On_Light
+                          DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =deFormCommentKey.Y + deFormCommentKey.Height + 5
+                    - deFormCommentKey:
+                        Control: Label
+                        Layout: vertical
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
+                          Height: =34
+                          Width: =Parent.Width - 60
+                          Wrap: =false
+                          X: =30
+                          Y: =10
+            - deFormButtons:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  DropShadow: =DropShadow.Regular
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gblPadding * 2
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  LayoutMinHeight: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding * 2
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding * 2
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - deFormSubmit:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =SubmitForm(deForm);
+                      Text: ="Submit"
+                      BorderColor: =gblTheme.Pri_Complement
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FontWeight: =FontWeight.Normal
+                      HoverBorderColor: =gblTheme.Sec_Complement
+                      HoverColor: =gblTheme.Text_On_Dark
+                      HoverFill: =gblTheme.Accept
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width * 0.3
+                - deFormCancel:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: |-
+                        =ResetForm(deForm);
+                        Reset(deGallery);
+                      Text: ="Cancel"
+                      BorderColor: =gblTheme.Pri_Complement
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =gblTheme.Secondary
+                      FontWeight: =FontWeight.Normal
+                      HoverBorderColor: =gblTheme.Sec_Complement
+                      HoverColor: =gblTheme.Text_On_Dark
+                      HoverFill: =gblTheme.Deny
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Size: =Self.Height / 3
+                      Width: =Parent.Width * 0.3
+        - deGalleryParent:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              BorderColor: =gblTheme.Sec_Complement
+              BorderThickness: =If(gblTheme.Mode = "Light",0,1)
+              DropShadow: =DropShadow.Regular
+              Fill: =gblTheme.Midground
+              FillPortions: =0
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutMinHeight: =10
+              LayoutMode: =LayoutMode.Auto
+              Width: =Parent.Width * 0.35
+            Children:
+            - deGalleryColumns:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Secondary
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - deGalleryColumnsLine:
+                    Control: Label
+                    Properties:
+                      Text: ="Line"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =0.5
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                - deGalleryColumnsStarted:
+                    Control: Label
+                    Properties:
+                      Text: ="Started"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                - deGalleryColumnsEnded:
+                    Control: Label
+                    Properties:
+                      Text: ="Ended"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                - deGalleryColumnsLot:
+                    Control: Label
+                    Properties:
+                      Text: ="Lot"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                - deGalleryColumnsCatalog:
+                    Control: Label
+                    Properties:
+                      Text: ="Catalog"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1.5
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+                - deGalleryColumnsReason:
+                    Control: Label
+                    Properties:
+                      Text: ="Reason"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =RGBA(0,0,0,0)
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 6
+            - deGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Default: ={}
+                  Items: "=Sort(\r\n    Filter(FE_Downtime,\r\n        Started >= DateAdd(deFormStartedDate.SelectedDate, -1,TimeUnit.Hours),\r\n        Ended < DateAdd(deFormEndedDate.SelectedDate, 23, TimeUnit.Hours),\r\n        If(Not(deFormLineValue.Selected.Value = Blank()),\r\n            Line.Value = deFormLineValue.Selected.Value,\r\n            true\r\n        ),\r\n        If(Not(deFormShiftValue.Selected.Value = Blank()),\r\n            Shift_Letter.Value = deFormShiftValue.Selected.Value,\r\n            true\r\n        )\r\n        \r\n    ),\r\n    Started,\r\n    SortOrder.Ascending\r\n)"
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  FillPortions: =11
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =0
+                  TemplateSize: =Self.Height / 16
+                Children:
+                - deGalleryData:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.Regular
+                      Fill: =If(ThisItem.IsSelected, gblTheme.Pri_Complement, RGBA(0, 0, 0, 0))
+                      Height: =Parent.TemplateHeight - deGallerySeparator.Height
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Width: =Parent.TemplateWidth
+                    Children:
+                    - deGalleryLine:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.Line.Value
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =0.5
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 5
+                    - deGalleryStarted:
+                        Control: Label
+                        Properties:
+                          Text: |-
+                            =DateValue(ThisItem.Started)
+                            & Char(13) &
+                            TimeValue(ThisItem.Started)
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 5
+                    - deGalleryEnded:
+                        Control: Label
+                        Properties:
+                          Text: |-
+                            =DateValue(ThisItem.Ended)
+                            & Char(13) &
+                            TimeValue(ThisItem.Ended)
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 5
+                    - deGalleryLot:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.Lot
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 5
+                    - deGalleryCatalog:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.Catalog
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1.5
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 5
+                    - deGalleryReason:
+                        Control: Label
+                        Properties:
+                          Text: =ThisItem.Reason.Value
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 5
+                - deGallerySeparator:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Accent
+                      Height: =Parent.TemplateHeight * 0.05
+                      Width: =Parent.TemplateWidth
+                      Y: =Parent.TemplateHeight - Self.Height
