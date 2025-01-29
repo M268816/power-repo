@@ -107,7 +107,7 @@ Home
 Each object starts with the first letter of the screen's name. Then they receive
 either, their own name, becoming a parent, or their parent's name. With the
 submit button nested so far within the tree, naming it something like
-'h-main-body-form-submit' is too unwieldy. So, nested controls should only try
+'hMainBodyFormButtonsSubmit' is too unwieldy. So, nested controls should only try
 and be as distinctive as their screen name and *lowest significant parent*.
 
 > hFormSubmit
@@ -119,21 +119,20 @@ between the 'Load Error' popup and the 'Warning' popup structures.
 
 > hPopupWarningHeader
 
-However, we wont need to go so in depth for the content. We just need to go deep
-enough into the tree as to make it distinguishable between other objects within
-the same level.
+We wont need to go so in depth for content. We just need to go deep enough into
+the tree to make it distinguishable between other objects within the same level.
 
-> ~~hMainBodyFormParentFormButtonsSubmit~~
+> ~~hLayoutMainBodyFormParentFormButtonsSubmit~~
 >
 > hFormSubmit
 
-> ~~hPopupWarningBodyConfirm~~
+> ~~hLayoutPopupsWarningBodyConfirm~~
 >
 > hPopupWarningConfirm
 
-I break this rule for items that would only appear once. Like a bug report
-button would not need to describe its located within the header or footer, but
-that its the bug button for that page.
+For items that only appear once I break all the rules and only prefix the screen
+of the control. Like a bug report button would not need to describe its located
+within the header or footer, but only that its the bug button for that page.
 
 > ~~hMainHeaderReportBug~~
 >
@@ -141,9 +140,9 @@ that its the bug button for that page.
 
 ## Variables
 
-> Update Jan 28 2025: I really liked using the simpler 'g' or 'l' for naming
-> variables. But it was unfortunately hard to read sometimes. Changing the 
-> my convention to always use the three letter prefix instead.
+> Update Jan 28 2025: I really liked using the simpler 'g' from 'gbl or 'l' from
+> 'loc' for naming variables. But it was unfortunately hard to read sometimes.
+> Changing my convention to always use the three letter prefix instead.
 
 PowerApp development is in a fight with itself over where it wants to store its 
 variables using two functions 'Set()' and 'UpdateContext({})'. Set() is used
@@ -266,7 +265,7 @@ Collections in PowerApps are powerful data structures that can be used for a
 large variety of data management. These collections can be used to not only
 store and display data from within the app, but you can pull data from outside
 databases like share point lists to create local copies. These local copies can
-be manipulated without need to worry about delegation. Collections can even be
+be manipulated without needing to worry about delegation. Collections can even be
 used to create static lists, dictionaries, arrays, or tables of variables.
 
 - Collections
@@ -280,7 +279,7 @@ used to create static lists, dictionaries, arrays, or tables of variables.
 Clear(colProduction);
 // For all Records in this data
 ForAll(EncapsulationProductionData,
-    //Collect each record into cProduction
+    //Collect each record into colProduction
     Collect(colProduction,
         {
             Id: ThisRecord.Id,
@@ -299,13 +298,13 @@ ForAll(EncapsulationProductionData,
 
 Single record collections are useful for creating mutable variables accessible
 with dot notation. I make sure to only ever init the collection, then change its
-variables with the Patch() function. There is a drawback to this method, to use
+variables with the Patch() function. There is a drawback to this method. To use
 the dot notation, you need to use the First() function to access the record. 
 However, through extensive testing, this is the only way to make mutable data
 structures and variables that can use dot notation.
 
 - Mutable Records
-    - Use ClearCollect() for initialization.
+    - Use Collect() for initialization.
     - Prefix the collection with 'rec'
     - Use camel case.
     - Set new values with Patch()

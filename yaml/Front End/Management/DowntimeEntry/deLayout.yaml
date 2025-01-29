@@ -71,7 +71,7 @@
         - deTitle:
             Control: Label
             Properties:
-              Text: ="Singleton"
+              Text: =APP_NAME
               Color: =gblTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
@@ -128,6 +128,7 @@
           DropShadow: =DropShadow.None
           FillPortions: =11
           LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding * 2
           LayoutJustifyContent: =LayoutJustifyContent.Center
           LayoutMinHeight: =10
           LayoutMinWidth: =10
