@@ -350,7 +350,7 @@
                 Control: Image
                 Properties:
                   Image: |-
-                    ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
+                    ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&chart=" & 
                     EncodeUrl("
 
                     {

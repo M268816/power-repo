@@ -4,6 +4,29 @@ In an attempt to create some sort of consistency with my own code, I'm going to
 write up a code of ethics and conventions for writing PowerApps code and try and
 adhere to them.
 
+## Commenting
+
+No big comment rules here, just be sure to use comments for tricky parts of
+formulas or functions
+
+```cpp
+// Inline comments have so much rizz
+
+/*
+    I Got a lot to say here:
+    Look at all this freaking
+    code here.
+
+    It does something that chatGPT
+    told me worked so well.
+
+    It took 5 hrs to debug tho.
+    Thanks chatGPT 👎
+    Not very skibity of you.
+
+*/
+```
+
 ## Databases or data sources
 
 When using outside data sources, it's good practice to first create the database
@@ -32,88 +55,95 @@ explained in the next section.
 
 ```
 Home
-  |_. h-control
+  |_. hControl
 
 OrderMaterials
-  |_. o-control
+  |_. oControl
 ```
 
 ## Objects / Controls
 
+> Update Jan 28 2025: PowerApps handles kebab case by adding single quotes to the
+> yaml code. Using this for a while, I noticed how absolutely annoying it was.
+> It makes editing objects in yaml to import into the Editor a big
+> pain, changed conventions to use camelCaseInstead.
+
 ```
-<Screen>-<Parent>-<Object>-<Iteration>
+<screen><Parent><Object><Iteration>
 ```
 
 Because the complexity of object trees can increase quickly naming objects in
-the app can get out of hand quickly. To combat this; first I use kebab case to
-distinguish between objects and variables, then begin the name of an object with
-its parent screen. Next, the lowest significant parent of the object on the tree
-is added to the name until I need to use an unique identifier. For example, A
-button that would submit information on the home page, located in the main form
-content of the screen may be named 'h-form-submit'.
+the app can get out of hand quickly. To combat this, I will use ~~kebab case~~
+camel case to distinguish between objects and variables. I begin the name of an
+object with the first initial of its parent screen then add the lowest significant
+parent of the object on the tree until I need to use a unique identifier. For
+example, A button that would submit information on the home page, located in the
+main form content of the screen may be named 'hFormSubmit'.
 
 The parent structure looks like this.
+
 ```
 Home
-  |_. h-popups
-    |_. h-pop-load-error
-      |_. h-pop-le-header
-      |_. h-pop-le-body
-      |_. h-pop-le-footer
-    |_. h-pop-warning
-      |_. h-pop-warn-header
-      |_. h-pop-warn-body
-      |_. h-pop-warn-footer
-  |_. h-main
-    |_. h-header
-    |_. h-body
-      |_. h-form-parent
-        |_. h-form
-        |_. h-form-submit
-    |_. h-footer
+  |_. hPopups
+    |_. hPopupLoadError
+      |_. hPopupLoadErrorHeader
+      |_. hPopupLoadErrorBody
+      |_. hPopupLoadErrorFooter
+    |_. hPopupWarning
+      |_. hPopupWarningHeader
+      |_. hPopupWarningBody
+      |_. hPopupWarningFooter
+  |_. hMain
+    |_. hHeader
+    |_. hBody
+      |_. hFormParent
+        |_. hForm
+        |_. hFormButtons
+          |_. hFormSubmit
+          |_. hFormCancel
+    |_. hFooter
 ```
+
 Each object starts with the first letter of the screen's name. Then they receive
 either, their own name, becoming a parent, or their parent's name. With the
 submit button nested so far within the tree, naming it something like
 'h-main-body-form-submit' is too unwieldy. So, nested controls should only try
 and be as distinctive as their screen name and *lowest significant parent*.
-> h-form-submit
+
+> hFormSubmit
 
 But with objects like the popups, this does get ugly, as we need to distinguish 
 between the 'Load Error' popup and the 'Warning' popup structures.
-> h-pop-le-header
 
-> h-pop-warn-header
+> hPopupLoadErrorHeader
+
+> hPopupWarningHeader
 
 However, we wont need to go so in depth for the content. We just need to go deep
 enough into the tree as to make it distinguishable between other objects within
-the same level. I even use short hand for longer names like 'Load Error', and
-just use 'le' instead.
-> ~~h-pop-le-header-title~~
->
-> h-pop-le-title
+the same level.
 
-> ~~h-pop-le-body-confirm~~
+> ~~hMainBodyFormParentFormButtonsSubmit~~
 >
-> h-pop-le-confirm
+> hFormSubmit
 
-> ~~h-pop-warn-header-title~~
+> ~~hPopupWarningBodyConfirm~~
 >
-> h-pop-warn-title
-
-> ~~h-pop-warn-body-confirm~~
->
-> h-pop-warn-confirm
+> hPopupWarningConfirm
 
 I break this rule for items that would only appear once. Like a bug report
 button would not need to describe its located within the header or footer, but
 that its the bug button for that page.
 
-> ~~h-main-header-report-bug~~
+> ~~hMainHeaderReportBug~~
 >
-> h-report-bug
+> hReportBug
 
 ## Variables
+
+> Update Jan 28 2025: I really liked using the simpler 'g' or 'l' for naming
+> variables. But it was unfortunately hard to read sometimes. Changing the 
+> my convention to always use the three letter prefix instead.
 
 PowerApp development is in a fight with itself over where it wants to store its 
 variables using two functions 'Set()' and 'UpdateContext({})'. Set() is used
@@ -122,6 +152,7 @@ anywhere in the app. UpdateContext({}) creates variables that can only be set
 and accessed in the screen they were initiated. You can use Set() to create any
 data structure you would need. UpdateContext({}) stores everything in a record.
 But, record values can then be set to whatever type you may need.
+
 ```cpp
 Set(variable, value);
 
@@ -132,9 +163,10 @@ The variable scopes I use in a PowerApp are constant, local, global, and
 something I call universal. Here are the conventions that I use.
 
 ### Constant
+
 - Variables that should be set, and not changed.
     - Use the Set() function.
-    - Snake case.
+    - Screaming Snake case.
     - All capital letters.
     - The actual concept of constants do no exist within PowerApps, so this must
     be self regulated. Whenever you need a constant set it on the app start
@@ -144,33 +176,36 @@ something I call universal. Here are the conventions that I use.
     ```
 
 ### Local
+
 - Variables that only need to apply to the current loaded screen.
     - Use the UpdateContext({}) function.
-    - Prefix with 'l' or 'loc'.
+    - Prefix with 'loc'.
     - Camel case.
     ```cpp
-    UpdateContext({lThemeMode: Theme.Mode.Dark});
+    UpdateContext({locThemeMode: Theme.Mode.Dark});
     ```
 
 ### Global
+
 - Variables that need to be applied across the whole application.
     - Use the Set() function.
-    - Prefix with 'g' or 'gbl'.
+    - Prefix with 'gbl'.
     - Camel Case.
     ```cpp
-    Set(gThemeMode, Theme.Mode.Dark);
+    Set(gblThemeMode, Theme.Mode.Dark);
     ```
 ### Universal
+
 - Variables that need to be applied across application *sessions*.
     - Use the Set() function.
-    - Prefix with 'U' or 'UNI'.
-    - Snake case.
+    - Prefix with 'UNI'.
+    - Screaming Snake case.
     - All capital letters.
     - Init the value from a data source.
     - Set new values to the data source.
     ```cpp
     // Init the value from the data source
-    Set(U_THEME_MODE, LookUp(UserPreferences, E_Mail = User().Email).Theme_Mode)
+    Set(UNI_THEME_MODE, LookUp(UserPreferences, E_Mail = User().Email).Theme_Mode)
     
     // To set the variable, use Patch()
     Patch(UserPreferences,
@@ -206,16 +241,17 @@ I fix this by assigning the functions to variables.
 
 The variables are set at a global level each time a screen is loaded or 
 logic needs to be run. The variables I set for these purposes is as follows:
+
 ```cpp
-Set(gToday, Today());
+Set(gblToday, Today());
 
-Set(gNow, Now());
+Set(gblNow, Now());
 
-Set(gHour, Hour(Now()));
+Set(gblHour, Hour(Now()));
 
 /*Or to allow for dot notation*/
 
-Set(gTime,
+Set(gblTime,
     {
         Today: Today(),
         Now: Now(),
@@ -236,15 +272,16 @@ used to create static lists, dictionaries, arrays, or tables of variables.
 - Collections
     - Use Collect() for initialization, or within ForALL() loops.
     - Use ClearCollect() for everything else.
-    - Prefix the collection with 'c' or 'collect'
+    - Prefix the collection with 'col'
     - Camel case.
+
 ```cpp
 // Clear the collection for new data
-Clear(cProduction);
+Clear(colProduction);
 // For all Records in this data
 ForAll(EncapsulationProductionData,
     //Collect each record into cProduction
-    Collect(cProduction,
+    Collect(colProduction,
         {
             Id: ThisRecord.Id,
             Line: ThisRecord.Line,
@@ -261,19 +298,22 @@ ForAll(EncapsulationProductionData,
 ## Records
 
 Single record collections are useful for creating mutable variables accessible
-with dot notation. To use collections this way, preface the collection with 'r'
-or 'record'. Then, be sure to only ever init the collection, then change its
+with dot notation. I make sure to only ever init the collection, then change its
 variables with the Patch() function. There is a drawback to this method, to use
-the dot notation, you need to use the First() function to access the record.
+the dot notation, you need to use the First() function to access the record. 
+However, through extensive testing, this is the only way to make mutable data
+structures and variables that can use dot notation.
 
 - Mutable Records
     - Use ClearCollect() for initialization.
-    - Prefix the collection with 'r' or 'record'
+    - Prefix the collection with 'rec'
     - Use camel case.
     - Set new values with Patch()
     - Get values with First()
+
 ```cpp
-ClearCollect(rPopups,
+// Initialize
+ClearCollect(recPopups,
     {
         Display_Text: "Not Loading",
         Value: -1,
@@ -281,8 +321,11 @@ ClearCollect(rPopups,
         Visible: false
     }
 );
-// Setter: Patch(rPopups,First(rPopups),{Value: 10});
-// Getter: First(rPopups).Value
+
+// Setter
+Patch(recPopups,First(recPopups),{Value: 10});
+// Getter
+First(recPopups).Value
 ```
 
 When we only need to store a single immutable record. Instead of using a
@@ -293,13 +336,15 @@ This method also ensure we are using as little memory as possible with the app,
 as setting a record variable is less intensive than setting up a collection for
 a single record. The downside to this, is that Set() records must be updated in
 their entirety, as the Patch() function will not work with Set().
+
 - Records
     - Use Set() for initialization.
-    - Prefix the record with 'r' or 'record'
+    - Prefix the record with 'rec'
     - Use camel case.
+
 ```cpp
-// To set AND update this record.
-Set(rOEE,
+// Initialize and Setter
+Set(recOEE,
     {
         OEE2: 0.5,
         Amount_Built: 100,
@@ -307,6 +352,9 @@ Set(rOEE,
         Rejects: 5
     }
 );
+
+// Getter
+recOEE.Goal
 ```
 
 ## Field Names
@@ -324,7 +372,7 @@ and filter it for another data display.
 ```cpp
 // Copy the original data source into a local copy. 'Top Level Collection'
 ForAll(DataSource,
-    Collect(cTopLevelData,
+    Collect(colTopLevelData,
         {
             Id: ThisRecord.ID,
             DateTime: ThisRecord.DateTime,
@@ -335,8 +383,8 @@ ForAll(DataSource,
 );
 
 // Create a sub-collection, a modified/filtered version.
-ForAll(Filter(cTopLevelData, DateTime = gTime.Today),
-    Collect(cLowerLevelData,
+ForAll(Filter(colTopLevelData, DateTime = gblTime.Today),
+    Collect(colLowerLevelData,
         {
             id: ThisRecord.Id,
             date: DateValue(ThisRecord.DateTime),
@@ -349,4 +397,3 @@ ForAll(Filter(cTopLevelData, DateTime = gTime.Today),
     )
 );
 ```
-## Galleries

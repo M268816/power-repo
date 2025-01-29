@@ -122,7 +122,7 @@
         - oee-title:
             Control: Label
             Properties:
-              Text: ="App Title"
+              Text: =APP_NAME
               Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
@@ -601,7 +601,7 @@
                                     Properties:
                                       Text: =Last(collectOEE2).total_packs*1
                                       Align: =Align.Center
-                                      Color: =gTheme.Text_Dark
+                                      Color: =gTheme.Text_On_Light
                                       FillPortions: =1
                                       Font: =Font.Verdana
                                       FontWeight: =FontWeight.Semibold
@@ -645,7 +645,7 @@
                                         ="Not Collected"
                                         //Last(collectOEE2).line
                                       Align: =Align.Center
-                                      Color: =gTheme.Text_Dark
+                                      Color: =gTheme.Text_On_Light
                                       FillPortions: =1
                                       Font: =Font.Verdana
                                       LayoutMinHeight: =10
@@ -703,7 +703,7 @@
                                         =IfError(Round(Last(collectOEE2).pack_per_hour*1,0),0) & "
                                         packs per hour"
                                       Align: =Align.Center
-                                      Color: =gTheme.Text_Dark
+                                      Color: =gTheme.Text_On_Light
                                       FillPortions: =1
                                       Font: =Font.Verdana
                                       LayoutMinHeight: =10
@@ -744,7 +744,7 @@
                                     Properties:
                                       Text: =RoundDown(Last(collectOEE2).planned_packs,0)
                                       Align: =Align.Center
-                                      Color: =gTheme.Text_Dark
+                                      Color: =gTheme.Text_On_Light
                                       FillPortions: =1
                                       Font: =Font.Verdana
                                       LayoutMinHeight: =10
@@ -803,7 +803,7 @@
                                         //"Not Collected"
                                         //RoundDown(First(collectOEE2).downtime_unplanned/60,0) &"H "& Mod(First(collectOEE2).downtime_unplanned,60) & "m"
                                       Align: =Align.Center
-                                      Color: =gTheme.Text_Dark
+                                      Color: =gTheme.Text_On_Light
                                       FillPortions: =1
                                       Font: =Font.Verdana
                                       LayoutMinHeight: =10
@@ -847,7 +847,7 @@
                                         //"Not Collected"
                                         //RoundDown(First(collectOEE2).downtime_planned/60,0) &"H "& Mod(First(collectOEE2).downtime_planned,60) & "m"
                                       Align: =Align.Center
-                                      Color: =gTheme.Text_Dark
+                                      Color: =gTheme.Text_On_Light
                                       FillPortions: =1
                                       Font: =Font.Verdana
                                       LayoutMinHeight: =10
@@ -890,7 +890,7 @@
                                     Properties:
                                       Text: =Last(collectOEE2).total_runtime*1 & "H"
                                       Align: =Align.Center
-                                      Color: =gTheme.Text_Dark
+                                      Color: =gTheme.Text_On_Light
                                       FillPortions: =1
                                       Font: =Font.Verdana
                                       LayoutMinHeight: =10
@@ -1079,7 +1079,7 @@
                                             Properties:
                                               Text: =Sum(Filter(collectShiftOEE2, line = "Average", shift = "C"),total_packs)*1
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1120,7 +1120,7 @@
                                             Properties:
                                               Text: =Round(Sum(Filter(collectShiftOEE2, line="Average", shift="C"),downtime_planned_packs),0)
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1161,7 +1161,7 @@
                                             Properties:
                                               Text: =IfError(LookUp(collectShiftOEE2, line="Average" && shift = "C").pack_per_hour,0)
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1219,7 +1219,7 @@
                                                 =Round(Sum(Filter(collectShiftOEE2, shift= "C", line <> "Average"), total_runtime),0) & "H"
                                                 //RoundDown(LookUp(collectShiftOEE2, line = "Average" shift = "C").runtime,0) & "H "& Mod(LookUp(collectShiftOEE, shift = "C").runtime*60,60) & "m"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1263,7 +1263,7 @@
                                                 //"Not Collected"
                                                 //RoundDown(LookUp(collectShiftOEE, shift = "C").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "C").downtime_planned,60) & "m"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1304,7 +1304,7 @@
                                             Properties:
                                               Text: =If('oee-line'.Selected.Value = "All", 11, 1) * 16 * count_of_days & "H"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1456,7 +1456,7 @@
                                             Properties:
                                               Text: =Sum(Filter(collectShiftOEE2, line = "Average", shift = "A"),total_packs)*1
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1497,7 +1497,7 @@
                                             Properties:
                                               Text: =Round(Sum(Filter(collectShiftOEE2, line="Average", shift="A"),planned_packs),0)
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1538,7 +1538,7 @@
                                             Properties:
                                               Text: =IfError(LookUp(collectShiftOEE2, line="Average" && shift = "A").pack_per_hour,0)
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1596,7 +1596,7 @@
                                                 =Round(Sum(Filter(collectShiftOEE2, shift= "A", line <> "Average"), total_runtime),0) & "H"
                                                 //RoundDown(LookUp(collectShiftOEE2, line = "Average" shift = "A").runtime,0) & "H "& Mod(LookUp(collectShiftOEE, shift = "A").runtime*60,60) & "m"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1640,7 +1640,7 @@
                                                 //"Not Collected"
                                                 //RoundDown(LookUp(collectShiftOEE, shift = "A").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "A").downtime_planned,60) & "m"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1681,7 +1681,7 @@
                                             Properties:
                                               Text: =If('oee-line'.Selected.Value = "All", 11, 1) * 16 * count_of_days & "H"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1833,7 +1833,7 @@
                                             Properties:
                                               Text: =Sum(Filter(collectShiftOEE2, line = "Average", shift = "B"),total_packs)*1
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1874,7 +1874,7 @@
                                             Properties:
                                               Text: =Round(Sum(Filter(collectShiftOEE2, line="Average", shift="B"),planned_packs),0)
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1915,7 +1915,7 @@
                                             Properties:
                                               Text: =IfError(LookUp(collectShiftOEE2, line="Average" && shift = "B").pack_per_hour,0)
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -1973,7 +1973,7 @@
                                                 =Round(Sum(Filter(collectShiftOEE2, shift= "A", line <> "Average"), total_runtime),0) & "H"
                                                 //RoundDown(LookUp(collectShiftOEE2, line = "Average" shift = "B").runtime,0) & "H "& Mod(LookUp(collectShiftOEE, shift = "B").runtime*60,60) & "m"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -2017,7 +2017,7 @@
                                                 //"Not Collected"
                                                 //RoundDown(LookUp(collectShiftOEE, shift = "B").downtime_planned/60,0) &"H "& Mod(LookUp(collectShiftOEE, shift = "B").downtime_planned,60) & "m"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -2058,7 +2058,7 @@
                                             Properties:
                                               Text: =If('oee-line'.Selected.Value = "All", 11, 1) * 16 * count_of_days & "H"
                                               Align: =Align.Center
-                                              Color: =gTheme.Text_Dark
+                                              Color: =gTheme.Text_On_Light
                                               FillPortions: =1
                                               Font: =Font.Verdana
                                               LayoutMinHeight: =10
@@ -2173,7 +2173,7 @@
                               OnSelect: =Select(Parent)
                               Text: =RoundDown(ThisItem.Downtime_Total/60,0) & "H " & Mod(ThisItem.Downtime_Total,60) & "m"
                               Align: =Align.Center
-                              Color: =gTheme.Text_Dark
+                              Color: =gTheme.Text_On_Light
                               Font: =Font.Verdana
                               Height: =Parent.TemplateHeight - 'oee-td-g-seperator'.Height
                               Size: =Self.Height / 4.5
@@ -2186,7 +2186,7 @@
                               OnSelect: =Select(Parent)
                               Text: =ThisItem.Downtime_Reason
                               Align: =Align.Center
-                              Color: =gTheme.Text_Dark
+                              Color: =gTheme.Text_On_Light
                               Font: =Font.Verdana
                               Height: =Parent.TemplateHeight - 'oee-td-g-seperator'.Height
                               Size: =Self.Height / 4.5

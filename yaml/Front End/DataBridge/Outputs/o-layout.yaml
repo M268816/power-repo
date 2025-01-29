@@ -116,7 +116,7 @@
         - o-title:
             Control: Label
             Properties:
-              Text: ="App Title"
+              Text: =APP_NAME
               Color: =gTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
