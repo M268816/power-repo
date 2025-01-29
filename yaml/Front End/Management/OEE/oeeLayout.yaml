@@ -1,0 +1,1284 @@
+- oeeLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - oeeCollect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Set(gPopups, {Visible: true, Value:10, Text:"Updating Variables", Popup:"Loading"});
+            /*Update Time*/
+            Set(gblTime,
+                {
+                    Now: Now(),
+                    Today: Today()
+
+                }
+            );
+            UpdateContext({
+                locStartDate: DateAdd(oeeStartDate.SelectedDate, -1, TimeUnit.Hours),
+                locEndDate: DateAdd(oeeEndDate.SelectedDate, 23, TimeUnit.Hours)
+            });
+            UpdateContext({
+                locCountOfDays: DateDiff(locStartDate,locEndDate)
+            });
+
+            Set(gPopups, {Visible: true, Value:20, Text:"Collecting Production Data", Popup:"Loading"});
+            /*Collect Production Data*/
+            Clear(colProduction);
+            ForAll(
+                Filter(FE_Production,
+                    Hour_Starting >= locStartDate,
+                    Hour_Ending <= locEndDate
+                ),
+                Collect(colProduction,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter.Value,
+                        Operator_1: ThisRecord.Operator_1,
+                        Operator_2: ThisRecord.Operator_2,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Master_Roll: ThisRecord.Master_Roll,
+                        Cast_Date: ThisRecord.Cast_Date,
+                        Cast_Roll: ThisRecord.Cast_Roll,
+                        Poly_Lot: ThisRecord.Poly_Lot,
+                        Membrane_Type: ThisRecord.Membrane_Type,
+                        Pleats_Per_Pack: ThisRecord.Pleats_Per_Pack,
+                        Pleat_Height: ThisRecord.Pleat_Height,
+                        Pleater_Speed: ThisRecord.Pleater_Speed,
+                        Hour_Starting: ThisRecord.Hour_Starting,
+                        Hour_Ending: ThisRecord.Hour_Ending,
+                        Unit_Starting: ThisRecord.Unit_Starting,
+                        Unit_Ending: ThisRecord.Unit_Ending,
+                        Amount_Built: ThisRecord.Amount_Built*1,
+                        Reject_Units: ThisRecord.Reject_Units,
+                        Hourly_Goal:ThisRecord.Hourly_Goal,
+                        Reject_Footage:Round(ThisRecord.Reject_Footage,4),
+                        Good_Footage: Round(ThisRecord.Good_Footage,4),
+                        Record_Editor:ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+
+
+            /*Collect Downtime Data*/
+            Set(gPopups, {Visible: true, Value:30, Text:"Collecting Downtime Data", Popup:"Loading"});
+            Clear(colDowntime);
+            ForAll(
+                Filter(FE_Downtime,
+                    Started >= locStartDate,
+                    Ended <= locEndDate
+                ),
+                Collect(colDowntime,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter.Value,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Started: ThisRecord.Started,
+                        Ended: ThisRecord.Ended,
+                        Reason: ThisRecord.Reason.Value,
+                        Total_Downtime: ThisRecord.Total_Downtime,
+                        Record_Editor:ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+
+            Select(oeeUpdate);
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - oeeSequentialCollect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - oeeUpdate:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(gblPopups,First(gblPopups),{Visible:true, Value: 40, Display_Text:"Calculating OEE"});
+
+            With(
+                {
+                    thisTotalPacks: Sum(colProduction,Amount_Built) - Sum(colProduction,Reject_Units),
+                    thisPlannedPacks:
+                        IfError(
+                            Round(
+                                //Average(colProduction,Pleater_Speed)
+                                (120 * 60 / Average(colProduction,Pleats_Per_Pack)) *
+                                (locCountOfDays * 24 * 22 - (Sum(Filter(colDowntime, Reason in gblLists.Downtime_Reasons_Planned), Total_Downtime)/60)),
+                                2
+                            ),
+                            0
+                        )
+                },
+
+                Set(recOEE1,
+                    {
+                        Amount_Built: thisTotalPacks,
+                        Goal: thisPlannedPacks,
+                        OEE2: IfError(Round(thisTotalPacks/thisPlannedPacks,4),0),
+                        Planned_Downtime:
+                            Sum(Filter(colDowntime, Reason in gblLists.Downtime_Reasons_Planned), Total_Downtime),
+                        Unplanned_Downtime:
+                            Sum(Filter(colDowntime, Reason in gblLists.Downtime_Reasons_Unplanned), Total_Downtime)
+                    }
+                )
+            );
+
+            Patch(gblPopups,First(gblPopups),{Value: 50, Display_Text:"Calculating Shift OEE"});
+            Clear(colShiftOEE);
+            ForAll(gblLists.Shifts,
+                With({thisShift:ThisRecord.Value},
+                    With(
+                        {
+                            thisProductionFilter: Filter(colProduction, Shift = thisShift),
+                            thisDowntimeFilter: Filter(colDowntime, Shift = thisShift)
+                        },
+                        With(
+                            {
+                                thisTotalPacks: Sum(thisProductionFilter, Amount_Built) - Sum(thisProductionFilter, Reject_Units),
+                                thisPlannedPacks:
+                                    IfError(
+                                        Round(
+                                            //Average(thisProductionFilter,Pleater_Speed)
+                                            (120 * 60 /
+                                            Average(thisProductionFilter,Pleats_Per_Pack)) *
+                                            (locCountOfDays * 8 * 22 - (Sum(Filter(thisDowntimeFilter, Reason in gblLists.Downtime_Reasons_Planned),Total_Downtime)/60)),
+                                            2
+                                        ),
+                                        0
+                                    )
+                            },
+                            Collect(colShiftOEE,
+                                {
+                                    Shift: thisShift,
+                                    Amount_Built: thisTotalPacks,
+                                    Goal: thisPlannedPacks,
+                                    OEE2: IfError(Round(thisTotalPacks/thisPlannedPacks,4),0),
+                                    Planned_Downtime:
+                                        Sum(Filter(thisDowntimeFilter, Reason in gblLists.Downtime_Reasons_Planned), Total_Downtime),
+                                    Unplanned_Downtime:
+                                        Sum(Filter(thisDowntimeFilter, Reason in gblLists.Downtime_Reasons_Unplanned), Total_Downtime)
+                                }
+                            )
+                        )
+                    )
+                )
+            );
+
+            Patch(gblPopups,First(gblPopups),{Value: 60, Display_Text:"Calculating Line OEE"});
+            Clear(cLineOEE);
+            ForAll(gblLists.Lines,
+                With({thisLine:ThisRecord.Value},
+                    With(
+                        {
+                            thisProductionFilter: Filter(colProduction, Line in thisLine),
+                            thisDowntimeFilter: Filter(colDowntime, Line in thisLine)
+                        },
+                        With(
+                            {
+                                thisTotalPacks: Sum(thisProductionFilter, Amount_Built) - Sum(thisProductionFilter, Reject_Units),
+                                thisPlannedPacks:
+                                    IfError(
+                                        Round(
+                                            //Average(thisProductionFilter,Pleater_Speed)
+                                            (120 * 60 /
+                                            Average(thisProductionFilter,Pleats_Per_Pack)) *
+                                            (locCountOfDays * 24 * 2 - (Sum(Filter(thisDowntimeFilter, Reason in gblLists.Downtime_Reasons_Planned),Total_Downtime)/60)),
+                                            2
+                                        ),
+                                        0
+                                    )
+                            },
+                            Collect(cLineOEE,
+                                {
+                                    Line: thisLine,
+                                    Amount_Built: thisTotalPacks,
+                                    Goal: thisPlannedPacks,
+                                    OEE2: IfError(Round(thisTotalPacks/thisPlannedPacks,4),0),
+                                    Planned_Downtime:
+                                        Sum(Filter(thisDowntimeFilter, Reason in gblLists.Downtime_Reasons_Planned), Total_Downtime),
+                                    Unplanned_Downtime:
+                                        Sum(Filter(thisDowntimeFilter, Reason in gblLists.Downtime_Reasons_Unplanned), Total_Downtime)
+                                }
+                            )
+                        )
+                    )
+                )
+            );
+
+            Patch(gblPopups,First(gblPopups),{Visible:false, Value: -1, Display_Text:"Finishing Up"});
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - oeeHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - oeeLogo:
+            Control: Image
+            Properties:
+              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: =hNavTitle.Width
+        - oeeTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - oeeMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - oeeBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - oeeUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - oeeMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - oeeNavigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - oeeNavTitle:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - oeeNavSeparator0:
+                Control: Rectangle
+                Properties:
+                  Fill: =gblTheme.Pri_Complement
+                  Height: =Round(gblPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - oeeNavGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =colNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gblPadding
+                  TemplateSize: =40
+                Children:
+                - oeeNavGalleryButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - oeeNavLegalNote:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - oeeBody:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - oeeDateParent:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Pri_Complement
+                  FillPortions: =0
+                  Height: =50
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gblPadding
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  Width: =Parent.Width * 0.45
+                Children:
+                - oeeDateLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Date Range:"
+                      Color: =gblTheme.Text_Dark
+                      FillPortions: =2
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - oeeStartDate:
+                    Control: Classic/DatePicker
+                    Properties:
+                      DefaultDate: =gblTime.Today
+                      BorderColor: =gblTheme.Primary
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =2.75
+                      IconBackground: =gblTheme.Secondary
+                      IconFill: =gblTheme.Text_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - oeeDateSeparator:
+                    Control: Label
+                    Properties:
+                      Text: ="-"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_Dark
+                      FillPortions: =0.5
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - oeeEndDate:
+                    Control: Classic/DatePicker
+                    Properties:
+                      DefaultDate: =gblTime.Today
+                      BorderColor: =gblTheme.Primary
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =2.75
+                      IconBackground: =gblTheme.Secondary
+                      IconFill: =gblTheme.Text_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - oeeDateButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Select(oeeCollect);
+                      Text: ="Update Date Range"
+                      Color: =gblTheme.Text_Dark
+                      DisabledColor: =gblTheme.Text_Dark
+                      DisabledFill: =ColorFade(Self.Fill, 0.8)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =8
+                      RadiusBottomRight: =8
+                      RadiusTopLeft: =8
+                      RadiusTopRight: =8
+                      Size: =Self.Height / 4
+                      Width: =140
+            - oeeOEEParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =0
+                  Height: =Self.Width * 0.5
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.30
+                Children:
+                - oeeOEETitle:
+                    Control: Label
+                    Properties:
+                      Text: ="OEE2"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Stretch
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =gblTheme.Secondary
+                      Height: '=40  '
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - oeeOEESection0:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.None
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutJustifyContent: =LayoutJustifyContent.Center
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - oeeOEEGraph:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" & 
+                            EncodeUrl(
+                                "{
+                                    type: 'radialGauge',
+                                    data: {
+                                        datasets: [{
+                                            data: ["& Round(recOEE1.OEE2*100,4) &"],
+                                            backgroundColor: getGradientFillHelper('horizontal', [
+                                                '"& gblTheme.Chart_Blue &"',
+                                                '"& gblTheme.Chart_Blue &"',
+                                                '"& gblTheme.Chart_Blue &"',
+                                                '"& gblTheme.Chart_Red &"',
+                                                '"& gblTheme.Chart_Red &"',
+                                                '"& gblTheme.Chart_Red &"'
+                                            ]),
+                                        }]
+                                    },
+                                    options: {
+                                        domain: [0, "& If(Round(recOEE1.OEE2*100,4) <= 100, 100, Round(recOEE1.OEE2*100,4)) &"],
+                                        trackColor: '"& gblTheme.Chart_White &"', 
+                                        centerPercentage: 90,
+                                        centerArea: {
+                                            text: (val) => val + '%',
+                                            fontColor: '"& gblTheme.Chart_Black &"'
+                                        },
+                                    }
+                                }"
+                            )
+                          FillPortions: =5
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                    - oeeOEESection1:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.None
+                          FillPortions: =7
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutJustifyContent: =LayoutJustifyContent.Center
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                        Children:
+                        - oeeOEEKeys:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =gblPadding
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oeeOEEKeyOEE2:
+                                Control: Label
+                                Properties:
+                                  Text: ="OEE2"
+                                  Align: =Align.Right
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Midground
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                            - oeeOEEKeyAmountBuilt:
+                                Control: Label
+                                Properties:
+                                  Text: ="Amount Built"
+                                  Align: =Align.Right
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Midground
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                            - oeeOEEKeyGoal:
+                                Control: Label
+                                Properties:
+                                  Text: ="Goal"
+                                  Align: =Align.Right
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Midground
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                            - oeeOEEKeyPlannedDowntime:
+                                Control: Label
+                                Properties:
+                                  Text: ="Planned Downtime"
+                                  Align: =Align.Right
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Midground
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                            - oeeOEEKeyUnplannedDowntime:
+                                Control: Label
+                                Properties:
+                                  Text: ="Unplanned Downtime"
+                                  Align: =Align.Right
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Midground
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                        - oeeOEEValues:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =gblPadding
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oeeOEEValueOEE2:
+                                Control: Label
+                                Properties:
+                                  Text: =Round(recOEE1.OEE2 * 100,2) & "%"
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Background
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                            - oeeOEEValueAmountBuilt:
+                                Control: Label
+                                Properties:
+                                  Text: =recOEE1.Amount_Built
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Background
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                            - oeeOEEValueGoal:
+                                Control: Label
+                                Properties:
+                                  Text: =recOEE1.Goal
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Background
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                            - oeeOEEValuePlannedDowntime:
+                                Control: Label
+                                Properties:
+                                  Text: =RoundDown(recOEE1.Planned_Downtime/60,0) & "H " & Mod(recOEE1.Planned_Downtime, 60) & "m"
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Background
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+                            - oeeOEEValueUnplannedDowntime:
+                                Control: Label
+                                Properties:
+                                  Text: =RoundDown(recOEE1.Unplanned_Downtime/60,0) & "H " & Mod(recOEE1.Unplanned_Downtime, 60) & "m"
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Background
+                                  FillPortions: =1
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 4
+            - oeeShiftParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =0
+                  Height: =Self.Width
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.35
+                Children:
+                - oeeShiftTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="OEE per Shift"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Stretch
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =gblTheme.Secondary
+                      Height: '=40  '
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - oeeShiftGallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      Items: =colShiftOEE
+                      DelayItemLoading: =true
+                      Layout: =Layout.Vertical
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Self.Height / 3
+                    Children:
+                    - oeeShiftGalleryDataParent:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Height: =Parent.TemplateHeight - oeeShiftGallerySeparator.Height
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.TemplateWidth
+                        Children:
+                        - oeeShiftGallerySection0:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =5
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oeeShiftGalleryShift:
+                                Control: Label
+                                Properties:
+                                  Text: =ThisItem.Shift
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Sec_Complement
+                                  FillPortions: =3
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  Size: =Self.Height / 8
+                            - oeeShiftGalleryraph:
+                                Control: Image
+                                Properties:
+                                  Image: |-
+                                    ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                                    With({thisOEE: Round(ThisItem.OEE2*100,4)},
+                                        EncodeUrl(
+                                            "{
+                                                type: 'radialGauge',
+                                                data: {
+                                                    datasets: [{
+                                                        data: ["& thisOEE &"],
+                                                        backgroundColor: getGradientFillHelper('horizontal', [
+                                                            '"& gblTheme.Chart_Blue &"',
+                                                            '"& gblTheme.Chart_Blue &"',
+                                                            '"& gblTheme.Chart_Blue &"',
+                                                            '"& gblTheme.Chart_Red &"',
+                                                            '"& gblTheme.Chart_Red &"',
+                                                            '"& gblTheme.Chart_Red &"'
+                                                        ]),
+                                                    }]
+                                                },
+                                                options: {
+                                                    domain: [0, "& If(thisOEE <= 100, 100, thisOEE) &"],
+                                                    trackColor: '"& gblTheme.Chart_White &"', 
+                                                    centerPercentage: 90,
+                                                    centerArea: {
+                                                        text: (val) => val + '%',
+                                                        fontColor: '"& gblTheme.Chart_Black &"'
+                                                    },
+                                                }
+                                            }"
+                                        )
+                                    )
+                                  FillPortions: =9
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  X: =40
+                                  Y: =40
+                        - oeeShiftGallerySection1:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              FillPortions: =7
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutJustifyContent: =LayoutJustifyContent.Center
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oeeShiftGalleryKeys:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutDirection: =LayoutDirection.Vertical
+                                  LayoutGap: =gblPadding
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oeeShiftGalleryKeyOEE2:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="OEE2"
+                                      Align: =Align.Right
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeShiftGalleryKeyAmountBuilt:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Amount Built"
+                                      Align: =Align.Right
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeShiftGalleryKeyGoal:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Goal"
+                                      Align: =Align.Right
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeShiftGalleryKeyPlannedDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Planned Downtime"
+                                      Align: =Align.Right
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeShiftGalleryKeyUnplannedDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Unplanned Downtime"
+                                      Align: =Align.Right
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                            - oeeShiftGalleryValues:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutDirection: =LayoutDirection.Vertical
+                                  LayoutGap: =gblPadding
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oeeShiftGalleryValueOEE2:
+                                    Control: Label
+                                    Properties:
+                                      Text: =Round(ThisItem.OEE2 * 100,2) & "%"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeShiftGalleryValueAmountBuilt:
+                                    Control: Label
+                                    Properties:
+                                      Text: =ThisItem.Amount_Built
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeShiftGalleryValueGoal:
+                                    Control: Label
+                                    Properties:
+                                      Text: =ThisItem.Goal
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeShiftGalleryValuePlannedDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: =RoundDown(ThisItem.Planned_Downtime/60,0) & "H " & Mod(ThisItem.Planned_Downtime, 60) & "m"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeShiftGalleryValueUnplannedDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: =RoundDown(ThisItem.Unplanned_Downtime/60,0) & "H " & Mod(ThisItem.Unplanned_Downtime, 60) & "m"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                    - oeeShiftGallerySeparator:
+                        Control: Rectangle
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Fill: =gblTheme.Accent
+                          Height: =Parent.TemplateHeight * 0.03
+                          Width: =Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight - Self.Height
+            - oeeLineParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =0
+                  Height: =Self.Width * 1
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.40
+                Children:
+                - oeeLineGalleryTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="OEE per Line"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Stretch
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =gblTheme.Secondary
+                      Height: '=40  '
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - oeeLineGallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      Items: =cLineOEE
+                      DelayItemLoading: =true
+                      Layout: =Layout.Vertical
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =IfError(Self.Height / Self.AllItemsCount,0)
+                    Children:
+                    - oeeLineGallerySection0:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Height: =Parent.TemplateHeight - oeeLineGallerySeparator.Height
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.TemplateWidth
+                        Children:
+                        - oeeLineGalleryShift:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Line
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Sec_Complement
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 5
+                        - oeeLineGallerySection1:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              FillPortions: =11
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutJustifyContent: =LayoutJustifyContent.Center
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - oeeLineGalleryKeys:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutGap: =gblPadding
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oeeLineGalleryKeyOEE2:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="OEE2"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeLineGalleryKeyAmountBuilt:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Amount Built"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeLineGalleryKeyGoal:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Goal"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeLineGalleryKeyPlannedDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Planned Downtime"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeLineGalleryKeyUnplannedDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Unplanned Downtime"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                            - oeeLineGalleryValues:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutGap: =gblPadding
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - oeeLineGalleryValueOEE2:
+                                    Control: Label
+                                    Properties:
+                                      Text: =Round(ThisItem.OEE2*100,2) & "%"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeLineGalleryValueAmountBuilt:
+                                    Control: Label
+                                    Properties:
+                                      Text: =ThisItem.Amount_Built
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeLineGalleryValueGoal:
+                                    Control: Label
+                                    Properties:
+                                      Text: =ThisItem.Goal
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeLineGalleryValuePlannedDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: =RoundDown(ThisItem.Planned_Downtime/60,0) & "H " & Mod(ThisItem.Planned_Downtime, 60) & "m"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - oeeLineGalleryValueUnplannedDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: =RoundDown(ThisItem.Unplanned_Downtime/60,0) & "H " & Mod(ThisItem.Unplanned_Downtime, 60) & "m"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                    - oeeLineGallerySeparator:
+                        Control: Rectangle
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Fill: =gblTheme.Accent
+                          Height: =Parent.TemplateHeight * 0.03
+                          Width: =Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight - Self.Height

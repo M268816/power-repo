@@ -1,2 +1,2 @@
 Properties:
-  OnVisible: =Select('i-init');
+  OnVisible: =Select('iInit');

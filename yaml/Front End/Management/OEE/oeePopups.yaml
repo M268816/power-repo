@@ -1,0 +1,63 @@
+- oeePopups:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =First(gblPopups).Visible
+      Width: =Parent.Width
+    Children:
+    - oeePopupLoading:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light",0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.25
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Width: =Parent.Width * 0.25
+        Children:
+        - oeePopupLoadingSpinner:
+            Control: Spinner
+            Properties:
+              FontWeight: =FontWeight.Normal
+              Label: =First(gblPopups).Display_Text
+              LabelPosition: ='Spinner.LabelPosition'.Below
+              SpinnerSize: ='Spinner.SpinnerSize'.Medium
+              AlignInContainer: =AlignInContainer.Stretch
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+        - oeePopupLoadingProgress:
+            Control: Progress
+            Properties:
+              Indeterminate: =First(gblPopups).Value = -1
+              Thickness: ='Progress.Thickness'.Medium
+              Value: =First(gblPopups).Value
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Width: =
