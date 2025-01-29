@@ -1,0 +1,574 @@
+- tLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - tCollect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(gblPopups,First(gblPopups),{Visible: true, Value: 10, Display_Text:"Updating Variables"});
+            /*Update Time*/
+            Set(gblTime,
+                {
+                    Now: Now(),
+                    Today: Today()
+
+                }
+            );
+            UpdateContext({
+                locStartDate: DateAdd(tDate.SelectedDate, -1, TimeUnit.Hours),
+                locEndDate: DateAdd(tDate.SelectedDate, 23, TimeUnit.Hours)
+            });
+            UpdateContext({
+                locCountOfDays: DateDiff(locStartDate,locEndDate),
+                locWeekNum: WeekNum(locStartDate)
+            });
+            UpdateContext({
+                locWeekEnd: 
+                    DateAdd(
+                        Date(Year(locStartDate), 1, 1) + (locWeekNum-1)*7 - Weekday(Date(Year(locStartDate), 1, 1)) + 6,
+                        24,
+                        TimeUnit.Hours
+                    ),
+
+                lWeekStart: Date(Year(locStartDate), 1, 1) + (locWeekNum-1)*7 - Weekday(Date(Year(locStartDate), 1, 1)) + 2
+            });
+
+            Patch(gblPopups,First(gblPopups),{Value: 20, Display_Text:"Collecting Production Data"});
+            /*Collect Production Data*/
+            Clear(colProduction);
+            ForAll(
+                Filter(FE_Production,
+                    Hour_Starting >= lWeekStart,
+                    Hour_Ending <= locWeekEnd
+                ),
+                Collect(colProduction,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter.Value,
+                        Operator_1: ThisRecord.Operator_1,
+                        Operator_2: ThisRecord.Operator_2,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Master_Roll: ThisRecord.Master_Roll,
+                        Cast_Date: ThisRecord.Cast_Date,
+                        Cast_Roll: ThisRecord.Cast_Roll,
+                        Poly_Lot: ThisRecord.Poly_Lot,
+                        Membrane_Type: ThisRecord.Membrane_Type,
+                        Pleats_Per_Pack: ThisRecord.Pleats_Per_Pack,
+                        Pleat_Height: ThisRecord.Pleat_Height,
+                        Pleater_Speed: ThisRecord.Pleater_Speed,
+                        Hour_Starting: ThisRecord.Hour_Starting,
+                        Hour_Ending: ThisRecord.Hour_Ending,
+                        Unit_Starting: ThisRecord.Unit_Starting,
+                        Unit_Ending: ThisRecord.Unit_Ending,
+                        Amount_Built: ThisRecord.Amount_Built*1,
+                        Reject_Units: ThisRecord.Reject_Units,
+                        Hourly_Goal:ThisRecord.Hourly_Goal,
+                        Reject_Footage:Round(ThisRecord.Reject_Footage,4),
+                        Good_Footage: Round(ThisRecord.Good_Footage,4),
+                        Record_Editor:ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+
+            /*Collect Downtime Data*/
+            Patch(gblPopups,First(gblPopups),{Value: 30, Display_Text:"Collecting Downtime Data"});
+            Clear(colDowntime);
+            ForAll(
+                Filter(FE_Downtime,
+                    Started >= lWeekStart,
+                    Ended <= locWeekEnd
+                ),
+                Collect(colDowntime,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter.Value,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Started: ThisRecord.Started,
+                        Ended: ThisRecord.Ended,
+                        Reason: ThisRecord.Reason.Value,
+                        Total_Downtime: ThisRecord.Total_Downtime,
+                        Record_Editor:ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+
+            Select(tUpdate);
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - tSequentialCollect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - tUpdate:
+        Control: Classic/Button
+        Properties:
+          OnSelect: "=Patch(gblPopups,First(gblPopups),{Visible: true, Value: 40, Display_Text:\"Checking Line Status\"});\r\n\r\nUpdateContext({\r\n    lProductionFilter:\r\n        Filter(colProduction,\r\n            Hour_Ending <= locWeekEnd,\r\n            Hour_Ending >= lWeekStart\r\n        ),\r\n    locDownFilter:\r\n        Filter(colDowntime,\r\n            Ended <= locWeekEnd,\r\n            Ended >= lWeekStart            \r\n        ),      \r\n    count_of_days:\r\n        RoundUp(DateDiff(lWeekStart, locWeekEnd, TimeUnit.Days) / 7, 0)\r\n        * 5\r\n        + Mod(5 + Weekday(locWeekEnd) - Weekday(lWeekStart), 5)\r\n});\r\n\r\nUpdateContext({\r\n    distinct_lanes: Distinct(lProductionFilter, Line),\r\n    distinct_lines: gblLists.Lines\r\n});\r\n\r\n// Collect Trend Data\r\nPatch(gblPopups,First(gblPopups),{Value: 50, Display_Text:\"Gathering OEE Data\"});\r\nClear(collectTrendData);\r\nForAll(distinct_lanes,\r\n    With({thisLane: ThisRecord.Value},\r\n        ForAll(Distinct(Filter(lProductionFilter, thisLane in Line), Pleats_Per_Pack),\r\n            With({thisPleatPerPack: ThisRecord.Value},                \r\n                Collect(collectTrendData,\r\n                    {\r\n                        lane: thisLane,\r\n                        Pleats_Per_Pack: thisPleatPerPack,\r\n                        total_packs: Sum(Filter(lProductionFilter, thisLane = Line, Pleats_Per_Pack = thisPleatPerPack), Amount_Built),\r\n                        pleats_per_hour: Average(Filter(colProduction, thisLane in Line), Pleats_Per_Pack) * 60,                                \r\n                        pack_per_hour:\r\n                            IfError(\r\n                                Round(\r\n                                    Average(Filter(colProduction, thisLane in Line), Pleats_Per_Pack) * 60\r\n                                    / thisPleatPerPack,\r\n                                    4\r\n                                ),\r\n                                0\r\n                            )\r\n                    }\r\n                )\r\n            )\r\n        )\r\n    )\r\n);\r\nClear(collectTrend);\r\nForAll(distinct_lines,\r\n    With({thisLine: ThisRecord.Value},\r\n        If(\r\n            // If lane in line has pack_per_hour data\r\n            IfError(\r\n                Round(\r\n                    Average(\r\n                        Filter(collectTrendData, lane in thisLine),\r\n                        pack_per_hour\r\n                    ),\r\n                    4\r\n                ) > 0,\r\n                false\r\n            ),\r\n            // Collect the trend for the line\r\n            Collect(collectTrend,\r\n                {\r\n                    line: thisLine,\r\n                    total_packs: 0,\r\n                    OEE2: 0,\r\n                    pack_per_hour: Round(Average(Filter(collectTrendData, lane in thisLine), pack_per_hour),4),\r\n                    total_runtime: 48 * count_of_days,\r\n                    total_downtime: Round(Sum(Filter(locDownFilter, thisLine in Line, Reason in gblLists.Downtime_Reasons_Planned),Total_Downtime)/60,4),\r\n                    planned_packs:\r\n                        Round(\r\n                            Average(Filter(collectTrendData, lane in thisLine), pack_per_hour)\r\n                            * (\r\n                                (48 * count_of_days)\r\n                                - Round(Sum(Filter(locDownFilter, thisLine in Line, Reason in gblLists.Downtime_Reasons_Planned),Total_Downtime)/60,4)\r\n                            ),\r\n                            4\r\n                        )\r\n                }\r\n            );\r\n        )\r\n    \r\n    )\r\n);\r\nForAll( // Lines\r\n    Distinct(collectTrend, line),\r\n    With({thisLine: ThisRecord.Value},\r\n        If(\r\n            Sum(Filter(collectTrendData, lane in thisLine),total_packs) > 0,\r\n\r\n            Patch(collectTrend, First(Filter(collectTrend, line = thisLine)),\r\n                {\r\n                    total_packs: Sum(Filter(collectTrendData, lane in thisLine),total_packs),\r\n                    \r\n                    OEE2:\r\n                        IfError(\r\n                            Round(\r\n                                Sum(Filter(collectTrendData, lane in thisLine),total_packs)\r\n                                / Sum(Filter(collectTrend, line = thisLine),planned_packs) \r\n                                * 100,\r\n                                4\r\n                            ),\r\n                            0\r\n                        )\r\n                }\r\n            )\r\n        )\r\n    )\r\n);\r\nPatch(collectTrend, Defaults(collectTrend),\r\n    {\r\n        line: \"Average\",\r\n        pack_per_hour:Round(Average(collectTrend, pack_per_hour),4),\r\n        total_packs: Sum(collectTrend, total_packs),\r\n        planned_packs: Round(Sum(collectTrend, planned_packs),4),\r\n        total_runtime: Sum(collectTrend, total_runtime),\r\n        total_downtime: Sum(collectTrend, total_downtime),\r\n        OEE2:\r\n            IfError(\r\n                Round(\r\n                    Sum(collectTrend, total_packs)\r\n                    / Sum(collectTrend, planned_packs)\r\n                    * 100,\r\n                    4\r\n                ),\r\n                0\r\n            )   \r\n    }\r\n);\r\n\r\nPatch(gblPopups,First(gblPopups),{Value: 75, Display_Text:\"Patching Week \"&locWeekNum&\" OEE2 into Database\"});\r\n/*Patch data into OEE2 sharepoint list*/\r\nForAll(collectTrend,\r\n    With({thisLine:ThisRecord.line, thisOEE: Round(ThisRecord.OEE2,0)},\r\n        If(\r\n            IsBlankOrError(\r\n                LookUp(\r\n                    FE_Analysis_Manual,\r\n                    Week = locWeekNum &&\r\n                    Year = Year(locWeekEnd) &&\r\n                    Line.Value = thisLine\r\n                )\r\n            ),\r\n\r\n            Patch(\r\n                FE_Analysis_Manual,\r\n                Defaults(FE_Analysis_Manual),\r\n                {\r\n                    OEE2: thisOEE,\r\n                    Week: locWeekNum,\r\n                    Year: Year(locWeekEnd),\r\n                    Line: {Value: thisLine}\r\n                }\r\n            ),\r\n\r\n            Patch(\r\n                FE_Analysis_Manual,\r\n                LookUp(\r\n                    FE_Analysis_Manual,\r\n                    Week = locWeekNum &&\r\n                    Year = Year(locWeekEnd) &&\r\n                    Line.Value = thisLine\r\n                ),\r\n                {\r\n                    OEE2: thisOEE\r\n                }\r\n            )\r\n        )\r\n    )\r\n);\r\n\r\nPatch(gblPopups,First(gblPopups),{Visible: false, Value: -1, Display_Text:\"Finishing Up\"});\r\n\r\n\r\n"
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - tHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - tLogo:
+            Control: Image
+            Properties:
+              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: =tNavTitle.Width
+        - tTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - tMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - tBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - tUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - tMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - tNavigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - tNavTitle:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - tNavSeparator0:
+                Control: Rectangle
+                Properties:
+                  Fill: =gblTheme.Pri_Complement
+                  Height: =Round(gblPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - tNavGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =colNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gblPadding
+                  TemplateSize: =40
+                Children:
+                - tNavGalleryButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - tNavLegalNote:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - tBody:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - tControlsParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =1.5
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - tControls:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gblTheme.Sec_Complement
+                      BorderThickness: =If(gblTheme.Mode = "Light",0,1)
+                      DropShadow: =DropShadow.Regular
+                      Fill: =gblTheme.Midground
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutGap: =gblPadding
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                    Children:
+                    - tWeekTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Select Week"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Size: =Self.Height / 3
+                    - tDate:
+                        Control: Classic/DatePicker
+                        Properties:
+                          OnChange: |-
+                            =UpdateContext({
+                                locStartDate: DateAdd(tDate.SelectedDate, -1, TimeUnit.Hours),
+                                locEndDate: DateAdd(tDate.SelectedDate, 23, TimeUnit.Hours)
+                            });
+                            UpdateContext({
+                                locWeekNum: WeekNum(locStartDate)
+                            });
+                          DefaultDate: =gblTime.Today
+                          BorderColor: =gblTheme.Primary
+                          BorderThickness: =1
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =gblTheme.Background
+                          IconBackground: =gblTheme.Secondary
+                          IconFill: =gblTheme.Text_Light
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          PaddingBottom: =gblPadding
+                          PaddingLeft: =gblPadding
+                          PaddingRight: =gblPadding
+                          PaddingTop: =gblPadding
+                          Size: =Self.Height / 3
+                    - tControlsButton:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: =Select(tCollect);
+                          Text: ="Update Week " & locWeekNum
+                          Color: =gblTheme.Text_Dark
+                          DisabledColor: =gblTheme.Text_Dark
+                          DisabledFill: =ColorFade(Self.Fill, 0.8)
+                          Fill: =gblTheme.Accent
+                          FontWeight: =FontWeight.Normal
+                          LayoutMinWidth: =10
+                          RadiusBottomLeft: =8
+                          RadiusBottomRight: =8
+                          RadiusTopLeft: =8
+                          RadiusTopRight: =8
+                          Size: =Self.Height / 4
+                          Width: =10
+                    - tSeparator0:
+                        Control: Rectangle
+                        Properties:
+                          Fill: =gblTheme.Pri_Complement
+                          Height: =2
+                          LayoutMinWidth: =10
+                    - tYearTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Filter Year"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Size: =Self.Height / 3
+                    - tYear:
+                        Control: Classic/DropDown
+                        Properties:
+                          Default: =Year(gblTime.Today)
+                          Items: =["2024", "2025"]
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Text_Light
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =gblTheme.Background
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                    - tSeparator1:
+                        Control: Rectangle
+                        Properties:
+                          Fill: =gblTheme.Pri_Complement
+                          Height: =2
+                          LayoutMinWidth: =10
+                    - tLineTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Filter Line"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Size: =Self.Height / 3
+                    - tLine:
+                        Control: Classic/DropDown
+                        Properties:
+                          Default: =Year(gblTime.Today)
+                          Items: =Table(["Average"],gblLists.Lines)
+                          ChevronBackground: =gblTheme.Secondary
+                          ChevronFill: =gblTheme.Text_Light
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =gblTheme.Background
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                    - tSeparator2:
+                        Control: Rectangle
+                        Properties:
+                          Fill: =gblTheme.Pri_Complement
+                          Height: =2
+                          LayoutMinWidth: =10
+            - tSection0:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =10.5
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - tChart:
+                    Control: Image
+                    Properties:
+                      Image: |-
+                        ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" &
+                        With({thisAnalysisFilter: Filter(FE_Analysis_Manual, Line.Value = tLine.Selected.Value, Year = Value(tYear.SelectedText.Value))},
+                        EncodeUrl("
+                        {
+                            type: 'line',
+                            data: {
+                                labels:"& Concatenate( "[", Concat(Sort(thisAnalysisFilter,Week,SortOrder.Ascending), Week, "," ), "]") &",
+                                datasets: [
+                                    {
+                                        label: '"&tLine.Selected.Value&"',
+                                        backgroundColor: '"&gblTheme.Chart_White&"',
+                                        borderColor: '"&gblTheme.Chart_Blue&"',
+                                        data: "& Concatenate( "[", Concat(Sort(thisAnalysisFilter,Week,SortOrder.Ascending), OEE2, "," ), "]") &",
+                                        fill: false
+                                    }
+                                ]
+                            },
+                            options: {
+                                scales: {
+                                    xAxes: [{
+                                        offset: true,
+                                        fontColor: '"&gblTheme.Chart_Black&"',
+                                        ticks: {fontColor: '"&gblTheme.Chart_Black&"'},
+                                        gridLines: {color: '"&gblTheme.Chart_Dim&"'}
+                                    }],
+                                    yAxes: [{
+                                        id: 'y-axis-0',
+                                        type: 'linear',
+                                        position: 'right',
+                                        ticks: {
+                                            beginAtZero: true,
+                                            fontColor: '"&gblTheme.Chart_Black&"',
+                                            min: "& First(Sort(thisAnalysisFilter,OEE2,SortOrder.Ascending)).OEE2 - 5 &",
+                                            max: "& Last(Sort(thisAnalysisFilter,OEE2,SortOrder.Ascending)).OEE2 + 5 &",
+                                            stepSize: 5
+                                        },
+                                        gridLines: {color: '"&gblTheme.Chart_Dim&"', zeroLineColor: '"& gblTheme.Chart_Red &"'}
+                                    }]
+                                },
+                                plugins: {
+                                    datalabels: {
+                                        color: '"&gblTheme.Chart_Black&"',
+                                        font: {size: 16},
+                                        anchor: 'end',
+                                        align: 'top',
+                                        formatter: function(value, context) {
+                                            return value + '%'; // Customize label text
+                                        }
+                                    }
+                                },
+                                annotation: {
+                                    annotations: [{
+                                        type: 'line',
+                                        mode: 'horizontal',
+                                        scaleID: 'y-axis-0',
+                                        value: "& 59 &",
+                                        borderColor: '"&gblTheme.Chart_Accent&"',
+                                        borderWidth: 2,
+                                        borderDash: [5,5],
+                                        label: {
+                                            enabled: true,
+                                            backgroundColor: '"&gblTheme.Chart_Black&"',
+                                            fontColor: '"&gblTheme.Chart_White&"',
+                                            position: 'left',
+                                            content: '"& "59% Target" &"'
+                                        }
+                                    }]
+                                }
+                            }
+                        }")
+                        )
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
