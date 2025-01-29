@@ -1,0 +1,1173 @@
+- lLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - lCollect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(gblPopups,First(gblPopups),{Visible: true, Value: 10, Display_Text: "Updating Variables"});
+            /*Update Time*/
+            Set(gblTime,
+                {
+                    Now: Now(),
+                    Today: Today()
+
+                }
+            );
+            UpdateContext({
+                locStartDate: DateAdd(lStartDate.SelectedDate, -1, TimeUnit.Hours),
+                locEndDate: DateAdd(lEndDate.SelectedDate, 23, TimeUnit.Hours)
+            });
+            UpdateContext({
+                locCountOfDays: DateDiff(locStartDate,locEndDate,TimeUnit.Days)
+            });
+
+            Patch(gblPopups,First(gblPopups),{Value: 20, Display_Text: "Collecting Production Data"});
+            /*Collect Production Data*/
+            Clear(colProduction);
+            ForAll(
+                Filter(FE_Production,
+                    Hour_Starting >= locStartDate,
+                    Hour_Ending <= locEndDate
+                ),
+                Collect(colProduction,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter.Value,
+                        Operator_1: ThisRecord.Operator_1,
+                        Operator_2: ThisRecord.Operator_2,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Master_Roll: ThisRecord.Master_Roll,
+                        Cast_Date: ThisRecord.Cast_Date,
+                        Cast_Roll: ThisRecord.Cast_Roll,
+                        Poly_Lot: ThisRecord.Poly_Lot,
+                        Membrane_Type: ThisRecord.Membrane_Type,
+                        Pleats_Per_Pack: ThisRecord.Pleats_Per_Pack,
+                        Pleat_Height: ThisRecord.Pleat_Height,
+                        Pleater_Speed: ThisRecord.Pleater_Speed,
+                        Hour_Starting: ThisRecord.Hour_Starting,
+                        Hour_Ending: ThisRecord.Hour_Ending,
+                        Unit_Starting: ThisRecord.Unit_Starting,
+                        Unit_Ending: ThisRecord.Unit_Ending,
+                        Amount_Built: ThisRecord.Amount_Built*1,
+                        Reject_Units: ThisRecord.Reject_Units,
+                        Hourly_Goal:ThisRecord.Hourly_Goal,
+                        Reject_Footage:Round(ThisRecord.Reject_Footage,4),
+                        Good_Footage: Round(ThisRecord.Good_Footage,4),
+                        Record_Editor:ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+
+
+            /*Collect Downtime Data*/
+            Patch(gblPopups,First(gblPopups),{Value: 20, Display_Text: "Collecting Downtime Data"});
+            Clear(colDowntime);
+            ForAll(
+                Filter(FE_Downtime,
+                    Started >= locStartDate,
+                    Ended <= locEndDate
+                ),
+                Collect(colDowntime,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter.Value,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Started: ThisRecord.Started,
+                        Ended: ThisRecord.Ended,
+                        Reason: ThisRecord.Reason.Value,
+                        Total_Downtime: ThisRecord.Total_Downtime,
+                        Record_Editor:ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+
+            Select(lUpdate);
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - lUpdate:
+        Control: Classic/Button
+        Properties:
+          OnSelect: "=Patch(gblPopups,First(gblPopups),{Visible: true, Value: 40, Display_Text: \"Calculating Losses\"});\r\n\r\nClear(colLossSummary);\r\n\r\nCollect(colLossSummary,\r\n    {\r\n        Downtime_Loss:\r\n            RoundUp(\r\n                /* Possible Packs Per Hour */\r\n                IfError(Average(colProduction,Pleater_Speed),1) *\r\n                60 /\r\n                IfError(Average(colProduction,Pleats_Per_Pack),1) *\r\n                /*Scheduled Downtime Hours*/\r\n                (Sum(Filter(colDowntime, Reason in gblLists.Downtime_Reasons_Planned), Total_Downtime)/60),\r\n                0\r\n            ),\r\n        Performance_Loss:\r\n            RoundUp(\r\n                /* Possible Packs Per Hour */\r\n                IfError(Average(colProduction,Pleater_Speed),1) *\r\n                60 /\r\n                IfError(Average(colProduction,Pleats_Per_Pack),1) *\r\n                /*Unscheduled Downtime Hours*/\r\n                (Sum(Filter(colDowntime, Reason in gblLists.Downtime_Reasons_Unplanned), Total_Downtime)/60),\r\n                0\r\n            ),\r\n        Rejects: Sum(colProduction, Reject_Units),\r\n        Total: 0\r\n    }\r\n);\r\nPatch(colLossSummary,\r\n    First(colLossSummary),\r\n    {\r\n        Total:\r\n            RoundUp(\r\n                First(colLossSummary).Downtime_Loss +\r\n                First(colLossSummary).Performance_Loss +\r\n                First(colLossSummary).Rejects,\r\n                2\r\n            )\r\n    }\r\n);\r\n\r\n/*Configure Pareto*/\r\nPatch(gblPopups,First(gblPopups),{Value: 50, Display_Text: \"Configuring Pareto Chart\"});\r\nClear(cTopDowntime);\r\n/*\r\n    For all base downtime reasons,\r\n    If the sum of the downtime total is greater than 0,\r\n    add to cTopDowntime.\r\n    \r\n*/\r\nForAll(Distinct(colDowntime, Reason),\r\n    If(Sum(Filter(colDowntime,Reason = Value), Total_Downtime) > 0,\r\n        Collect(cTopDowntime,\r\n            {\r\n                Downtime_Reason: Value,\r\n\r\n                Downtime_Total: \r\n                    Round(\r\n                        Sum(\r\n                            Filter(\r\n                                colDowntime,\r\n                                Reason = Value\r\n                            ),\r\n                            Total_Downtime\r\n                        ),\r\n                        0\r\n                    )\r\n            }\r\n        )\r\n    )\r\n);\r\n\r\n/*Collect OEE 2 data for pareto chart*/\r\nClear(collectPareto);\r\n/*\r\n    For all cTopDowntime,\r\n    Sorted and filtered by user selections,\r\n    Create pareto data in collectPareto.\r\n*/\r\nForAll(\r\n    Sort(\r\n        Filter(cTopDowntime,\r\n                Downtime_Reason in gblLists.Downtime_Reasons_Unplanned\r\n        ),\r\n        Downtime_Total,\r\n        SortOrder.Descending\r\n    ),\r\n    Collect(collectPareto,\r\n        {\r\n            id: CountRows(collectPareto)+1,\r\n            /*Debugging value*/\r\n            id_lookup: LookUp(collectPareto, id = CountRows(collectPareto)).id,\r\n            reason: Downtime_Reason,\r\n            total: ThisRecord.Downtime_Total,\r\n            sum: Sum(cTopDowntime,Downtime_Total),\r\n            /*frequency = This record's downtime / sum of total downtime */\r\n            freq:\r\n                Round(\r\n                    ThisRecord.Downtime_Total /\r\n                    Sum(\r\n                        Filter(cTopDowntime,\r\n                            Downtime_Reason in gblLists.Downtime_Reasons_Unplanned\r\n                        ),\r\n                        Downtime_Total\r\n                    ) * 100,0\r\n                ),\r\n            /*cumulative percentage = (this record's downtime / sum of total downtime) + the last record's cumulative percentage */\r\n            cumulative:\r\n                Round(\r\n                    ThisRecord.Downtime_Total / \r\n                    Sum(\r\n                        Filter(cTopDowntime,\r\n                            Downtime_Reason in gblLists.Downtime_Reasons_Unplanned\r\n                        ),\r\n                        Downtime_Total\r\n                    ) * 100,0\r\n                ) + \r\n                If(\r\n                    CountRows(collectPareto) >= 1,\r\n                    LookUp(collectPareto, id = CountRows(collectPareto)).cumulative,\r\n                    0\r\n                )\r\n        }\r\n    )\r\n);\r\n\r\n/*Collect OEE 1 data for pareto chart*/\r\nClear(collectParetoOEE1);\r\n/*\r\n    For all cTopDowntime,\r\n    Sorted and filtered by user selections,\r\n    Create pareto data in collectPareto.\r\n*/\r\nForAll(\r\n    Sort(\r\n        Filter(cTopDowntime,\r\n            Downtime_Reason in gblLists.Downtime_Reasons_Planned\r\n        ),\r\n        Downtime_Total,\r\n        SortOrder.Descending\r\n    ),\r\n    Collect(collectParetoOEE1,\r\n        {\r\n            id: CountRows(collectParetoOEE1)+1,            \r\n            reason: Downtime_Reason,\r\n            total: ThisRecord.Downtime_Total,\r\n            sum: Sum(cTopDowntime,Downtime_Total),            \r\n            /*frequency = This record's downtime / sum of total downtime */\r\n            freq:\r\n                Round(\r\n                    ThisRecord.Downtime_Total /\r\n                    Sum(\r\n                        Filter(cTopDowntime,\r\n                            Downtime_Reason in gblLists.Downtime_Reasons_Planned\r\n                        ),\r\n                        Downtime_Total\r\n                    ) * 100,0\r\n                ),\r\n            /*cumulative percentage = frequency + the last record's cumulative percentage */\r\n            cumulative:\r\n                Round(\r\n                    ThisRecord.Downtime_Total / \r\n                    Sum(\r\n                        Filter(cTopDowntime,\r\n                                Downtime_Reason in gblLists.Downtime_Reasons_Planned\r\n                        ),\r\n                        Downtime_Total\r\n                    ) * 100,0\r\n                ) + \r\n                If(\r\n                    CountRows(collectParetoOEE1) >= 1,\r\n                    LookUp(collectParetoOEE1, id = CountRows(collectParetoOEE1)).cumulative,\r\n                    0\r\n                )\r\n        }\r\n    )\r\n);\r\n\r\n/*Runtime Reporting*/\r\nPatch(gblPopups,First(gblPopups),{Value: 60, Display_Text: \"Calculating Runtimes\"});\r\n\r\nClear(cRuntime);\r\nCollect(cRuntime,\r\n    {\r\n        Total: 11 * 48 * 60 * locCountOfDays,\r\n        Reported_Downtime: Sum(colDowntime, Total_Downtime),\r\n        Reported_Runtime: CountRows(colProduction) * 60,\r\n        Missing_Runtime:\r\n            (11 * 48 * 60 * locCountOfDays) - (Sum(colDowntime, Total_Downtime) + CountRows(colProduction) * 60)\r\n    }\r\n);\r\n\r\nPatch(gblPopups,First(gblPopups),{Visible: false, Value: -1, Display_Text: \"Finishing Up\", Popup: \"\"});"
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - lHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - lLogo:
+            Control: Image
+            Properties:
+              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: =hNavTitle.Width
+        - lTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - lMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - lBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - lUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - lMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - lNavigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - lNavTitle:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - lNavSeparator0:
+                Control: Rectangle
+                Properties:
+                  Fill: =gblTheme.Pri_Complement
+                  Height: =Round(gblPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - lNavGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =colNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gblPadding
+                  TemplateSize: =40
+                Children:
+                - lNavGalleryButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - lNavLegalNote:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - lBody:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - lDateParent:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Pri_Complement
+                  FillPortions: =0
+                  Height: =50
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gblPadding
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  Width: =Parent.Width * 0.45
+                Children:
+                - lDateLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Date Range:"
+                      Color: =gblTheme.Text_Dark
+                      FillPortions: =2
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - lStartDate:
+                    Control: Classic/DatePicker
+                    Properties:
+                      DefaultDate: =gblTime.Today
+                      BorderColor: =gblTheme.Primary
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =2.75
+                      IconBackground: =gblTheme.Secondary
+                      IconFill: =gblTheme.Text_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - lDateSeparator:
+                    Control: Label
+                    Properties:
+                      Text: ="-"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_Dark
+                      FillPortions: =0.5
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - lEndDate:
+                    Control: Classic/DatePicker
+                    Properties:
+                      DefaultDate: =gblTime.Today
+                      BorderColor: =gblTheme.Primary
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =2.75
+                      IconBackground: =gblTheme.Secondary
+                      IconFill: =gblTheme.Text_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - lDateButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Select(lCollect);
+                      Text: ="Update Date Range"
+                      Color: =gblTheme.Text_Dark
+                      DisabledColor: =gblTheme.Text_Dark
+                      DisabledFill: =ColorFade(Self.Fill, 0.8)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =8
+                      RadiusBottomRight: =8
+                      RadiusTopLeft: =8
+                      RadiusTopRight: =8
+                      Size: =Self.Height / 4
+                      Width: =140
+            - lLossParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =0
+                  Height: =Self.Width * 0.5
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.3
+                Children:
+                - lLossTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Loss Summary"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Stretch
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =gblTheme.Secondary
+                      Height: '=40  '
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - lLoss:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.None
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutJustifyContent: =LayoutJustifyContent.Center
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - lLossKeys:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutGap: =gblPadding
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                        Children:
+                        - lLossKeysTotal:
+                            Control: Label
+                            Properties:
+                              Text: ="Total Missed Opportunity"
+                              Align: =Align.Right
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lLossKeysLoss:
+                            Control: Label
+                            Properties:
+                              Text: ="Pack Loss from Downtime"
+                              Align: =Align.Right
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lLossKeysPerformance:
+                            Control: Label
+                            Properties:
+                              Text: ="Pack Loss from Performance"
+                              Align: =Align.Right
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lLossKeysRejects:
+                            Control: Label
+                            Properties:
+                              Text: ="Reject Packs"
+                              Align: =Align.Right
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                    - lLossValues:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutGap: =gblPadding
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                        Children:
+                        - lLossValuesTotal:
+                            Control: Label
+                            Properties:
+                              Text: =First(colLossSummary).Total & " packs"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Background
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lLossValuesDowntime:
+                            Control: Label
+                            Properties:
+                              Text: =First(colLossSummary).Downtime_Loss & " packs"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Background
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lLossValuesPerformance:
+                            Control: Label
+                            Properties:
+                              Text: =First(colLossSummary).Performance_Loss & " packs"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Background
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lLossValuesRejects:
+                            Control: Label
+                            Properties:
+                              Text: =First(colLossSummary).Rejects & " packs"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Background
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+            - lRuntimeParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =0
+                  Height: =Self.Width * 0.5
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.3
+                Children:
+                - lRuntimeTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Runtime Summary"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Stretch
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =gblTheme.Secondary
+                      Height: '=40  '
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - lRuntime:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.None
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutJustifyContent: =LayoutJustifyContent.Center
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - lRuntimeKeys:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutGap: =gblPadding
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                        Children:
+                        - lRuntimeKeysTotal:
+                            Control: Label
+                            Properties:
+                              Text: ="Total Possible Runtime"
+                              Align: =Align.Right
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lRuntimeKeysDowntime:
+                            Control: Label
+                            Properties:
+                              Text: ="Reported Downtime"
+                              Align: =Align.Right
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lRuntimeKeysRuntime:
+                            Control: Label
+                            Properties:
+                              Text: ="Reported Runtime"
+                              Align: =Align.Right
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lRuntimeKeysMissing:
+                            Control: Label
+                            Properties:
+                              Text: ="Missing Time"
+                              Align: =Align.Right
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                    - lRuntimeValues:
+                        Control: GroupContainer
+                        Variant: verticalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutDirection: =LayoutDirection.Vertical
+                          LayoutGap: =gblPadding
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                        Children:
+                        - lRuntimeValuesTotal:
+                            Control: Label
+                            Properties:
+                              Text: =First(cRuntime).Total/60 & "H " & Mod(First(cRuntime).Total, 60) & "m"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Background
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lRuntimeValuesDowntime:
+                            Control: Label
+                            Properties:
+                              Text: =RoundDown(First(cRuntime).Reported_Downtime/60,0) & "H " & Mod(First(cRuntime).Reported_Downtime, 60) & "m"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Background
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lRuntimeValuesRuntime:
+                            Control: Label
+                            Properties:
+                              Text: =RoundDown(First(cRuntime).Reported_Runtime/60,0) & "H " & Mod(First(cRuntime).Reported_Runtime, 60) & "m"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Background
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                        - lRuntimeValuesMissing:
+                            Control: Label
+                            Properties:
+                              Text: =RoundDown(First(cRuntime).Missing_Runtime/60,0) & "H " & Mod(First(cRuntime).Missing_Runtime, 60) & "m"
+                              Align: =Align.Center
+                              Color: =If(First(cRuntime).Missing_Runtime > 0, gblTheme.Text_On_Dark, gblTheme.Text_On_Light)
+                              Fill: =If(First(cRuntime).Missing_Runtime > 0, gblTheme.Deny, gblTheme.Background)
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+            - lSection0:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =600
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gblPadding
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: '=gblPadding*2  '
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width * 0.7
+                Children:
+                - lParetoParent:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      FillPortions: =2
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutGap: =gblPadding
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - lParetoOEE2:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
+                            EncodeUrl("
+                            {
+                                type: 'bar',
+                                data: {
+                                    labels: "&
+                                        Concatenate(
+                                            "['",
+                                            Concat(
+                                                Sort(
+                                                    Filter(cTopDowntime,
+                                                        Downtime_Reason in gblLists.Downtime_Reasons_Unplanned
+                                                    ),
+                                                    Downtime_Total,
+                                                    SortOrder.Descending
+                                                ),
+                                                ThisRecord.Downtime_Reason,
+                                                "',
+                                                '"
+                                            ),
+                                            "']")
+                                        &",
+                                    datasets: [{
+                                        label: 'Frequency',
+                                        data: "&
+                                            Concatenate(
+                                                "['",
+                                                Concat(
+                                                    Sort(
+                                                        Filter(cTopDowntime,
+                                                            Downtime_Reason in gblLists.Downtime_Reasons_Unplanned
+                                                        ),
+                                                        Downtime_Total,
+                                                        SortOrder.Descending
+                                                    ),
+                                                    ThisRecord.Downtime_Total,
+                                                    "',
+                                                    '"
+                                                ),
+                                                "']"
+                                            )
+                                        &",
+                                        backgroundColor: '"& gblTheme.Chart_Blue &"'
+                                    }, {
+                                        label: 'Cumulative Percentage',
+                                        data: " & Concatenate("['", Concat(Sort(collectPareto, freq, SortOrder.Descending), ThisRecord.cumulative, "', '"), "']") & ",
+                                        type: 'line',
+                                        borderColor: '"& gblTheme.Chart_Red &"',
+                                        fill: false,
+                                        yAxisID: 'right-y-axis' // Assign to the right Y-axis
+                                    }]
+                                },
+                                options: {
+                                    title: {
+                                        display: true,
+                                        text: 'OEE2 ',
+                                    },
+                                    scales: {
+                                        xAxes: [{
+                                            offset: true,
+                                            fontColor: '"&gblTheme.Chart_Black&"',
+                                            ticks:{fontColor: '"&gblTheme.Chart_Black&"'},
+                                            gridLines: {color: '"&gblTheme.Chart_Dim&"'}
+                                        }],
+                                        yAxes: [{
+                                            id: 'left-y-axis',
+                                            type: 'linear',
+                                            position: 'left',
+                                            ticks: {
+                                                beginAtZero: true,
+                                                fontColor: '"&gblTheme.Chart_Black&"'
+                                            },
+                                            gridLines: {color: '"&gblTheme.Chart_Dim&"'}
+                                        },
+                                        {
+                                            id: 'right-y-axis',
+                                            type: 'linear',
+                                            position: 'right',
+                                            ticks: {
+                                                beginAtZero: true,
+                                                fontColor: '"&gblTheme.Chart_Black&"',
+                                                max: 100,
+                                                stepSize: 20,
+                                                callback: function(value, index, values) {
+                                                    return value + '%';
+                                                }
+                                            },
+                                            gridLines: { 
+                                                drawOnChartArea: false
+                                            }
+                                        }]
+                                    },
+                                    tooltips: {
+                                        mode: 'index',
+                                        intersect: false
+                                    },
+                                    annotation: {
+                                        annotations: [{
+                                            type: 'line',
+                                            mode: 'horizontal',
+                                            scaleID: 'right-y-axis',
+                                            value: 80,
+                                            borderColor: '"& gblTheme.Chart_Red &"',
+                                            borderWidth: 2,
+                                            label: {
+                                                enabled: true,
+                                                position: 'right',
+                                                content: '80% Threshold'
+                                            }
+                                        },
+                                        {
+                                            type: 'line',
+                                            mode: 'vertical',
+                                            scaleID: 'x-axis-0',
+                                            value: ["& First(Sort(Filter(collectPareto, cumulative >= 80), freq, SortOrder.Descending)).id-1 &"],
+                                            borderColor: '"& gblTheme.Chart_Blue &"',
+                                            borderWidth: 2,
+                                            label: {
+                                                enabled: true,
+                                                content: '80% Volume',
+                                                position: 'top',
+                                                backgroundColor: 'rgba(72, 72, 192, 0.5)'
+                                            }
+                                        }]
+                                    }
+                                }
+                            }")
+                          FillPortions: =1
+                          Height: =350
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Width: =Parent.Width * 0.5
+                    - lParetoOEE1:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" & Self.Width & "&height=" & Self.Height*0.90 & "&c=" & 
+                            EncodeUrl("
+                            {
+                                type: 'bar',
+                                data: {
+                                    labels: "&
+                                        Concatenate(
+                                            "['",
+                                            Concat(
+                                                Sort(
+                                                    Filter(cTopDowntime,
+                                                        Downtime_Reason in gblLists.Downtime_Reasons_Planned
+                                                    ),
+                                                    Downtime_Total,
+                                                    SortOrder.Descending
+                                                ),
+                                                ThisRecord.Downtime_Reason,
+                                                "',
+                                                '"
+                                            ),
+                                            "']")
+                                        &",
+                                    datasets: [{
+                                        label: 'Frequency',
+                                        data: "&
+                                            Concatenate(
+                                                "['",
+                                                Concat(
+                                                    Sort(
+                                                        Filter(cTopDowntime,
+                                                            Downtime_Reason in gblLists.Downtime_Reasons_Planned
+                                                        ),
+                                                        Downtime_Total,
+                                                        SortOrder.Descending
+                                                    ),
+                                                    ThisRecord.Downtime_Total,
+                                                    "',
+                                                    '"
+                                                ),
+                                                "']"
+                                            )
+                                        &",
+                                        backgroundColor: '"& gblTheme.Chart_Blue &"'
+                                    }, {
+                                        label: 'Cumulative Percentage',
+                                        data: " & Concatenate("['", Concat(Sort(collectParetoOEE1, freq, SortOrder.Descending), ThisRecord.cumulative, "', '"), "']") & ",
+                                        type: 'line',
+                                        borderColor: '"& gblTheme.Chart_Red &"',
+                                        fill: false,
+                                        yAxisID: 'right-y-axis' // Assign to the right Y-axis
+                                    }]
+                                },
+                                options: {
+                                    title: {
+                                        display: true,
+                                        text: 'OEE1',
+                                    },
+                                    scales: {
+                                        xAxes: [{
+                                            offset: true,
+                                            fontColor: '"&gblTheme.Chart_Black&"',
+                                            ticks:{fontColor: '"&gblTheme.Chart_Black&"'},
+                                            gridLines: {color: '"&gblTheme.Chart_Dim&"'}
+                                        }],
+                                        yAxes: [{
+                                            id: 'left-y-axis',
+                                            type: 'linear',
+                                            position: 'left',
+                                            ticks: {
+                                                beginAtZero: true,
+                                                fontColor: '"&gblTheme.Chart_Black&"'
+                                            },
+                                            gridLines: {color: '"&gblTheme.Chart_Dim&"'}
+                                        },
+                                        {
+                                            id: 'right-y-axis',
+                                            type: 'linear',
+                                            position: 'right',
+                                            ticks: {
+                                                beginAtZero: true,
+                                                fontColor: '"&gblTheme.Chart_Black&"',
+                                                max: 100,
+                                                stepSize: 20,
+                                                callback: function(value, index, values) {
+                                                    return value + '%';
+                                                }
+                                            },
+                                            gridLines: { 
+                                                drawOnChartArea: false
+                                            }
+                                        }]
+                                    },
+                                    tooltips: {
+                                        mode: 'index',
+                                        intersect: false
+                                    },
+                                    annotation: {
+                                        annotations: [{
+                                            type: 'line',
+                                            mode: 'horizontal',
+                                            scaleID: 'right-y-axis',
+                                            value: 80,
+                                            borderColor: '"& gblTheme.Chart_Red &"',
+                                            borderWidth: 2,
+                                            label: {
+                                                enabled: true,
+                                                position: 'right',
+                                                content: '80% Threshold'
+                                            }
+                                        },
+                                        {
+                                            type: 'line',
+                                            mode: 'vertical',
+                                            scaleID: 'x-axis-0',
+                                            value: ["& First(Sort(Filter(collectParetoOEE1, cumulative >= 80), freq, SortOrder.Descending)).id-1 &"],
+                                            borderColor: '"& gblTheme.Chart_Blue &"',
+                                            borderWidth: 2,
+                                            label: {
+                                                enabled: true,
+                                                content: '80% Volume',
+                                                position: 'top',
+                                                backgroundColor: 'rgba(72, 72, 192, 0.5)'
+                                            }
+                                        }]
+                                    }
+                                }
+                            }")
+                          FillPortions: =1
+                          Height: =350
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                          Width: =Parent.Width * 0.5
+                - lTopDowntime:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gblTheme.Sec_Complement
+                      BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Semilight
+                      Fill: =gblTheme.Midground
+                      Height: =Parent.Height
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                      PaddingBottom: =gblPadding
+                      PaddingTop: =
+                      Width: =Parent.Width * 0.65
+                    Children:
+                    - lTopDowtnimeTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Downtime Breakdown"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          Fill: =gblTheme.Secondary
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinHeight: =12
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 3
+                          Width: =Parent.Width
+                    - lTopDowntimeColumns:
+                        Control: GroupContainer
+                        Variant: manualLayoutContainer
+                        Properties:
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DropShadow: =DropShadow.None
+                          Fill: =gblTheme.Sec_Complement
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width
+                        Children:
+                        - lTopDowntimeAmount:
+                            Control: Label
+                            Properties:
+                              Text: ="Amount"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_Dark
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              Size: =Self.Height / 3.5
+                              Width: =Parent.Width / 2
+                              X: =lTopDowntimeReason.X + lTopDowntimeReason.Width
+                        - lTopDowntimeReason:
+                            Control: Label
+                            Properties:
+                              Text: ="Reason"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_Dark
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              Size: =Self.Height / 3.5
+                              Width: =Parent.Width / 2
+                    - lGallery:
+                        Control: Gallery
+                        Variant: galleryVertical
+                        Properties:
+                          Items: |-
+                            =Sort(cTopDowntime,
+                                Downtime_Total,
+                                SortOrder.Descending
+                            )
+                          AlignInContainer: =AlignInContainer.SetByContainer
+                          DelayItemLoading: =true
+                          FillPortions: =14
+                          Layout: =Layout.Vertical
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          LoadingSpinner: =LoadingSpinner.Data
+                          TemplatePadding: =0
+                          TemplateSize: =Self.Height / 14
+                        Children:
+                        - lGalleryAmount:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(Parent)
+                              Text: =RoundDown(ThisItem.Downtime_Total/60,0) & "H " & Mod(ThisItem.Downtime_Total,60) & "m"
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Font: =Font.Verdana
+                              Height: =Parent.TemplateHeight - lGallerySeparator.Height
+                              Size: =Self.Height / 4.5
+                              Width: =Parent.TemplateWidth/2
+                              X: =lGalleryReason.X + lGalleryReason.Width
+                              Y: =1-1
+                        - lGalleryReason:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(Parent)
+                              Text: =ThisItem.Downtime_Reason
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Font: =Font.Verdana
+                              Height: =Parent.TemplateHeight - lGallerySeparator.Height
+                              Size: =Self.Height / 4.5
+                              Width: =Parent.TemplateWidth/2
+                              X: =1-1
+                              Y: =1-1
+                        - lGallerySeparator:
+                            Control: Rectangle
+                            Properties:
+                              OnSelect: =Select(Parent)
+                              Fill: =gblTheme.Accent
+                              Height: =Parent.TemplateHeight * 0.025
+                              Width: =Parent.Width
+                              Y: =Parent.TemplateHeight - Self.Height
