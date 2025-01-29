@@ -139,7 +139,7 @@
             Properties:
               Image: =If(gblTheme.Mode = "Light", logo1, logo2)
               LayoutMinHeight: =10
-              Width: =hNavTitle.Width
+              Width: =lNavTitle.Width
         - lTitle:
             Control: Label
             Properties:

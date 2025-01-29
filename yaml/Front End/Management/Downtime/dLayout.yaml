@@ -18,7 +18,7 @@
         Control: Classic/Button
         Properties:
           OnSelect: |-
-            =Set(gPopups, {Visible: true, Value:10, Text:"Updating Variables", Popup:"Loading"});
+            =Patch(gblPopups,First(gblPopups),{Visible: true, Value: 10, Display_Text:"Updating Variables"});
             /*Update Time*/
             Set(gblTime,
                 {
@@ -35,7 +35,7 @@
                 locCountOfDays: DateDiff(locStartDate,locEndDate)
             });
 
-            Set(gPopups, {Visible: true, Value:20, Text:"Collecting Production Data", Popup:"Loading"});
+            Patch(gblPopups,First(gblPopups),{Value: 20, Display_Text:"Collecting Production Data"});
             /*Collect Production Data*/
             Clear(colProduction);
             ForAll(
@@ -76,7 +76,7 @@
             );
 
             /*Collect Downtime Data*/
-            Set(gPopups, {Visible: true, Value:30, Text:"Collecting Downtime Data", Popup:"Loading"});
+            Patch(gblPopups,First(gblPopups),{Value: 30, Display_Text:"Collecting Downtime Data"});
             Clear(colDowntime);
             ForAll(
                 Filter(FE_Downtime,
@@ -114,7 +114,7 @@
         Control: Classic/Button
         Properties:
           OnSelect: |-
-            =Set(gPopups, {Visible: true, Value:40, Text:"Checking Line Status", Popup:"Loading"});
+            =Patch(gblPopups,First(gblPopups),{Visible: true, Value: 40, Display_Text:"Collecting Downtime Data"});
 
             UpdateContext({locLines:[
                 "1", "2",
@@ -131,8 +131,7 @@
                 ]});
 
             /*Runtime Reporting*/
-            Set(gPopups, {Visible: true, Value:60, Text:"Calculating Runtimes", Popup:"Loading"});
-
+            Patch(gblPopups,First(gblPopups),{Value: 50, Display_Text:"Calculating Runtimes"});
             Clear(colRuntime);
             ForAll(gblLists.Lines,
                 With(
@@ -158,8 +157,7 @@
                 )
             );
 
-            Set(gPopups, {Visible: true, Value:100, Text:"Finishing Up", Popup:"Loading"});
-            Set(gPopups, {Visible: false, Value:-1, Text:"Not Loading", Popup:Blank()});
+            Patch(gblPopups,First(gblPopups),{Visible: false, Value: -1, Display_Text:"Finishing Up"});
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
@@ -190,7 +188,7 @@
             Properties:
               Image: =If(gblTheme.Mode = "Light", logo1, logo2)
               LayoutMinHeight: =10
-              Width: =hNavTitle.Width
+              Width: =dNavTitle.Width
         - dTitle:
             Control: Label
             Properties:
