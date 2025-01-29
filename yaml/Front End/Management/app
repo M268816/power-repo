@@ -1,5 +1,0 @@
-OnStart
-Set(varInit, false);
-
-Formulas
-Center(ParentSize:Number,SelfSize:Number):Number = ParentSize/2 - SelfSize/2;

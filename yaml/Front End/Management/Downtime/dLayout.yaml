@@ -1,0 +1,730 @@
+- dLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - dCollect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Set(gPopups, {Visible: true, Value:10, Text:"Updating Variables", Popup:"Loading"});
+            /*Update Time*/
+            Set(gblTime,
+                {
+                    Now: Now(),
+                    Today: Today()
+
+                }
+            );
+            UpdateContext({
+                locStartDate: DateAdd(dDate.SelectedDate, -1, TimeUnit.Hours),
+                locEndDate: DateAdd(dDate.SelectedDate, 23, TimeUnit.Hours)
+            });
+            UpdateContext({
+                locCountOfDays: DateDiff(locStartDate,locEndDate)
+            });
+
+            Set(gPopups, {Visible: true, Value:20, Text:"Collecting Production Data", Popup:"Loading"});
+            /*Collect Production Data*/
+            Clear(colProduction);
+            ForAll(
+                Filter(FE_Production,
+                    Hour_Starting >= locStartDate,
+                    Hour_Ending <= locEndDate
+                ),
+                Collect(colProduction,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter.Value,
+                        Operator_1: ThisRecord.Operator_1,
+                        Operator_2: ThisRecord.Operator_2,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Master_Roll: ThisRecord.Master_Roll,
+                        Cast_Date: ThisRecord.Cast_Date,
+                        Cast_Roll: ThisRecord.Cast_Roll,
+                        Poly_Lot: ThisRecord.Poly_Lot,
+                        Membrane_Type: ThisRecord.Membrane_Type,
+                        Pleats_Per_Pack: ThisRecord.Pleats_Per_Pack,
+                        Pleat_Height: ThisRecord.Pleat_Height,
+                        Pleater_Speed: ThisRecord.Pleater_Speed,
+                        Hour_Starting: ThisRecord.Hour_Starting,
+                        Hour_Ending: ThisRecord.Hour_Ending,
+                        Unit_Starting: ThisRecord.Unit_Starting,
+                        Unit_Ending: ThisRecord.Unit_Ending,
+                        Amount_Built: ThisRecord.Amount_Built*1,
+                        Reject_Units: ThisRecord.Reject_Units,
+                        Hourly_Goal:ThisRecord.Hourly_Goal,
+                        Reject_Footage:Round(ThisRecord.Reject_Footage,4),
+                        Good_Footage: Round(ThisRecord.Good_Footage,4),
+                        Record_Editor:ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+
+            /*Collect Downtime Data*/
+            Set(gPopups, {Visible: true, Value:30, Text:"Collecting Downtime Data", Popup:"Loading"});
+            Clear(colDowntime);
+            ForAll(
+                Filter(FE_Downtime,
+                    Started >= locStartDate,
+                    Ended <= locEndDate
+                ),
+                Collect(colDowntime,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter.Value,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Started: ThisRecord.Started,
+                        Ended: ThisRecord.Ended,
+                        Reason: ThisRecord.Reason.Value,
+                        Total_Downtime: ThisRecord.Total_Downtime,
+                        Record_Editor:ThisRecord.Record_Editor,
+                        Edit_Reason: ThisRecord.Edit_Reason
+                    }
+                )
+            );
+
+            Select(dUpdate);
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - dSequentialCollect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - dUpdate:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Set(gPopups, {Visible: true, Value:40, Text:"Checking Line Status", Popup:"Loading"});
+
+            UpdateContext({locLines:[
+                "1", "2",
+                "3", "4",
+                "E", "F",
+                "G", "H",
+                "J", "K",
+                "L", "M",
+                "N", "O",
+                "P", "Q",
+                "R", "S",
+                "W", "X",
+                "Y", "Z"
+                ]});
+
+            /*Runtime Reporting*/
+            Set(gPopups, {Visible: true, Value:60, Text:"Calculating Runtimes", Popup:"Loading"});
+
+            Clear(colRuntime);
+            ForAll(gblLists.Lines,
+                With(
+                    {
+                        thisLine: ThisRecord.Value,
+                        thisShift: dShiftSelect.SelectedText.Value
+                    },
+                    With(
+                        {
+                            thisProductionFilter: Filter(colProduction, Line in thisLine, Shift = thisShift),
+                            thisDowntimeFilter: Filter(colDowntime, Line in thisLine, Shift = thisShift)
+                        },
+                        Collect(colRuntime,
+                            {
+                                Line: thisLine,
+                                Reported_Downtime: Sum(thisDowntimeFilter, Total_Downtime),
+                                Reported_Runtime: CountRows(thisProductionFilter) * 60,
+                                Planned_Downtime: Sum(Filter(thisDowntimeFilter, Reason in gblLists.Downtime_Reasons_Planned), Total_Downtime),
+                                Unplanned_Downtime: Sum(Filter(thisDowntimeFilter, Reason in gblLists.Downtime_Reasons_Unplanned), Total_Downtime)
+                            }
+                        )
+                    )
+                )
+            );
+
+            Set(gPopups, {Visible: true, Value:100, Text:"Finishing Up", Popup:"Loading"});
+            Set(gPopups, {Visible: false, Value:-1, Text:"Not Loading", Popup:Blank()});
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - dHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - dLogo:
+            Control: Image
+            Properties:
+              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: =hNavTitle.Width
+        - dTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - dMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - dBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - dUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - dMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - dNavigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - dNavTitle:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - dNavSeparator0:
+                Control: Rectangle
+                Properties:
+                  Fill: =gblTheme.Pri_Complement
+                  Height: =Round(gblPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - dNavGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =colNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gblPadding
+                  TemplateSize: =40
+                Children:
+                - dNavGalleryButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - dNavLegalNote:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - dBody:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - dDateParent:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Pri_Complement
+                  FillPortions: =0
+                  Height: =50
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gblPadding
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  Width: =Parent.Width * 0.45
+                Children:
+                - dDateLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Select Date:"
+                      Color: =gblTheme.Text_Dark
+                      FillPortions: =2
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - dDate:
+                    Control: Classic/DatePicker
+                    Properties:
+                      OnChange: =Select(dCollect);
+                      DefaultDate: =gblTime.Today
+                      BorderColor: =gblTheme.Primary
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =2.5
+                      IconBackground: =gblTheme.Secondary
+                      IconFill: =gblTheme.Text_Light
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - dDateSeparator:
+                    Control: Label
+                    Properties:
+                      Text: ="Select Shift:"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_Dark
+                      FillPortions: =2
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      PaddingBottom: =gblPadding
+                      PaddingLeft: =gblPadding
+                      PaddingRight: =gblPadding
+                      PaddingTop: =gblPadding
+                      Size: =Self.Height / 3
+                - dShiftSelect:
+                    Control: Classic/DropDown
+                    Properties:
+                      OnChange: =Select(dUpdate);
+                      Items: =["C","A","B"]
+                      ChevronBackground: =gblTheme.Secondary
+                      ChevronFill: =gblTheme.Text_Light
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =2.5
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+            - dDowntimeParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Midground
+                  FillPortions: =0
+                  Height: =Self.Width * 0.25
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.5
+                Children:
+                - dDowntimeTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Report Daily Downtime"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =gblTheme.Secondary
+                      Size: =Self.Height / 3
+                - dGallery:
+                    Control: Gallery
+                    Variant: BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0
+                    Properties:
+                      Items: =locLines
+                      WrapCount: =2
+                      DelayItemLoading: =true
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Parent.Width / 11
+                    Children:
+                    - dGalleryButton:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: |-
+                            =UpdateContext({lLine: Self.Text});
+                            Set(gPopups, {Visible: true, Value:10, Text:"Updating Variables", Popup:"Confirm"});
+                          Text: =ThisItem.Value
+                          Color: =gblTheme.Text_Dark
+                          DisabledColor: =gblTheme.Text_Dark
+                          DisabledFill: =ColorFade(Self.Fill, 0.8)
+                          DisplayMode: =If(IsEmpty(Filter(colDowntime,Line = ThisItem.Value, Shift = dShiftSelect.SelectedText.Value)), DisplayMode.Edit, DisplayMode.Disabled)
+                          Fill: =gblTheme.Accent
+                          FontWeight: =FontWeight.Normal
+                          Height: =Parent.TemplateHeight - gblPadding
+                          RadiusBottomLeft: =8
+                          RadiusBottomRight: =8
+                          RadiusTopLeft: =8
+                          RadiusTopRight: =8
+                          Size: =Self.Height / 4
+                          Width: =Parent.TemplateWidth * 0.9
+                          X: =Center(Parent.TemplateWidth,Self.Width)
+                          Y: =Center(Parent.TemplateHeight,Self.Height)
+            - dManualReportButton:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: =Navigate(DowntimeEntry, ScreenTransition.Fade);
+                  Text: ="Report Downtime via Manual Entry"
+                  Color: =gblTheme.Text_Dark
+                  DisabledColor: =gblTheme.Text_Dark
+                  DisabledFill: =ColorFade(Self.Fill, 0.8)
+                  Fill: =gblTheme.Accent
+                  FontWeight: =FontWeight.Normal
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  Size: =Self.Height / 4
+                  Width: =Parent.Width * 0.2
+            - dLineParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =0
+                  Height: =Self.Width * 1
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.40
+                Children:
+                - dLineTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Downtime Per Line"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Stretch
+                      Color: =gblTheme.Text_On_Dark
+                      Fill: =gblTheme.Secondary
+                      Height: '=40  '
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - dLineGallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      Items: =colRuntime
+                      DelayItemLoading: =true
+                      Layout: =Layout.Vertical
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =IfError(Self.Height / Self.AllItemsCount,0)
+                    Children:
+                    - dLineGallerySection0:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Height: =Parent.TemplateHeight - dLineGallerySeparator.Height
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.TemplateWidth
+                        Children:
+                        - dLineGalleryShift:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Line
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Sec_Complement
+                              FillPortions: =1
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 5
+                        - dLineGallerySection1:
+                            Control: GroupContainer
+                            Variant: horizontalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              FillPortions: =11
+                              Height: =531
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutJustifyContent: =LayoutJustifyContent.Center
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =532
+                              X: =52
+                            Children:
+                            - dLineGalleryKeys:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutGap: =gblPadding
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - dLineGalleryKeysRuntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Reported Runtime"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - dLineGalleryKeysDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Reported Downtime"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - dLineGalleryKeysPlanned:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Planned Downtime"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - dLineGalleryKeysUnplanned:
+                                    Control: Label
+                                    Properties:
+                                      Text: ="Unplanned Downtime"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Midground
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                            - dLineGalleryValues:
+                                Control: GroupContainer
+                                Variant: verticalAutoLayoutContainer
+                                Properties:
+                                  DropShadow: =DropShadow.None
+                                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                                  LayoutGap: =gblPadding
+                                  LayoutMinHeight: =10
+                                  LayoutMinWidth: =10
+                                  LayoutMode: =LayoutMode.Auto
+                                  RadiusBottomLeft: =0
+                                  RadiusBottomRight: =0
+                                  RadiusTopLeft: =0
+                                  RadiusTopRight: =0
+                                Children:
+                                - dLineGalleryValueRuntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: =RoundDown(ThisItem.Reported_Runtime/60,0) & "H " & Mod(ThisItem.Reported_Runtime, 60) & "m"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - dLineGalleryValueDowntime:
+                                    Control: Label
+                                    Properties:
+                                      Text: =RoundDown(ThisItem.Reported_Downtime/60,0) & "H " & Mod(ThisItem.Reported_Downtime, 60) & "m"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - dLineGalleryValuePlanned:
+                                    Control: Label
+                                    Properties:
+                                      Text: =RoundDown(ThisItem.Planned_Downtime/60,0) & "H " & Mod(ThisItem.Planned_Downtime, 60) & "m"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                                - dLineGalleryValueUnplanned:
+                                    Control: Label
+                                    Properties:
+                                      Text: =RoundDown(ThisItem.Unplanned_Downtime/60,0) & "H " & Mod(ThisItem.Unplanned_Downtime, 60) & "m"
+                                      Align: =Align.Center
+                                      Color: =gblTheme.Text_On_Light
+                                      Fill: =gblTheme.Background
+                                      FillPortions: =1
+                                      LayoutMinHeight: =10
+                                      LayoutMinWidth: =10
+                                      Size: =Self.Height / 4
+                    - dLineGallerySeparator:
+                        Control: Rectangle
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Fill: =gblTheme.Accent
+                          Height: =Parent.TemplateHeight * 0.03
+                          Width: =Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight - Self.Height
