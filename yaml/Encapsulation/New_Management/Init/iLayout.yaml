@@ -18,7 +18,16 @@
           OnSelect: |-
             =// Navigation Setup
             ClearCollect(colNavigation,
-                {Screen: Home, Label: "Home", Position: 0}
+                {Title: "Home", ScreenName: Home},
+                {Title: "Daily Operational Report", ScreenName: DOR},
+                {Title: "Performance", ScreenName: Performance},
+                {Title: "Outputs", ScreenName: Outputs},
+                {Title: "Downtime", ScreenName: Downtime_Screen},
+                {Title: "Hourly", ScreenName: Hourly},
+                {Title: "Review Batch Record Errors", ScreenName: Errors},
+                {Title: "OEE2 Analysis", ScreenName: OEE},
+                {Title: "Catalog Analysis", ScreenName: Catalog},
+                {Title: "Trend Analysis", ScreenName: Trend}
             );
 
             // Popup Manager
@@ -92,8 +101,31 @@
             // Getter: gblTheme.Mode;
             Set(gblTheme, gblThemeMode.Light);
 
-            // Global Variables
-            Set(APP_NAME, "DMS Management Template");
+            /*ID Checks*/
+            Set(varProductionIDCheck, First(Sort(Filter(Production, Created = Today()),ID,SortOrder.Descending)).ID);
+
+            /*SN2 XLT Catalogs*/
+            ClearCollect(
+                collectSCatalogs,
+                {Catalog:"SN2M027A07", Line: "XLT", Size:"20"},
+                {Catalog:"SN2J014A03", Line: "XLT", Size:"30"},
+                {Catalog:"SN2J015A03", Line: "XLT", Size:"30"},
+                {Catalog:"SN2M013A03", Line: "XLT", Size:"30"},
+                {Catalog:"SN1J013A04", Line: "XLT", Size:"20"},
+                {Catalog:"SN1M188A06", Line: "XLT", Size:"30"},
+                {Catalog:"SN2J016A03", Line: "XLT", Size:"30"},
+                {Catalog:"SN2J024A03", Line: "XLT", Size:"30"},
+                {Catalog:"SN2J145A05", Line: "XLT", Size:"20"},
+                {Catalog:"SN2J146A05", Line: "XLT", Size:"30"},
+                {Catalog:"SN2M003A06", Line: "XLT", Size:"30"},
+                {Catalog:"SN2M087A05", Line: "XLT", Size:"20"},
+                {Catalog:"SN2M090A06", Line: "XLT", Size:"20"},
+                {Catalog:"SN2M104A04", Line: "XLT", Size:"20"},
+                {Catalog:"SN2M138A06", Line: "XLT", Size:"20"}
+            ); 
+
+                // Global Variables
+            Set(APP_NAME, "Encapsulation DMS for Management");
             Set(gblPadding, Round(App.Width * 0.005,0));
             Set(gblTime,{Today:Today(),Now:Now()});
             Set(gblLists,
@@ -107,8 +139,18 @@
                         "SSC", "SSC2"
                     ],
                     Downtime_Reasons: [
-                        "Reason 1","Reason 2","Reason 3","Reason 4",
-                        "Reason 5","Reason 6","Reason 7","Reason 8",
+                        "2 Lots Awaiting Lot Release", "Accountability", "Bagger",
+                        "Break Not Covered", "Data Entry", "Engineering DT",
+                        "Engineering Verifications", "Equipment Adjustments", "Huddle/Stop Work/Flow down",
+                        "Leak Master", "Lot Changeover", "Melt Checks",
+                        "No Scheduled Work", "Other", "Planned Downtime",
+                        "Plug Bonder", "Preventive Maintenance - Planned", "Preventive Maintenance - Unplanned",
+                        "QA Sample Build", "Quality Issue", "Rework",
+                        "Safety/EMRT", "Scrap", "Shift Change",
+                        "Short Staffed Over Target", "Short Staffed Under Target", "Spider Bonder",
+                        "SSC Bonder", "Training", "Uson Tester",
+                        "Vibe Welder","Waiting for Mechanic","Waiting for Parts",
+                        "Waiting on Labels","XL Bonder","XLT Bonder"
                     ]
                 }
             );
@@ -138,7 +180,7 @@
                 }
             );
 
-            // Login Catching -- DISABLED
+            // Login Catching
             /*Patch(
                 LoginTracking,
                 Defaults(LoginTracking), 

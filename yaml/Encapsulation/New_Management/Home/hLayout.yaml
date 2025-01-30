@@ -1,0 +1,1021 @@
+- hLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - hCollect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: "=/*Start*/\r\nPatch(recPopups,First(recPopups),{Visible: true, Value: 10, Display_Text: \"Loading\"});\r\n\r\nSet(gblTime,{Now: Now(), Today: Today()});\r\n\r\n/*Update Date Variables*/\r\nUpdateContext({\r\n    locEndDate: gblTime.Today,\r\n    locStartDate: DateAdd(gblTime.Today, -1, TimeUnit.Days)\r\n    \r\n});\r\n\r\n/*Collect Production*/\r\nPatch(recPopups,First(recPopups),{Value: 20, Display_Text: \"Collecting Production Data\"});\r\nClearCollect(colProduction,\r\n    ForAll(\r\n        Filter(Production,\r\n            Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n            Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)\r\n        ),\r\n        {\r\n            Id: Value(ThisRecord.ID),\r\n            Shift: Text(ThisRecord.Shift_Letter),\r\n            Line: Text(ThisRecord.Line.Value),\r\n            Lot: Text(ThisRecord.Lot),\r\n            Catalog: Text(ThisRecord.Catalog),\r\n            Size: Text(ThisRecord.Size),\r\n            Hour_Ending: DateTimeValue(ThisRecord.Hour_Ending),\r\n            Hour_Starting: DateTimeValue(ThisRecord.Hour_Starting),\r\n            Goal: Value(ThisRecord.Hourly_Goal),\r\n            Amount_Built: Value(ThisRecord.Amount_Built),\r\n            Unit_Starting: Value(ThisRecord.Unit_Starting),\r\n            Unit_Ending: Value(ThisRecord.Unit_Ending),\r\n            Reject_Labels: Value(ThisRecord.Reject_Labels),\r\n            Reject_Cartridges: Value(ThisRecord.Reject_Cartridges),\r\n            Reject_Units: Value(ThisRecord.Reject_Units),\r\n            QA_Units: Value(ThisRecord.QA_Units)\r\n        }\r\n    )\r\n);\r\n\r\nPatch(recPopups,First(recPopups),{Value: 30, Display_Text: \"Collecting Downtime Data\"});\r\nClearCollect(colDowntime,\r\n    ForAll(\r\n        Filter(Downtime,\r\n            Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n            Started >= DateAdd(locStartDate, -1, TimeUnit.Days)\r\n        ),\r\n        {\r\n            Id: Value(ThisRecord.ID),\r\n            Shift: Text(ThisRecord.Shift_Letter),\r\n            Line: Text(ThisRecord.Line.Value),\r\n            Lot: Text(ThisRecord.Lot),\r\n            Catalog: Text(ThisRecord.Catalog),\r\n            Size: Text(ThisRecord.Size),\r\n            Started: DateTimeValue(ThisRecord.Started),\r\n            Ended: DateTimeValue(ThisRecord.Ended),\r\n            Reason: Text(ThisRecord.Reason.Value),\r\n            Total_Downtime: Value(ThisRecord.Total_Downtime),\r\n            Comments: Text(ThisRecord.Comments)\r\n        }\r\n    )\r\n);\r\n\r\nSelect(hUpdate);"
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - hUpdate:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(recPopups,First(recPopups),{Value: 40, Display_Text:"Checking Line Status"});
+
+            UpdateContext({locLines:[
+                "XL1", "XL2", "XL3", "XL4", "XL5",
+                "SSC", "SSC2", "XLT", "XLT2", "XLT3"
+                ]});
+
+            Clear(colKanban);
+            ForAll(locLines,
+                With({thisLine:ThisRecord.Value},
+                    Collect(colKanban,
+                        {
+                            Line: thisLine,
+                            Status:
+                                If(
+                                    IsEmpty(
+                                    Filter(colProduction,
+                                        Line = thisLine,
+                                        Hour(Hour_Starting) >= Hour(gblTime.Now)-1
+                                    )
+                                    ),
+                                    "Not Running",
+                                    "Running" 
+                                )
+                        }
+                    )
+                )
+            );
+
+            With(
+                {
+                    thisRuntime:
+                        CountRows(
+                            Filter(colProduction,
+                                Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours),
+                                Hour_Ending < DateAdd(gblTime.Today, 23, TimeUnit.Hours)
+                            )
+                        )*60,
+                    thisDowntime:
+                        Sum(
+                            Filter(colDowntime,
+                                Started >= DateAdd(gblTime.Today, -1, TimeUnit.Hours),
+                                Ended < DateAdd(gblTime.Today, 23, TimeUnit.Hours),
+                                Not(Reason in gblLists.Downtime_Reasons_Planned)
+                            ),
+                            Total_Downtime
+                        ),
+                    thisTotalTime: 60 * Hour(gblTime.Now) * 9,
+                    thisTotalUnits:
+                        Sum(
+                            Filter(colProduction,
+                                Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours),
+                                Hour_Ending < DateAdd(gblTime.Today, 23, TimeUnit.Hours)
+                            ),
+                            Amount_Built + Reject_Units + Reject_Labels + QA_Units
+                        ),
+                    thisGoodUnits:
+                        Sum(
+                            Filter(colProduction,
+                                Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours),
+                                Hour_Ending < DateAdd(gblTime.Today, 23, TimeUnit.Hours)
+                            ),
+                            Amount_Built
+                        ),
+                    thisIdealTime:
+                        RoundUp(Average(Goal_Settings,Constraint_Setting),0)/60
+                },
+                Set(recAvailability,
+                    IfError(
+                        (thisRuntime - thisDowntime) / thisTotalTime,
+                        0
+                    )
+                );
+                Set(recPerformance,
+                    IfError(
+                        (thisIdealTime * thisTotalUnits) / (thisRuntime - thisDowntime),
+                        0
+                    )
+                );
+                Set(recQuality,
+                    IfError(
+                        thisGoodUnits/thisTotalUnits,
+                        0
+                    )
+                );
+                Set(recOEE, recAvailability * recPerformance * recQuality);
+            );
+
+
+            Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Display_Text:"Finishing Up"});
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - hHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - hLogo:
+            Control: Image
+            Properties:
+              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: =hNavTitle.Width
+        - hTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - hMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - hBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - hUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - hMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - hNavigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - hNavTitle:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - hNavSeparator0:
+                Control: Rectangle
+                Properties:
+                  Fill: =gblTheme.Pri_Complement
+                  Height: =Round(gblPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - hNavGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =colNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gblPadding
+                  TemplateSize: =30
+                Children:
+                - hNavGalleryButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - hNavLegalNote:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - hBody:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - hKanban:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Midground
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.5
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.33
+                Children:
+                - hKanbanTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Kanban"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_Light
+                      Fill: =gblTheme.Secondary
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 3
+                - hKanbanGallery:
+                    Control: Gallery
+                    Variant: BrowseLayout_Horizontal_TwoTextOneImageVariant_ver5.0
+                    Properties:
+                      Items: =colKanban
+                      WrapCount: =5
+                      DelayItemLoading: =true
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Parent.Width / 2
+                    Children:
+                    - hKanbanGalleryStatus:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =ThisItem.Status
+                          Align: =Align.Center
+                          Height: =Parent.TemplateHeight * 0.35
+                          Size: =Self.Height / 3
+                          Width: =Parent.TemplateWidth
+                          Y: =Parent.TemplateHeight - Self.Height
+                    - hKanbanGalleryLine:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Text: =ThisItem.Line
+                          Align: =Align.Center
+                          Fill: =If(ThisItem.Status = "Running", gblTheme.Accent, gblTheme.Deny)
+                          Height: =Parent.TemplateHeight
+                          PaddingTop: =
+                          Size: =Self.Height / 3
+                          Width: =Parent.TemplateWidth
+            - hAPQParent:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.28
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gblPadding * 2
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width * 0.65
+                Children:
+                - hAvailability:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gblTheme.Sec_Complement
+                      BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Regular
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - hAvailabilityTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Availability"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          Fill: =gblTheme.Secondary
+                          LayoutMinWidth: =10
+                          Size: =Self.Height / 3
+                    - hAvailabilityChart:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                            With({thisData: Round(recAvailability*100,2)},
+                                EncodeUrl(
+                                    "{
+                                        type: 'radialGauge',
+                                        data: {
+                                            datasets: [{
+                                                data: ["& thisData &"],
+                                                backgroundColor: getGradientFillHelper('horizontal', [
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Red &"',
+                                                    '"& gblTheme.Chart_Red &"',
+                                                    '"& gblTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                        },
+                                        options: {
+                                            domain: [0, "& If(thisData <= 100, 100, thisData) &"],
+                                            trackColor: '"& gblTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                                text: (val) => val + '%',
+                                                fontColor: '"& gblTheme.Chart_Black &"'
+                                            },
+                                        }
+                                    }"
+                                )
+                            )
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                - hPerformance:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gblTheme.Sec_Complement
+                      BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Regular
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - hPerformanceTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Performance"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          Fill: =gblTheme.Secondary
+                          Size: =Self.Height / 3
+                    - hPerformanceChart:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                            With({thisData: Round(recPerformance*100,2)},
+                                EncodeUrl(
+                                    "{
+                                        type: 'radialGauge',
+                                        data: {
+                                            datasets: [{
+                                                data: ["& thisData &"],
+                                                backgroundColor: getGradientFillHelper('horizontal', [
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Red &"',
+                                                    '"& gblTheme.Chart_Red &"',
+                                                    '"& gblTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                        },
+                                        options: {
+                                            domain: [0, "& If(thisData <= 100, 100, thisData) &"],
+                                            trackColor: '"& gblTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                                text: (val) => val + '%',
+                                                fontColor: '"& gblTheme.Chart_Black &"'
+                                            },
+                                        }
+                                    }"
+                                )
+                            )
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                - hQuality:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gblTheme.Sec_Complement
+                      BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Regular
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - hQualityTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Quality"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          Fill: =gblTheme.Secondary
+                          Size: =Self.Height / 3
+                    - hQualityChart:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                            With({thisData: Round(recQuality*100,2)},
+                                EncodeUrl(
+                                    "{
+                                        type: 'radialGauge',
+                                        data: {
+                                            datasets: [{
+                                                data: ["& thisData &"],
+                                                backgroundColor: getGradientFillHelper('horizontal', [
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Red &"',
+                                                    '"& gblTheme.Chart_Red &"',
+                                                    '"& gblTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                        },
+                                        options: {
+                                            domain: [0, "& If(thisData <= 100, 100, thisData) &"],
+                                            trackColor: '"& gblTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                                text: (val) => val + '%',
+                                                fontColor: '"& gblTheme.Chart_Black &"'
+                                            },
+                                        }
+                                    }"
+                                )
+                            )
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+                - hOEE:
+                    Control: GroupContainer
+                    Variant: verticalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      BorderColor: =gblTheme.Sec_Complement
+                      BorderThickness: =If(gblTheme.Mode = "Light", 0, 1)
+                      DropShadow: =DropShadow.Regular
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutDirection: =LayoutDirection.Vertical
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      LayoutMode: =LayoutMode.Auto
+                    Children:
+                    - hOEETitle:
+                        Control: Label
+                        Properties:
+                          Text: ="TPS OEE"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          Fill: =gblTheme.Secondary
+                          Size: =Self.Height / 3
+                    - hOEEChart:
+                        Control: Image
+                        Properties:
+                          Image: |-
+                            ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
+                            With({thisData: Round(recOEE*100,2)},
+                                EncodeUrl(
+                                    "{
+                                        type: 'radialGauge',
+                                        data: {
+                                            datasets: [{
+                                                data: ["& thisData &"],
+                                                backgroundColor: getGradientFillHelper('horizontal', [
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Blue &"',
+                                                    '"& gblTheme.Chart_Red &"',
+                                                    '"& gblTheme.Chart_Red &"',
+                                                    '"& gblTheme.Chart_Red &"'
+                                                ]),
+                                            }]
+                                        },
+                                        options: {
+                                            domain: [0, "& If(thisData <= 100, 100, thisData) &"],
+                                            trackColor: '"& gblTheme.Chart_White &"', 
+                                            centerPercentage: 90,
+                                            centerArea: {
+                                                text: (val) => val + '%',
+                                                fontColor: '"& gblTheme.Chart_Black &"'
+                                            },
+                                        }
+                                    }"
+                                )
+                            )
+                          FillPortions: =1
+                          LayoutMinHeight: =10
+                          LayoutMinWidth: =10
+            - hDailyTargets:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  BorderColor: =gblTheme.Sec_Complement
+                  BorderThickness: =If(gblTheme.Mode = "Light",0,1)
+                  DropShadow: =DropShadow.Regular
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.30
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width * 0.8
+                Children:
+                - hDailyTargetsTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Adjusted Daily Output Targets"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_Light
+                      Fill: =gblTheme.Secondary
+                      FillPortions: =1
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                - hDailyTargetsColumns:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.None
+                      Fill: =gblTheme.Sec_Complement
+                      Height: =Parent.Height
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutJustifyContent: =LayoutJustifyContent.Center
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Width: =Parent.Width
+                    Children:
+                    - hDailyTargetsColumnLines:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(hGallery)
+                          Text: ="Lines"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =10
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Self.Height / 5
+                          Width: =10
+                    - hDailyTargetsColumnBase:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(hGallery)
+                          Text: ="Base Target"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =10
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Self.Height / 5
+                          Width: =10
+                    - hDailyTargetsColumnShiftC:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(hGallery)
+                          Text: ="C Shift Output"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Height: =10
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Self.Height / 5
+                          Width: =10
+                    - hDailyTargetsColumnAjustA:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(hGallery)
+                          Text: ="Adjusted Target for A Shift"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =10
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Self.Height / 5
+                          Width: =10
+                    - hDailyTargetsColumnShiftA:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(hGallery)
+                          Text: ="A Shift Output"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Height: =10
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Self.Height / 5
+                          Width: =10
+                    - hDailyTargetsColumnAdjustB:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(hGallery)
+                          Text: ="Adjusted Target for B Shift"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          Height: =10
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Self.Height / 5
+                          Width: =10
+                    - hDailyTargetsColumnShiftB:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(hGallery)
+                          Text: ="B Shift Output"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Height: =10
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Self.Height / 5
+                          Width: =10
+                    - hDailyTargetsColumnDelta:
+                        Control: Label
+                        Properties:
+                          OnSelect: =Select(hGallery)
+                          Text: ="Target Delta"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Height: =10
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Self.Height / 5
+                          Width: =10
+                - hGallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      Items: |-
+                        =[
+                            {
+                                Lines: "SSC",
+                                Base_Target: Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_SSC").int/5/3,0),
+                                C: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="SSC" || Line="SSC2", Shift="C"), Amount_Built)*1,
+                                Adjusted_Target_A:
+                                    (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_SSC").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="SSC" || Line="SSC2", Shift="C"), Amount_Built*1)
+                                    )
+                                    + Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_SSC").int/5/3,0),
+                                A: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="SSC" || Line="SSC2", Shift="A"), Amount_Built)*1,
+                                Adjusted_Target_B:
+                                    (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_SSC").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="SSC" || Line="SSC2", Shift="C"), Amount_Built*1)
+                                    )
+                                    + (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_SSC").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="SSC" || Line="SSC2", Shift="A"), Amount_Built*1)
+                                    )
+                                    + Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_SSC").int/5/3,0),
+                                B: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="SSC" || Line="SSC2", Shift="B"), Amount_Built)*1
+                            },
+                            {
+                                Lines: "XL",
+                                Base_Target: Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XL").int/5/3,0),
+                                C: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XL1" || Line="XL2" || Line="XL3" || Line="XL4" || Line="XL5", Shift="C"), Amount_Built)*1,
+                                Adjusted_Target_A:
+                                    (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XL").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XL1" || Line="XL2" || Line="XL3" || Line="XL4" || Line="XL5", Shift="C"), Amount_Built*1)
+                                    )
+                                    + Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XL").int/5/3,0),
+                                A: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XL1" || Line="XL2" || Line="XL3" || Line="XL4" || Line="XL5", Shift="A"), Amount_Built)*1,
+                                Adjusted_Target_B:
+                                    (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XL").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XL1" || Line="XL2" || Line="XL3" || Line="XL4" || Line="XL5", Shift="C"), Amount_Built*1)
+                                    )
+                                    + (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XL").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XL1" || Line="XL2" || Line="XL3" || Line="XL4" || Line="XL5", Shift="A"), Amount_Built*1)
+                                    )
+                                    + Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XL").int/5/3,0),
+                                B: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XL1" || Line="XL2" || Line="XL3" || Line="XL4" || Line="XL5", Shift="B"), Amount_Built)*1
+                            },
+                            {
+                                Lines: "XLT",
+                                Base_Target: Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XLT").int/5/3,0),
+                                C: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XLT" || Line="XLT2", Shift="C"), Amount_Built)*1,
+                                Adjusted_Target_A:
+                                    (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XLT").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XLT" || Line="XLT2", Shift="C"), Amount_Built*1)
+                                    )
+                                    + Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XLT").int/5/3,0),
+                                A: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XLT" || Line="XLT2", Shift="A"), Amount_Built)*1,
+                                Adjusted_Target_B:
+                                    (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XLT").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XLT" || Line="XLT2", Shift="C"), Amount_Built*1)
+                                    )
+                                    + (
+                                        Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XLT").int/5/3,0)
+                                        - Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XLT" || Line="XLT2", Shift="A"), Amount_Built*1)
+                                    )
+                                    + Round(LookUp(Universal_Variables, name = "UNI_MANAGE_TARGET_XLT").int/5/3,0),
+                                B: Sum(Filter(colProduction, Hour_Starting >= DateAdd(gblTime.Today, -1, TimeUnit.Hours), Line="XLT" || Line="XLT2", Shift="B"), Amount_Built)*1
+                            }
+                        ]
+                      WrapCount: =0
+                      DelayItemLoading: =true
+                      FillPortions: =3
+                      Layout: =Layout.Vertical
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Self.Height / 3
+                    Children:
+                    - hGalleryColumns:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Height: =Parent.TemplateHeight
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutJustifyContent: =LayoutJustifyContent.Center
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.TemplateWidth
+                        Children:
+                        - hGalleryLines:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hGallery)
+                              Text: =ThisItem.Lines
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              Height: =10
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                              Width: =10
+                        - hGalleryBase:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hGallery)
+                              Text: =ThisItem.Base_Target
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Height: =10
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                              Width: =10
+                        - hGalleryShiftC:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hGallery)
+                              Text: =ThisItem.C
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              Height: =10
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                              Width: =10
+                        - hGalleryAdjustA:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hGallery)
+                              Text: =ThisItem.Adjusted_Target_A
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Height: =10
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                              Width: =10
+                        - hGalleryShiftA:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hGallery)
+                              Text: =ThisItem.A
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              Height: =10
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                              Width: =10
+                        - hGalleryAdjustB:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hGallery)
+                              Text: =ThisItem.Adjusted_Target_B
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Height: =10
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                              Width: =10
+                        - hGalleryShiftB:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hGallery)
+                              Text: =ThisItem.B
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =gblTheme.Midground
+                              FillPortions: =1
+                              Height: =10
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                              Width: =10
+                        - hGalleryDelta:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hGallery)
+                              Text: |-
+                                =(
+                                    Value(hGalleryShiftC.Text)
+                                    + Value(hGalleryShiftA.Text)
+                                    + Value(hGalleryShiftB.Text)
+                                )
+                                - Value(hGalleryBase.Text)*3
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Height: =10
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 4
+                              Width: =10
+            - hBodyPadding:
+                Control: GroupContainer
+                Variant: manualLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width * 0.1
