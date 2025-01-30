@@ -138,7 +138,7 @@
                   Align: =Align.Center
                   Color: =gblTheme.Text_Light
                   Fill: =gblTheme.Secondary
-                  Height: ='bTitle'.Height / 2
+                  Height: =bTitle.Height / 2
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   Size: =Round(Self.Height / 3,0)
@@ -167,7 +167,7 @@
                       Default: =ThisItem.User
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,User)
                       Required: =true
-                      Update: ='bFormUserValue'.Selected
+                      Update: =bFormUserValue.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
@@ -180,11 +180,11 @@
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='bFormUserKey'.Height
+                          Height: =bFormUserKey.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='bFormUserKey'.Y
+                          Y: =bFormUserKey.Y
                     - bFormUserError:
                         Control: Label
                         Layout: horizontal
@@ -201,7 +201,7 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='bFormUserValue'.Y + 'bFormUserValue'.Height
+                          Y: =bFormUserValue.Y + bFormUserValue.Height
                     - bFormUserValue:
                         Control: Classic/ComboBox
                         Layout: horizontal
@@ -226,7 +226,7 @@
                           SelectionColor: =RGBA(255, 255, 255, 1)
                           Size: =Self.Height / 4
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='bFormUserKey'.X + 'bFormUserKey'.Width
+                          X: =bFormUserKey.X + bFormUserKey.Width
                           Y: =10
                     - bFormUserKey:
                         Control: Label
@@ -239,7 +239,7 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('bFormUserValue'.Height / 2) - (Self.Height / 2)
+                          Y: =10 + (bFormUserValue.Height / 2) - (Self.Height / 2)
                 - bFormTitleCard:
                     Control: TypedDataCard
                     Variant: textualEditCard
@@ -250,7 +250,7 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Title)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Title)
                       Required: =true
-                      Update: ='bFormTitleValue'.Text
+                      Update: =bFormTitleValue.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
@@ -264,11 +264,11 @@
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='bFormTitleKey'.Height
+                          Height: =bFormTitleKey.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='bFormTitleKey'.Y
+                          Y: =bFormTitleKey.Y
                     - bFormTitleError:
                         Control: Label
                         Layout: horizontal
@@ -284,7 +284,7 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='bFormTitleValue'.Y + 'bFormTitleValue'.Height
+                          Y: =bFormTitleValue.Y + bFormTitleValue.Height
                     - bFormTitleValue:
                         Control: Classic/TextInput
                         Layout: horizontal
@@ -305,7 +305,7 @@
                           RadiusTopRight: =0
                           Size: =Self.Height / 3
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='bFormTitleKey'.X + 'bFormTitleKey'.Width
+                          X: =bFormTitleKey.X + bFormTitleKey.Width
                           Y: =10
                     - bFormTitleKey:
                         Control: Label
@@ -318,17 +318,17 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('bFormTitleValue'.Height / 2) - (Self.Height / 2)
+                          Y: =10 + (bFormTitleValue.Height / 2) - (Self.Height / 2)
                 - bFormEnvironmentCard:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
                     Properties:
                       DataField: ="Environment"
-                      Default: =LookUp(Choices([@BugReports].Environment),Value = "FE Data Bridge DMS")
+                      Default: =LookUp(Choices([@BugReports].Environment),Value = "Encap DMS Management")
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Environment)
                       Required: =true
-                      Update: ='bFormEnvironmentValue'.Selected
+                      Update: =bFormEnvironmentValue.Selected
                       DisplayMode: =DisplayMode.View
                       Height: =55
                       Width: =672
@@ -341,11 +341,11 @@
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: ='bFormEnvironmentKey'.Height
+                          Height: =bFormEnvironmentKey.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='bFormEnvironmentKey'.Y
+                          Y: =bFormEnvironmentKey.Y
                     - bFormEnvironmentError:
                         Control: Label
                         Layout: horizontal
@@ -361,7 +361,7 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='bFormEnvironmentValue'.Y + 'bFormEnvironmentValue'.Height
+                          Y: =bFormEnvironmentValue.Y + bFormEnvironmentValue.Height
                     - bFormEnvironmentValue:
                         Control: Classic/ComboBox
                         Layout: horizontal
@@ -381,7 +381,7 @@
                           PressedColor: =RGBA(255, 255, 255, 1)
                           SelectionColor: =RGBA(255, 255, 255, 1)
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='bFormEnvironmentKey'.X + 'bFormEnvironmentKey'.Width
+                          X: =bFormEnvironmentKey.X + bFormEnvironmentKey.Width
                           Y: =10
                     - bFormEnvironmentKey:
                         Control: Label
@@ -394,7 +394,7 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('bFormEnvironmentValue'.Height / 2) - (Self.Height / 2)
+                          Y: =10 + (bFormEnvironmentValue.Height / 2) - (Self.Height / 2)
                 - bFormTypeCard:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
@@ -404,7 +404,7 @@
                       Default: =ThisItem.'Problem Type'
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Problem Type')
                       Required: =true
-                      Update: ='bFormTypeValue'.Selected
+                      Update: =bFormTypeValue.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
@@ -418,11 +418,11 @@
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='bFormTypeKey'.Height
+                          Height: =bFormTypeKey.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='bFormTypeKey'.Y
+                          Y: =bFormTypeKey.Y
                     - bFormTypeError:
                         Control: Label
                         Layout: horizontal
@@ -438,7 +438,7 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='bFormTypeValue'.Y + 'bFormTypeValue'.Height
+                          Y: =bFormTypeValue.Y + bFormTypeValue.Height
                     - bFormTypeValue:
                         Control: Classic/ComboBox
                         Layout: horizontal
@@ -462,7 +462,7 @@
                           SelectionColor: =RGBA(255, 255, 255, 1)
                           Size: =Self.Height / 4
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='bFormTypeKey'.X + 'bFormTypeKey'.Width
+                          X: =bFormTypeKey.X + bFormTypeKey.Width
                           Y: =10
                     - bFormTypeKey:
                         Control: Label
@@ -475,7 +475,7 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('bFormTypeValue'.Height / 2) - (Self.Height / 2)
+                          Y: =10 + (bFormTypeValue.Height / 2) - (Self.Height / 2)
                 - bFormExpectedCard:
                     Control: TypedDataCard
                     Variant: textualEditCard
@@ -486,7 +486,7 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Expected_Result)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Expected_Result)
                       Required: =true
-                      Update: ='bFormExpectedValue'.Text
+                      Update: =bFormExpectedValue.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
@@ -500,11 +500,11 @@
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='bFormExpectedKey'.Height
+                          Height: =bFormExpectedKey.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='bFormExpectedKey'.Y
+                          Y: =bFormExpectedKey.Y
                     - bFormExpectedError:
                         Control: Label
                         Layout: horizontal
@@ -520,7 +520,7 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='bFormExpectedValue'.Y + 'bFormExpectedValue'.Height
+                          Y: =bFormExpectedValue.Y + bFormExpectedValue.Height
                     - bFormExpectedValue:
                         Control: Classic/TextInput
                         Layout: horizontal
@@ -541,7 +541,7 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='bFormExpectedKey'.X + 'bFormExpectedKey'.Width
+                          X: =bFormExpectedKey.X + bFormExpectedKey.Width
                           Y: =10
                     - bFormExpectedKey:
                         Control: Label
@@ -554,7 +554,7 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('bFormExpectedValue'.Height / 2) - (Self.Height / 2)
+                          Y: =10 + (bFormExpectedValue.Height / 2) - (Self.Height / 2)
                 - bFormActualCard:
                     Control: TypedDataCard
                     Variant: textualEditCard
@@ -565,7 +565,7 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Actual_Result)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Actual_Result)
                       Required: =true
-                      Update: ='bFormActualValue'.Text
+                      Update: =bFormActualValue.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
@@ -579,11 +579,11 @@
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='bFormActualKey'.Height
+                          Height: =bFormActualKey.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='bFormActualKey'.Y
+                          Y: =bFormActualKey.Y
                     - bFormActualError:
                         Control: Label
                         Layout: horizontal
@@ -599,7 +599,7 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='bFormActualValue'.Y + 'bFormActualValue'.Height
+                          Y: =bFormActualValue.Y + bFormActualValue.Height
                     - bFormActualValue:
                         Control: Classic/TextInput
                         Layout: horizontal
@@ -620,7 +620,7 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='bFormActualKey'.X + 'bFormActualKey'.Width
+                          X: =bFormActualKey.X + bFormActualKey.Width
                           Y: =10
                     - bFormActualKey:
                         Control: Label
@@ -633,7 +633,7 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('bFormActualValue'.Height / 2) - (Self.Height / 2)
+                          Y: =10 + (bFormActualValue.Height / 2) - (Self.Height / 2)
                 - bFormStatusCard:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
@@ -643,7 +643,7 @@
                       Default: =ThisItem.Status
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Status)
                       Required: =true
-                      Update: ='bFormStatusValue'.Selected
+                      Update: =bFormStatusValue.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 7.2
                       Visible: =false
@@ -657,11 +657,11 @@
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: ='bFormStatusKey'.Height
+                          Height: =bFormStatusKey.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='bFormStatusKey'.Y
+                          Y: =bFormStatusKey.Y
                     - bFormStatusError:
                         Control: Label
                         Layout: horizontal
@@ -677,7 +677,7 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='bFormStatusValue'.Y + 'bFormStatusValue'.Height
+                          Y: =bFormStatusValue.Y + bFormStatusValue.Height
                     - bFormStatusValue:
                         Control: Classic/ComboBox
                         Layout: horizontal
@@ -696,7 +696,7 @@
                           PressedColor: =RGBA(255, 255, 255, 1)
                           SelectionColor: =RGBA(255, 255, 255, 1)
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='bFormStatusKey'.X + 'bFormStatusKey'.Width
+                          X: =bFormStatusKey.X + bFormStatusKey.Width
                           Y: =10
                     - bFormStatusKey:
                         Control: Label
@@ -708,7 +708,7 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('bFormStatusValue'.Height / 2) - (Self.Height / 2)
+                          Y: =10 + (bFormStatusValue.Height / 2) - (Self.Height / 2)
                 - bFormLineCard:
                     Control: TypedDataCard
                     Variant: textualEditCard
@@ -719,7 +719,7 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Line)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Line)
                       Required: =true
-                      Update: ='bFormLineValue'.Text
+                      Update: =bFormLineValue.Text
                       DisplayMode: =DisplayMode.View
                       Height: =50
                       Visible: =false
@@ -733,11 +733,11 @@
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: ='bFormLineKey'.Height
+                          Height: =bFormLineKey.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='bFormLineKey'.Y
+                          Y: =bFormLineKey.Y
                     - bFormLineError:
                         Control: Label
                         Layout: horizontal
@@ -753,7 +753,7 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='bFormLineValue'.Y + 'bFormLineValue'.Height
+                          Y: =bFormLineValue.Y + bFormLineValue.Height
                     - bFormLineValue:
                         Control: Classic/TextInput
                         Layout: horizontal
@@ -773,7 +773,7 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='bFormLineKey'.X + 'bFormLineKey'.Width
+                          X: =bFormLineKey.X + bFormLineKey.Width
                           Y: =5
                     - bFormLineKey:
                         Control: Label
@@ -809,7 +809,7 @@
                 - bFormSubmit:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: "=Set(EmailBody,\n    \"<!DOCTYPE html>\n    <html>\n    <head>\n        <style>\n            body {\n                font-family: Arial, sans-serif;\n                color: #333333;\n                margin: 0;\n                padding: 0; /* Removed padding to prevent extra space */\n            }\n            .email-container {\n                border: 1px solid #dddddd;\n                border-radius: 5px;\n                overflow: hidden;\n                width: 100%; /* Ensure the table uses full width */\n            }\n            .email-header {\n                background-color: #5585b5;\n                color: #ffffff;\n                padding: 20px;\n                text-align: center;\n            }\n            .email-header h1 {\n                margin: 0;\n                font-size: 24px;\n            }\n            .email-body {\n                padding: 20px;\n            }\n            .bug-report-table {\n                width: 100%;\n                border-collapse: collapse;\n            }\n            .bug-report-table th, .bug-report-table td {\n                padding: 12px;\n                text-align: left;\n                vertical-align: top;\n                border-bottom: 1px solid #dddddd;\n            }\n            .bug-report-table th {\n                background-color: #f5f5f5;\n                width: 150px;\n            }\n            .footer {\n                text-align: center;\n                color: #aaaaaa;\n                font-size: 12px;\n                padding: 10px;\n            }\n            /* Inline styles may be more reliable in emails */\n        </style>\n    </head>\n    <body>\n    <table width='100%' cellpadding='0' cellspacing='0' border='0'>\n        <tr>\n            <!-- Left Margin -->\n            <td width='15%'>&nbsp;</td>\n            \n            <!-- Main Content -->\n            <td width='70%'>\n                <div class='email-container'>\n                    <!-- Email Header -->\n                    <div class='email-header'>\n                        <h1>DMS Bug Report System</h1>\n                    </div>\n        \n                    <!-- Email Body -->\n                    <div class='email-body'>\n                        <table class='bug-report-table'>\n                            <tr>\n                                <th>Title</th>\n                                <td>\"& 'bFormTitleValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Environment</th>\n                                <td>\"& 'bFormEnvironmentValue'.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Line</th>\n                                <td>\"& 'bFormLineValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Problem Type</th>\n                                <td>\"& 'bFormTypeValue'.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Expected Result</th>\n                                <td>\"& 'bFormExpectedValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Actual Result</th>\n                                <td>\"& 'bFormActualValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Status</th>\n                                <td>\"& 'bFormStatusValue'.Selected.Value &\"</td>\n                            </tr>\n                        </table>\n                    </div>\n        \n                    <!-- Email Footer -->\n                    <div class='footer'>\n                        &copy; 2025 EMD Millipore. All rights reserved.\n                    </div>\n                </div>\n            </td>\n            \n            <!-- Right Margin -->\n            <td width='15%'>&nbsp;</td>\n        </tr>\n    </table>\n    </body>\n    </html>\"\n);\n\nIfError(SubmitForm('bForm'),\n    Notify(\"Submission Error. Check that all required fields are populated.\",NotificationType.Error),\n    \n    Office365Outlook.SendEmailV2(\n        \"M268816@ONE.MERCKGROUP.COM\",\n        \"A bug report was submitted for the \" & APP_NAME,\n        EmailBody,\n        {\n            Cc: 'bFormUserValue'.Selected.Email\n        }\n    );\n    \n    ResetForm('bForm');\n\n    Back(ScreenTransition.Fade);\n\n);"
+                      OnSelect: "=Set(EmailBody,\n    \"<!DOCTYPE html>\n    <html>\n    <head>\n        <style>\n            body {\n                font-family: Arial, sans-serif;\n                color: #333333;\n                margin: 0;\n                padding: 0; /* Removed padding to prevent extra space */\n            }\n            .email-container {\n                border: 1px solid #dddddd;\n                border-radius: 5px;\n                overflow: hidden;\n                width: 100%; /* Ensure the table uses full width */\n            }\n            .email-header {\n                background-color: #5585b5;\n                color: #ffffff;\n                padding: 20px;\n                text-align: center;\n            }\n            .email-header h1 {\n                margin: 0;\n                font-size: 24px;\n            }\n            .email-body {\n                padding: 20px;\n            }\n            .bug-report-table {\n                width: 100%;\n                border-collapse: collapse;\n            }\n            .bug-report-table th, .bug-report-table td {\n                padding: 12px;\n                text-align: left;\n                vertical-align: top;\n                border-bottom: 1px solid #dddddd;\n            }\n            .bug-report-table th {\n                background-color: #f5f5f5;\n                width: 150px;\n            }\n            .footer {\n                text-align: center;\n                color: #aaaaaa;\n                font-size: 12px;\n                padding: 10px;\n            }\n            /* Inline styles may be more reliable in emails */\n        </style>\n    </head>\n    <body>\n    <table width='100%' cellpadding='0' cellspacing='0' border='0'>\n        <tr>\n            <!-- Left Margin -->\n            <td width='15%'>&nbsp;</td>\n            \n            <!-- Main Content -->\n            <td width='70%'>\n                <div class='email-container'>\n                    <!-- Email Header -->\n                    <div class='email-header'>\n                        <h1>DMS Bug Report System</h1>\n                    </div>\n        \n                    <!-- Email Body -->\n                    <div class='email-body'>\n                        <table class='bug-report-table'>\n                            <tr>\n                                <th>Title</th>\n                                <td>\"& bFormTitleValue.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Environment</th>\n                                <td>\"& bFormEnvironmentValue.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Line</th>\n                                <td>\"& bFormLineValue.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Problem Type</th>\n                                <td>\"& bFormTypeValue.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Expected Result</th>\n                                <td>\"& bFormExpectedValue.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Actual Result</th>\n                                <td>\"& bFormActualValue.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Status</th>\n                                <td>\"& bFormStatusValue.Selected.Value &\"</td>\n                            </tr>\n                        </table>\n                    </div>\n        \n                    <!-- Email Footer -->\n                    <div class='footer'>\n                        &copy; 2025 EMD Millipore. All rights reserved.\n                    </div>\n                </div>\n            </td>\n            \n            <!-- Right Margin -->\n            <td width='15%'>&nbsp;</td>\n        </tr>\n    </table>\n    </body>\n    </html>\"\n);\n\nIfError(SubmitForm(bForm),\n    Notify(\"Submission Error. Check that all required fields are populated.\",NotificationType.Error),\n    \n    Office365Outlook.SendEmailV2(\n        \"M268816@ONE.MERCKGROUP.COM\",\n        \"A bug report was submitted for the \" & APP_NAME,\n        EmailBody,\n        {\n            Cc: bFormUserValue.Selected.Email\n        }\n    );\n    \n    ResetForm(bForm);\n\n    Back(ScreenTransition.Fade);\n\n);"
                       Text: ="Submit"
                       BorderColor: =gblTheme.Primary
                       BorderThickness: =1
@@ -828,7 +828,7 @@
                 - bFormCancel:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: =ResetForm('bForm');
+                      OnSelect: =ResetForm(bForm);
                       Text: ="Cancel"
                       BorderColor: =gblTheme.Primary
                       BorderThickness: =1

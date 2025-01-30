@@ -54,6 +54,9 @@
                 )
             );
 
+            Clear(colConstraints);
+            ForAll(Goal_Settings, Collect(colConstraints, {Constraint: ThisRecord.Constraint_Setting}));
+
             With(
                 {
                     thisRuntime:
@@ -90,7 +93,7 @@
                             Amount_Built
                         ),
                     thisIdealTime:
-                        RoundUp(Average(Goal_Settings,Constraint_Setting),0)/60
+                        RoundUp(Average(colConstraints, Constraint),-1)/60
                 },
                 Set(recAvailability,
                     IfError(
@@ -292,7 +295,7 @@
                     "© 2025 EMD Millipore. All rights reserved."
                   Align: =Align.Center
                   Color: =gblTheme.Text_On_Light
-                  Height: =200
+                  Height: =Parent.Height * 0.2
                   LayoutMinWidth: =10
                   Size: =Self.Height / 24
                   VerticalAlign: =VerticalAlign.Bottom
@@ -351,6 +354,8 @@
                       Items: =colKanban
                       WrapCount: =5
                       DelayItemLoading: =true
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
                       LoadingSpinner: =LoadingSpinner.Data
                       TemplatePadding: =0
                       TemplateSize: =Parent.Width / 2
