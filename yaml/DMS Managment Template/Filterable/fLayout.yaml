@@ -71,7 +71,7 @@
         - ???Title:
             Control: Label
             Properties:
-              Text: ="App Title"
+              Text: =APP_NAME
               Color: =gblTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
