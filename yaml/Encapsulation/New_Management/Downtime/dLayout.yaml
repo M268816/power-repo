@@ -45,7 +45,7 @@
                         Started: DateTimeValue(ThisRecord.Started),
                         Ended: DateTimeValue(ThisRecord.Ended),
                         Reason: Text(ThisRecord.Reason.Value),
-                        Total: Value(ThisRecord.Total_Downtime),
+                        Total_Downtime: Value(ThisRecord.Total_Downtime),
                         Comments: Text(ThisRecord.Comments)
                     }
                 )
@@ -64,7 +64,7 @@
     - dUpdate:
         Control: Classic/Button
         Properties:
-          OnSelect: "=/*Update Code*/\nSet(varLoading,{Visible: true, Value: 20, Text: \"Updating\"});\n\n/*Clear collections for top downtime reasons*/\nClear(collectTopDowntime);\nClear(collectHasReason);\n\nUpdateContext({\n    locStartDate: dStartDate.SelectedDate,\n    locEndDate: dEndDate.SelectedDate\n});\n\n/*Create a Default filter*/\nUpdateContext({\n    locDefaultDowntimeFilter:\n        Filter(\n                collectDowntime,\n                And(\n                    started >= DateAdd(\n                        DateValue(locStartDate),\n                        -1,\n                        TimeUnit.Hours\n                    ),\n                    ended <= DateAdd(\n                        DateValue(locEndDate),\n                        23,\n                        TimeUnit.Hours\n                    )\n                ),\n                If(\n                    d_shift.Selected.Value = \"All\",\n                    shift = shift,\n                    shift = d_shift.Selected.Value\n                ),\n                If(\n                    d_line.Selected.Value = \"All\",\n                    line = line,\n                    line = d_line.Selected.Value\n                )\n            )\n});\n\n\n/*For all downtime reasons, collect the total sum of downtime, if downtime is greater than 0, add to has reason collection*/\nSet(varLoading,{Visible: true, Value: 40, Text: \"Collecting Downtime Sums\"});\nForAll(\n    collectDowntimeReasons,\n    If(\n        Sum(\n            Filter(\n                locDefaultDowntimeFilter,\n                reason = Downtime_Reason\n            ),\n            total\n        ) > 0,\n        Collect(\n            collectHasReason,\n            {Downtime_Reason: Downtime_Reason}\n        )\n    )\n);\n/*For all downtime that has an amount/reason, collect the total sum of downtime, sort by total amount*/\nSet(varLoading,{Visible: true, Value: 60, Text: \"Building Top Downtime List\"});\nForAll(\n    collectHasReason,\n    Collect(\n        collectTopDowntime,\n        {\n            Downtime_Reason: Downtime_Reason,\n            \n            Downtime_Total: Sum(\n                Filter(\n                    locDefaultDowntimeFilter,\n                    reason = Downtime_Reason\n                ),\n                total\n            ),\n            \n            Downtime_Comments:\n                Concat(\n                    Filter(\n                        locDefaultDowntimeFilter,\n                        !IsBlankOrError(comments),\n                        reason = Downtime_Reason\n                ),\n                    comments,\n                    \" ¶ \"\n                )\n        }\n    )\n);\n\n\n\n/*Clear for garbage collection*/\nSet(varLoading,{Visible: true, Value: 95, Text: \"Finishing Up\"});\n\nUpdateContext({\n    locDefaultDowntimeFilter: Blank()\n});\n\n/*End*/\nSet(varLoading,{Value: 100, Text: \"Completed\"});\nSet(varLoading,{Visible: false, Value: -1, Text: \"Not Loading\"});"
+          OnSelect: "=/*Update Code*/\nPatch(recPopups,First(recPopups),{Visible: true, Value: 20, Display_Text:\"Updating\"});\n\n/*Clear collections for top downtime reasons*/\nClear(colTopDowntime);\n//Clear(colHasReason);\n\nUpdateContext({\n    locStartDate: dStartDate.SelectedDate,\n    locEndDate: dEndDate.SelectedDate\n});\n\n/*Create a Default filter*/\nUpdateContext({\n    locDowntime:\n        Filter(colDowntime,\n            Started >= DateAdd(DateValue(locStartDate),-1,TimeUnit.Hours),\n            Ended <= DateAdd(DateValue(locEndDate),23,TimeUnit.Hours),\n            If(dShift.Selected.Value = \"All\",\n                Shift = Shift,\n                Shift = dShift.Selected.Value\n            ),\n            If(dLine.Selected.Value = \"All\",\n                Line = Line,\n                Line = dLine.Selected.Value\n            )\n        )\n});\n\n\n/*For all downtime reasons, collect the total sum of downtime, if downtime is greater than 0, add to has reason collection*/\nSet(varLoading,{Visible: true, Value: 40, Text: \"Collecting Downtime Sums\"});\n/*ForAll(\n    colDowntimeReasons,\n    If(\n        Sum(\n            Filter(\n                locDowntime,\n                Reason = Downtime_Reason\n            ),\n            total\n        ) > 0,\n        Collect(\n            colHasReason,\n            {Downtime_Reason: Downtime_Reason}\n        )\n    )\n);*/\n/*For all downtime that has an amount/reason, collect the total sum of downtime, sort by total amount*/\nSet(varLoading,{Visible: true, Value: 60, Text: \"Building Top Downtime List\"});\nForAll(gblLists.Downtime_Reasons,\n    With({thisReason: ThisRecord.Value,\n        thisDowntime: Filter(locDowntime, Total_Downtime > 0)\n        },\n        Collect(colTopDowntime,\n            {\n                Downtime_Reason: thisReason,\n                Total_Downtime:\n                    Sum(\n                        Filter(thisDowntime,\n                            If(dShift.Selected.Value = \"All\",\n                                Shift = Shift,\n                                Shift = dShift.Selected.Value\n                            ),\n                            If(dLine.Selected.Value = \"All\",\n                                Line = Line,\n                                Line = dLine.Selected.Value\n                            ),\n                            thisReason = Reason\n                        ),\n                        Total_Downtime\n                    ),\n                Downtime_Comments:\n                    Concat(\n                        Filter(\n                            thisDowntime,\n                            !IsBlankOrError(Comments),\n                            Reason = thisReason\n                        ),\n                        \" ► \" & Comments,\n                        \" ◄ \"\n                    )\n            }\n        \n        )\n    )\n);\n\n\n/*ForAll(\n    colHasReason,\n    Collect(\n        colTopDowntime,\n        {\n            Downtime_Reason: Downtime_Reason,\n            \n            Downtime_Total: Sum(\n                Filter(\n                    locDowntime,\n                    Reason = Downtime_Reason\n                ),\n                Total_Downtime\n            ),\n            \n            Downtime_Comments:\n                Concat(\n                    Filter(\n                        locDowntime,\n                        !IsBlankOrError(comments),\n                        reason = Downtime_Reason\n                ),\n                    comments,\n                    \" ¶ \"\n                )\n        }\n    )\n);*/\n\n\n\n/*Clear for garbage collection*/\nSet(varLoading,{Visible: true, Value: 95, Text: \"Finishing Up\"});\n\nUpdateContext({\n    locDowntime: Blank()\n});\n\n/*End*/\nSet(varLoading,{Value: 100, Text: \"Completed\"});\nSet(varLoading,{Visible: false, Value: -1, Text: \"Not Loading\"});"
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
@@ -99,7 +99,7 @@
         - dTitle:
             Control: Label
             Properties:
-              Text: ="App Title"
+              Text: =APP_NAME
               Color: =gblTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
@@ -125,7 +125,7 @@
             Control: Image
             Properties:
               OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
-              Image: =gIcons.Bug
+              Image: =gblIcons.Bug
               HoverFill: =gblTheme.Pri_Complement
               ImagePosition: =ImagePosition.Fill
               LayoutMinHeight: =10
@@ -189,7 +189,7 @@
             - dNavigationTitle:
                 Control: Label
                 Properties:
-                  Text: =App.ActiveScreen.Name
+                  Text: ="Downtime"
                   Align: =Align.Center
                   Color: =gblTheme.Text_On_Light
                   LayoutMinWidth: =10
@@ -379,7 +379,8 @@
                 - dShift:
                     Control: Classic/DropDown
                     Properties:
-                      Items: =gblLists.Shifts
+                      OnChange: =Select(dUpdate);
+                      Items: =Table(["All"],gblLists.Shifts)
                       ChevronBackground: =gblTheme.Sec_Complement
                       ChevronFill: =gblTheme.Text_Dark
                       Color: =gblTheme.Text_On_Light
@@ -408,7 +409,8 @@
                 - dLine:
                     Control: Classic/DropDown
                     Properties:
-                      Items: =gblLists.Lines
+                      OnChange: =Select(dUpdate);
+                      Items: =Table(["All"],gblLists.Lines)
                       ChevronBackground: =gblTheme.Sec_Complement
                       ChevronFill: =gblTheme.Text_Dark
                       Color: =gblTheme.Text_On_Light
@@ -437,7 +439,8 @@
                 - dReason:
                     Control: Classic/DropDown
                     Properties:
-                      Items: =false
+                      OnChange: =Select(dUpdate);
+                      Items: =Table(["All"],gblLists.Downtime_Reasons)
                       ChevronBackground: =gblTheme.Sec_Complement
                       ChevronFill: =gblTheme.Text_Dark
                       Color: =gblTheme.Text_On_Light
@@ -515,6 +518,7 @@
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.Semilight
+                  Fill: =gblTheme.Foreground
                   FillPortions: =1.5
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
@@ -528,61 +532,45 @@
                     Properties:
                       Text: ="Total Downtime"
                       Align: =Align.Center
-                      Color: =varColor5
-                      Fill: =varColor2
-                      FillPortions: =1
+                      Color: =gblTheme.Text_Light
+                      Fill: =gblTheme.Secondary
                       Font: =Font.Verdana
-                      Height: =Parent.Height
+                      Height: =dTitle.Height
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
-                      Size: =Self.Height / 3
+                      Size: =Round(Self.Height/4,0)
                       Width: =Parent.Width
                 - dTopDowntimeTotal:
                     Control: Label
                     Properties:
-                      Text: =Sum(collectTopDowntime, Downtime_Total) & " Minutes"
+                      Text: =Sum(colTopDowntime, Total_Downtime) & " Minutes"
                       Align: =Align.Center
-                      Color: =varColor0
-                      Fill: =varColor4
-                      FillPortions: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Sec_Complement
                       Font: =Font.Verdana
-                      Height: =Parent.Height
+                      Height: =dTitle.Height
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
                       Size: =Self.Height / 3.5
                       Width: =Parent.Width
-                - d_c_t_header:
-                    Control: GroupContainer
-                    Variant: manualLayoutContainer
+                - d_c_t_h_title:
+                    Control: Label
                     Properties:
-                      AlignInContainer: =AlignInContainer.SetByContainer
-                      DropShadow: =DropShadow.None
-                      Fill: =varColor2
-                      LayoutMinHeight: =1
-                      LayoutMinWidth: =1
-                      RadiusBottomLeft: =0
-                      RadiusBottomRight: =0
-                      RadiusTopLeft: =0
-                      RadiusTopRight: =0
+                      Text: ="Top Downtime Reasons"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_Light
+                      Fill: =gblTheme.Secondary
+                      Font: =Font.Verdana
+                      Height: =dTitle.Height
+                      Size: =Round(Self.Height/4,0)
                       Width: =Parent.Width
-                    Children:
-                    - d_c_t_h_title:
-                        Control: Label
-                        Properties:
-                          Text: ="Top Downtime Reasons"
-                          Align: =Align.Center
-                          Color: =varColor5
-                          Font: =Font.Verdana
-                          Height: =Parent.Height
-                          Size: =Self.Height / 3
-                          Width: =Parent.Width
                 - d_c_t_columns:
                     Control: GroupContainer
                     Variant: manualLayoutContainer
                     Properties:
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DropShadow: =DropShadow.None
-                      Fill: =varColor3
+                      Fill: =gblTheme.Sec_Complement
                       LayoutMinHeight: =1
                       LayoutMinWidth: =1
                       RadiusBottomLeft: =0
@@ -596,10 +584,10 @@
                         Properties:
                           Text: ="Downtime Amount"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           Font: =Font.Verdana
                           Height: =Parent.Height
-                          Size: =Self.Width / 14
+                          Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 2
                           X: =d_c_t_c_reason.X + d_c_t_c_reason.Width
                     - d_c_t_c_reason:
@@ -607,16 +595,16 @@
                         Properties:
                           Text: ="Downtime Reason"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           Font: =Font.Verdana
                           Height: =Parent.Height
-                          Size: =Self.Width / 14
+                          Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 2
                 - d_c_t_gallery:
                     Control: Gallery
                     Variant: galleryVertical
                     Properties:
-                      Items: =Sort(collectTopDowntime, Downtime_Total, SortOrder.Descending)
+                      Items: =Sort(colTopDowntime, Total_Downtime, SortOrder.Descending)
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DelayItemLoading: =true
                       FillPortions: =10
@@ -631,11 +619,12 @@
                         Control: Label
                         Properties:
                           OnSelect: =Select(Parent)
-                          Text: =ThisItem.Downtime_Total
+                          Text: =ThisItem.Total_Downtime
                           Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
                           Font: =Font.Verdana
                           Height: =Parent.TemplateHeight - d_c_t_g_seperator.Height
-                          Size: =Self.Width / 14
+                          Size: =Round(Self.Height/6,0)
                           Width: =Parent.TemplateWidth/2
                           X: =d_c_t_g_reason.X + d_c_t_g_reason.Width
                           Y: =1-1
@@ -645,9 +634,10 @@
                           OnSelect: =Select(Parent)
                           Text: =ThisItem.Downtime_Reason
                           Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
                           Font: =Font.Verdana
                           Height: =Parent.TemplateHeight - d_c_t_g_seperator.Height
-                          Size: =Self.Width / 14
+                          Size: =Round(Self.Height/6,0)
                           Width: =Parent.TemplateWidth/2
                           X: =1-1
                           Y: =1-1
@@ -655,7 +645,7 @@
                         Control: Rectangle
                         Properties:
                           OnSelect: =Select(Parent)
-                          Fill: =varColor1
+                          Fill: =gblTheme.Accent
                           Height: =Parent.TemplateHeight * 0.025
                           Width: =Parent.Width
                           Y: =Parent.TemplateHeight - Self.Height
@@ -668,13 +658,13 @@
                                 Concat(
                                     FirstN(
                                         Sort(
-                                            collectTopDowntime,
-                                            Downtime_Total,
+                                            colTopDowntime,
+                                            Total_Downtime,
                                             SortOrder.Descending
                                             ),
                                         6
                                         ),
-                                    Downtime_Reason & Char(9) & Downtime_Total & Char(9) & Downtime_Comments,
+                                    Downtime_Reason & Char(9) & Total_Downtime & Char(9) & Downtime_Comments,
                                     Char(13)
                                 )
                             ),
@@ -689,11 +679,12 @@
                             Notify("Copied top downtime for " & dLine.Selected.Value, NotificationType.Success)
                         );
                       Text: ="Copy Downtime for DOR"
-                      Color: =varColor0
-                      Fill: =varColorAccent
-                      FillPortions: =2
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Accent
+                      FillPortions: =1
                       Font: =Font.Verdana
-                      HoverColor: =varColor5
+                      FontWeight: =FontWeight.Normal
+                      HoverColor: =gblTheme.Text_On_Dark
                       HoverFill: =ColorFade(Self.Fill, -50%)
                       LayoutMinHeight: =0
                       LayoutMinWidth: =1
@@ -701,7 +692,7 @@
                       RadiusBottomRight: =4
                       RadiusTopLeft: '=4   '
                       RadiusTopRight: '=4   '
-                      Size: =Self.Width / 24
+                      Size: =Round(Self.Height/4,0)
                       Width: =Parent.Width
             - dDowntime:
                 Control: GroupContainer
@@ -709,6 +700,7 @@
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.Semilight
+                  Fill: =gblTheme.Foreground
                   FillPortions: =If(locShowTop, 5.5, 7.5)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
@@ -720,7 +712,9 @@
                     Properties:
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DropShadow: =DropShadow.None
-                      Fill: =varColor2
+                      Fill: =gblTheme.Secondary
+                      FillPortions: =0
+                      Height: =dTitle.Height
                       LayoutMinHeight: =1
                       LayoutMinWidth: =1
                       RadiusBottomLeft: =0
@@ -734,20 +728,20 @@
                           Text: |-
                             =If(
                                 And(
-                                    d_shift.Selected.Value = "All",
-                                    d_line.Selected.Value = "All"
+                                    dShift.Selected.Value = "All",
+                                    dLine.Selected.Value = "All"
                                 ),
                                 "All Downtime",
-                                d_shift.Selected.Value = "All",
-                                d_shift.Selected.Value & " " & d_line.Selected.Value & " Downtime",
-                                d_line.Selected.Value & " " & d_shift.Selected.Value & " Shift Downtime"
+                                dShift.Selected.Value = "All",
+                                dShift.Selected.Value & " " & dLine.Selected.Value & " Downtime",
+                                dLine.Selected.Value & " " & dShift.Selected.Value & " Shift Downtime"
 
                             )
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Dark
                           Font: =Font.Verdana
-                          Height: =Parent.Height
-                          Size: =Self.Height / 2
+                          Height: =dTitle.Height
+                          Size: =Round(Self.Height / 3,0)
                           Width: =Parent.Width
                     - d_c_d_h_view:
                         Control: Classic/Button
@@ -759,13 +753,14 @@
                                 "Hide Top Downtime",
                                 "Show Top Downtime"
                             )
-                          Color: =varColor0
-                          Fill: =varColorAccent
+                          Color: =gblTheme.Text_Dark
+                          Fill: =gblTheme.Accent
                           Font: =Font.Verdana
+                          FontWeight: =FontWeight.Normal
                           Height: =Parent.Height * 0.80
-                          HoverColor: =varColor5
+                          HoverColor: =gblTheme.Text_On_Dark
                           HoverFill: =ColorFade(Self.Fill, -50%)
-                          Size: =Self.Width / 16
+                          Size: =Round(Self.Height/4,0)
                           Width: =Parent.Width * 0.15
                           X: =Parent.Width * 0.01
                           Y: =Parent.Height/2 - Self.Height/2
@@ -776,13 +771,14 @@
                             =Set(varDowntimeMode, FormMode.New);
                             Navigate(Modify_Downtime);
                           Text: ="Add Downtime"
-                          Color: =varColor0
-                          Fill: =varColorAccent
+                          Color: =gblTheme.Text_Dark
+                          Fill: =gblTheme.Accent
                           Font: =Font.Verdana
+                          FontWeight: =FontWeight.Normal
                           Height: =Parent.Height * 0.80
-                          HoverColor: =varColor5
+                          HoverColor: =gblTheme.Text_On_Dark
                           HoverFill: =ColorFade(Self.Fill, -50%)
-                          Size: =Self.Width / 16
+                          Size: =Round(Self.Height/4,0)
                           Width: =Parent.Width * 0.15
                           X: =Parent.Width * 0.99 - Self.Width
                           Y: =Parent.Height/2 - Self.Height/2
@@ -792,7 +788,9 @@
                     Properties:
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DropShadow: =DropShadow.None
-                      Fill: =varColor3
+                      Fill: =gblTheme.Sec_Complement
+                      FillPortions: =0
+                      Height: =dTitle.Height
                       LayoutMinHeight: =1
                       LayoutMinWidth: =1
                       LayoutMode: =LayoutMode.Auto
@@ -806,12 +804,12 @@
                         Properties:
                           Text: ="Line"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           FillPortions: =1
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
-                          Size: =Self.Width / 8
+                          Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
                           X: =d_c_d_c_shift.X + d_c_d_c_shift.Width
                     - d_c_d_c_shift:
@@ -819,24 +817,24 @@
                         Properties:
                           Text: ="Shift"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           FillPortions: =0.5
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
-                          Size: =d_c_d_c_line.Size * 0.95
+                          Size: =Round(Self.Height/5,0)
                           Width: =(Parent.Width / 10) * 0.5
                     - d_c_d_c_time:
                         Control: Label
                         Properties:
                           Text: ="Time"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           FillPortions: =1
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
-                          Size: =Self.Width / 8
+                          Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
                           X: =d_c_d_c_shift.X + d_c_d_c_shift.Width
                     - d_c_d_c_catalog:
@@ -844,12 +842,12 @@
                         Properties:
                           Text: ="Catalog"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           FillPortions: =1
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
-                          Size: =Self.Width / 8
+                          Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
                           X: =d_c_d_c_line.X + d_c_d_c_line.Width * 1
                     - d_c_d_c_lot:
@@ -857,12 +855,12 @@
                         Properties:
                           Text: ="Lot"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           FillPortions: =1
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
-                          Size: =Self.Width / 8
+                          Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
                           X: =d_c_d_c_line.X + d_c_d_c_line.Width * 2
                     - d_c_d_c_total:
@@ -870,12 +868,12 @@
                         Properties:
                           Text: ="Minutes Down"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           FillPortions: =1
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
-                          Size: =Self.Width / 10
+                          Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
                           X: =d_c_d_c_reason.X + d_c_d_c_reason.Width
                     - d_c_d_c_reason:
@@ -883,12 +881,12 @@
                         Properties:
                           Text: ="Reason"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           FillPortions: =1
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
-                          Size: =Self.Width / 8
+                          Size: =Round(Self.Height/5,0)
                           Width: =(Parent.Width / 10) * 1.5
                           X: =d_c_d_c_line.X + d_c_d_c_line.Width * 5
                     - d_c_d_c_comments:
@@ -896,12 +894,12 @@
                         Properties:
                           Text: ="Comments"
                           Align: =Align.Center
-                          Color: =varColor5
+                          Color: =gblTheme.Text_On_Light
                           FillPortions: =2.5
                           Font: =Font.Verdana
                           Height: =Parent.Height
                           LayoutMinWidth: =1
-                          Size: =d_c_d_c_line.Size
+                          Size: =Round(Self.Height/5,0)
                           Width: =(Parent.Width / 10) * 2
                           X: =d_c_d_c_total.X + d_c_d_c_total.Width
                 - d_c_d_gallery:
@@ -912,51 +910,55 @@
                         =Set(varDowntimeID, d_c_d_gallery.Selected.id);
                         Set(varDowntimeMode, FormMode.Edit);
                         Navigate(Modify_Downtime);
-                      Items: "=SortByColumns(\r\n    Filter(\r\n        collectDowntime,\r\n        started >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        If(\r\n            d_shift.Selected.Value = \"All\",\r\n            shift = shift,\r\n            shift = d_shift.Selected.Value\r\n            ),\r\n        If(\r\n            d_line.Selected.Value = \"All\",\r\n            line = line,\r\n            line = d_line.Selected.Value\r\n            ),\r\n        If(\r\n            IsBlank(d_reason.Selected.Downtime_Reason),\r\n            reason = reason,\r\n            reason = d_reason.Selected.Downtime_Reason\r\n            )\r\n    ),\r\n    \r\n    Switch(\r\n        d_sort_by.Selected.Value,\r\n        \"Line\",\r\n        \"line\",\r\n        \"Shift\",\r\n        \"shift\",\r\n        \"Time\",\r\n        \"ended\",\r\n        \"Minutes Down\",\r\n        \"total\"\r\n    ),\r\n    \r\n    Switch(\r\n        d_sort_order.Selected.Value,\r\n        \"Ascending\",\r\n        SortOrder.Ascending,\r\n        \"Descending\",\r\n        SortOrder.Descending,\r\n        SortOrder.Ascending\r\n    )\r\n\r\n)"
+                      Items: "=SortByColumns(\r\n    Filter(\r\n        colDowntime,\r\n        Started >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        Ended <= DateAdd(locEndDate,23,TimeUnit.Hours),\r\n        If(\r\n            dShift.Selected.Value = \"All\",\r\n            Shift = Shift,\r\n            Shift = dShift.Selected.Value\r\n            ),\r\n        If(\r\n            dLine.Selected.Value = \"All\",\r\n            Line = Line,\r\n            Line = dLine.Selected.Value\r\n            ),\r\n        If(\r\n            dReason.Selected.Value = \"All\",\r\n            Reason = Reason,\r\n            Reason = dReason.Selected.Value\r\n            )\r\n    ),\r\n    \r\n    Switch(\r\n        dSortBy.Selected.Value,\r\n        \"Line\",\r\n        \"Line\",\r\n        \"Shift\",\r\n        \"Shift\",\r\n        \"Time\",\r\n        \"Ended\",\r\n        \"Minutes Down\",\r\n        \"Total_Downtime\"\r\n    ),\r\n    \r\n    Switch(\r\n        dSortOrder.Selected.Value,\r\n        \"Ascending\",\r\n        SortOrder.Ascending,\r\n        \"Descending\",\r\n        SortOrder.Descending,\r\n        SortOrder.Ascending\r\n    )\r\n\r\n)"
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DelayItemLoading: =true
-                      FillPortions: =12
                       Layout: =Layout.Vertical
                       LayoutMinHeight: =1
                       LayoutMinWidth: =1
                       LoadingSpinner: =LoadingSpinner.Data
                       TemplatePadding: =0
-                      TemplateSize: =Self.Height / 10
+                      TemplateSize: =Self.Height / 12
                     Children:
                     - d_c_d_g_parent:
                         Control: GroupContainer
                         Variant: horizontalAutoLayoutContainer
                         Properties:
+                          DropShadow: =DropShadow.None
                           Height: =Parent.TemplateHeight - d_c_d_g_seperator.Height
                           LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
                           Width: =Parent.TemplateWidth
                         Children:
                         - d_c_d_g_line:
                             Control: Label
                             Properties:
                               OnSelect: =Select(d_c_d_gallery);
-                              Text: =ThisItem.line
+                              Text: =ThisItem.Line
                               Align: =Align.Center
-                              Color: =varColor0
+                              Color: =gblTheme.Text_On_Light
                               FillPortions: =1
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinWidth: =1
-                              Size: =Self.Width / 8
+                              Size: =Round(Self.Height/6,0)
                               Width: =Parent.Width / 10
                               X: =d_c_d_g_shift.X + d_c_d_g_shift.Width
                         - d_c_d_g_shift:
                             Control: Label
                             Properties:
                               OnSelect: =Select(d_c_d_gallery);
-                              Text: =ThisItem.shift
+                              Text: =ThisItem.Shift
                               Align: =Align.Center
-                              Color: =varColor0
+                              Color: =gblTheme.Text_On_Light
                               FillPortions: =0.5
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinWidth: =1
-                              Size: =d_c_d_g_line.Size
+                              Size: =Round(Self.Height/6,0)
                               Width: =(Parent.Width / 10) * 0.5
                         - d_c_d_g_time:
                             Control: GroupContainer
@@ -976,101 +978,96 @@
                                 Control: Label
                                 Properties:
                                   OnSelect: =Select(d_c_d_gallery);
-                                  Text: =TimeValue(ThisItem.started)
+                                  Text: =TimeValue(ThisItem.Started)
                                   Align: =Align.Center
-                                  Color: =varColor0
+                                  Color: =gblTheme.Text_On_Light
                                   FillPortions: =1
                                   Font: =Font.Verdana
                                   Height: =Parent.Height
                                   LayoutMinHeight: =1
                                   LayoutMinWidth: =1
-                                  Size: =Self.Width / 8
+                                  Size: =Round(Self.Height/3,0)
                                   Width: =Parent.Width
                                   X: =d_c_d_g_shift.X + d_c_d_g_shift.Width
                             - d_c_d_g_t_end:
                                 Control: Label
                                 Properties:
                                   OnSelect: =Select(d_c_d_gallery);
-                                  Text: =TimeValue(ThisItem.ended)
+                                  Text: =TimeValue(ThisItem.Ended)
                                   Align: =Align.Center
-                                  Color: =varColor0
-                                  Fill: =varColor4
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Pri_Complement
                                   FillPortions: =1
                                   Font: =Font.Verdana
                                   Height: =Parent.Height
                                   LayoutMinHeight: =1
                                   LayoutMinWidth: =1
-                                  Size: =Self.Width / 8
+                                  Size: =Round(Self.Height/3,0)
                                   Width: =Parent.Width
                                   X: =d_c_d_g_shift.X + d_c_d_g_shift.Width
                         - d_c_d_g_catalog:
                             Control: Label
                             Properties:
                               OnSelect: =Select(d_c_d_gallery);
-                              Text: =ThisItem.catalog
+                              Text: =ThisItem.Catalog
                               Align: =Align.Center
-                              Color: =varColor0
+                              Color: =gblTheme.Text_On_Light
                               FillPortions: =1
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinWidth: =1
-                              Size: =Self.Width / 12
+                              Size: =Round(Self.Height/6,0)
                               Width: =Parent.Width / 10
                               X: =d_c_d_g_line.X + d_c_d_g_line.Width * 1
                         - d_c_d_g_lot:
                             Control: Label
                             Properties:
                               OnSelect: =Select(d_c_d_gallery);
-                              Text: =ThisItem.lot
+                              Text: =ThisItem.Lot
                               Align: =Align.Center
-                              Color: =varColor0
+                              Color: =gblTheme.Text_On_Light
                               FillPortions: =1
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinWidth: =1
-                              Size: =Self.Width / 12
+                              Size: =Round(Self.Height/6,0)
                               Width: =Parent.Width / 10
                               X: =d_c_d_g_line.X + d_c_d_g_line.Width * 2
                         - d_c_d_g_total:
                             Control: Label
                             Properties:
                               OnSelect: =Select(d_c_d_gallery);
-                              Text: =ThisItem.total
+                              Text: =ThisItem.Total_Downtime
                               Align: =Align.Center
-                              Color: =varColor0
+                              Color: =gblTheme.Text_On_Light
                               FillPortions: =1
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinWidth: =1
-                              Size: =Self.Width / 8
+                              Size: =Round(Self.Height/6,0)
                               Width: =Parent.Width / 10
                               X: =d_c_d_g_reason.X + d_c_d_g_reason.Width
                         - d_c_d_g_reason:
                             Control: Label
                             Properties:
                               OnSelect: =Select(d_c_d_gallery);
-                              Text: =ThisItem.reason
+                              Text: =ThisItem.Reason
                               Align: =Align.Center
-                              Color: =varColor0
+                              Color: =gblTheme.Text_On_Light
                               FillPortions: =1
                               Font: =Font.Verdana
                               Height: =Parent.Height
                               LayoutMinWidth: =1
-                              Size: |-
-                                =If(
-                                    Len(Self.Text) <= 20,
-                                    Self.Width / 12,
-                                    Self.Width / (Len(Self.Text)*0.50)
-                                )
+                              Size: =Round(Self.Height/6,0)
                               Width: =(Parent.Width / 10) * 1.5
                               X: =d_c_d_g_line.X + d_c_d_g_line.Width * 5
                         - d_c_d_g_comments:
                             Control: Label
                             Properties:
                               OnSelect: =Select(d_c_d_gallery);
-                              Text: =ThisItem.comments
+                              Text: =ThisItem.Comments
                               Align: =Align.Center
-                              Color: =varColor0
+                              Color: =gblTheme.Text_On_Light
                               FillPortions: =2.5
                               Font: =Font.Verdana
                               Height: =Parent.Height
@@ -1083,7 +1080,7 @@
                         Control: Rectangle
                         Properties:
                           OnSelect: =Select(Parent)
-                          Fill: =varColor1
+                          Fill: =gblTheme.Accent
                           Height: =Parent.TemplateHeight * 0.025
                           Width: =Parent.Width
                           Y: =Parent.TemplateHeight - Self.Height
