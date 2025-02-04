@@ -1,6 +1,6 @@
 # Todo
 
-## Aervent and HA Calculations
+## Aervent and High Area Calculations
 
 ClearCollect(colAerventCatalogs,
     {Value: "CTGR01TP1"}, {Value: "CTGR02TP1"}, {Value: "CTGR03TP1"}, // Code 0
@@ -14,14 +14,32 @@ ClearCollect(colHighAreaCatalogs,
 );
 
 ## Power Automate Flow Fixes
+Downtime Data pulling in duplicate short stop data.
 
-## Nephele needs review.
+## Nephele needs review
 
-## Daily Operations Report / End of Day Processing
-
-## Tier 1?
-
-## Tier 2
+## PowerApp Building
+Refactor naming conventions to align with design docs
+Review versioning, galleries and quickchart.io connections breaking.
+### Home
+    Completed
+### Outputs
+    Completed
+### Downtime
+    Completed
+### OEE
+    Data Collection Review
+    General Reformatting
+### Loss
+    Data Collection Review
+    General Reformatting
+### Trend
+    Data Collection Review
+    Graphing with quickchart.io is broken
+### Bugs
+    Completed
+### Daily Operations Report / End of Day Processing / Tier 1?
+### Tier 2
 
 - Safety
     - Safety Moments
@@ -45,10 +63,31 @@ ClearCollect(colHighAreaCatalogs,
     - Owner
     - Due Date
     - Comments
+### Tier 3
 
-## Tier 3
-
-## Power Bi Integration
+- Safety
+    - Safety Moments
+    - Safety Incidents
+    - Overdue EHS Actions
+    - Upcoming EHS Actions
+    - Overdue Critical PMs
+- Quality
+    - Deviations
+    - ROEs
+- Supply
+    - Daily Targets
+- Completions
+    - Weekly Targets
+- Action Tracker
+    - Area
+    - Downtime
+    - Issue
+    - Primary Action
+    - Follow up Action
+    - Owner
+    - Due Date
+    - Comments
+### Power Bi Integration
 
 - Requires pro license.
 
@@ -70,5 +109,7 @@ ClearCollect(colHighAreaCatalogs,
 712.6816 ft
 
 # Stable PowerApp Versions
-
 Encap Production = 1303
+Encap Management = ????
+Encap Accountability = ????
+FE DataBridge DMS = ????
