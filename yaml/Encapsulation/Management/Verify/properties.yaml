@@ -1,8 +1,0 @@
-Properties:
-  OnVisible: |-
-    =UpdateContext({
-        locPadding: Self.Width * 0.005,
-        locLoading: {Visible: false, Value: 0, Text: "Starting"}
-    });
-
-    Select(v_collect);

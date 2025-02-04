@@ -1,8 +1,0 @@
-Properties:
-  OnVisible: |-
-    =/*Init Local Variables*/
-    UpdateContext({
-        locLoading: false,
-        locPopup: false,
-        locPopupType: Blank()
-        });

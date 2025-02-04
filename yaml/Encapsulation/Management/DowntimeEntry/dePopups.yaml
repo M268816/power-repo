@@ -754,12 +754,12 @@
                   OnSelect: |-
                     =Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Finishing Up"});
                   Text: ="Cancel"
-                  Color: =gblTheme.Text_On_Light
+                  Color: =gblTheme.Text_On_Dark
                   Fill: =gblTheme.Secondary
                   FillPortions: =1
                   Font: =Font.Verdana
                   Height: =10
-                  HoverColor: =gblTheme.Text_On_Light
+                  HoverColor: =gblTheme.Text_On_Dark
                   HoverFill: =gblTheme.Deny
                   LayoutMinHeight: =1
                   LayoutMinWidth: =1

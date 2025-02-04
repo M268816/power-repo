@@ -97,7 +97,7 @@
             Control: Image
             Properties:
               OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
-              Image: =gIcons.Bug
+              Image: =gblIcons.Bug
               HoverFill: =gblTheme.Pri_Complement
               ImagePosition: =ImagePosition.Fill
               LayoutMinHeight: =10
@@ -177,7 +177,7 @@
                 Control: Gallery
                 Variant: galleryVertical
                 Properties:
-                  Items: =cNavigation
+                  Items: =colNavigation
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DelayItemLoading: =true
                   Layout: =Layout.Vertical
@@ -306,7 +306,7 @@
                 - ???Line:
                     Control: Classic/DropDown
                     Properties:
-                      Items: =gLists.Lines
+                      Items: =gblLists.Lines
                       ChevronBackground: =gblTheme.Sec_Complement
                       ChevronFill: =gblTheme.Text_Dark
                       Color: =gblTheme.Text_On_Light

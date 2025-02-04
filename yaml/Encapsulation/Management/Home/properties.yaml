@@ -1,7 +1,0 @@
-    Properties:
-      OnVisible: |-
-        =/*Init Time Variables*/
-        Set(varNowDay, Today());
-        Set(varNowHour, Now());
-
-        Select(h_collect);

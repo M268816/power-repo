@@ -1,0 +1,1525 @@
+- hrLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - hrCollect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =/*Start*/
+            Patch(recPopups,First(recPopups),{Visible: true, Value: 10, Popup: "loading", Display_Text: "Loading"});
+
+            Set(gblTime,{Today:Today(),Now:Now()});
+
+            /*Capture Local Date Selection*/
+            UpdateContext({
+                locEndDate: DateTimeValue(hrDate.SelectedDate),
+                locStartDate: DateTimeValue(hrDate.SelectedDate)
+            });
+
+            /*Collect Production*/
+            Patch(recPopups,First(recPopups),{Value: 20, Display_Text: "Collecting Production Data"});
+
+            ClearCollect(colProduction,
+                ForAll(
+                    Filter(Production,
+                        Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                        Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)
+                    ),
+                    {
+                        Id: Value(ThisRecord.ID),
+                        Shift: Text(ThisRecord.Shift_Letter),
+                        Line: Text(ThisRecord.Line.Value),
+                        Lot: Text(ThisRecord.Lot),
+                        Catalog: Text(ThisRecord.Catalog),
+                        Size: Text(ThisRecord.Size),
+                        Hour_Ending: DateTimeValue(ThisRecord.Hour_Ending),
+                        Hour_Starting: DateTimeValue(ThisRecord.Hour_Starting),
+                        Goal: Value(ThisRecord.Hourly_Goal),
+                        Amount_Built: Value(ThisRecord.Amount_Built),
+                        Unit_Starting: Value(ThisRecord.Unit_Starting),
+                        Unit_Ending: Value(ThisRecord.Unit_Ending),
+                        Reject_Labels: Value(ThisRecord.Reject_Labels),
+                        Reject_Cartridges: Value(ThisRecord.Reject_Cartridges),
+                        Reject_Units: Value(ThisRecord.Reject_Units),
+                        QA_Units: Value(ThisRecord.QA_Units)
+                    }
+                )
+            );
+
+            /* Collect Downtime */
+            Patch(recPopups,First(recPopups),{Value: 30, Display_Text: "Collecting Downtime Data"});
+
+            ClearCollect(colDowntime,
+                ForAll(
+                    Filter(Downtime,
+                        Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                        Started >= DateAdd(locStartDate, -1, TimeUnit.Hours)
+                    ),
+                    {
+                        Id: Value(ThisRecord.ID),
+                        Shift: Text(ThisRecord.Shift_Letter),
+                        Line: Text(ThisRecord.Line.Value),
+                        Lot: Text(ThisRecord.Lot),
+                        Catalog: Text(ThisRecord.Catalog),
+                        Size: Text(ThisRecord.Size),
+                        Started: DateTimeValue(ThisRecord.Started),
+                        Ended: DateTimeValue(ThisRecord.Ended),
+                        Reason: Text(ThisRecord.Reason.Value),
+                        Total_Downtime: Value(ThisRecord.Total_Downtime),
+                        Comments: Text(ThisRecord.Comments)
+                    }
+                )
+            );
+
+            Select(hrUpdate);
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+    - hrSequentialCollect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - hrUpdate:
+        Control: Classic/Button
+        Properties:
+          OnSelect: "=/*Update Code*/\nPatch(recPopups,First(recPopups),{Visible: true, Value: 40, Popup: \"loading\", Display_Text: \"Updating\"});\n\n/*Create and reset Schema for displaying hourly informaiton*/\nClear(collectHourlySchema);\nForAll(Sequence(24),\n    With({thisItteration: ThisRecord.Value},\n        Collect(collectHourlySchema,\n            {\n                SCH_Hour_Starting: DateAdd(locStartDate, -2 + thisItteration, TimeUnit.Hours),\n                SCH_Hour_Ending: DateAdd(locStartDate, -1 + thisItteration, TimeUnit.Hours),\n                SCH_Shift_Letter:\n                    If(\n                        Hour(DateAdd(locStartDate, -2 + thisItteration, TimeUnit.Hours)) >= 23, \"C\",\n                        Hour(DateAdd(locStartDate, -2 + thisItteration, TimeUnit.Hours)) >= 15, \"B\",\n                        Hour(DateAdd(locStartDate, -2 + thisItteration, TimeUnit.Hours)) >= 7 , \"A\",\n                        \"C\" \n                    )\n            }\n        )\n    )\n);\n\n/*Join Schema (on visible) and Local Unit Data*/\nPatch(recPopups,First(recPopups),{Value: 50, Display_Text: \"Joining Unit Data\"});\nClearCollect(colProductionJoined,\n    // Iterate through all source records and join to destination collection\n    ForAll(\n \n        // Iterate through the source collection\n        collectHourlySchema,\n        { \n            // Columns to appear in dataset\n            Id: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Id,\n            \n            Catalog: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Catalog,\n            \n            Lot: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Lot,\n\n            Line: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Line,\n            \n            Hour_Starting: DateTimeValue(ThisRecord.SCH_Hour_Starting),\n\n            Hour_Ending: DateTimeValue(ThisRecord.SCH_Hour_Ending),\n            \n            Amount_Built: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Amount_Built,\n            \n            Goal: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Goal,\n            \n            Unit_Starting: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Unit_Starting,\n            \n            Unit_Ending: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Unit_Ending,\n            \n            QA: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).QA_Units,\n            \n            Reject_Labels: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Reject_Labels,\n            \n            Reject_Units: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Reject_Units,\n            \n            Reject_Cartridges: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Reject_Cartridges,\n            \n            Shift_Letter: ThisRecord.SCH_Shift_Letter\n        }\n    )\n);\n\n/*Join Schema (on visible) and Local Downtime Data*/\nPatch(recPopups,First(recPopups),{Value: 60, Display_Text: \"Joining Downtime Data\"});\nClearCollect(colDowntimeJoined,\n    // Iterate through all source records and join to destination collection\n    ForAll(\n \n        // Iterate through the source collection\n        collectHourlySchema,\n        { \n            // Columns to appear in dataset\n            Id:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Id,\n\n            Line:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Line,\n\n            Lot:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Lot,\n            \n            Catalog:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Catalog,\n            \n            Started: ThisRecord.SCH_Hour_Starting,\n            Ended: ThisRecord.SCH_Hour_Ending,\n\n            Reason:\n                First(\n                    Sort(\n                        Sort(\n                            AddColumns(\n                                Filter(\n                                   colDowntime,\n                                    /*Both the...*/\n                                    And(\n                                        /*Time and Total_Downtime downtime must be...*/\n                                        /*Of the selected Line And,*/\n                                        Line =hrLine.Selected.Value,\n                                        Or(\n                                            /*Either the end time is between than the start and end schema hour*/\n                                            And(\n                                                Ended <= SCH_Hour_Ending,\n                                                Ended > SCH_Hour_Starting\n                                            ),\n                                            /*Or the start time is between the start and end schema hour*/\n                                            And(\n                                                Started >= SCH_Hour_Starting,\n                                                Started < SCH_Hour_Ending\n                                            ),\n                                            /*Or the time passes through this hour*/\n                                            And(\n                                                Started < SCH_Hour_Starting,\n                                                Ended > SCH_Hour_Starting\n                                            )\n                                        )\n                                    )\n                                ),\n                                Time_Calc,\n                                If(\n                                    And(\n                                        Started >= SCH_Hour_Starting,\n                                        Ended <= SCH_Hour_Ending\n                                    ),\n                                    Total_Downtime,\n                                    Total_Downtime -\n                                    If(\n                                        Started < SCH_Hour_Starting,\n                                        DateDiff(Started, SCH_Hour_Starting, TimeUnit.Minutes),\n                                        0\n                                    ) +\n                                    If(\n                                        Ended > SCH_Hour_Ending,\n                                        DateDiff(Ended, SCH_Hour_Ending, TimeUnit.Minutes),\n                                        0\n                                    )\n                                )\n                            ),\n                            Time_Calc,\n                            SortOrder.Descending\n                        ),\n                        Total_Downtime,\n                        SortOrder.Descending\n                    )\n                ).Reason,\n            \n            Total_Downtime:\n                If(                   \n                    !IsBlank(\n                        LookUp(\n                            colDowntime,\n                            And(\n                                /*Of the selected Line And,*/\n                                Line =hrLine.Selected.Value,\n                                Or(\n                                    /*Either the end time is between than the start and end schema hour*/\n                                    And(\n                                        Ended <= SCH_Hour_Ending,\n                                        Ended > SCH_Hour_Starting\n                                    ),\n                                    /*Or the start time is between the start and end schema hour*/\n                                    And(\n                                        Started >= SCH_Hour_Starting,\n                                        Started < SCH_Hour_Ending\n                                    ),\n                                    /*Or the time passes through this hour*/\n                                    And(\n                                        Started < SCH_Hour_Starting,\n                                        Ended > SCH_Hour_Starting\n                                    )\n                                )\n                            )\n                        )\n                    ),\n\n                    Sum(\n                        Filter(\n                            colDowntime,\n                            And(\n                                /*Of the selected Line And,*/\n                                Line =hrLine.Selected.Value,\n                                Or(\n                                    /*Either the end time is between than the start and end schema hour*/\n                                    And(\n                                        Ended <= SCH_Hour_Ending,\n                                        Ended > SCH_Hour_Starting\n                                    ),\n                                    /*Or the start time is between the start and end schema hour*/\n                                    And(\n                                        Started >= SCH_Hour_Starting,\n                                        Started < SCH_Hour_Ending\n                                    ),\n                                    /*Or the time passes through this hour*/\n                                    And(\n                                        Started < SCH_Hour_Starting,\n                                        Ended > SCH_Hour_Starting\n                                    )\n                                )\n                            )\n                        ),\n                        /*Difference between endtime and start time*/\n                        DateDiff(\n                            /*find the max starting time for that hour*/\n                            Max(\n                                Started,\n                                DateTime(\n                                    Year(Started),Month(SCH_Hour_Starting),Day(SCH_Hour_Starting),\n                                    Hour(SCH_Hour_Starting),0,0\n                                )\n                            ),\n                            /*Find the min ending time for that hour*/\n                            Min(\n                                Ended,\n                                DateTime(\n                                    Year(Ended),Month(SCH_Hour_Ending),Day(SCH_Hour_Ending),\n                                    Hour(SCH_Hour_Ending),0,0\n                                )\n                            ),\n                            TimeUnit.Minutes\n                        )\n                    )\n                ),\n            \n            Comments:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Comments,\n\n            Shift: ThisRecord.SCH_Shift_Letter\n        }\n    )\n);\n\nPatch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: \"\", Display_Text: \"Finishing Up\"});"
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+    - hrHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - hrLogo:
+            Control: Image
+            Properties:
+              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: =hrNavigationTitle.Width
+        - hrTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - hrMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - hrBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - hrUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - hrMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - hrNavigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - hrNavigationTitle:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - hrNavigationSeparator:
+                Control: Rectangle
+                Properties:
+                  Fill: =gblTheme.Pri_Complement
+                  Height: =Round(gblPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - hrNavigationGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =colNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gblPadding
+                  TemplateSize: =30
+                Children:
+                - hrNavigationGalleryButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =100
+                      RadiusBottomRight: =100
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =100
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - hrNavigationFooter:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - hrFilterParent:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Background
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - hrFilters:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =gblTheme.Foreground
+                  Height: =Parent.Height * 0.5
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gblPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                Children:
+                - hrFilterTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Filters"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Center
+                      Color: =gblTheme.Text_Light
+                      Fill: =gblTheme.Secondary
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width
+                - hrDateLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Date"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - hrDate:
+                    Control: Classic/DatePicker
+                    Properties:
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FocusedBorderThickness: =1
+                      IconBackground: =gblTheme.Sec_Complement
+                      IconFill: =gblTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 5
+                - hrFilterSeparator0:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - hrLineLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Line"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - hrLine:
+                    Control: Classic/DropDown
+                    Properties:
+                      Items: =gblLists.Lines
+                      ChevronBackground: =gblTheme.Sec_Complement
+                      ChevronFill: =gblTheme.Text_Dark
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 5
+                - hrFilterSeparator1:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - hrShiftLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Shift"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - hrShift:
+                    Control: Classic/DropDown
+                    Properties:
+                      Items: =gblLists.Shifts
+                      ChevronBackground: =gblTheme.Sec_Complement
+                      ChevronFill: =gblTheme.Text_Dark
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 5
+                - hrFilterSeparator2:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+        - hrBody:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 6, 10)
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - hrOverview:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Semilight
+                  Fill: =gblTheme.Foreground
+                  Height: =Parent.Height
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width/2
+                Children:
+                - hrOverviewGoalLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Hourly Goal"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Pri_Complement
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewGoal:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =IfError(
+                            RoundUp(
+                                Average(
+                                    Filter(
+                                        colProduction,
+                                        Text(Hour_Ending, DateTimeFormat.ShortDate) = Text(locStartDate,DateTimeFormat.ShortDate),
+                                        Line = hrLine.Selected.Value,
+                                        Shift = hrShift.Selected.Value
+                                    ),
+                                    Goal
+                                ),
+                                0
+                            ),
+                            0
+                        )
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewTotalLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Total"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Pri_Complement
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewTotal:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =IfError(
+                            Sum(
+                                Filter(
+                                    colProduction,
+                                    Text(Hour_Ending, DateTimeFormat.ShortDate) = Text(locStartDate,DateTimeFormat.ShortDate),
+                                    Line = hrLine.Selected.Value,
+                                    Shift = hrShift.Selected.Value
+                                ),
+                                amount_built * 1
+                            )*1
+                            &" / "&
+                            Sum(
+                                Filter(
+                                    colProduction,
+                                    Text(Hour_Ending, DateTimeFormat.ShortDate) = Text(locStartDate,DateTimeFormat.ShortDate),
+                                    Line = hrLine.Selected.Value,
+                                    Shift = hrShift.Selected.Value
+                                ),
+                                goal
+                            )*1,
+                            0
+                        )
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewAverageLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Average Hourly Build Amount"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Pri_Complement
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewAverage:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =IfError(
+                            RoundUp(
+                                Average(
+                                    Filter(
+                                        colProduction,
+                                        Text(Hour_Ending, DateTimeFormat.ShortDate) = Text(locStartDate,DateTimeFormat.ShortDate),
+                                        Line = hrLine.Selected.Value,
+                                        Shift = hrShift.Selected.Value
+                                    ),
+                                    Amount_Built * 1
+                                ),
+                                0
+                            ),
+                            0
+                        )
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewRejectLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Rejects"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Pri_Complement
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewReject:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =IfError(
+                            RoundUp(
+                                Sum(
+                                    Filter(
+                                        colProduction,
+                                        Text(Hour_Ending, DateTimeFormat.ShortDate) = Text(locStartDate,DateTimeFormat.ShortDate),
+                                        Line = hrLine.Selected.Value,
+                                        Shift = hrShift.Selected.Value
+                                    ),
+                                    (Reject_Cartridges + Reject_Units) * 1
+                                ),
+                                0
+                            ),
+                            0
+                        )
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewDowntimeLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Downtime"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Pri_Complement
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+                - hrOverviewDowntime:
+                    Control: Label
+                    Properties:
+                      Text: |-
+                        =IfError(
+                            RoundUp(
+                                Sum(
+                                    Filter(
+                                        colDowntime,
+                                        Text(Ended, DateTimeFormat.ShortDate) = Text(locStartDate,DateTimeFormat.ShortDate),
+                                        Line = hrLine.Selected.Value,
+                                        Shift = hrShift.Selected.Value
+                                    ),
+                                    Total_Downtime * 1
+                                ),
+                                0
+                            ),
+                            0
+                        )
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: '=1   '
+                      Font: =Font.Verdana
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/6,0)
+            - hrUnits:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Semilight
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =If(locExpandUnits, 8, 4.5)
+                  Height: =Parent.Height
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LayoutMode: =LayoutMode.Auto
+                  Width: =Parent.Width/2
+                Children:
+                - hrUnitsHeader:
+                    Control: GroupContainer
+                    Variant: manualLayoutContainer
+                    Properties:
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - hrUnitsTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Units"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          Fill: =gblTheme.Secondary
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          Size: =Self.Height / 2
+                          Width: =Parent.Width
+                          X: =1-1
+                          Y: =1-1
+                    - hrUnitsAddEntry:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: |-
+                            =Set(gblHourlyFormMode, FormMode.New);
+                            Set(gblHourlyID, "");
+                            Navigate(Modify_Hourly);
+                          Text: ="Add New Entry"
+                          Color: =gblTheme.Text_Dark
+                          Fill: =gblTheme.Accent
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Normal
+                          Height: =Parent.Height * 0.75
+                          HoverColor: =varColor5
+                          HoverFill: =ColorFade(Self.Fill, -50%)
+                          Size: =Self.Height / 4
+                          Width: =Hourly.Width * 0.075
+                          X: =Parent.Width * 0.01
+                          Y: =Parent.Height/2 - Self.Height/2
+                    - hrUnitsExpand:
+                        Control: Classic/Icon
+                        Variant: 3DPrinting
+                        Properties:
+                          OnSelect: =UpdateContext({locExpandUnits:!locExpandUnits});
+                          Color: =gblTheme.Accent
+                          Height: =Parent.Height * 0.75
+                          Icon: |-
+                            =If(
+                                locExpandUnits,
+                                Icon.CollapseView,
+                                Icon.ExpandView
+                            )
+                          PaddingBottom: =Self.Width * 0.01
+                          PaddingTop: =Self.Width * 0.01
+                          Width: =Self.Height
+                          X: =Parent.Width * 0.99 - Self.Width
+                          Y: =Parent.Height/2 - Self.Height/2
+                - hrUnitsColumns:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.None
+                      Fill: =gblTheme.Sec_Complement
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - hrUnitsColumnTime:
+                        Control: Label
+                        Properties:
+                          Text: ="Time"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrUnitsColumnLot:
+                        Control: Label
+                        Properties:
+                          Text: ="Lot"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1.5
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrUnitsColumnTotal:
+                        Control: Label
+                        Properties:
+                          Text: ="Built"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrUnitsColumnGoal:
+                        Control: Label
+                        Properties:
+                          Text: ="Goal"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrUnitsColumnDelta:
+                        Control: Label
+                        Properties:
+                          Text: ="Delta"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrUnitsColumnRunning:
+                        Control: Label
+                        Properties:
+                          Text: ="Total"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrUnitsColumnRejects:
+                        Control: Label
+                        Properties:
+                          Text: ="Rejects"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                          Visible: =!locExpandUnits
+                    - hrUnitsColumnStart:
+                        Control: Label
+                        Properties:
+                          Text: ="Starting Unit"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                          Visible: =locExpandUnits
+                    - hrUnitsColumnEnd:
+                        Control: Label
+                        Properties:
+                          Text: ="Ending Unit"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                          Visible: =locExpandUnits
+                    - hrUnitsColumnQA:
+                        Control: Label
+                        Properties:
+                          Text: ="QA Units"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                          Visible: =locExpandUnits
+                    - hrUnitsColumnLabel:
+                        Control: Label
+                        Properties:
+                          Text: ="Label Rejects"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                          Visible: =locExpandUnits
+                    - hrUnitsColumnCart:
+                        Control: Label
+                        Properties:
+                          Text: ="Cartridge Rejects"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                          Visible: =locExpandUnits
+                    - hrUnitsColumnUnit:
+                        Control: Label
+                        Properties:
+                          Text: ="Unit Rejects"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =RGBA(0,0,0,0)
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                          Visible: =locExpandUnits
+                - hrUnitGallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      OnSelect: "=SelectedState;\r\nIf(\r\n    hrUnitGallery.Selected.ID = Blank(),\r\n    \r\n        Set(gblHourlyID, Blank());\r\n            Set(gblHourlyFormMode, FormMode.New);\r\n                Navigate(Modify_Hourly);,\r\n    \r\n        Set(gblHourlyID, hrUnitGallery.Selected.ID);\r\n            Set(gblHourlyFormMode, FormMode.Edit);\r\n                Navigate(Modify_Hourly);\r\n\r\n);"
+                      Items: |-
+                        =Filter(
+                            colProductionJoined,
+                            Shift_Letter = hrShift.Selected.Value
+                            )
+                      DelayItemLoading: =true
+                      FillPortions: =13.5
+                      Layout: =Layout.Vertical
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Self.Height / 8
+                    Children:
+                    - hrUnitGalleryLayout:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Height: =Parent.TemplateHeight - hrUnitGallerySeparator.Height
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width
+                          X: =1-1
+                          Y: =1-1
+                        Children:
+                        - hrUnitGalleryTime:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - hrUnitGalleryStarting:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(hrUnitGallery);
+                                  Text: =TimeValue(ThisItem.Hour_Starting)
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =RGBA(0,0,0,0)
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =1
+                                  LayoutMinHeight: =1
+                                  LayoutMinWidth: =1
+                                  Size: =Self.Height / 4
+                            - hrUnitGalleryEnding:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(hrUnitGallery);
+                                  Text: =TimeValue(ThisItem.Hour_Ending)
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Pri_Complement
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =1
+                                  LayoutMinHeight: =1
+                                  LayoutMinWidth: =1
+                                  Size: =Self.Height / 4
+                        - hrUnitGalleryLotParent:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =1.5
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - hrUnitGalleryCatalog:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(hrUnitGallery);
+                                  Text: =ThisItem.Catalog
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =RGBA(0,0,0,0)
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =1
+                                  LayoutMinHeight: =1
+                                  LayoutMinWidth: =1
+                                  PaddingLeft: =1
+                                  PaddingRight: =1
+                                  Size: =Self.Height / 4
+                            - hrUnitGalleryLot:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(hrUnitGallery);
+                                  Text: =ThisItem.Lot
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =RGBA(0,0,0,0)
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =1
+                                  LayoutMinHeight: =1
+                                  LayoutMinWidth: =1
+                                  PaddingLeft: =1
+                                  PaddingRight: =1
+                                  Size: =Self.Height / 4
+                        - hrUnitGalleryTotal:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.Amount_Built
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                        - hrUnitGalleryGoal:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.Goal
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                        - hrUnitGalleryDelta:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.Amount_Built - ThisItem.Goal
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                        - hrUnitGalleryRunning:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: |-
+                                =Sum(
+                                    Filter(
+                                        colProductionJoined,
+                                        Shift_Letter = hrShift.Selected.Value,
+                                        Hour_Ending <= ThisItem.Hour_Ending
+                                    ),
+                                    Amount_Built
+                                )
+                                & Char(10) &
+                                UniChar(9473)&UniChar(9473) 
+                                & Char(10) &
+                                Sum(
+                                    Filter(
+                                        colProductionJoined,
+                                        Shift_Letter = hrShift.Selected.Value,
+                                        Hour_Ending <= ThisItem.Hour_Ending
+                                    ),
+                                    Goal
+                                )
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 6
+                        - hrUnitGalleryRejects:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =If(ThisItem.Reject_Cartridges + ThisItem.Reject_Units = 0 , "", ThisItem.Reject_Cartridges + ThisItem.Reject_Units)
+                              Align: =Align.Center
+                              Color: =varColor0
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              FontWeight: =FontWeight.Lighter
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                              Visible: =!locExpandUnits
+                        - hrUnitGalleryStartUnit:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.Unit_Starting
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                              Visible: =locExpandUnits
+                        - hrUnitGalleryEndUnit:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.Unit_Ending
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                              Visible: =locExpandUnits
+                        - hrUnitGalleryQA:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.QA
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                              Visible: =locExpandUnits
+                        - hrUnitGalleryLabel:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.Reject_Labels
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                              Visible: =locExpandUnits
+                        - hrUnitGalleryCart:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.Reject_Cartridges
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                              Visible: =locExpandUnits
+                        - hrUnitGalleryUnit:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrUnitGallery);
+                              Text: =ThisItem.Reject_Units
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Size: =Self.Height / 5
+                              Visible: =locExpandUnits
+                    - hrUnitGallerySeparator:
+                        Control: Rectangle
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Height: =Parent.TemplateHeight * 0.020
+                          Width: =Parent.TemplateWidth
+                          X: =1-1
+                          Y: =Parent.TemplateHeight - Self.Height
+            - hrDowntime:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Semilight
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =4
+                  Height: =Parent.Height
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  LayoutMode: =LayoutMode.Auto
+                  Visible: =!locExpandUnits
+                  Width: =Parent.Width/2
+                Children:
+                - hrDowntimeHeader:
+                    Control: GroupContainer
+                    Variant: manualLayoutContainer
+                    Properties:
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - hrDowntimeTitle:
+                        Control: Label
+                        Properties:
+                          Text: ="Downtime"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          Fill: =gblTheme.Secondary
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          Size: =Self.Height / 2
+                          Width: =Parent.Width
+                    - hrDowntimeView:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: =UpdateContext({locExpandDowntime:!locExpandDowntime});
+                          Text: =If (locExpandDowntime, "Show Hourly", "Show All Entries")
+                          Color: =varColor0
+                          Fill: =gblTheme.Accent
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Normal
+                          Height: =Parent.Height * 0.75
+                          HoverColor: =varColor5
+                          HoverFill: =ColorFade(Self.Fill, -50%)
+                          Size: =Self.Height / 4
+                          Width: =Hourly.Width * 0.075
+                          X: =Parent.Width * 0.99 - Self.Width
+                          Y: =Parent.Height/2 - Self.Height/2
+                    - hrDowntimeAdd:
+                        Control: Classic/Button
+                        Properties:
+                          OnSelect: |-
+                            =Set(gblDowntimeFormMode, FormMode.New);
+                            Navigate(DowntimeEntry);
+                          Text: ="Add Downtime"
+                          Color: =varColor0
+                          Fill: =gblTheme.Accent
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Normal
+                          Height: =Parent.Height * 0.75
+                          HoverColor: =varColor5
+                          HoverFill: =ColorFade(Self.Fill, -50%)
+                          Size: =Self.Height / 4
+                          Width: =Hourly.Width * 0.075
+                          X: =Parent.Width * 0.01
+                          Y: =Parent.Height/2 - Self.Height/2
+                - hrDowntimeColumns:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.None
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                    Children:
+                    - hrDowntimeColumnTime:
+                        Control: Label
+                        Properties:
+                          Text: ="Time"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =gblTheme.Sec_Complement
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrDowntimeColumnLot:
+                        Control: Label
+                        Properties:
+                          Text: ="Lot"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =gblTheme.Sec_Complement
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrDowntimeColumnTotal:
+                        Control: Label
+                        Properties:
+                          Text: ="Total"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =gblTheme.Sec_Complement
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrDowntimeColumnReason:
+                        Control: Label
+                        Properties:
+                          Text: ="Reason"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =gblTheme.Sec_Complement
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - hrDowntimeColumnComments:
+                        Control: Label
+                        Properties:
+                          Text: ="Comments"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_On_Light
+                          Fill: =gblTheme.Sec_Complement
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                - hrDowntimeGallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      OnSelect: |-
+                        =If(
+                            locExpandDowntime,
+                            Set(gblDowntimeID, hrDowntimeGallery.Selected.id);
+                                Set(gblDowntimeFormMode, FormMode.Edit);
+                                    Navigate(DowntimeEntry);,
+                            Notify("To edit downtime from the hourly screen, please show all individual entries. This ensures the program picks up the correct ID#. Thank you!", NotificationType.Information);
+                        )
+                      Items: "=Sort(\r\n    Filter(\r\n        If(\r\n            locExpandDowntime,\r\n            colDowntime,\r\n            colDowntimeJoined\r\n        ),\r\n        DateTimeValue(Started) >= DateAdd(locStartDate,-1,TimeUnit.Hours),\r\n        DateTimeValue(Ended) <= DateAdd(locStartDate,23,TimeUnit.Hours),\r\n        If (\r\n            locExpandDowntime,\r\n            And(\r\n                Shift = hrShift.Selected.Value,\r\n                Line = hrLine.Selected.Value\r\n            ),\r\n            Shift = hrShift.Selected.Value\r\n        )\r\n        \r\n    ),\r\n    Ended,\r\n    SortOrder.Ascending\r\n)\r\n"
+                      DelayItemLoading: =true
+                      FillPortions: =14
+                      Layout: =Layout.Vertical
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Self.Height / 8
+                    Children:
+                    - hrDowntimeGalleryLayout:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Height: =Parent.TemplateHeight - hrDowntimeGallerySeparator.Height
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.Width
+                          X: =1-1
+                          Y: =1-1
+                        Children:
+                        - hrDowntimeGalleryTime:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - hrDowntimeGalleryStarting:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(hrDowntimeGallery);
+                                  Text: =TimeValue(ThisItem.Started)
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =RGBA(0,0,0,0)
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =1
+                                  LayoutMinHeight: =1
+                                  LayoutMinWidth: =1
+                                  Size: =Self.Height / 4
+                            - hrDowntimeGalleryEnding:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(hrDowntimeGallery);
+                                  Text: =TimeValue(ThisItem.Ended)
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =gblTheme.Pri_Complement
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =1
+                                  LayoutMinHeight: =1
+                                  LayoutMinWidth: =1
+                                  Size: =Self.Height / 4
+                        - hrDowntimeGalleryLotParent:
+                            Control: GroupContainer
+                            Variant: verticalAutoLayoutContainer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.None
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              LayoutMode: =LayoutMode.Auto
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                            - hrDowntimeGalleryCatalog:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(hrDowntimeGallery);
+                                  Text: =ThisItem.Catalog
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =RGBA(0,0,0,0)
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =1
+                                  LayoutMinHeight: =1
+                                  LayoutMinWidth: =1
+                                  PaddingLeft: =1
+                                  PaddingRight: =1
+                                  Size: =Self.Height / 4
+                            - hrDowntimeGalleryLot:
+                                Control: Label
+                                Properties:
+                                  OnSelect: =Select(hrDowntimeGallery);
+                                  Text: =ThisItem.Lot
+                                  Align: =Align.Center
+                                  Color: =gblTheme.Text_On_Light
+                                  Fill: =RGBA(0,0,0,0)
+                                  FillPortions: =1
+                                  Font: =Font.Verdana
+                                  Height: =1
+                                  LayoutMinHeight: =1
+                                  LayoutMinWidth: =1
+                                  PaddingLeft: =1
+                                  PaddingRight: =1
+                                  Size: =Self.Height / 4
+                        - hrDowntimeGalleryTotal:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrDowntimeGallery);
+                              Text: =ThisItem.Total_Downtime
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              PaddingRight: =1
+                              Size: =Self.Width / 8
+                        - hrDowntimeGalleryReason:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrDowntimeGallery);
+                              Text: =ThisItem.Reason
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              PaddingRight: =1
+                              Size: =Self.Width / 12
+                        - hrDowntimeGalleryComments:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(hrDowntimeGallery);
+                              Text: =ThisItem.Comments
+                              Color: =gblTheme.Text_On_Light
+                              Fill: =RGBA(0,0,0,0)
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =1
+                              LayoutMinWidth: =1
+                              Overflow: =Overflow.Scroll
+                              PaddingRight: =1
+                              Size: =Self.Width / 12
+                    - hrDowntimeGallerySeparator:
+                        Control: Rectangle
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Height: =Parent.TemplateHeight * 0.020
+                          Width: =Parent.TemplateWidth
+                          X: =1-1
+                          Y: =Parent.TemplateHeight - Self.Height
