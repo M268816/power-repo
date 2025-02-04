@@ -1,0 +1,803 @@
+- eLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - eHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - eLogo:
+            Control: Image
+            Properties:
+              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: =eNavigationTitle.Width
+        - eTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - eMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - eBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - eUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - eMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - eNavigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Midground
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - eNavigationTitle:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+            - eNavigationSeparator:
+                Control: Rectangle
+                Properties:
+                  Fill: =gblTheme.Pri_Complement
+                  Height: =Round(gblPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - eNavigationGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =colNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gblPadding
+                  TemplateSize: =30
+                Children:
+                - eNavigationGalleryButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =100
+                      RadiusBottomRight: =100
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =100
+                      Size: =Self.Height / 4
+                      Width: =Parent.TemplateWidth
+            - eNavigationFooter:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  Height: =200
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 24
+                  VerticalAlign: =VerticalAlign.Bottom
+        - eFilterParent:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Background
+              FillPortions: =1.5
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - eFilters:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =gblTheme.Foreground
+                  Height: =Parent.Height * 0.5
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gblPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                Children:
+                - eFilterTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Filters"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Center
+                      Color: =gblTheme.Text_Light
+                      Fill: =gblTheme.Secondary
+                      Height: =eTitle.Height
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                      Width: =Parent.Width
+                - eSupervisorLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Supervisor"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - eSupervisor:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DisplayFields: =["Value"]
+                      Items: =Distinct(ErrorTracking.Supervisor, Supervisor.DisplayName)
+                      SearchFields: =["Value"]
+                      SelectMultiple: =false
+                      ChevronBackground: =gblTheme.Sec_Complement
+                      ChevronFill: =gblTheme.Text_Dark
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/3,0)
+                - eFilterSeparator0:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - eOperatorLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Operator"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - eOperator:
+                    Control: Classic/ComboBox
+                    Properties:
+                      DisplayFields: =["Value"]
+                      Items: |-
+                        =Distinct(
+                            Filter(ErrorTracking,
+                                Supervisor.DisplayName = eSupervisor.Selected.Value
+                            ).Person,
+                            Person.DisplayName
+                        )
+                      SearchFields: =["Value"]
+                      ChevronBackground: =gblTheme.Sec_Complement
+                      ChevronFill: =gblTheme.Text_Dark
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/3,0)
+                - eFilterSeparator1:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - eDateOrderLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Date Order"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - eDateOrder:
+                    Control: Classic/DropDown
+                    Properties:
+                      Items: =["Descending", "Ascending"]
+                      ChevronBackground: =gblTheme.Sec_Complement
+                      ChevronFill: =gblTheme.Text_Dark
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/3,0)
+                - eFilterSeparator2:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - eTypeLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Error Type"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - eType:
+                    Control: Classic/DropDown
+                    Properties:
+                      Default: =""
+                      Items: =Table([""],Choices([@ErrorTracking].Error_Type))
+                      ChevronBackground: =gblTheme.Sec_Complement
+                      ChevronFill: =gblTheme.Text_Dark
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/3,0)
+                - eFilterSeparator3:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - eProcessLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Process Type"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - eProcess:
+                    Control: Classic/DropDown
+                    Properties:
+                      Default: =""
+                      Items: =Table([""],Choices([@ErrorTracking].Error_Area))
+                      ChevronBackground: =gblTheme.Sec_Complement
+                      ChevronFill: =gblTheme.Text_Dark
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height/3,0)
+                - eFilterSeparator4:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - eReviewedLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Reviewed"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - eReviewed:
+                    Control: Toggle
+                    Properties:
+                      FontColor: =gblTheme.Text_On_Light
+                      FontSize: =Self.Width / 10
+                      Label: =If(Self.Checked, "Yes", "No")
+                      FillPortions: =1
+                      Height: =40
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Width: =110
+                - eCoachedLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Coached"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      FillPortions: =1
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Self.Height / 4
+                - eCoached:
+                    Control: Toggle
+                    Properties:
+                      FontColor: =gblTheme.Text_On_Light
+                      FontSize: =Self.Width / 10
+                      Label: =If(Self.Checked, "Yes", "No")
+                      FillPortions: =1
+                      Height: =40
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Width: =110
+                - eFilterSeparator5:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - eResetFilters:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: |-
+                        =Reset(eSupervisor);
+                        Reset(eOperator);
+                        Reset(eDateOrder);
+                        Reset(eType);
+                        Reset(eProcess);
+                        Reset(eReviewed);
+                        Reset(eCoached);
+                      Text: ="Reset Filters"
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      Fill: =gblTheme.Accent
+                      FillPortions: =1
+                      FontWeight: =FontWeight.Normal
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =Self.RadiusTopLeft
+                      RadiusBottomRight: =Self.RadiusTopLeft
+                      RadiusTopRight: =Self.RadiusTopLeft
+                      Size: =Self.Height / 4
+                      Width: =10
+        - eBody:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 5.5, 9.5)
+              LayoutAlignItems: =LayoutAlignItems.Center
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              LayoutOverflowY: =LayoutOverflow.Scroll
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - eGalleryParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =8
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                Children:
+                - eGalleryColumns:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      DropShadow: =DropShadow.None
+                      Fill: =gblTheme.Secondary
+                      FillPortions: =0
+                      Height: =eTitle.Height
+                      LayoutMinHeight: =1
+                      LayoutMinWidth: =1
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusBottomLeft: =0
+                      RadiusBottomRight: =0
+                      RadiusTopLeft: =0
+                      RadiusTopRight: =0
+                      Width: =10
+                      X: =1-1
+                      Y: =1-1
+                    Children:
+                    - eGalleryColumnPerson:
+                        Control: Label
+                        Properties:
+                          Text: ="Person In Error"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - eGalleryColumnDate:
+                        Control: Label
+                        Properties:
+                          Text: ="Date of Error"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - eGalleryColumnType:
+                        Control: Label
+                        Properties:
+                          Text: ="Error Type"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - eGalleryColumnProcess:
+                        Control: Label
+                        Properties:
+                          Text: ="Process"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - eGalleryColumnFound:
+                        Control: Label
+                        Properties:
+                          Text: ="Found At"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - eGalleryColumnReviewed:
+                        Control: Label
+                        Properties:
+                          Text: ="Reviewed?"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - eGalleryColumnCoached:
+                        Control: Label
+                        Properties:
+                          Text: ="Coached?"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                    - eGalleryColumnAttachment:
+                        Control: Label
+                        Properties:
+                          Text: ="Attatchment"
+                          Align: =Align.Center
+                          Color: =gblTheme.Text_Light
+                          FillPortions: =1
+                          Font: =Font.Verdana
+                          Height: =Parent.Height
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/5,0)
+                - eGallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      OnSelect: |-
+                        =Set(varErrorID, eGallery.Selected.ID);
+                        Navigate(Modify_Errors);
+                      Items: |-
+                        =Sort(
+                            Filter(
+                                ErrorTracking,
+                                /*Filter if the item is reviewed and/or coached*/
+                                Reviewed = eReviewed.Checked,
+                                Coached = eCoached.Checked,
+
+                                /*Filter for selected supervisor*/
+                                If(
+                                    eSupervisor.Selected.Value = Blank(),
+                                    true,
+                                    Supervisor.DisplayName = eSupervisor.Selected.Value
+                                ),
+
+                                /*Filter for selected person*/
+                                If(
+                                    eOperator.Selected.Value = Blank(),
+                                    true,
+                                    Person.DisplayName = eOperator.Selected.Value
+                                ),
+
+                                /*Filter Error Type*/
+                                If(
+                                    eType.Selected.Value = "",
+                                    true,
+                                    Error_Type.Value = eType.Selected.Value
+                                ),
+
+                                /*Filter Error Area*/
+                                If(
+                                    eProcess.Selected.Value = "",
+                                    true,
+                                    Error_Area.Value = eProcess.Selected.Value
+                                )
+                            ),
+                            Error_Date,
+                            If (eDateOrder.Selected.Value = "Ascending", SortOrder.Ascending, SortOrder.Descending)
+                        )
+                      AlignInContainer: =AlignInContainer.SetByContainer
+                      FillPortions: =11
+                      Layout: =Layout.Vertical
+                      LoadingSpinner: =LoadingSpinner.Data
+                      TemplatePadding: =0
+                      TemplateSize: =Self.Height / 12
+                    Children:
+                    - eGalleryLayout:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Height: =Parent.TemplateHeight - eGallerySeparator.Height
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.TemplateWidth
+                          X: =1-1
+                          Y: =1-1
+                        Children:
+                        - eGalleryPerson:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(eGallery)
+                              Text: =ThisItem.Person.DisplayName
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/6.5,0)
+                        - eGalleryDate:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(eGallery)
+                              Text: =ThisItem.Error_Date
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/6.5,0)
+                        - eGalleryType:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(eGallery)
+                              Text: =ThisItem.Error_Type.Value
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/6.5,0)
+                        - eGalleryProcess:
+                            Control: Label
+                            Properties:
+                              OnSelect: =Select(eGallery)
+                              Text: =ThisItem.Error_Area.Value
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/6.5,0)
+                        - eGalleryFound:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Found_At.Value
+                              Align: =Align.Center
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/6.5,0)
+                        - eGalleryReviewed:
+                            Control: Classic/CheckBox
+                            Properties:
+                              OnSelect: =Select(eGallery)
+                              Default: =ThisItem.Reviewed
+                              Text: =If(ThisItem.Reviewed, "Reviewed", "Not Reviewed")
+                              CheckboxBackgroundFill: =gblTheme.Background
+                              CheckboxBorderColor: =gblTheme.Sec_Complement
+                              CheckboxSize: =Self.Width / 3
+                              CheckmarkFill: =gblTheme.Text_On_Light
+                              Color: =gblTheme.Text_On_Light
+                              DisplayMode: =DisplayMode.View
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/6.5,0)
+                        - eGalleryCoached:
+                            Control: Classic/CheckBox
+                            Properties:
+                              OnSelect: =Select(eGallery)
+                              Default: =ThisItem.Coached
+                              Text: =If(ThisItem.Coached, "Coached", "Not Coached")
+                              CheckboxBackgroundFill: =gblTheme.Background
+                              CheckboxBorderColor: =gblTheme.Sec_Complement
+                              CheckboxSize: =Self.Width / 3
+                              CheckmarkFill: =gblTheme.Text_On_Light
+                              Color: =gblTheme.Text_On_Light
+                              DisplayMode: =DisplayMode.View
+                              FillPortions: =1
+                              Font: =Font.Verdana
+                              Height: =Parent.Height
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/6.5,0)
+                        - eGalleryAttachment:
+                            Control: Classic/Icon
+                            Variant: Attachment
+                            Properties:
+                              OnSelect: =Launch(First(ThisItem.Attachments).AbsoluteUri)
+                              Color: =gblTheme.Accent
+                              FillPortions: =1
+                              Height: =Parent.Height
+                              Icon: =If(ThisItem.'Has attachments', Icon.PaperClip, Icon.Cancel)
+                              LayoutMinWidth: =1
+                              PaddingBottom: =Parent.Width * 0.005
+                              PaddingLeft: =Parent.Width * 0.005
+                              PaddingRight: =Parent.Width * 0.005
+                              PaddingTop: =Parent.Width * 0.005
+                    - eGallerySeparator:
+                        Control: Rectangle
+                        Properties:
+                          OnSelect: =Select(Parent)
+                          Height: =Parent.TemplateHeight * 0.025
+                          Width: =Parent.TemplateWidth
+                          X: =1-1
+                          Y: =Parent.TemplateHeight - Self.Height
