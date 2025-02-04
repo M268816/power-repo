@@ -19,7 +19,7 @@
         Properties:
           OnSelect: |-
             =/*Start*/
-            Set(varLoading,{Visible: true, Value: 1, Text: "Loading"});
+            Patch(recPopups,First(recPopups),{Visible: true, Value: 10, Display_Text: "Loading"});
 
             /*Capture Local Date Selection*/
             UpdateContext({
@@ -28,7 +28,7 @@
             });
 
             /*Collect Downtime*/
-            Set(varLoading,{Visible: true, Value: 20, Text: "Collecting Downtime Data"});
+            Patch(recPopups,First(recPopups),{Value: 20, Display_Text: "Collecting Downtime Data"});
             ClearCollect(colDowntime,
                 ForAll(
                     Filter(Downtime,
@@ -64,7 +64,7 @@
     - dUpdate:
         Control: Classic/Button
         Properties:
-          OnSelect: "=/*Update Code*/\nPatch(recPopups,First(recPopups),{Visible: true, Value: 20, Display_Text:\"Updating\"});\n\n/*Clear collections for top downtime reasons*/\nClear(colTopDowntime);\n//Clear(colHasReason);\n\nUpdateContext({\n    locStartDate: dStartDate.SelectedDate,\n    locEndDate: dEndDate.SelectedDate\n});\n\n/*Create a Default filter*/\nUpdateContext({\n    locDowntime:\n        Filter(colDowntime,\n            Started >= DateAdd(DateValue(locStartDate),-1,TimeUnit.Hours),\n            Ended <= DateAdd(DateValue(locEndDate),23,TimeUnit.Hours),\n            If(dShift.Selected.Value = \"All\",\n                Shift = Shift,\n                Shift = dShift.Selected.Value\n            ),\n            If(dLine.Selected.Value = \"All\",\n                Line = Line,\n                Line = dLine.Selected.Value\n            )\n        )\n});\n\n\n/*For all downtime reasons, collect the total sum of downtime, if downtime is greater than 0, add to has reason collection*/\nSet(varLoading,{Visible: true, Value: 40, Text: \"Collecting Downtime Sums\"});\n/*ForAll(\n    colDowntimeReasons,\n    If(\n        Sum(\n            Filter(\n                locDowntime,\n                Reason = Downtime_Reason\n            ),\n            total\n        ) > 0,\n        Collect(\n            colHasReason,\n            {Downtime_Reason: Downtime_Reason}\n        )\n    )\n);*/\n/*For all downtime that has an amount/reason, collect the total sum of downtime, sort by total amount*/\nSet(varLoading,{Visible: true, Value: 60, Text: \"Building Top Downtime List\"});\nForAll(gblLists.Downtime_Reasons,\n    With({thisReason: ThisRecord.Value,\n        thisDowntime: Filter(locDowntime, Total_Downtime > 0)\n        },\n        Collect(colTopDowntime,\n            {\n                Downtime_Reason: thisReason,\n                Total_Downtime:\n                    Sum(\n                        Filter(thisDowntime,\n                            If(dShift.Selected.Value = \"All\",\n                                Shift = Shift,\n                                Shift = dShift.Selected.Value\n                            ),\n                            If(dLine.Selected.Value = \"All\",\n                                Line = Line,\n                                Line = dLine.Selected.Value\n                            ),\n                            thisReason = Reason\n                        ),\n                        Total_Downtime\n                    ),\n                Downtime_Comments:\n                    Concat(\n                        Filter(\n                            thisDowntime,\n                            !IsBlankOrError(Comments),\n                            Reason = thisReason\n                        ),\n                        \" ► \" & Comments,\n                        \" ◄ \"\n                    )\n            }\n        \n        )\n    )\n);\n\n\n/*ForAll(\n    colHasReason,\n    Collect(\n        colTopDowntime,\n        {\n            Downtime_Reason: Downtime_Reason,\n            \n            Downtime_Total: Sum(\n                Filter(\n                    locDowntime,\n                    Reason = Downtime_Reason\n                ),\n                Total_Downtime\n            ),\n            \n            Downtime_Comments:\n                Concat(\n                    Filter(\n                        locDowntime,\n                        !IsBlankOrError(comments),\n                        reason = Downtime_Reason\n                ),\n                    comments,\n                    \" ¶ \"\n                )\n        }\n    )\n);*/\n\n\n\n/*Clear for garbage collection*/\nSet(varLoading,{Visible: true, Value: 95, Text: \"Finishing Up\"});\n\nUpdateContext({\n    locDowntime: Blank()\n});\n\n/*End*/\nSet(varLoading,{Value: 100, Text: \"Completed\"});\nSet(varLoading,{Visible: false, Value: -1, Text: \"Not Loading\"});"
+          OnSelect: "=/*Update Code*/\nPatch(recPopups,First(recPopups),{Visible: true, Value: 30, Display_Text: \"Updating\"});\n\nUpdateContext({\n    locStartDate: dStartDate.SelectedDate,\n    locEndDate: dEndDate.SelectedDate\n});\n\n/*Create a Default filter*/\nUpdateContext({\n    locDowntimeFilter:\n        Filter(colDowntime,\n            Started >= DateAdd(DateValue(locStartDate),-1,TimeUnit.Hours),\n            Ended <= DateAdd(DateValue(locEndDate),23,TimeUnit.Hours),\n            If(dShift.Selected.Value = \"All\",\n                Shift = Shift,\n                Shift = dShift.Selected.Value\n            ),\n            If(dLine.Selected.Value = \"All\",\n                Line = Line,\n                Line = dLine.Selected.Value\n            )\n        )\n});\n\n\n/* Collect Top Downtime */\nPatch(recPopups,First(recPopups),{Value: 40, Display_Text: \"Collecting Top Downtime List\"});\nClear(colTopDowntime);\nForAll(gblLists.Downtime_Reasons,\n    With({thisReason: ThisRecord.Value,\n        thisDowntime: Filter(locDowntimeFilter, Total_Downtime > 0)\n        },\n        Collect(colTopDowntime,\n            {\n                Downtime_Reason: thisReason,\n                Total_Downtime:\n                    Sum(\n                        Filter(thisDowntime,\n                            If(dShift.Selected.Value = \"All\",\n                                Shift = Shift,\n                                Shift = dShift.Selected.Value\n                            ),\n                            If(dLine.Selected.Value = \"All\",\n                                Line = Line,\n                                Line = dLine.Selected.Value\n                            ),\n                            thisReason = Reason\n                        ),\n                        Total_Downtime\n                    ),\n                Downtime_Comments:\n                    Concat(\n                        Filter(\n                            thisDowntime,\n                            !IsBlankOrError(Comments),\n                            Reason = thisReason\n                        ),\n                        \" ► \" & Comments,\n                        \" ◄ \"\n                    )\n            }\n        \n        )\n    )\n);\n\nPatch(recPopups,First(recPopups),{Visible: false, Value: -1, Display_Text: \"Finishing Up\"});"
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
@@ -553,7 +553,7 @@
                       LayoutMinWidth: =10
                       Size: =Self.Height / 3.5
                       Width: =Parent.Width
-                - d_c_t_h_title:
+                - dTopDowntimeTitle:
                     Control: Label
                     Properties:
                       Text: ="Top Downtime Reasons"
@@ -564,7 +564,7 @@
                       Height: =dTitle.Height
                       Size: =Round(Self.Height/4,0)
                       Width: =Parent.Width
-                - d_c_t_columns:
+                - dTopDowntimeColumns:
                     Control: GroupContainer
                     Variant: manualLayoutContainer
                     Properties:
@@ -600,11 +600,11 @@
                           Height: =Parent.Height
                           Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 2
-                - d_c_t_gallery:
+                - dTopDowntimeGallery:
                     Control: Gallery
                     Variant: galleryVertical
                     Properties:
-                      Items: =Sort(colTopDowntime, Total_Downtime, SortOrder.Descending)
+                      Items: =Sort(Filter(colTopDowntime, Total_Downtime > 0), Total_Downtime, SortOrder.Descending)
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DelayItemLoading: =true
                       FillPortions: =10
@@ -615,7 +615,7 @@
                       TemplatePadding: =0
                       TemplateSize: =Self.Height / 10
                     Children:
-                    - d_c_t_g_amount:
+                    - dTopDowntimeGalleryAmount:
                         Control: Label
                         Properties:
                           OnSelect: =Select(Parent)
@@ -623,12 +623,12 @@
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
                           Font: =Font.Verdana
-                          Height: =Parent.TemplateHeight - d_c_t_g_seperator.Height
+                          Height: =Parent.TemplateHeight - dTopDowntimeGallerySeparator.Height
                           Size: =Round(Self.Height/6,0)
                           Width: =Parent.TemplateWidth/2
-                          X: =d_c_t_g_reason.X + d_c_t_g_reason.Width
+                          X: =dTopDowntimeGalleryReason.X + dTopDowntimeGalleryReason.Width
                           Y: =1-1
-                    - d_c_t_g_reason:
+                    - dTopDowntimeGalleryReason:
                         Control: Label
                         Properties:
                           OnSelect: =Select(Parent)
@@ -636,12 +636,12 @@
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
                           Font: =Font.Verdana
-                          Height: =Parent.TemplateHeight - d_c_t_g_seperator.Height
+                          Height: =Parent.TemplateHeight - dTopDowntimeGallerySeparator.Height
                           Size: =Round(Self.Height/6,0)
                           Width: =Parent.TemplateWidth/2
                           X: =1-1
                           Y: =1-1
-                    - d_c_t_g_seperator:
+                    - dTopDowntimeGallerySeparator:
                         Control: Rectangle
                         Properties:
                           OnSelect: =Select(Parent)
@@ -649,7 +649,7 @@
                           Height: =Parent.TemplateHeight * 0.025
                           Width: =Parent.Width
                           Y: =Parent.TemplateHeight - Self.Height
-                - d_c_t_copy:
+                - dTopDowntimeCopy:
                     Control: Classic/Button
                     Properties:
                       OnSelect: |-
@@ -706,7 +706,7 @@
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutMode: =LayoutMode.Auto
                 Children:
-                - d_c_d_header:
+                - dDowntimeHeader:
                     Control: GroupContainer
                     Variant: manualLayoutContainer
                     Properties:
@@ -722,7 +722,7 @@
                       RadiusTopLeft: =0
                       RadiusTopRight: =0
                     Children:
-                    - d_c_d_h_title:
+                    - dDowntimeHeaderTitle:
                         Control: Label
                         Properties:
                           Text: |-
@@ -738,12 +738,12 @@
 
                             )
                           Align: =Align.Center
-                          Color: =gblTheme.Text_On_Dark
+                          Color: =gblTheme.Text_Light
                           Font: =Font.Verdana
                           Height: =dTitle.Height
                           Size: =Round(Self.Height / 3,0)
                           Width: =Parent.Width
-                    - d_c_d_h_view:
+                    - dDowntimeHeaderToggle:
                         Control: Classic/Button
                         Properties:
                           OnSelect: =UpdateContext({locShowTop:!locShowTop});
@@ -764,12 +764,12 @@
                           Width: =Parent.Width * 0.15
                           X: =Parent.Width * 0.01
                           Y: =Parent.Height/2 - Self.Height/2
-                    - d_c_d_h_add:
+                    - dDowntimeHeaderAdd:
                         Control: Classic/Button
                         Properties:
                           OnSelect: |-
-                            =Set(varDowntimeMode, FormMode.New);
-                            Navigate(Modify_Downtime);
+                            =Set(gblDowntimeFormMode, FormMode.New);
+                            Navigate(DowntimeEntry);
                           Text: ="Add Downtime"
                           Color: =gblTheme.Text_Dark
                           Fill: =gblTheme.Accent
@@ -782,7 +782,7 @@
                           Width: =Parent.Width * 0.15
                           X: =Parent.Width * 0.99 - Self.Width
                           Y: =Parent.Height/2 - Self.Height/2
-                - d_c_d_columns:
+                - dDowntimeColumns:
                     Control: GroupContainer
                     Variant: horizontalAutoLayoutContainer
                     Properties:
@@ -799,7 +799,7 @@
                       RadiusTopLeft: =0
                       RadiusTopRight: =0
                     Children:
-                    - d_c_d_c_line:
+                    - dDowntimeColumnsLine:
                         Control: Label
                         Properties:
                           Text: ="Line"
@@ -811,8 +811,8 @@
                           LayoutMinWidth: =1
                           Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
-                          X: =d_c_d_c_shift.X + d_c_d_c_shift.Width
-                    - d_c_d_c_shift:
+                          X: =dDowntimeColumnsShift.X + dDowntimeColumnsShift.Width
+                    - dDowntimeColumnsShift:
                         Control: Label
                         Properties:
                           Text: ="Shift"
@@ -824,7 +824,7 @@
                           LayoutMinWidth: =1
                           Size: =Round(Self.Height/5,0)
                           Width: =(Parent.Width / 10) * 0.5
-                    - d_c_d_c_time:
+                    - dDowntimeColumnsTime:
                         Control: Label
                         Properties:
                           Text: ="Time"
@@ -836,8 +836,8 @@
                           LayoutMinWidth: =1
                           Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
-                          X: =d_c_d_c_shift.X + d_c_d_c_shift.Width
-                    - d_c_d_c_catalog:
+                          X: =dDowntimeColumnsShift.X + dDowntimeColumnsShift.Width
+                    - dDowntimeColumnsCatalog:
                         Control: Label
                         Properties:
                           Text: ="Catalog"
@@ -849,8 +849,8 @@
                           LayoutMinWidth: =1
                           Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
-                          X: =d_c_d_c_line.X + d_c_d_c_line.Width * 1
-                    - d_c_d_c_lot:
+                          X: =dDowntimeColumnsLine.X + dDowntimeColumnsLine.Width * 1
+                    - dDowntimeColumnsLot:
                         Control: Label
                         Properties:
                           Text: ="Lot"
@@ -862,8 +862,8 @@
                           LayoutMinWidth: =1
                           Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
-                          X: =d_c_d_c_line.X + d_c_d_c_line.Width * 2
-                    - d_c_d_c_total:
+                          X: =dDowntimeColumnsLine.X + dDowntimeColumnsLine.Width * 2
+                    - dDowntimeColumnsTotal:
                         Control: Label
                         Properties:
                           Text: ="Minutes Down"
@@ -875,8 +875,8 @@
                           LayoutMinWidth: =1
                           Size: =Round(Self.Height/5,0)
                           Width: =Parent.Width / 10
-                          X: =d_c_d_c_reason.X + d_c_d_c_reason.Width
-                    - d_c_d_c_reason:
+                          X: =dDowntimeColumnsReason.X + dDowntimeColumnsReason.Width
+                    - dDowntimeColumnsReason:
                         Control: Label
                         Properties:
                           Text: ="Reason"
@@ -888,8 +888,8 @@
                           LayoutMinWidth: =1
                           Size: =Round(Self.Height/5,0)
                           Width: =(Parent.Width / 10) * 1.5
-                          X: =d_c_d_c_line.X + d_c_d_c_line.Width * 5
-                    - d_c_d_c_comments:
+                          X: =dDowntimeColumnsLine.X + dDowntimeColumnsLine.Width * 5
+                    - dDowntimeColumnsComments:
                         Control: Label
                         Properties:
                           Text: ="Comments"
@@ -901,15 +901,15 @@
                           LayoutMinWidth: =1
                           Size: =Round(Self.Height/5,0)
                           Width: =(Parent.Width / 10) * 2
-                          X: =d_c_d_c_total.X + d_c_d_c_total.Width
-                - d_c_d_gallery:
+                          X: =dDowntimeColumnsTotal.X + dDowntimeColumnsTotal.Width
+                - dDowntimeGallery:
                     Control: Gallery
                     Variant: galleryVertical
                     Properties:
                       OnSelect: |-
-                        =Set(varDowntimeID, d_c_d_gallery.Selected.id);
-                        Set(varDowntimeMode, FormMode.Edit);
-                        Navigate(Modify_Downtime);
+                        =Set(gblDowntimeID, dDowntimeGallery.Selected.Id);
+                        Set(gblDowntimeFormMode, FormMode.Edit);
+                        Navigate(DowntimeEntry);
                       Items: "=SortByColumns(\r\n    Filter(\r\n        colDowntime,\r\n        Started >= DateAdd(locStartDate, -1, TimeUnit.Hours),\r\n        Ended <= DateAdd(locEndDate,23,TimeUnit.Hours),\r\n        If(\r\n            dShift.Selected.Value = \"All\",\r\n            Shift = Shift,\r\n            Shift = dShift.Selected.Value\r\n            ),\r\n        If(\r\n            dLine.Selected.Value = \"All\",\r\n            Line = Line,\r\n            Line = dLine.Selected.Value\r\n            ),\r\n        If(\r\n            dReason.Selected.Value = \"All\",\r\n            Reason = Reason,\r\n            Reason = dReason.Selected.Value\r\n            )\r\n    ),\r\n    \r\n    Switch(\r\n        dSortBy.Selected.Value,\r\n        \"Line\",\r\n        \"Line\",\r\n        \"Shift\",\r\n        \"Shift\",\r\n        \"Time\",\r\n        \"Ended\",\r\n        \"Minutes Down\",\r\n        \"Total_Downtime\"\r\n    ),\r\n    \r\n    Switch(\r\n        dSortOrder.Selected.Value,\r\n        \"Ascending\",\r\n        SortOrder.Ascending,\r\n        \"Descending\",\r\n        SortOrder.Descending,\r\n        SortOrder.Ascending\r\n    )\r\n\r\n)"
                       AlignInContainer: =AlignInContainer.SetByContainer
                       DelayItemLoading: =true
@@ -920,12 +920,12 @@
                       TemplatePadding: =0
                       TemplateSize: =Self.Height / 12
                     Children:
-                    - d_c_d_g_parent:
+                    - dDowntimeGalleryParent:
                         Control: GroupContainer
                         Variant: horizontalAutoLayoutContainer
                         Properties:
                           DropShadow: =DropShadow.None
-                          Height: =Parent.TemplateHeight - d_c_d_g_seperator.Height
+                          Height: =Parent.TemplateHeight - dDowntimeGallerySeparator.Height
                           LayoutMode: =LayoutMode.Auto
                           RadiusBottomLeft: =0
                           RadiusBottomRight: =0
@@ -933,10 +933,10 @@
                           RadiusTopRight: =0
                           Width: =Parent.TemplateWidth
                         Children:
-                        - d_c_d_g_line:
+                        - dDowntimeGalleryLine:
                             Control: Label
                             Properties:
-                              OnSelect: =Select(d_c_d_gallery);
+                              OnSelect: =Select(dDowntimeGallery);
                               Text: =ThisItem.Line
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
@@ -946,11 +946,11 @@
                               LayoutMinWidth: =1
                               Size: =Round(Self.Height/6,0)
                               Width: =Parent.Width / 10
-                              X: =d_c_d_g_shift.X + d_c_d_g_shift.Width
-                        - d_c_d_g_shift:
+                              X: =dDowntimeGalleryShift.X + dDowntimeGalleryShift.Width
+                        - dDowntimeGalleryShift:
                             Control: Label
                             Properties:
-                              OnSelect: =Select(d_c_d_gallery);
+                              OnSelect: =Select(dDowntimeGallery);
                               Text: =ThisItem.Shift
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
@@ -960,7 +960,7 @@
                               LayoutMinWidth: =1
                               Size: =Round(Self.Height/6,0)
                               Width: =(Parent.Width / 10) * 0.5
-                        - d_c_d_g_time:
+                        - dDowntimeGalleryTime:
                             Control: GroupContainer
                             Variant: verticalAutoLayoutContainer
                             Properties:
@@ -977,7 +977,7 @@
                             - d_c_d_g_t_start:
                                 Control: Label
                                 Properties:
-                                  OnSelect: =Select(d_c_d_gallery);
+                                  OnSelect: =Select(dDowntimeGallery);
                                   Text: =TimeValue(ThisItem.Started)
                                   Align: =Align.Center
                                   Color: =gblTheme.Text_On_Light
@@ -988,11 +988,11 @@
                                   LayoutMinWidth: =1
                                   Size: =Round(Self.Height/3,0)
                                   Width: =Parent.Width
-                                  X: =d_c_d_g_shift.X + d_c_d_g_shift.Width
+                                  X: =dDowntimeGalleryShift.X + dDowntimeGalleryShift.Width
                             - d_c_d_g_t_end:
                                 Control: Label
                                 Properties:
-                                  OnSelect: =Select(d_c_d_gallery);
+                                  OnSelect: =Select(dDowntimeGallery);
                                   Text: =TimeValue(ThisItem.Ended)
                                   Align: =Align.Center
                                   Color: =gblTheme.Text_On_Light
@@ -1004,11 +1004,11 @@
                                   LayoutMinWidth: =1
                                   Size: =Round(Self.Height/3,0)
                                   Width: =Parent.Width
-                                  X: =d_c_d_g_shift.X + d_c_d_g_shift.Width
-                        - d_c_d_g_catalog:
+                                  X: =dDowntimeGalleryShift.X + dDowntimeGalleryShift.Width
+                        - dDowntimeGalleryCatalog:
                             Control: Label
                             Properties:
-                              OnSelect: =Select(d_c_d_gallery);
+                              OnSelect: =Select(dDowntimeGallery);
                               Text: =ThisItem.Catalog
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
@@ -1018,11 +1018,11 @@
                               LayoutMinWidth: =1
                               Size: =Round(Self.Height/6,0)
                               Width: =Parent.Width / 10
-                              X: =d_c_d_g_line.X + d_c_d_g_line.Width * 1
-                        - d_c_d_g_lot:
+                              X: =dDowntimeGalleryLine.X + dDowntimeGalleryLine.Width * 1
+                        - dDowntimeGalleryLot:
                             Control: Label
                             Properties:
-                              OnSelect: =Select(d_c_d_gallery);
+                              OnSelect: =Select(dDowntimeGallery);
                               Text: =ThisItem.Lot
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
@@ -1032,11 +1032,11 @@
                               LayoutMinWidth: =1
                               Size: =Round(Self.Height/6,0)
                               Width: =Parent.Width / 10
-                              X: =d_c_d_g_line.X + d_c_d_g_line.Width * 2
-                        - d_c_d_g_total:
+                              X: =dDowntimeGalleryLine.X + dDowntimeGalleryLine.Width * 2
+                        - dDowntimeGalleryTotal:
                             Control: Label
                             Properties:
-                              OnSelect: =Select(d_c_d_gallery);
+                              OnSelect: =Select(dDowntimeGallery);
                               Text: =ThisItem.Total_Downtime
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
@@ -1046,11 +1046,11 @@
                               LayoutMinWidth: =1
                               Size: =Round(Self.Height/6,0)
                               Width: =Parent.Width / 10
-                              X: =d_c_d_g_reason.X + d_c_d_g_reason.Width
-                        - d_c_d_g_reason:
+                              X: =dDowntimeGalleryReason.X + dDowntimeGalleryReason.Width
+                        - dDowntimeGalleryReason:
                             Control: Label
                             Properties:
-                              OnSelect: =Select(d_c_d_gallery);
+                              OnSelect: =Select(dDowntimeGallery);
                               Text: =ThisItem.Reason
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
@@ -1060,11 +1060,11 @@
                               LayoutMinWidth: =1
                               Size: =Round(Self.Height/6,0)
                               Width: =(Parent.Width / 10) * 1.5
-                              X: =d_c_d_g_line.X + d_c_d_g_line.Width * 5
-                        - d_c_d_g_comments:
+                              X: =dDowntimeGalleryLine.X + dDowntimeGalleryLine.Width * 5
+                        - dDowntimeGalleryComments:
                             Control: Label
                             Properties:
-                              OnSelect: =Select(d_c_d_gallery);
+                              OnSelect: =Select(dDowntimeGallery);
                               Text: =ThisItem.Comments
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
@@ -1073,10 +1073,10 @@
                               Height: =Parent.Height
                               LayoutMinWidth: =1
                               Overflow: =Overflow.Scroll
-                              Size: =d_c_d_g_catalog.Size
+                              Size: =dDowntimeGalleryCatalog.Size
                               Width: =(Parent.Width / 10) * 2
-                              X: =d_c_d_g_total.X + d_c_d_g_total.Width
-                    - d_c_d_g_seperator:
+                              X: =dDowntimeGalleryTotal.X + dDowntimeGalleryTotal.Width
+                    - dDowntimeGallerySeparator:
                         Control: Rectangle
                         Properties:
                           OnSelect: =Select(Parent)

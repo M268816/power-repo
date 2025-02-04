@@ -1,0 +1,773 @@
+- dePopups:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =First(recPopups).Visible
+      Width: =Parent.Width
+    Children:
+    - dePopupLoading:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light",0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.25
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =First(recPopups).Popup = "loading"
+          Width: =Parent.Width * 0.25
+        Children:
+        - dePopupLoadingSpinner:
+            Control: Spinner
+            Properties:
+              FontWeight: =FontWeight.Normal
+              Label: =First(recPopups).Display_Text
+              LabelPosition: ='Spinner.LabelPosition'.Below
+              SpinnerSize: ='Spinner.SpinnerSize'.Medium
+              AlignInContainer: =AlignInContainer.Stretch
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+        - dePopupLoadingProgress:
+            Control: Progress
+            Properties:
+              Indeterminate: =First(recPopups).Value = -1
+              Thickness: ='Progress.Thickness'.Medium
+              Value: =First(recPopups).Value
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Width: =
+    - dePopupDelete:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light", 0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =locPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =//First(recPopups).Popup = "delete"
+          Width: =Parent.Width * 0.3
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - dePopupDeleteTitle:
+            Control: Label
+            Properties:
+              Text: ="Deleting Record."
+              Color: =gblTheme.Secondary
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - dePopupDeleteBody:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              FillPortions: =4
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap*2
+              PaddingRight: =Self.LayoutGap*2
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - dePopupDeleteIcon:
+                Control: Image
+                Properties:
+                  Image: =gblIcons.Delete
+                  AlignInContainer: =AlignInContainer.Start
+                  FillPortions: =1
+                  Height: =Parent.Height * 0.5
+            - dePopupDeleteText:
+                Control: Label
+                Properties:
+                  Text: |-
+                    ="You are about to permanently delete record #" & gblDowntimeID &". Proceed?"
+                  Color: =gblTheme.Text_On_Light
+                  FillPortions: =3
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Size: =Self.Height / 12
+                  VerticalAlign: =VerticalAlign.Top
+        - dePopupDeleteButtons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingLeft: =Self.Width / 3
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - dePopupDeleteSubmit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(recPopups,First(recPopups),{Value: -1, Popup: "loading", Display_Text: "Removing Downtime Entry"});
+                    RemoveIf(Downtime, ID = gblDowntimeID);
+                    Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Finishing Up"});
+                    Set(gblDowntimeFormMode, FormMode.New);
+                    ResetForm(deForm);
+                  Text: ="Delete"
+                  Color: =gblTheme.Text_On_Light
+                  Fill: =gblTheme.Background
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =gblTheme.Text_On_Light
+                  HoverFill: =gblTheme.Deny
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - dePopupDeleteCancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =UpdateContext({locPopups: {Visible: false, Value: Blank()}});
+                  Text: ="Cancel"
+                  Color: =gblTheme.Text_On_Light
+                  Fill: =gblTheme.Secondary
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =gblTheme.Text_On_Dark
+                  HoverFill: =gblTheme.Deny
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+    - dePopupLot:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light", 0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =locPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =First(recPopups).Popup = "lot"
+          Width: =Parent.Width * 0.3
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - dePopupLotTitle:
+            Control: Label
+            Properties:
+              Text: ="Lot and Catalog number missing."
+              Color: =gblTheme.Secondary
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - dePopupLotBody:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =4
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap*2
+              PaddingRight: =Self.LayoutGap*2
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - dePopupLotIcon:
+                Control: Image
+                Properties:
+                  Image: =gblIcons.Announce
+                  AlignInContainer: =AlignInContainer.Start
+                  FillPortions: =1
+                  Height: =Parent.Height * 0.5
+            - dePopupLotText:
+                Control: Label
+                Properties:
+                  Text: ="The catalog and lot numbers are missing from this entry. If you proceed you will submit the entry with placeholder information as a daily occurance that did not require lot information. Proceed?"
+                  Color: =gblTheme.Text_On_Light
+                  FillPortions: =3
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Size: =Self.Height / 12
+                  VerticalAlign: =VerticalAlign.Top
+        - dePopupLotButtons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingLeft: =Self.Width / 3
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - dePopupLotSubmit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(recPopups,First(recPopups),{Visible: true, Value: -1, Popup: "Loading", Display_Text: "Submitting Downtime Entry"});
+                    UpdateContext({locPlannedEvent: true});
+                    SubmitForm(deForm);
+                    UpdateContext({locPlannedEvent: false});
+                    Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Finishing Up"});
+                  Text: ="Submit"
+                  Color: =gblTheme.Text_On_Light
+                  Fill: =gblTheme.Background
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =gblTheme.Background
+                  HoverFill: =gblTheme.Accept
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - dePopupLotCancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Finishing Up"});
+                  Text: ="Cancel"
+                  Color: =gblTheme.Text_Light
+                  Fill: =gblTheme.Secondary
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =gblTheme.Text_On_Dark
+                  HoverFill: =gblTheme.Deny
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+    - dePopupExceed:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light", 0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =locPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =First(recPopups).Popup = "exceed"
+          Width: =Parent.Width * 0.3
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - dePopupExceedTitle:
+            Control: Label
+            Properties:
+              Text: ="Downtime maximum reached."
+              Color: =gblTheme.Secondary
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - dePopupExceedBody:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =4
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap*2
+              PaddingRight: =Self.LayoutGap*2
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - dePopupExceedIcon:
+                Control: Image
+                Properties:
+                  Image: =gblIcons.Warning
+                  AlignInContainer: =AlignInContainer.Start
+                  FillPortions: =1
+                  Height: =Parent.Height * 0.5
+            - dePopupExceedText:
+                Control: Label
+                Properties:
+                  Text: ="The downtime entry you are trying to enter exceeds 480 minutes. Please return and only define a time for a single shift."
+                  Color: =gblTheme.Text_On_Light
+                  FillPortions: =3
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Size: =Self.Height / 12
+                  VerticalAlign: =VerticalAlign.Top
+        - dePopupExceedCancel:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Finishing Up"});
+              Text: ="Okay"
+              AlignInContainer: =AlignInContainer.End
+              Color: =gblTheme.Text_On_Light
+              Fill: =gblTheme.Background
+              FillPortions: =1
+              Font: =Font.Verdana
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Dark
+              HoverFill: =gblTheme.Accept
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Self.Width / 18
+              Width: =Parent.Width * 0.35
+              X: =Parent.Width * 0.01
+              Y: =Parent.Height/2 - Self.Height/2
+    - dePopupTime:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light", 0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =locPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =First(recPopups).Popup = "time"
+          Width: =Parent.Width * 0.3
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - dePopupTimeTitle:
+            Control: Label
+            Properties:
+              Text: ="Start time incorrect."
+              Color: =gblTheme.Secondary
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - dePopupTimeBody:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =4
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =Self.LayoutGap
+              PaddingLeft: =Self.LayoutGap*2
+              PaddingRight: =Self.LayoutGap*2
+              PaddingTop: =Self.LayoutGap
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - dePopupTimeIcon:
+                Control: Image
+                Properties:
+                  Image: =gblIcons.Warning
+                  AlignInContainer: =AlignInContainer.Start
+                  FillPortions: =1
+                  Height: =Parent.Height * 0.5
+            - dePopupTimeText:
+                Control: Label
+                Properties:
+                  Text: ="The downtime entry you are trying to enter is incorrectly assigned. Please return and select a start time earlier than the end time."
+                  Color: =gblTheme.Text_On_Light
+                  FillPortions: =3
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  Size: =Self.Height / 12
+                  VerticalAlign: =VerticalAlign.Top
+        - dePopupTimeCancel:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Finishing Up"});
+              Text: ="Okay"
+              AlignInContainer: =AlignInContainer.End
+              Color: =gblTheme.Text_On_Light
+              Fill: =gblTheme.Background
+              FillPortions: =1
+              Font: =Font.Verdana
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Dark
+              HoverFill: =gblTheme.Accept
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Size: =Self.Width / 18
+              Width: =Parent.Width * 0.35
+              X: =Parent.Width * 0.01
+              Y: =Parent.Height/2 - Self.Height/2
+    - dePopupQuick:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light", 0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.5
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =locPadding
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =Self.LayoutGap
+          PaddingLeft: =Self.LayoutGap*2
+          PaddingRight: =Self.LayoutGap*2
+          PaddingTop: =Self.LayoutGap
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =First(recPopups).Popup = "quick"
+          Width: =Parent.Width * 0.25
+          X: =Center(Parent.Width, Self.Width)
+          Y: =Center(Parent.Height, Self.Height)
+        Children:
+        - dePopupQuickTitle:
+            Control: Label
+            Properties:
+              Text: =locLine & " quick downtime entry."
+              Align: =Align.Center
+              Color: =gblTheme.Secondary
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 3
+        - dePopupQuickText:
+            Control: Label
+            Properties:
+              Text: ="You are about to post a full day of downtime for "& locLine &" ending on "& deFormStartedDate.SelectedDate &". Select the shift and reason below before posting the new entry."
+              Align: =Align.Center
+              Color: =gblTheme.Text_On_Light
+              FillPortions: =3
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              Size: =Self.Height / 10
+              VerticalAlign: =VerticalAlign.Top
+        - dePopupQuickShift:
+            Control: Classic/DropDown
+            Properties:
+              Default: =""
+              Items: =["A","B","C"]
+              AlignInContainer: =AlignInContainer.Center
+              ChevronBackground: =gblTheme.Secondary
+              ChevronFill: =gblTheme.Background
+              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+              Color: =gblTheme.Text_On_Light
+              Fill: =gblTheme.Background
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              PressedColor: =RGBA(255, 255, 255, 1)
+              SelectionColor: =RGBA(255, 255, 255, 1)
+              Size: =Self.Height / 3
+              Width: =Parent.Width * 0.3
+        - dePopupQuickReason:
+            Control: Classic/DropDown
+            Properties:
+              Default: ="No Scheduled Work"
+              Items: =Choices([@Downtime].Reason)
+              ChevronBackground: =gblTheme.Secondary
+              ChevronFill: =gblTheme.Background
+              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+              Color: =gblTheme.Text_On_Light
+              Fill: =gblTheme.Background
+              FillPortions: =1
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              PressedColor: =RGBA(255, 255, 255, 1)
+              SelectionColor: =RGBA(255, 255, 255, 1)
+              Size: =Self.Height / 3
+        - dePopupQuickButtons:
+            Control: GroupContainer
+            Variant: horizontalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.Center
+              DropShadow: =DropShadow.None
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutGap: =locPadding
+              LayoutMinHeight: =1
+              LayoutMinWidth: =1
+              LayoutMode: =LayoutMode.Auto
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+              Width: =Parent.Width * 0.7
+            Children:
+            - dePopupQuickSubmit:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(recPopups,First(recPopups),{Visible: true, Value: -1, Popup: "Loading", Display_Text: "Submitting Downtime Entry"});
+                    Patch(
+                        Downtime,
+                        Defaults(Downtime),
+                        {
+                            Lot: "X0XX00000",
+                            Catalog: "KXXXX00XX0",
+                            Line: {Value: locLine},
+                            Reason: {Value: dePopupQuickReason.Selected.Value},
+                            Started:
+                                Switch(dePopupQuickShift.Selected.Value,
+                                    "A",
+                                    DateTime(
+                                        Year(deFormStartedDate.SelectedDate),
+                                        Month(deFormStartedDate.SelectedDate),
+                                        Day(deFormStartedDate.SelectedDate),
+                                        7,
+                                        0,
+                                        0
+                                    ),
+                                    "B",
+                                    DateTime(
+                                        Year(deFormStartedDate.SelectedDate),
+                                        Month(deFormStartedDate.SelectedDate),
+                                        Day(deFormStartedDate.SelectedDate),
+                                        15,
+                                        0,
+                                        0
+                                    ),
+                                    "C",
+                                    DateTime(
+                                        Year(deFormStartedDate.SelectedDate),
+                                        Month(deFormStartedDate.SelectedDate),
+                                        Day(deFormStartedDate.SelectedDate)-1,
+                                        23,
+                                        0,
+                                        0
+                                    )
+                                ),
+                            Ended:
+                                Switch(dePopupQuickShift.Selected.Value,
+                                    "A",
+                                    DateTime(
+                                        Year(deFormStartedDate.SelectedDate),
+                                        Month(deFormStartedDate.SelectedDate),
+                                        Day(deFormStartedDate.SelectedDate),
+                                        15,
+                                        0,
+                                        0
+                                    ),
+                                    "B",
+                                    DateTime(
+                                        Year(deFormStartedDate.SelectedDate),
+                                        Month(deFormStartedDate.SelectedDate),
+                                        Day(deFormStartedDate.SelectedDate),
+                                        23,
+                                        0,
+                                        0
+                                    ),
+                                    "C",
+                                    DateTime(
+                                        Year(deFormStartedDate.SelectedDate),
+                                        Month(deFormStartedDate.SelectedDate),
+                                        Day(deFormStartedDate.SelectedDate),
+                                        7,
+                                        0,
+                                        0
+                                    )
+                                ),
+                            Comments: "Created with the quick entry prompt."
+                        }    
+                    );
+                    Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Finishing Up"});
+                  Text: ="Submit"
+                  Color: =gblTheme.Text_On_Light
+                  Fill: =gblTheme.Background
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =gblTheme.Text_On_Dark
+                  HoverFill: =gblTheme.Accept
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2
+            - dePopupQuickCancel:
+                Control: Classic/Button
+                Properties:
+                  OnSelect: |-
+                    =Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Finishing Up"});
+                  Text: ="Cancel"
+                  Color: =gblTheme.Text_On_Light
+                  Fill: =gblTheme.Secondary
+                  FillPortions: =1
+                  Font: =Font.Verdana
+                  Height: =10
+                  HoverColor: =gblTheme.Text_On_Light
+                  HoverFill: =gblTheme.Deny
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Size: =Self.Width / 18
+                  Width: =Parent.Width * 0.35
+                  X: =Parent.Width * 0.01
+                  Y: =Parent.Height/2 - Self.Height/2

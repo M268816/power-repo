@@ -122,7 +122,7 @@
         - pTitle:
             Control: Label
             Properties:
-              Text: ="App Title"
+              Text: =APP_NAME
               Color: =gblTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10
@@ -411,7 +411,7 @@
                   TemplatePadding: =0
                   TemplateSize: =Self.Width / 5
                 Children:
-                - p_t_g_spacer:
+                - pGallerySpacer:
                     Control: GroupContainer
                     Variant: manualLayoutContainer
                     Properties:
@@ -429,7 +429,7 @@
                       X: =Self.Width - Self.Width
                       Y: =Self.Height - Self.Height
                     Children:
-                    - p_t_g_card:
+                    - pGalleryCard:
                         Control: GroupContainer
                         Variant: verticalAutoLayoutContainer
                         Properties:
@@ -452,7 +452,7 @@
                           X: =Parent.Width/2 - Self.Width/2
                           Y: =Parent.Height/2 - Self.Height/2
                         Children:
-                        - p_t_g_h_title:
+                        - pGalleryTitle:
                             Control: Label
                             Properties:
                               Text: =ThisItem.Value
@@ -461,17 +461,17 @@
                               Color: =gblTheme.Text_Light
                               Fill: =gblTheme.Secondary
                               Font: =Font.Verdana
-                              Height: =bTitle.Height
+                              Height: =RoundUp(pTitle.Height * 0.5,0)
                               LayoutMinHeight: =10
                               LayoutMinWidth: =10
                               Size: =Self.Height / 2
                               Width: =Parent.Width
-                        - p_t_g_p_graph:
+                        - pGalleryGraph:
                             Control: Image
                             Properties:
                               Image: |-
                                 ="https://quickchart.io/chart?width=" &Self.Width& "&height=" &Self.Height*0.90& "&c=" &
-                                With({thisData: Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Performance)},
+                                With({thisData: Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Performance)},
                                     EncodeUrl(
                                         "{
                                             type: 'radialGauge',
@@ -489,7 +489,7 @@
                                                 }]
                                             },
                                             options: {
-                                                domain: [0, "& If(Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Performance) <= 100, 100, Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Performance)) &"],
+                                                domain: [0, "& If(Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Performance) <= 100, 100, Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Performance)) &"],
                                                 trackColor: '"& gblTheme.Chart_White &"', 
                                                 centerPercentage: 90,
                                                 centerArea: {
@@ -502,7 +502,7 @@
                                 )
                               AlignInContainer: =AlignInContainer.Stretch
                               Fill: =gblTheme.Foreground
-                              FillPortions: =2
+                              FillPortions: =3
                               Height: =Parent.Height * 0.30
                               HoverFill: =Self.Fill
                               LayoutMinHeight: =10
@@ -510,7 +510,7 @@
                               Width: =Parent.Width / 2
                               X: =Parent.Width /2 - Self.Width/2
                               Y: =1
-                        - p_t_g_goal:
+                        - pGalleryGoal:
                             Control: GroupContainer
                             Variant: verticalAutoLayoutContainer
                             Properties:
@@ -526,12 +526,12 @@
                               X: =Parent.Width/2 - Self.Width/2
                               Y: =1
                             Children:
-                            - p_t_g_g_title:
+                            - pGalleryGoalKey:
                                 Control: Label
                                 Properties:
                                   Text: ="Goal"
                                   Align: =Align.Center
-                                  Color: =varColor0
+                                  Color: =gblTheme.Text_Dark
                                   Fill: =RGBA(0,0,0,0.2)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -540,16 +540,16 @@
                                   LayoutMinWidth: =10
                                   Size: =Self.Height / 5
                                   Width: =Parent.Width
-                            - p_t_g_g_value:
+                            - pGalleryGoalValue:
                                 Control: Label
                                 Properties:
                                   Text: |-
-                                    =Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Goal) & "%
+                                    =Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Goal) & "%
                                     "
-                                    & Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Amount_Built) &" / "
-                                    & Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Goal_Sum)
+                                    & Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Amount_Built) &" / "
+                                    & Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Goal_Sum)
                                   Align: =Align.Center
-                                  Color: =varColor0
+                                  Color: =gblTheme.Text_Dark
                                   Fill: =RGBA(0,0,0,0)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -558,7 +558,7 @@
                                   LayoutMinWidth: =10
                                   Size: =Self.Height / 5
                                   Width: =Parent.Width
-                        - p_t_g_downtime:
+                        - pGalleryDowntime:
                             Control: GroupContainer
                             Variant: verticalAutoLayoutContainer
                             Properties:
@@ -572,14 +572,14 @@
                               LayoutMode: =LayoutMode.Auto
                               Width: =Self.Height
                               X: =Parent.Width/2 - Self.Width/2
-                              Y: =p_t_g_goal.Y + p_t_g_goal.Height + Parent.Width * 0.05
+                              Y: =pGalleryGoal.Y + pGalleryGoal.Height + Parent.Width * 0.05
                             Children:
-                            - p_t_g_d_title:
+                            - pGalleryDowntimeKey:
                                 Control: Label
                                 Properties:
                                   Text: ="Downtime"
                                   Align: =Align.Center
-                                  Color: =varColor0
+                                  Color: =gblTheme.Text_Dark
                                   Fill: =RGBA(0,0,0,0.2)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -588,15 +588,15 @@
                                   LayoutMinWidth: =10
                                   Size: =Self.Height / 5
                                   Width: =Parent.Width
-                            - p_t_g_d_value:
+                            - pGalleryDowntimeValue:
                                 Control: Label
                                 Properties:
                                   Text: |-
-                                    =LookUp(colPerformance, Line = p_t_g_h_title.Text).Downtime & "%
+                                    =LookUp(colPerformance, Line = pGalleryTitle.Text).Downtime & "%
                                     " &
-                                    LookUp(colPerformance, Line = p_t_g_h_title.Text).Downtime_Sum & " Minutes"
+                                    LookUp(colPerformance, Line = pGalleryTitle.Text).Downtime_Sum & " Minutes"
                                   Align: =Align.Center
-                                  Color: =varColor0
+                                  Color: =gblTheme.Text_Dark
                                   Fill: =RGBA(0,0,0,0)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -605,7 +605,7 @@
                                   LayoutMinWidth: =10
                                   Size: =Self.Height / 5
                                   Width: =Parent.Width
-                        - p_t_g_yield:
+                        - pGalleryYield:
                             Control: GroupContainer
                             Variant: verticalAutoLayoutContainer
                             Properties:
@@ -621,12 +621,12 @@
                               X: =Parent.Width/2 - Self.Width/2
                               Y: =1
                             Children:
-                            - p_t_g_y_title:
+                            - pGalleryYieldKey:
                                 Control: Label
                                 Properties:
                                   Text: ="Yield"
                                   Align: =Align.Center
-                                  Color: =varColor0
+                                  Color: =gblTheme.Text_Dark
                                   Fill: =RGBA(0,0,0,0.2)
                                   FillPortions: =1
                                   Font: =Font.Verdana
@@ -635,16 +635,16 @@
                                   LayoutMinWidth: =10
                                   Size: =Self.Height / 5
                                   Width: =Parent.Width
-                            - p_t_g_y_value:
+                            - pGalleryYieldValue:
                                 Control: Label
                                 Properties:
                                   Text: |-
-                                    =Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Yield) & "%
+                                    =Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Yield) & "%
                                     " &
-                                    Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Yield_Total) & " / " &
-                                    Value(LookUp(colPerformance, Line = p_t_g_h_title.Text ).Yield_Sum)
+                                    Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Yield_Total) & " / " &
+                                    Value(LookUp(colPerformance, Line = pGalleryTitle.Text ).Yield_Sum)
                                   Align: =Align.Center
-                                  Color: =varColor0
+                                  Color: =gblTheme.Text_Dark
                                   Fill: =RGBA(0,0,0,0)
                                   FillPortions: =1
                                   Font: =Font.Verdana
