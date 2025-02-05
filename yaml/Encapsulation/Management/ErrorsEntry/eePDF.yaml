@@ -1,0 +1,10 @@
+- eePDF:
+    Control: PDFViewer
+    Properties:
+      OnStateChange: =
+      Document: =First(eGallery.Selected.Attachments).Value
+      Height: =eePDFParent.Height
+      ShowControls: =true
+      Width: =eePDFParent.Width
+      X: =eePDFParent.X
+      Y: =eePDFParent.Y + eeMain.Y

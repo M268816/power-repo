@@ -1,0 +1,1301 @@
+- eeLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - eeCollect:
+        Control: Classic/Button
+        Properties:
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - eeSequentialCollect:
+        Control: Timer
+        Properties:
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - eeUpdate:
+        Control: Classic/Button
+        Properties:
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - eeHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - eeBack:
+            Control: Image
+            Properties:
+              OnSelect: =Back(ScreenTransition.Fade)
+              Image: =gblIcons.Back
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - eeTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Self.Height / 3
+        - eeMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - eeBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - eeUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - eeMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding * 2
+          LayoutJustifyContent: =LayoutJustifyContent.Center
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - eeFormParent:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              Fill: =gblTheme.Foreground
+              FillPortions: =0
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutMode: =LayoutMode.Auto
+              Width: =Parent.Width * 0.35
+            Children:
+            - me_b_form:
+                Control: Form
+                Layout: horizontal
+                Properties:
+                  DataSource: =ErrorTracking
+                  Item: =LookUp(ErrorTracking, ID = varErrorID)
+                  LayoutMinHeight: =1
+                  LayoutMinWidth: =1
+                Children:
+                - Person_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Person"
+                      Default: =ThisItem.Person
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Person)
+                      Required: =true
+                      Update: =DataCardValue2.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                    Children:
+                    - StarVisible2:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey2.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey2.Y
+                    - ErrorMessage2:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue2.Y + DataCardValue2.Height
+                    - DataCardValue2:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["DisplayName","Email","Picture"]
+                          Items: =Choices([@ErrorTracking].Person)
+                          SearchFields: =["Claims"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =gblTheme.Background
+                          ChevronHoverFill: =gblTheme.Background
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =gblTheme.Background
+                          SelectionColor: =gblTheme.Background
+                          Width: =(Parent.Width * 0.95 - Self.X)
+                          X: =DataCardKey2.X + DataCardKey2.Width
+                          Y: =10
+                    - DataCardKey2:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =Parent.Width * 0.40
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue2.Height / 2) - (Self.Height / 2)
+                - Supervisor_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Supervisor"
+                      Default: =ThisItem.Supervisor
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Supervisor)
+                      Required: =true
+                      Update: =DataCardValue6.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =1
+                    Children:
+                    - StarVisible6:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey6.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey6.Y
+                    - ErrorMessage6:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue6.Y + DataCardValue6.Height
+                    - DataCardValue6:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["DisplayName","Email","Picture"]
+                          Items: =Choices([@ErrorTracking].Supervisor)
+                          SearchFields: =["Claims"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =gblTheme.Background
+                          ChevronHoverFill: =gblTheme.Background
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =gblTheme.Background
+                          SelectionColor: =gblTheme.Background
+                          Width: =DataCardValue2.Width
+                          X: =DataCardKey6.X + DataCardKey6.Width
+                          Y: =10
+                    - DataCardKey6:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =DataCardKey2.Width
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue6.Height / 2) - (Self.Height / 2)
+                - Person_Shift_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Person_Shift"
+                      Default: =ThisItem.Person_Shift
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Person_Shift)
+                      Required: =true
+                      Update: =DataCardValue11.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =2
+                    Children:
+                    - StarVisible11:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey11.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey11.Y
+                    - ErrorMessage11:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue11.Y + DataCardValue11.Height
+                    - DataCardValue11:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          IsSearchable: =false
+                          Items: =Choices([@ErrorTracking].Person_Shift)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =gblTheme.Background
+                          ChevronHoverFill: =gblTheme.Background
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =gblTheme.Background
+                          SelectionColor: =gblTheme.Background
+                          Width: =DataCardValue2.Width
+                          X: =DataCardKey11.X + DataCardKey11.Width
+                          Y: =10
+                    - DataCardKey11:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="Person's Shift"
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =DataCardKey2.Width
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue11.Height / 2) - (Self.Height / 2)
+                - Affected_Shift_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Affected_Shift"
+                      Default: =ThisItem.Affected_Shift
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Affected_Shift)
+                      Required: =true
+                      Update: =DataCardValue12.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =3
+                    Children:
+                    - StarVisible12:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey12.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey12.Y
+                    - ErrorMessage12:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue12.Y + DataCardValue12.Height
+                    - DataCardValue12:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@ErrorTracking].Affected_Shift)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =gblTheme.Background
+                          ChevronHoverFill: =gblTheme.Background
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =gblTheme.Background
+                          SelectionColor: =gblTheme.Background
+                          Width: =DataCardValue2.Width
+                          X: =DataCardKey12.X + DataCardKey12.Width
+                          Y: =10
+                    - DataCardKey12:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="Shift the error was discovered"
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =DataCardKey2.Width
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue12.Height / 2) - (Self.Height / 2)
+                - Error_Date_DataCard1:
+                    Control: TypedDataCard
+                    Variant: dateEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Error_Date"
+                      Default: =ThisItem.Error_Date
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Error_Date)
+                      Required: =true
+                      Update: =DataCardValue8.SelectedDate
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =4
+                    Children:
+                    - StarVisible8:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey8.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey8.Y
+                    - ErrorMessage8:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue8.Y + DataCardValue8.Height
+                    - DataCardValue8:
+                        Control: Classic/DatePicker
+                        Layout: horizontal
+                        Properties:
+                          DefaultDate: =Parent.Default
+                          EndYear: =Year(Today())+100
+                          StartYear: =1899
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          IconFill: =gblTheme.Background
+                          IsEditable: =true
+                          PaddingBottom: =0
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          Width: =DataCardValue2.Width
+                          X: =DataCardKey8.X + DataCardKey8.Width
+                          Y: =10
+                    - DataCardKey8:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="Date of the Error"
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =DataCardKey2.Width
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue8.Height / 2) - (Self.Height / 2)
+                - WJ_DataCard1:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Title"
+                      Default: =ThisItem.WJ
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,WJ)
+                      MaxLength: =DataSourceInfo([@ErrorTracking], DataSourceInfo.MaxLength, WJ)
+                      Required: =true
+                      Update: =DataCardValue1.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =5
+                    Children:
+                    - StarVisible1:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey1.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey1.Y
+                    - ErrorMessage1:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue1.Y + DataCardValue1.Height
+                    - DataCardValue1:
+                        Control: Classic/TextInput
+                        Layout: horizontal
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =DataCardValue2.Width
+                          X: =DataCardKey1.X + DataCardKey1.Width
+                          Y: =10
+                    - DataCardKey1:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =DataCardKey2.Width
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue1.Height / 2) - (Self.Height / 2)
+                - Line_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Line"
+                      Default: =ThisItem.Line
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Line)
+                      Required: =true
+                      Update: =DataCardValue7.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =6
+                    Children:
+                    - StarVisible7:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey7.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey7.Y
+                    - ErrorMessage7:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue7.Y + DataCardValue7.Height
+                    - DataCardValue7:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          IsSearchable: =false
+                          Items: =Choices([@ErrorTracking].Line)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =gblTheme.Background
+                          ChevronHoverFill: =gblTheme.Background
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =gblTheme.Background
+                          SelectionColor: =gblTheme.Background
+                          Width: =DataCardValue2.Width
+                          X: =DataCardKey7.X + DataCardKey7.Width
+                          Y: =10
+                    - DataCardKey7:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =DataCardKey2.Width
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue7.Height / 2) - (Self.Height / 2)
+                - Error_Area_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Error_Area"
+                      Default: =ThisItem.Error_Area
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Error_Area)
+                      Required: =true
+                      Update: =DataCardValue3.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =7
+                    Children:
+                    - StarVisible3:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey3.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey3.Y
+                    - ErrorMessage3:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue3.Y + DataCardValue3.Height
+                    - DataCardValue3:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          IsSearchable: =false
+                          Items: =Choices([@ErrorTracking].Error_Area)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =gblTheme.Background
+                          ChevronHoverFill: =gblTheme.Background
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =gblTheme.Background
+                          SelectionColor: =gblTheme.Background
+                          Width: =DataCardValue2.Width
+                          X: =DataCardKey3.X + DataCardKey3.Width
+                          Y: =10
+                    - DataCardKey3:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="Affected production area"
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =DataCardKey2.Width
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue3.Height / 2) - (Self.Height / 2)
+                - Error_Type_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Error_Type"
+                      Default: =ThisItem.Error_Type
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Error_Type)
+                      Required: =true
+                      Update: =DataCardValue4.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =8
+                    Children:
+                    - StarVisible4:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey4.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey4.Y
+                    - ErrorMessage4:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue4.Y + DataCardValue4.Height
+                    - DataCardValue4:
+                        Control: Classic/ComboBox
+                        Layout: horizontal
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          IsSearchable: =false
+                          Items: =Choices([@ErrorTracking].Error_Type)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =gblTheme.Background
+                          ChevronHoverFill: =gblTheme.Background
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =gblTheme.Background
+                          SelectionColor: =gblTheme.Background
+                          Width: =DataCardValue2.Width
+                          X: =DataCardKey4.X + DataCardKey4.Width
+                          Y: =10
+                    - DataCardKey4:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="Type of error"
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =DataCardKey2.Width
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue4.Height / 2) - (Self.Height / 2)
+                - Reviewed_DataCard1:
+                    Control: TypedDataCard
+                    Variant: toggleEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Reviewed"
+                      Default: =ThisItem.Reviewed
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Reviewed)
+                      Update: =DataCardValue9.Value
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =9
+                    Children:
+                    - StarVisible9:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey9.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey9.Y
+                    - ErrorMessage9:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue9.Y + DataCardValue9.Height
+                    - DataCardValue9:
+                        Control: Classic/Toggle
+                        Layout: horizontal
+                        Properties:
+                          Default: =Parent.Default
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          X: =Parent.Width  - Self.Width - 30
+                          Y: =12
+                    - DataCardKey9:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="Was this error reviewed by a supervisor?"
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =(Parent.Width * 0.70)
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue9.Height / 2) - (Self.Height / 2)
+                - Coached_DataCard1:
+                    Control: TypedDataCard
+                    Variant: toggleEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Coached"
+                      Default: =ThisItem.Coached
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Coached)
+                      Update: =DataCardValue10.Value
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =Parent.Width
+                      Y: =10
+                    Children:
+                    - StarVisible10:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey10.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey10.Y
+                    - ErrorMessage10:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue10.Y + DataCardValue10.Height
+                    - DataCardValue10:
+                        Control: Classic/Toggle
+                        Layout: horizontal
+                        Properties:
+                          Default: =Parent.Default
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          Font: =Font.Verdana
+                          X: =Parent.Width  - Self.Width - 30
+                          Y: =12
+                    - DataCardKey10:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="Was the person coached on their error?"
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =(Parent.Width * 0.7)
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue10.Height / 2) - (Self.Height / 2)
+                - Comments_DataCard1:
+                    Control: TypedDataCard
+                    Variant: textualEditCard
+                    Layout: horizontal
+                    Properties:
+                      DataField: ="Comments"
+                      Default: =ThisItem.Comments
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Comments)
+                      MaxLength: =DataSourceInfo([@ErrorTracking], DataSourceInfo.MaxLength, Comments)
+                      Required: =true
+                      Update: =DataCardValue5.Text
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =Parent.Height * 0.25
+                      Width: =Parent.Width
+                      WidthFit: =true
+                      Y: =11
+                    Children:
+                    - StarVisible5:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =DataCardKey5.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey5.Y
+                    - ErrorMessage5:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =RGBA(168, 0, 0, 1)
+                          Font: =Font.Verdana
+                          FontWeight: =FontWeight.Semibold
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue5.Y + DataCardValue5.Height
+                    - DataCardValue5:
+                        Control: Classic/TextInput
+                        Layout: horizontal
+                        Properties:
+                          Default: =Parent.Default
+                          DelayOutput: =true
+                          MaxLength: =Parent.MaxLength
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          DisplayMode: =Parent.DisplayMode
+                          EnableSpellCheck: =true
+                          Font: =Font.Verdana
+                          Height: =Parent.Height * 0.50
+                          Mode: =TextMode.MultiLine
+                          PaddingLeft: =5
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: '=(Parent.Width * 0.95 - Self.X) '
+                          X: =DataCardKey5.X + DataCardKey5.Width
+                          Y: =10
+                    - DataCardKey5:
+                        Control: Label
+                        Layout: horizontal
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          BorderColor: =RGBA(0, 0, 0, 1)
+                          Color: =gblTheme.Text_On_Light
+                          Font: =Font.Verdana
+                          Height: =34
+                          Width: =Parent.Width * 0.25
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue5.Height / 2) - (Self.Height / 2)
+                - Found_At_DataCard1:
+                    Control: TypedDataCard
+                    Variant: comboBoxEditCard
+                    Properties:
+                      DataField: ="Found_At"
+                      Default: =ThisItem.Found_At
+                      DisplayName: =DataSourceInfo([@ErrorTracking],DataSourceInfo.DisplayName,Found_At)
+                      Update: =DataCardValue46.Selected
+                      DisplayMode: =Parent.DisplayMode
+                      Height: =50
+                      Width: =663
+                      Y: =12
+                    Children:
+                    - StarVisible51:
+                        Control: Label
+                        Properties:
+                          Text: ="*"
+                          Align: =Align.Center
+                          Height: =DataCardKey51.Height
+                          Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                          Width: =30
+                          Wrap: =false
+                          Y: =DataCardKey51.Y
+                    - ErrorMessage51:
+                        Control: Label
+                        Properties:
+                          Live: =Live.Assertive
+                          Text: =Parent.Error
+                          AutoHeight: =true
+                          Height: =10
+                          PaddingBottom: =0
+                          PaddingLeft: =0
+                          PaddingRight: =0
+                          PaddingTop: =0
+                          Visible: =Parent.DisplayMode=DisplayMode.Edit
+                          Width: =Parent.Width - 60
+                          X: =30
+                          Y: =DataCardValue46.Y + DataCardValue46.Height
+                    - DataCardValue46:
+                        Control: Classic/ComboBox
+                        Properties:
+                          DefaultSelectedItems: =Parent.Default
+                          DisplayFields: =["Value"]
+                          Items: =Choices([@ErrorTracking].Found_At)
+                          SearchFields: =["Value"]
+                          SelectMultiple: =false
+                          Tooltip: =Parent.DisplayName
+                          BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronFill: =gblTheme.Background
+                          ChevronHoverFill: =gblTheme.Background
+                          DisplayMode: =Parent.DisplayMode
+                          PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                          PressedColor: =gblTheme.Background
+                          SelectionColor: =gblTheme.Background
+                          Width: =(Parent.Width - 60) * 0.6
+                          X: =DataCardKey51.X + DataCardKey51.Width
+                          Y: =10
+                    - DataCardKey51:
+                        Control: Label
+                        Properties:
+                          Text: =Parent.DisplayName
+                          AutoHeight: =true
+                          Height: =34
+                          Width: =(Parent.Width - 60) * 0.4
+                          Wrap: =false
+                          X: =30
+                          Y: =10 + (DataCardValue46.Height / 2) - (Self.Height / 2)
+            - eeFormButtons:
+                Control: GroupContainer
+                Variant: horizontalAutoLayoutContainer
+                Properties:
+                  DropShadow: =DropShadow.Bold
+                  Fill: =gblTheme.Midground
+                  FillPortions: =0
+                  Height: =eeTitle.Height
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutGap: =gblPadding * 3
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                - e_h_submit:
+                    Control: Classic/Icon
+                    Variant: Add
+                    Properties:
+                      OnSelect: |-
+                        =SubmitForm(me_b_form);
+                        ResetForm(me_b_form);
+                        Back();
+                      Color: =gblTheme.Accept
+                      Height: =Parent.Height - Parent.Width * 0.02
+                      HoverColor: =ColorFade(Self.Color, 50%)
+                      Icon: =Icon.Check
+                      LayoutMinHeight: =10
+                      Width: =Self.Height
+                      X: =Parent.Width - Self.Width - Parent.Width * 0.01
+                      Y: =Parent.Width * 0.01
+                - e_h_reset:
+                    Control: Classic/Icon
+                    Variant: Add
+                    Properties:
+                      OnSelect: =ResetForm(me_b_form);
+                      Color: =gblTheme.Pri_Complement
+                      Height: =Parent.Height - Parent.Width * 0.02
+                      HoverColor: =ColorFade(Self.Color, 50%)
+                      Icon: =Icon.Reload
+                      LayoutMinHeight: =10
+                      Width: =Self.Height
+                      X: =e_h_submit.X - Self.Width - Parent.Width * 0.02
+                      Y: =Parent.Width * 0.01
+                - e_h_delete:
+                    Control: Classic/Icon
+                    Variant: Add
+                    Properties:
+                      OnSelect: |-
+                        =UpdateContext({locPopup: true, locPopupType: "deleting"})
+                      Color: =gblTheme.Deny
+                      Height: =Parent.Height - Parent.Width * 0.02
+                      HoverColor: =ColorFade(Self.Color, 50%)
+                      Icon: =Icon.Trash
+                      LayoutMinHeight: =10
+                      Width: =Self.Height
+                      X: =e_h_reset.X - Self.Width - Parent.Width * 0.02
+                      Y: =Parent.Width * 0.01
+                - e_h_attatchment:
+                    Control: Classic/Icon
+                    Variant: Add
+                    Properties:
+                      OnSelect: =Launch(First(eGallery.Selected.Attachments).AbsoluteUri)
+                      Color: =gblTheme.Accent
+                      Height: =Parent.Height - Parent.Width * 0.02
+                      HoverColor: =ColorFade(Self.Color, 50%)
+                      Icon: =Icon.PaperClip
+                      LayoutMinHeight: =10
+                      Width: =Self.Height
+                      X: =e_h_delete.X - Self.Width - Parent.Width * 0.02
+                      Y: =Parent.Width * 0.01
+        - eePDFParent:
+            Control: GroupContainer
+            Variant: manualLayoutContainer
+            Properties:
+              FillPortions: =0
+              Width: =Parent.Width * 0.35
