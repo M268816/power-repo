@@ -1,4 +1,4 @@
-- _?_Layout:
+- xBxLayout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -14,25 +14,25 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-    - _?_Collect:
+    - xBxCollect:
         Control: Classic/Button
         Properties:
           Text: ="collect"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_SequentialCollect:
+    - xBxSequentialCollect:
         Control: Timer
         Properties:
           Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_Update:
+    - xBxUpdate:
         Control: Classic/Button
         Properties:
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_Header:
+    - xBxHeader:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -54,7 +54,7 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - _?_Back:
+        - xBxBack:
             Control: Image
             Properties:
               OnSelect: =Back(ScreenTransition.Fade)
@@ -68,7 +68,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-        - _?_Title:
+        - xBxTitle:
             Control: Label
             Properties:
               Text: ="Report a Bug"
@@ -77,7 +77,7 @@
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Size: =Self.Height / 3
-        - _?_Mode:
+        - xBxMode:
             Control: Classic/Icon
             Variant: HalfFilledCircle
             Properties:
@@ -93,7 +93,7 @@
               PaddingTop: =4
               Rotation: =If(gblTheme.Mode = "Light", 0, 180)
               Width: =Self.Height
-    - _?_Main:
+    - xBxMain:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -114,7 +114,7 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - _?_FormParent:
+        - xBxFormParent:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
@@ -131,19 +131,19 @@
               PaddingRight: =
               Width: =If(App.Width > Index(App.SizeBreakpoints,3).Value, Parent.Width * 0.35, Parent.Width * 0.7)
             Children:
-            - _?_FormTitle:
+            - xBxFormTitle:
                 Control: Label
                 Properties:
                   Text: ="Bug Report Form"
                   Align: =Align.Center
                   Color: =gblTheme.Text_Light
                   Fill: =gblTheme.Secondary
-                  Height: ='_?_Title'.Height / 2
+                  Height: ='xBxTitle'.Height / 2
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   Size: =Round(Self.Height / 3,0)
                   Width: =Parent.Width
-            - _?_Form:
+            - xBxForm:
                 Control: Form
                 Layout: horizontal
                 Properties:
@@ -158,7 +158,7 @@
                   X: =1-1
                   Y: =1-1
                 Children:
-                - _?_FormUserCard:
+                - xBxFormUserCard:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
@@ -167,25 +167,25 @@
                       Default: =ThisItem.User
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,User)
                       Required: =true
-                      Update: ='_?_FormUserValue'.Selected
+                      Update: ='xBxFormUserValue'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
                       WidthFit: =true
                     Children:
-                    - _?_FormUserStar:
+                    - xBxFormUserStar:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='_?_FormUserKey'.Height
+                          Height: ='xBxFormUserKey'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='_?_FormUserKey'.Y
-                    - _?_FormUserError:
+                          Y: ='xBxFormUserKey'.Y
+                    - xBxFormUserError:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -201,8 +201,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='_?_FormUserValue'.Y + '_?_FormUserValue'.Height
-                    - _?_FormUserValue:
+                          Y: ='xBxFormUserValue'.Y + 'xBxFormUserValue'.Height
+                    - xBxFormUserValue:
                         Control: Classic/ComboBox
                         Layout: horizontal
                         Properties:
@@ -226,9 +226,9 @@
                           SelectionColor: =RGBA(255, 255, 255, 1)
                           Size: =Self.Height / 4
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='_?_FormUserKey'.X + '_?_FormUserKey'.Width
+                          X: ='xBxFormUserKey'.X + 'xBxFormUserKey'.Width
                           Y: =10
-                    - _?_FormUserKey:
+                    - xBxFormUserKey:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -239,8 +239,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('_?_FormUserValue'.Height / 2) - (Self.Height / 2)
-                - _?_FormTitleCard:
+                          Y: =10 + ('xBxFormUserValue'.Height / 2) - (Self.Height / 2)
+                - xBxFormTitleCard:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: horizontal
@@ -250,26 +250,26 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Title)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Title)
                       Required: =true
-                      Update: ='_?_FormTitleValue'.Text
+                      Update: ='xBxFormTitleValue'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
                       WidthFit: =true
                       Y: =3
                     Children:
-                    - _?_FormTitleStar:
+                    - xBxFormTitleStar:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='_?_FormTitleKey'.Height
+                          Height: ='xBxFormTitleKey'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='_?_FormTitleKey'.Y
-                    - _?_FormTitleError:
+                          Y: ='xBxFormTitleKey'.Y
+                    - xBxFormTitleError:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -284,8 +284,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='_?_FormTitleValue'.Y + '_?_FormTitleValue'.Height
-                    - _?_FormTitleValue:
+                          Y: ='xBxFormTitleValue'.Y + 'xBxFormTitleValue'.Height
+                    - xBxFormTitleValue:
                         Control: Classic/TextInput
                         Layout: horizontal
                         Properties:
@@ -305,9 +305,9 @@
                           RadiusTopRight: =0
                           Size: =Self.Height / 3
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='_?_FormTitleKey'.X + '_?_FormTitleKey'.Width
+                          X: ='xBxFormTitleKey'.X + 'xBxFormTitleKey'.Width
                           Y: =10
-                    - _?_FormTitleKey:
+                    - xBxFormTitleKey:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -318,8 +318,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('_?_FormTitleValue'.Height / 2) - (Self.Height / 2)
-                - _?_FormEnvironmentCard:
+                          Y: =10 + ('xBxFormTitleValue'.Height / 2) - (Self.Height / 2)
+                - xBxFormEnvironmentCard:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
@@ -328,25 +328,25 @@
                       Default: =LookUp(Choices([@BugReports].Environment),Value = "FE Data Bridge DMS")
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Environment)
                       Required: =true
-                      Update: ='_?_FormEnvironmentValue'.Selected
+                      Update: ='xBxFormEnvironmentValue'.Selected
                       DisplayMode: =DisplayMode.View
                       Height: =55
                       Width: =672
                       WidthFit: =true
                       Y: =1
                     Children:
-                    - _?_FormEnvironmentStar:
+                    - xBxFormEnvironmentStar:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: ='_?_FormEnvironmentKey'.Height
+                          Height: ='xBxFormEnvironmentKey'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='_?_FormEnvironmentKey'.Y
-                    - _?_FormEnvironmentError:
+                          Y: ='xBxFormEnvironmentKey'.Y
+                    - xBxFormEnvironmentError:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -361,8 +361,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='_?_FormEnvironmentValue'.Y + '_?_FormEnvironmentValue'.Height
-                    - _?_FormEnvironmentValue:
+                          Y: ='xBxFormEnvironmentValue'.Y + 'xBxFormEnvironmentValue'.Height
+                    - xBxFormEnvironmentValue:
                         Control: Classic/ComboBox
                         Layout: horizontal
                         Properties:
@@ -381,9 +381,9 @@
                           PressedColor: =RGBA(255, 255, 255, 1)
                           SelectionColor: =RGBA(255, 255, 255, 1)
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='_?_FormEnvironmentKey'.X + '_?_FormEnvironmentKey'.Width
+                          X: ='xBxFormEnvironmentKey'.X + 'xBxFormEnvironmentKey'.Width
                           Y: =10
-                    - _?_FormEnvironmentKey:
+                    - xBxFormEnvironmentKey:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -394,8 +394,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('_?_FormEnvironmentValue'.Height / 2) - (Self.Height / 2)
-                - _?_FormTypeCard:
+                          Y: =10 + ('xBxFormEnvironmentValue'.Height / 2) - (Self.Height / 2)
+                - xBxFormTypeCard:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
@@ -404,26 +404,26 @@
                       Default: =ThisItem.'Problem Type'
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Problem Type')
                       Required: =true
-                      Update: ='_?_FormTypeValue'.Selected
+                      Update: ='xBxFormTypeValue'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
                       WidthFit: =true
                       Y: =4
                     Children:
-                    - _?_FormTypeStar:
+                    - xBxFormTypeStar:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='_?_FormTypeKey'.Height
+                          Height: ='xBxFormTypeKey'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='_?_FormTypeKey'.Y
-                    - _?_FormTypeError:
+                          Y: ='xBxFormTypeKey'.Y
+                    - xBxFormTypeError:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -438,8 +438,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='_?_FormTypeValue'.Y + '_?_FormTypeValue'.Height
-                    - _?_FormTypeValue:
+                          Y: ='xBxFormTypeValue'.Y + 'xBxFormTypeValue'.Height
+                    - xBxFormTypeValue:
                         Control: Classic/ComboBox
                         Layout: horizontal
                         Properties:
@@ -462,9 +462,9 @@
                           SelectionColor: =RGBA(255, 255, 255, 1)
                           Size: =Self.Height / 4
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='_?_FormTypeKey'.X + '_?_FormTypeKey'.Width
+                          X: ='xBxFormTypeKey'.X + 'xBxFormTypeKey'.Width
                           Y: =10
-                    - _?_FormTypeKey:
+                    - xBxFormTypeKey:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -475,8 +475,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('_?_FormTypeValue'.Height / 2) - (Self.Height / 2)
-                - _?_FormExpectedCard:
+                          Y: =10 + ('xBxFormTypeValue'.Height / 2) - (Self.Height / 2)
+                - xBxFormExpectedCard:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: horizontal
@@ -486,26 +486,26 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Expected_Result)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Expected_Result)
                       Required: =true
-                      Update: ='_?_FormExpectedValue'.Text
+                      Update: ='xBxFormExpectedValue'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
                       WidthFit: =true
                       Y: =5
                     Children:
-                    - _?_FormExpectedStar:
+                    - xBxFormExpectedStar:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='_?_FormExpectedKey'.Height
+                          Height: ='xBxFormExpectedKey'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='_?_FormExpectedKey'.Y
-                    - _?_FormExpectedError:
+                          Y: ='xBxFormExpectedKey'.Y
+                    - xBxFormExpectedError:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -520,8 +520,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='_?_FormExpectedValue'.Y + '_?_FormExpectedValue'.Height
-                    - _?_FormExpectedValue:
+                          Y: ='xBxFormExpectedValue'.Y + 'xBxFormExpectedValue'.Height
+                    - xBxFormExpectedValue:
                         Control: Classic/TextInput
                         Layout: horizontal
                         Properties:
@@ -541,9 +541,9 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='_?_FormExpectedKey'.X + '_?_FormExpectedKey'.Width
+                          X: ='xBxFormExpectedKey'.X + 'xBxFormExpectedKey'.Width
                           Y: =10
-                    - _?_FormExpectedKey:
+                    - xBxFormExpectedKey:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -554,8 +554,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('_?_FormExpectedValue'.Height / 2) - (Self.Height / 2)
-                - _?_FormActualCard:
+                          Y: =10 + ('xBxFormExpectedValue'.Height / 2) - (Self.Height / 2)
+                - xBxFormActualCard:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: horizontal
@@ -565,26 +565,26 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Actual_Result)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Actual_Result)
                       Required: =true
-                      Update: ='_?_FormActualValue'.Text
+                      Update: ='xBxFormActualValue'.Text
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =672
                       WidthFit: =true
                       Y: =6
                     Children:
-                    - _?_FormActualStar:
+                    - xBxFormActualStar:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
-                          Height: ='_?_FormActualKey'.Height
+                          Height: ='xBxFormActualKey'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='_?_FormActualKey'.Y
-                    - _?_FormActualError:
+                          Y: ='xBxFormActualKey'.Y
+                    - xBxFormActualError:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -599,8 +599,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='_?_FormActualValue'.Y + '_?_FormActualValue'.Height
-                    - _?_FormActualValue:
+                          Y: ='xBxFormActualValue'.Y + 'xBxFormActualValue'.Height
+                    - xBxFormActualValue:
                         Control: Classic/TextInput
                         Layout: horizontal
                         Properties:
@@ -620,9 +620,9 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='_?_FormActualKey'.X + '_?_FormActualKey'.Width
+                          X: ='xBxFormActualKey'.X + 'xBxFormActualKey'.Width
                           Y: =10
-                    - _?_FormActualKey:
+                    - xBxFormActualKey:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -633,8 +633,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('_?_FormActualValue'.Height / 2) - (Self.Height / 2)
-                - _?_FormStatusCard:
+                          Y: =10 + ('xBxFormActualValue'.Height / 2) - (Self.Height / 2)
+                - xBxFormStatusCard:
                     Control: TypedDataCard
                     Variant: comboBoxEditCard
                     Layout: horizontal
@@ -643,7 +643,7 @@
                       Default: =ThisItem.Status
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Status)
                       Required: =true
-                      Update: ='_?_FormStatusValue'.Selected
+                      Update: ='xBxFormStatusValue'.Selected
                       DisplayMode: =Parent.DisplayMode
                       Height: =Parent.Height / 7.2
                       Visible: =false
@@ -651,18 +651,18 @@
                       WidthFit: =true
                       Y: =7
                     Children:
-                    - _?_FormStatusStar:
+                    - xBxFormStatusStar:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: ='_?_FormStatusKey'.Height
+                          Height: ='xBxFormStatusKey'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='_?_FormStatusKey'.Y
-                    - _?_FormStatusError:
+                          Y: ='xBxFormStatusKey'.Y
+                    - xBxFormStatusError:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -677,8 +677,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='_?_FormStatusValue'.Y + '_?_FormStatusValue'.Height
-                    - _?_FormStatusValue:
+                          Y: ='xBxFormStatusValue'.Y + 'xBxFormStatusValue'.Height
+                    - xBxFormStatusValue:
                         Control: Classic/ComboBox
                         Layout: horizontal
                         Properties:
@@ -696,9 +696,9 @@
                           PressedColor: =RGBA(255, 255, 255, 1)
                           SelectionColor: =RGBA(255, 255, 255, 1)
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='_?_FormStatusKey'.X + '_?_FormStatusKey'.Width
+                          X: ='xBxFormStatusKey'.X + 'xBxFormStatusKey'.Width
                           Y: =10
-                    - _?_FormStatusKey:
+                    - xBxFormStatusKey:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -708,8 +708,8 @@
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
                           X: =30
-                          Y: =10 + ('_?_FormStatusValue'.Height / 2) - (Self.Height / 2)
-                - _?_FormLineCard:
+                          Y: =10 + ('xBxFormStatusValue'.Height / 2) - (Self.Height / 2)
+                - xBxFormLineCard:
                     Control: TypedDataCard
                     Variant: textualEditCard
                     Layout: horizontal
@@ -719,7 +719,7 @@
                       DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Line)
                       MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Line)
                       Required: =true
-                      Update: ='_?_FormLineValue'.Text
+                      Update: ='xBxFormLineValue'.Text
                       DisplayMode: =DisplayMode.View
                       Height: =50
                       Visible: =false
@@ -727,18 +727,18 @@
                       WidthFit: =true
                       Y: =2
                     Children:
-                    - _?_FormLineStar:
+                    - xBxFormLineStar:
                         Control: Label
                         Layout: horizontal
                         Properties:
                           Text: ="*"
                           Align: =Align.Center
-                          Height: ='_?_FormLineKey'.Height
+                          Height: ='xBxFormLineKey'.Height
                           Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
                           Width: =30
                           Wrap: =false
-                          Y: ='_?_FormLineKey'.Y
-                    - _?_FormLineError:
+                          Y: ='xBxFormLineKey'.Y
+                    - xBxFormLineError:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -753,8 +753,8 @@
                           Visible: =Parent.DisplayMode=DisplayMode.Edit
                           Width: =Parent.Width - 60
                           X: =30
-                          Y: ='_?_FormLineValue'.Y + '_?_FormLineValue'.Height
-                    - _?_FormLineValue:
+                          Y: ='xBxFormLineValue'.Y + 'xBxFormLineValue'.Height
+                    - xBxFormLineValue:
                         Control: Classic/TextInput
                         Layout: horizontal
                         Properties:
@@ -773,9 +773,9 @@
                           RadiusTopLeft: =0
                           RadiusTopRight: =0
                           Width: =(Parent.Width - 60) * 0.6
-                          X: ='_?_FormLineKey'.X + '_?_FormLineKey'.Width
+                          X: ='xBxFormLineKey'.X + 'xBxFormLineKey'.Width
                           Y: =5
-                    - _?_FormLineKey:
+                    - xBxFormLineKey:
                         Control: Label
                         Layout: horizontal
                         Properties:
@@ -785,7 +785,7 @@
                           Wrap: =false
                           X: =30
                           Y: '=5   '
-            - _?_FormButtons:
+            - xBxFormButtons:
                 Control: GroupContainer
                 Variant: horizontalAutoLayoutContainer
                 Properties:
@@ -806,10 +806,10 @@
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                - _?_FormSubmit:
+                - xBxFormSubmit:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: "=Set(EmailBody,\n    \"<!DOCTYPE html>\n    <html>\n    <head>\n        <style>\n            body {\n                font-family: Arial, sans-serif;\n                color: #333333;\n                margin: 0;\n                padding: 0; /* Removed padding to prevent extra space */\n            }\n            .email-container {\n                border: 1px solid #dddddd;\n                border-radius: 5px;\n                overflow: hidden;\n                width: 100%; /* Ensure the table uses full width */\n            }\n            .email-header {\n                background-color: #5585b5;\n                color: #ffffff;\n                padding: 20px;\n                text-align: center;\n            }\n            .email-header h1 {\n                margin: 0;\n                font-size: 24px;\n            }\n            .email-body {\n                padding: 20px;\n            }\n            .bug-report-table {\n                width: 100%;\n                border-collapse: collapse;\n            }\n            .bug-report-table th, .bug-report-table td {\n                padding: 12px;\n                text-align: left;\n                vertical-align: top;\n                border-bottom: 1px solid #dddddd;\n            }\n            .bug-report-table th {\n                background-color: #f5f5f5;\n                width: 150px;\n            }\n            .footer {\n                text-align: center;\n                color: #aaaaaa;\n                font-size: 12px;\n                padding: 10px;\n            }\n            /* Inline styles may be more reliable in emails */\n        </style>\n    </head>\n    <body>\n    <table width='100%' cellpadding='0' cellspacing='0' border='0'>\n        <tr>\n            <!-- Left Margin -->\n            <td width='15%'>&nbsp;</td>\n            \n            <!-- Main Content -->\n            <td width='70%'>\n                <div class='email-container'>\n                    <!-- Email Header -->\n                    <div class='email-header'>\n                        <h1>DMS Bug Report System</h1>\n                    </div>\n        \n                    <!-- Email Body -->\n                    <div class='email-body'>\n                        <table class='bug-report-table'>\n                            <tr>\n                                <th>Title</th>\n                                <td>\"& '_?_FormTitleValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Environment</th>\n                                <td>\"& '_?_FormEnvironmentValue'.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Line</th>\n                                <td>\"& '_?_FormLineValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Problem Type</th>\n                                <td>\"& '_?_FormTypeValue'.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Expected Result</th>\n                                <td>\"& '_?_FormExpectedValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Actual Result</th>\n                                <td>\"& '_?_FormActualValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Status</th>\n                                <td>\"& '_?_FormStatusValue'.Selected.Value &\"</td>\n                            </tr>\n                        </table>\n                    </div>\n        \n                    <!-- Email Footer -->\n                    <div class='footer'>\n                        &copy; 2025 EMD Millipore. All rights reserved.\n                    </div>\n                </div>\n            </td>\n            \n            <!-- Right Margin -->\n            <td width='15%'>&nbsp;</td>\n        </tr>\n    </table>\n    </body>\n    </html>\"\n);\n\nIfError(SubmitForm('_?_Form'),\n    Notify(\"Submission Error. Check that all required fields are populated.\",NotificationType.Error),\n    \n    Office365Outlook.SendEmailV2(\n        \"M268816@ONE.MERCKGROUP.COM\",\n        \"A bug report was submitted for the \" & APP_NAME,\n        EmailBody,\n        {\n            Cc: '_?_FormUserValue'.Selected.Email\n        }\n    );\n    \n    ResetForm('_?_Form');\n\n    Back(ScreenTransition.Fade);\n\n);"
+                      OnSelect: "=Set(EmailBody,\n    \"<!DOCTYPE html>\n    <html>\n    <head>\n        <style>\n            body {\n                font-family: Arial, sans-serif;\n                color: #333333;\n                margin: 0;\n                padding: 0; /* Removed padding to prevent extra space */\n            }\n            .email-container {\n                border: 1px solid #dddddd;\n                border-radius: 5px;\n                overflow: hidden;\n                width: 100%; /* Ensure the table uses full width */\n            }\n            .email-header {\n                background-color: #5585b5;\n                color: #ffffff;\n                padding: 20px;\n                text-align: center;\n            }\n            .email-header h1 {\n                margin: 0;\n                font-size: 24px;\n            }\n            .email-body {\n                padding: 20px;\n            }\n            .bug-report-table {\n                width: 100%;\n                border-collapse: collapse;\n            }\n            .bug-report-table th, .bug-report-table td {\n                padding: 12px;\n                text-align: left;\n                vertical-align: top;\n                border-bottom: 1px solid #dddddd;\n            }\n            .bug-report-table th {\n                background-color: #f5f5f5;\n                width: 150px;\n            }\n            .footer {\n                text-align: center;\n                color: #aaaaaa;\n                font-size: 12px;\n                padding: 10px;\n            }\n            /* Inline styles may be more reliable in emails */\n        </style>\n    </head>\n    <body>\n    <table width='100%' cellpadding='0' cellspacing='0' border='0'>\n        <tr>\n            <!-- Left Margin -->\n            <td width='15%'>&nbsp;</td>\n            \n            <!-- Main Content -->\n            <td width='70%'>\n                <div class='email-container'>\n                    <!-- Email Header -->\n                    <div class='email-header'>\n                        <h1>DMS Bug Report System</h1>\n                    </div>\n        \n                    <!-- Email Body -->\n                    <div class='email-body'>\n                        <table class='bug-report-table'>\n                            <tr>\n                                <th>Title</th>\n                                <td>\"& 'xBxFormTitleValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Environment</th>\n                                <td>\"& 'xBxFormEnvironmentValue'.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Line</th>\n                                <td>\"& 'xBxFormLineValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Problem Type</th>\n                                <td>\"& 'xBxFormTypeValue'.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Expected Result</th>\n                                <td>\"& 'xBxFormExpectedValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Actual Result</th>\n                                <td>\"& 'xBxFormActualValue'.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Status</th>\n                                <td>\"& 'xBxFormStatusValue'.Selected.Value &\"</td>\n                            </tr>\n                        </table>\n                    </div>\n        \n                    <!-- Email Footer -->\n                    <div class='footer'>\n                        &copy; 2025 EMD Millipore. All rights reserved.\n                    </div>\n                </div>\n            </td>\n            \n            <!-- Right Margin -->\n            <td width='15%'>&nbsp;</td>\n        </tr>\n    </table>\n    </body>\n    </html>\"\n);\n\nIfError(SubmitForm('xBxForm'),\n    Notify(\"Submission Error. Check that all required fields are populated.\",NotificationType.Error),\n    \n    Office365Outlook.SendEmailV2(\n        \"M268816@ONE.MERCKGROUP.COM\",\n        \"A bug report was submitted for the \" & APP_NAME,\n        EmailBody,\n        {\n            Cc: 'xBxFormUserValue'.Selected.Email\n        }\n    );\n    \n    ResetForm('xBxForm');\n\n    Back(ScreenTransition.Fade);\n\n);"
                       Text: ="Submit"
                       BorderColor: =gblTheme.Primary
                       BorderThickness: =1
@@ -825,10 +825,10 @@
                       RadiusTopRight: =0
                       Size: =Self.Height / 3
                       Width: =Parent.Width * 0.28
-                - _?_FormCancel:
+                - xBxFormCancel:
                     Control: Classic/Button
                     Properties:
-                      OnSelect: =ResetForm('_?_Form');
+                      OnSelect: =ResetForm('xBxForm');
                       Text: ="Cancel"
                       BorderColor: =gblTheme.Primary
                       BorderThickness: =1

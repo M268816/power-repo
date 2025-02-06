@@ -1,4 +1,4 @@
-- _?_Popups:
+- xHxPopups:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -16,7 +16,7 @@
       Visible: =First(recPopups).Visible
       Width: =Parent.Width
     Children:
-    - _?_PopupLoading:
+    - xHxPopupLoading:
         Control: GroupContainer
         Variant: verticalAutoLayoutContainer
         Properties:
@@ -40,7 +40,7 @@
           RadiusTopRight: =0
           Width: =Parent.Width * 0.25
         Children:
-        - _?_PopupLoadingSpinner:
+        - xHxPopupLoadingSpinner:
             Control: Spinner
             Properties:
               FontColor: =gblTheme.Text_On_Light
@@ -52,7 +52,7 @@
               FillPortions: =1
               LayoutMinHeight: =10
               LayoutMinWidth: =10
-        - _?_PopupLoadingProgress:
+        - xHxPopupLoadingProgress:
             Control: Progress
             Properties:
               Indeterminate: =First(recPopups).Value = -1

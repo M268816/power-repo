@@ -1,4 +1,4 @@
-- _?_Layout:
+- xSxLayout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -14,25 +14,25 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-    - _?_Collect:
+    - xSxCollect:
         Control: Classic/Button
         Properties:
           Text: ="collect"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_SequentialCollect:
+    - xSxSequentialCollect:
         Control: Timer
         Properties:
           Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_Update:
+    - xSxUpdate:
         Control: Classic/Button
         Properties:
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_Header:
+    - xSxHeader:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -54,7 +54,7 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - _?_Back:
+        - xSxBack:
             Control: Image
             Properties:
               OnSelect: =Back(ScreenTransition.Fade)
@@ -68,7 +68,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-        - _?_Title:
+        - xSxTitle:
             Control: Label
             Properties:
               Text: =APP_NAME
@@ -77,7 +77,7 @@
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Size: =Self.Height / 3
-        - _?_Mode:
+        - xSxMode:
             Control: Classic/Icon
             Variant: HalfFilledCircle
             Properties:
@@ -93,7 +93,7 @@
               PaddingTop: =4
               Rotation: =If(gblTheme.Mode = "Light", 0, 180)
               Width: =Self.Height
-        - _?_Bugs:
+        - xSxBugs:
             Control: Image
             Properties:
               OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
@@ -107,7 +107,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-        - _?_UserImg:
+        - xSxUserImg:
             Control: Image
             Properties:
               Image: =User().Image
@@ -120,7 +120,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-    - _?_Main:
+    - xSxMain:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -141,7 +141,7 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - _?_Section0:
+        - xSxSection0:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
@@ -157,7 +157,7 @@
               LayoutOverflowY: =LayoutOverflow.Scroll
               PaddingRight: =
             Children:
-            - _?_Section0Title:
+            - xSxSection0Title:
                 Control: Label
                 Properties:
                   Text: ="Section Zero"
@@ -165,12 +165,11 @@
                   AlignInContainer: =AlignInContainer.Start
                   Color: =gblTheme.Text_Light
                   Fill: =gblTheme.Secondary
-                  Height: ='_?_title'.Height / 2
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   Size: =Self.Height / 3
                   Width: =Parent.Width
-            - _?_Section0Content:
+            - xSxSection0Content:
                 Control: Label
                 Properties:
                   Text: |-

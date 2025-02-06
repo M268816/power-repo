@@ -1,4 +1,4 @@
-- _?_Layout:
+- xHxLayout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -14,25 +14,25 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-    - _?_Collect:
+    - xHxCollect:
         Control: Classic/Button
         Properties:
           Text: ="collect"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_SequentialCollect:
+    - xHxSequentialCollect:
         Control: Timer
         Properties:
           Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_Update:
+    - xHxUpdate:
         Control: Classic/Button
         Properties:
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - _?_Header:
+    - xHxHeader:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -54,13 +54,13 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - _?_Logo:
+        - xHxLogo:
             Control: Image
             Properties:
               Image: =If(gblTheme.Mode = "Light", logo1, logo2)
               LayoutMinHeight: =10
-              Width: ='_?_NavTitle'.Width
-        - _?_Title:
+              Width: =xHxNavigationTitle.Width
+        - xHxTitle:
             Control: Label
             Properties:
               Text: =APP_NAME
@@ -69,7 +69,7 @@
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Size: =Self.Height / 3
-        - _?_Mode:
+        - xHxMode:
             Control: Classic/Icon
             Variant: HalfFilledCircle
             Properties:
@@ -85,7 +85,7 @@
               PaddingTop: =4
               Rotation: =If(gblTheme.Mode = "Light", 0, 180)
               Width: =Self.Height
-        - _?_Bugs:
+        - xHxBugs:
             Control: Image
             Properties:
               OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
@@ -99,7 +99,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-        - _?_UserImg:
+        - xHxUserImg:
             Control: Image
             Properties:
               Image: =User().Image
@@ -112,7 +112,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-    - _?_Main:
+    - xHxMain:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -128,13 +128,14 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - _?_Navigation:
+        - xHxNavigation:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
               Fill: =gblTheme.Midground
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
               LayoutGap: =gblPadding
@@ -150,7 +151,7 @@
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - _?_NavTitle:
+            - xHxNavigationTitle:
                 Control: Label
                 Properties:
                   Text: =App.ActiveScreen.Name
@@ -158,14 +159,14 @@
                   Color: =gblTheme.Text_On_Light
                   LayoutMinWidth: =10
                   Size: =Self.Height / 3
-            - _?_NavSeparator0:
+            - xHxNavigationSeparator:
                 Control: Rectangle
                 Properties:
                   Fill: =gblTheme.Pri_Complement
                   Height: =Round(gblPadding/2,0)
                   LayoutMinWidth: =10
                   Width: =10
-            - _?_NavGallery:
+            - xHxNavigationGallery:
                 Control: Gallery
                 Variant: galleryVertical
                 Properties:
@@ -179,7 +180,7 @@
                   TemplatePadding: =gblPadding
                   TemplateSize: =40
                 Children:
-                - _?_NavGalleryButton:
+                - xHxNavGalleryButton:
                     Control: Classic/Button
                     Properties:
                       OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
@@ -196,7 +197,7 @@
                       RadiusTopRight: =Self.RadiusTopLeft
                       Size: =Self.Height / 4
                       Width: =Parent.TemplateWidth
-            - _?_NavLegalNote:
+            - xHxNavigationFooter:
                 Control: Label
                 Properties:
                   Text: |-
@@ -206,17 +207,17 @@
                     "© 2025 EMD Millipore. All rights reserved."
                   Align: =Align.Center
                   Color: =gblTheme.Text_On_Light
-                  Height: =200
+                  Height: =Parent.Height * 0.1
                   LayoutMinWidth: =10
-                  Size: =Self.Height / 24
+                  Size: =Self.Height / 14
                   VerticalAlign: =VerticalAlign.Bottom
-        - _?_Body:
+        - xHxBody:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 7, 11)
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 20, 21)
               LayoutDirection: =LayoutDirection.Vertical
               LayoutGap: =gblPadding
               LayoutMinHeight: =10
@@ -231,7 +232,7 @@
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - _?_Section0:
+            - xHxSection0:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
@@ -247,7 +248,7 @@
                   LayoutOverflowY: =LayoutOverflow.Scroll
                   PaddingRight: =
                 Children:
-                - _?_Section0Title:
+                - xHxSection0Title:
                     Control: Label
                     Properties:
                       Text: ="Section Zero"
@@ -255,12 +256,11 @@
                       AlignInContainer: =AlignInContainer.Start
                       Color: =gblTheme.Text_Light
                       Fill: =gblTheme.Secondary
-                      Height: ='hTitle'.Height / 2
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
                       Size: =Self.Height / 3
                       Width: =Parent.Width
-                - _?_Section0Content:
+                - xHxSection0Content:
                     Control: Label
                     Properties:
                       Text: |-

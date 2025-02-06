@@ -1,0 +1,759 @@
+- xDxLayout:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+    - xDxInit:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(recPopups,First(recPopups),
+                {
+                    Visible:true,
+                    Value:10,
+                    Display_Text:"Updating Variables",
+                    Popup:"Loading"
+                }
+            );
+
+            Set(gTime,{Today: Today(), Now: Now()});
+            UpdateContext({
+                lStartDate: DateAdd(xDxStartDate.SelectedDate, -1, TimeUnit.Hours),
+                lEndDate: DateAdd(xDxEndDate.SelectedDate, 23, TimeUnit.Hours),
+                lMaxCollectionLength: 31,
+                lItteration: 0
+            });
+            UpdateContext({
+                lCountOfDays: DateDiff(lStartDate,lEndDate)
+            });
+            UpdateContext({
+                lItterations: RoundUp(lCountOfDays/lMaxCollectionLength,0)
+            });
+
+            Clear(cDatePairs);
+            ForAll(Sequence(lItterations),
+                With({i:ThisRecord.Value},
+                    Collect(cDatePairs,
+                        {
+                            Itteration: i,
+                            Start_Date: DateAdd(DateAdd(lStartDate, (i-1)*lMaxCollectionLength, TimeUnit.Days), 23, TimeUnit.Hours),
+                            End_Date:
+                                If(DateAdd(DateAdd(lStartDate, ((i-1)*lMaxCollectionLength)+lMaxCollectionLength, TimeUnit.Days), 23, TimeUnit.Hours) > lEndDate,
+                                    DateAdd(lEndDate, 23, TimeUnit.Hours),
+                                    DateAdd(DateAdd(lStartDate, ((i-1)*lMaxCollectionLength)+lMaxCollectionLength, TimeUnit.Days), 23, TimeUnit.Hours)
+                                )
+                        }
+                    );
+                )
+            );
+
+            Patch(recPopups,First(recPopups),
+                {
+                    Visible:true,
+                    Value:20,
+                    Display_Text:"Starting Collection",
+                    Popup:"Loading"
+                }
+            );
+            ClearCollect(cProduction, {ID:0});
+            Clear(cProduction);
+            If(lCountOfDays <= lMaxCollectionLength,
+                Select(xDxCollect);,
+                Select(xDxSequentialCollect);
+            );
+          Text: ="init"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - xDxCollect:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(recPopups,First(recPopups),
+                {
+                    Visible:true,
+                    Value:30,
+                    Display_Text:"Collecting Data",
+                    Popup:"Loading"
+                }
+            );
+
+            // Collect Production Data
+            ForAll(
+                Filter(Production,
+                    Hour_Starting >= lStartDate,
+                    Hour_Ending <= lEndDate
+                ),
+                Collect(cProduction,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Hour_Starting: ThisRecord.Hour_Starting,
+                        Hour_Ending: ThisRecord.Hour_Ending
+                    }
+                )
+            );
+
+            Select(xDxUpdate);
+          Text: ="collect"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - xDxSequentialCollect:
+        Control: Timer
+        Properties:
+          OnSelect: |-
+            =UpdateContext({lTimer: true});
+          OnTimerEnd: =
+          OnTimerStart: |+
+            =UpdateContext({lItteration: lItteration+1});
+
+            Patch(recPopups,First(recPopups),
+                {
+                    Display_Text: "Collecting Data Batch: "&lItteration&" of "&lItterations&".",
+                    Value: First(recPopups).Value+(lItteration*10)
+                }
+            );
+
+            ForAll(
+                Filter(Production,
+                    Hour_Starting >= Index(cDatePairs,lItteration).Start_Date,
+                    Hour_Ending <= Index(cDatePairs,lItteration).End_Date
+                ),
+                Collect(cProduction,
+                    {
+                        ID: ThisRecord.ID,
+                        Line: ThisRecord.Line.Value,
+                        Shift: ThisRecord.Shift_Letter,
+                        Lot: ThisRecord.Lot,
+                        Catalog: ThisRecord.Catalog,
+                        Hour_Starting: ThisRecord.Hour_Starting,
+                        Hour_Ending: ThisRecord.Hour_Ending
+                    }
+                )
+            );
+
+            If(lItteration = lItterations,
+                UpdateContext({lTimer:false});
+                Patch(recPopups,First(recPopups),
+                    {
+                        Visible:false,
+                        Value:-1,
+                        Display_Text:"Finishing Up",
+                        Popup:""
+                    }
+                );
+            )
+
+
+          AutoPause: =false
+          Duration: =25000
+          Repeat: =true
+          Start: =lTimer
+          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - xDxUpdate:
+        Control: Classic/Button
+        Properties:
+          OnSelect: |-
+            =Patch(recPopups,First(recPopups),
+                {
+                    Value:90,
+                    Display_Text:"Updating"
+                }
+            );
+
+            UpdateContext({
+                lTotal: Sum(1,3)
+            });
+
+            Patch(recPopups,First(recPopups),
+                {
+                    Visible:false,
+                    Value:-1,
+                    Display_Text:"Not Loading",
+                    Popup:""
+                }
+            );
+          Text: ="update"
+          AlignInContainer: =AlignInContainer.Start
+          Visible: =false
+    - xDxHeader:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          Fill: =gblTheme.Primary
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - xDxLogo:
+            Control: Image
+            Properties:
+              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
+              LayoutMinHeight: =10
+              Width: =xDxNavigationTitle.Width
+        - xDxTitle:
+            Control: Label
+            Properties:
+              Text: =APP_NAME
+              Color: =gblTheme.Text_Light
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Size: =Round(Self.Height / 3,0)
+        - xDxMode:
+            Control: Classic/Icon
+            Variant: HalfFilledCircle
+            Properties:
+              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
+              Color: =gblTheme.Text_On_Dark
+              Height: =10
+              HoverColor: =gblTheme.Text_On_Light
+              Icon: =Icon.HalfFilledCircle
+              LayoutMinHeight: =10
+              PaddingBottom: =4
+              PaddingLeft: =4
+              PaddingRight: =4
+              PaddingTop: =4
+              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
+              Width: =Self.Height
+        - xDxBugs:
+            Control: Image
+            Properties:
+              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+              Image: =gblIcons.Bug
+              HoverFill: =gblTheme.Pri_Complement
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+        - xDxUserImg:
+            Control: Image
+            Properties:
+              Image: =User().Image
+              Fill: =RGBA(0, 0, 0, 1)
+              ImagePosition: =ImagePosition.Fill
+              LayoutMinHeight: =10
+              PaddingLeft: =
+              RadiusBottomLeft: =Self.Width
+              RadiusBottomRight: =Self.RadiusBottomLeft
+              RadiusTopLeft: =Self.RadiusBottomLeft
+              RadiusTopRight: =Self.RadiusBottomLeft
+              Width: =Self.Height
+    - xDxMain:
+        Control: GroupContainer
+        Variant: horizontalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          DropShadow: =DropShadow.None
+          FillPortions: =11
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutMinHeight: =10
+          LayoutMinWidth: =10
+          LayoutMode: =LayoutMode.Auto
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+        Children:
+        - xDxNavigation:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Midground
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - xDxNavigationTitle:
+                Control: Label
+                Properties:
+                  Text: =App.ActiveScreen.Name
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  LayoutMinWidth: =10
+                  Size: =Round(Self.Height / 3,0)
+            - xDxNavigationSeparator:
+                Control: Rectangle
+                Properties:
+                  Fill: =gblTheme.Pri_Complement
+                  Height: =Round(gblPadding/2,0)
+                  LayoutMinWidth: =10
+                  Width: =10
+            - xDxNavigationGallery:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  Items: =colNavigation
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DelayItemLoading: =true
+                  Layout: =Layout.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LoadingSpinner: =LoadingSpinner.Data
+                  TemplatePadding: =gblPadding
+                  TemplateSize: =40
+                Children:
+                - xDxNavigationGalleryButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                      Text: =ThisItem.Label
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      Height: =Parent.TemplateHeight
+                      RadiusBottomLeft: =100
+                      RadiusBottomRight: =100
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =100
+                      Size: =Round(Self.Height / 4,0)
+                      Width: =Parent.TemplateWidth
+            - xDxNavigationFooter:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =
+                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                    &Char(13)&Char(13)&
+                    "© 2025 EMD Millipore. All rights reserved."
+                  Align: =Align.Center
+                  Color: =gblTheme.Text_On_Light
+                  Height: =Parent.Height * 0.1
+                  LayoutMinWidth: =10
+                  Size: =RoundDown(Self.Height / 14,0)
+                  VerticalAlign: =VerticalAlign.Bottom
+        - xDxfilterParent:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              Fill: =gblTheme.Background
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - xDxFilters:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  Fill: =gblTheme.Foreground
+                  Height: =Parent.Height * 0.5
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gblPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                Children:
+                - xDxFiltersTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Filters"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Center
+                      Color: =gblTheme.Text_Light
+                      Fill: =gblTheme.Secondary
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height / 4,0)
+                      Width: =Parent.Width
+                - xDxStartDateLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="Start Date"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height / 4,0)
+                - xDxStartDate:
+                    Control: Classic/DatePicker
+                    Properties:
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FocusedBorderThickness: =1
+                      IconBackground: =gblTheme.Sec_Complement
+                      IconFill: =gblTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height / 5,0)
+                - xDxFiltersSeparator0:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - xDxEndDateLabel:
+                    Control: Label
+                    Properties:
+                      Text: ="End Date"
+                      Align: =Align.Center
+                      Color: =gblTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height / 4,0)
+                - xDxEndDate:
+                    Control: Classic/DatePicker
+                    Properties:
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_On_Light
+                      Fill: =gblTheme.Background
+                      FocusedBorderThickness: =1
+                      IconBackground: =gblTheme.Sec_Complement
+                      IconFill: =gblTheme.Text_On_Light
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height / 5,0)
+                - xDxFiltersSeparator1:
+                    Control: Rectangle
+                    Properties:
+                      Fill: =gblTheme.Pri_Complement
+                      Height: =Round(gblPadding/2,0)
+                      LayoutMinWidth: =10
+                      Width: =10
+                - xDxFiltersButton:
+                    Control: Classic/Button
+                    Properties:
+                      OnSelect: =Select(xDxInit);
+                      Text: ="Update Filter"
+                      BorderThickness: =1
+                      Color: =gblTheme.Text_Dark
+                      Fill: =gblTheme.Accent
+                      FontWeight: =FontWeight.Normal
+                      LayoutMinWidth: =10
+                      RadiusBottomLeft: =100
+                      RadiusBottomRight: =100
+                      RadiusTopLeft: =100
+                      RadiusTopRight: =100
+                      Size: =Round(Self.Height / 4,0)
+                      Width: =10
+        - xDxBody:
+            Control: GroupContainer
+            Variant: verticalAutoLayoutContainer
+            Properties:
+              AlignInContainer: =AlignInContainer.SetByContainer
+              DropShadow: =DropShadow.None
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 16,18)
+              LayoutAlignItems: =LayoutAlignItems.Stretch
+              LayoutDirection: =LayoutDirection.Vertical
+              LayoutGap: =gblPadding
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              LayoutMode: =LayoutMode.Auto
+              PaddingBottom: =gblPadding
+              PaddingLeft: =gblPadding
+              PaddingRight: =gblPadding
+              PaddingTop: =gblPadding
+              RadiusBottomLeft: =0
+              RadiusBottomRight: =0
+              RadiusTopLeft: =0
+              RadiusTopRight: =0
+            Children:
+            - xDxGalleryParent:
+                Control: GroupContainer
+                Variant: verticalAutoLayoutContainer
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Foreground
+                  Height: =500
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinWidth: =10
+                  LayoutMode: =LayoutMode.Auto
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingRight: =
+                Children:
+                - xDxGalleryTitle:
+                    Control: Label
+                    Properties:
+                      Text: ="Data Example taken from Encapsulation Production"
+                      Align: =Align.Center
+                      AlignInContainer: =AlignInContainer.Start
+                      Color: =gblTheme.Text_Light
+                      Fill: =gblTheme.Secondary
+                      LayoutMinHeight: =10
+                      LayoutMinWidth: =10
+                      Size: =Round(Self.Height / 3,0)
+                      Width: =Parent.Width
+                - xDxGalleryColumns:
+                    Control: GroupContainer
+                    Variant: horizontalAutoLayoutContainer
+                    Properties:
+                      DropShadow: =DropShadow.Regular
+                      Fill: =gblTheme.Sec_Complement
+                      FillPortions: =0
+                      Height: =40
+                      LayoutAlignItems: =LayoutAlignItems.Stretch
+                      LayoutMinWidth: =100
+                      LayoutMode: =LayoutMode.Auto
+                      RadiusTopLeft: =0
+                      RadiusTopRight: '=0   '
+                    Children:
+                    - xDxGalleryIdLabel:
+                        Control: Label
+                        Properties:
+                          Text: ="ID"
+                          Align: =Align.Center
+                          BorderColor: =gblTheme.Background
+                          BorderThickness: =1
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/3,0)
+                    - xDxGalleryStartDateLabel:
+                        Control: Label
+                        Properties:
+                          Text: ="Start Date"
+                          Align: =Align.Center
+                          BorderColor: =gblTheme.Background
+                          BorderThickness: =1
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/3,0)
+                    - xDxGalleryEndDateLabel:
+                        Control: Label
+                        Properties:
+                          Text: ="End Date"
+                          Align: =Align.Center
+                          BorderColor: =gblTheme.Background
+                          BorderThickness: =1
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/3,0)
+                    - xDxGalleryShiftLabel:
+                        Control: Label
+                        Properties:
+                          Text: ="Shift"
+                          Align: =Align.Center
+                          BorderColor: =gblTheme.Background
+                          BorderThickness: =1
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/3,0)
+                    - xDxGalleryLineLabel:
+                        Control: Label
+                        Properties:
+                          Text: ="Line"
+                          Align: =Align.Center
+                          BorderColor: =gblTheme.Background
+                          BorderThickness: =1
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/3,0)
+                    - xDxGalleryLotLabel:
+                        Control: Label
+                        Properties:
+                          Text: ="Lot"
+                          Align: =Align.Center
+                          BorderColor: =gblTheme.Background
+                          BorderThickness: =1
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1.5
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/3,0)
+                    - xDxGalleryCatalogLabel:
+                        Control: Label
+                        Properties:
+                          Text: ="Catalog"
+                          Align: =Align.Center
+                          BorderColor: =gblTheme.Background
+                          BorderThickness: =1
+                          Color: =gblTheme.Text_On_Light
+                          FillPortions: =1.5
+                          LayoutMinHeight: =1
+                          LayoutMinWidth: =1
+                          Size: =Round(Self.Height/3,0)
+                - xDxGallery:
+                    Control: Gallery
+                    Variant: galleryVertical
+                    Properties:
+                      Items: =Sort(cProduction, Hour_Ending)
+                      Selectable: =false
+                      DelayItemLoading: =true
+                      FocusedBorderThickness: =0
+                      Layout: =Layout.Vertical
+                      LoadingSpinner: =LoadingSpinner.Data
+                      ShowScrollbar: =false
+                      TemplatePadding: =1
+                      TemplateSize: =50
+                      Transition: =Transition.Pop
+                    Children:
+                    - xDxGalleryData:
+                        Control: GroupContainer
+                        Variant: horizontalAutoLayoutContainer
+                        Properties:
+                          DropShadow: =DropShadow.None
+                          Fill: =RGBA(0,0,0,0)
+                          Height: =Parent.TemplateHeight
+                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                          LayoutMode: =LayoutMode.Auto
+                          RadiusBottomLeft: =0
+                          RadiusBottomRight: =0
+                          RadiusTopLeft: =0
+                          RadiusTopRight: =0
+                          Width: =Parent.TemplateWidth
+                        Children:
+                        - xDxGalleryId:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.ID
+                              Align: =Align.Center
+                              BorderColor: =gblTheme.Background
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              HoverFill: =RGBA(0,0,0,0.1)
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/4,0)
+                        - xDxGalleryStartDate:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Hour_Starting
+                              Align: =Align.Center
+                              BorderColor: =gblTheme.Background
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              HoverFill: =RGBA(0,0,0,0.1)
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/4,0)
+                        - xDxGalleryEndDate:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Hour_Ending
+                              Align: =Align.Center
+                              BorderColor: =gblTheme.Background
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              HoverFill: =RGBA(0,0,0,0.1)
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/4,0)
+                        - xDxGalleryShift:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Shift
+                              Align: =Align.Center
+                              BorderColor: =gblTheme.Background
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              HoverFill: =RGBA(0,0,0,0.1)
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/4,0)
+                        - xDxGalleryLine:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Line
+                              Align: =Align.Center
+                              BorderColor: =gblTheme.Background
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              HoverFill: =RGBA(0,0,0,0.1)
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/4,0)
+                        - xDxGalleryLot:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Lot
+                              Align: =Align.Center
+                              BorderColor: =gblTheme.Background
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1.5
+                              HoverFill: =RGBA(0,0,0,0.1)
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/4,0)
+                        - xDxGalleryCatalog:
+                            Control: Label
+                            Properties:
+                              Text: =ThisItem.Catalog
+                              Align: =Align.Center
+                              BorderColor: =gblTheme.Background
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1.5
+                              HoverFill: =RGBA(0,0,0,0.1)
+                              LayoutMinHeight: =1
+                              LayoutMinWidth: =1
+                              Size: =Round(Self.Height/4,0)

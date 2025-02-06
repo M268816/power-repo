@@ -1,4 +1,4 @@
-- ???Layout:
+- xFxLayout:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -14,19 +14,19 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-    - ???Collect:
+    - xFxCollect:
         Control: Classic/Button
         Properties:
           Text: ="collect"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - ???SequentialCollect:
+    - xFxSequentialCollect:
         Control: Timer
         Properties:
           Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - ???Update:
+    - xFxUpdate:
         Control: Classic/Button
         Properties:
           OnSelect: |-
@@ -40,7 +40,7 @@
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
-    - ???Header:
+    - xFxHeader:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -62,13 +62,13 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - ???Logo:
+        - xFxLogo:
             Control: Image
             Properties:
               Image: =If(gblTheme.Mode = "Light", logo1, logo2)
               LayoutMinHeight: =10
-              Width: ='???NavigationTitle'.Width
-        - ???Title:
+              Width: =xFxNavigationTitle.Width
+        - xFxTitle:
             Control: Label
             Properties:
               Text: =APP_NAME
@@ -77,7 +77,7 @@
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Size: =Self.Height / 3
-        - ???Mode:
+        - xFxMode:
             Control: Classic/Icon
             Variant: HalfFilledCircle
             Properties:
@@ -93,7 +93,7 @@
               PaddingTop: =4
               Rotation: =If(gblTheme.Mode = "Light", 0, 180)
               Width: =Self.Height
-        - ???Bugs:
+        - xFxBugs:
             Control: Image
             Properties:
               OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
@@ -107,7 +107,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-        - ???UserImg:
+        - xFxUserImg:
             Control: Image
             Properties:
               Image: =User().Image
@@ -120,7 +120,7 @@
               RadiusTopLeft: =Self.RadiusBottomLeft
               RadiusTopRight: =Self.RadiusBottomLeft
               Width: =Self.Height
-    - ???Main:
+    - xFxMain:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
         Properties:
@@ -136,13 +136,14 @@
           RadiusTopLeft: =0
           RadiusTopRight: =0
         Children:
-        - ???Navigation:
+        - xFxNavigation:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
               Fill: =gblTheme.Midground
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
               LayoutGap: =gblPadding
@@ -158,7 +159,7 @@
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - ???NavigationTitle:
+            - xFxNavigationTitle:
                 Control: Label
                 Properties:
                   Text: =App.ActiveScreen.Name
@@ -166,14 +167,14 @@
                   Color: =gblTheme.Text_On_Light
                   LayoutMinWidth: =10
                   Size: =Self.Height / 3
-            - ???NavigationSeparator:
+            - xFxNavigationSeparator:
                 Control: Rectangle
                 Properties:
                   Fill: =gblTheme.Pri_Complement
                   Height: =Round(gblPadding/2,0)
                   LayoutMinWidth: =10
                   Width: =10
-            - ???NavigationGallery:
+            - xFxNavigationGallery:
                 Control: Gallery
                 Variant: galleryVertical
                 Properties:
@@ -187,7 +188,7 @@
                   TemplatePadding: =gblPadding
                   TemplateSize: =40
                 Children:
-                - ???NavigationGalleryButton:
+                - xFxNavigationGalleryButton:
                     Control: Classic/Button
                     Properties:
                       OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
@@ -204,7 +205,7 @@
                       RadiusTopRight: =100
                       Size: =Self.Height / 4
                       Width: =Parent.TemplateWidth
-            - ???NavigationFooter:
+            - xFxNavigationFooter:
                 Control: Label
                 Properties:
                   Text: |-
@@ -214,17 +215,18 @@
                     "© 2025 EMD Millipore. All rights reserved."
                   Align: =Align.Center
                   Color: =gblTheme.Text_On_Light
-                  Height: =200
+                  Height: =Parent.Height * 0.1
                   LayoutMinWidth: =10
-                  Size: =Self.Height / 24
+                  Size: =Self.Height / 14
                   VerticalAlign: =VerticalAlign.Bottom
-        - ???FilterParent:
+        - xFxFilterParent:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
               Fill: =gblTheme.Background
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
               LayoutAlignItems: =LayoutAlignItems.Stretch
               LayoutDirection: =LayoutDirection.Vertical
               LayoutGap: =gblPadding
@@ -240,13 +242,12 @@
               RadiusTopLeft: =0
               RadiusTopRight: =0
             Children:
-            - ???Filters:
+            - xFxFilters:
                 Control: GroupContainer
                 Variant: verticalAutoLayoutContainer
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   Fill: =gblTheme.Foreground
-                  FillPortions: =0
                   Height: =Parent.Height * 0.5
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
@@ -258,7 +259,7 @@
                   PaddingLeft: =gblPadding
                   PaddingRight: =gblPadding
                 Children:
-                - ???FilterTitle:
+                - xFxFilterTitle:
                     Control: Label
                     Properties:
                       Text: ="Filters"
@@ -269,7 +270,7 @@
                       LayoutMinWidth: =10
                       Size: =Self.Height / 4
                       Width: =Parent.Width
-                - ???DateLabel:
+                - xFxDateLabel:
                     Control: Label
                     Properties:
                       Text: ="Date"
@@ -277,7 +278,7 @@
                       Color: =gblTheme.Text_On_Light
                       LayoutMinWidth: =10
                       Size: =Self.Height / 4
-                - ???Date:
+                - xFxDate:
                     Control: Classic/DatePicker
                     Properties:
                       BorderThickness: =1
@@ -288,14 +289,14 @@
                       IconFill: =gblTheme.Text_On_Light
                       LayoutMinWidth: =10
                       Size: =Self.Height / 5
-                - ???FilterSeparator0:
+                - xFxFilterSeparator0:
                     Control: Rectangle
                     Properties:
                       Fill: =gblTheme.Pri_Complement
                       Height: =Round(gblPadding/2,0)
                       LayoutMinWidth: =10
                       Width: =10
-                - ???LineLabel:
+                - xFxLineLabel:
                     Control: Label
                     Properties:
                       Text: ="Line"
@@ -303,7 +304,7 @@
                       Color: =gblTheme.Text_On_Light
                       LayoutMinWidth: =10
                       Size: =Self.Height / 4
-                - ???Line:
+                - xFxLine:
                     Control: Classic/DropDown
                     Properties:
                       Items: =gblLists.Lines
@@ -313,20 +314,20 @@
                       Fill: =gblTheme.Background
                       LayoutMinWidth: =10
                       Size: =Self.Height / 5
-                - ???FilterSeparator1:
+                - xFxFilterSeparator1:
                     Control: Rectangle
                     Properties:
                       Fill: =gblTheme.Pri_Complement
                       Height: =Round(gblPadding/2,0)
                       LayoutMinWidth: =10
                       Width: =10
-        - ???Body:
+        - xFxBody:
             Control: GroupContainer
             Variant: verticalAutoLayoutContainer
             Properties:
               AlignInContainer: =AlignInContainer.SetByContainer
               DropShadow: =DropShadow.None
-              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 6, 10)
+              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 16,18)
               LayoutAlignItems: =LayoutAlignItems.Center
               LayoutDirection: =LayoutDirection.Vertical
               LayoutGap: =gblPadding
