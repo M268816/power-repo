@@ -21,30 +21,13 @@
             =/*Start*/
             Patch(recPopups,First(recPopups),{Visible: true, Value: 10, Display_Text:"Loading"});
 
-            /*Init Local Variables*/
-            UpdateContext({
-                locStartDate: oStartDate.SelectedDate,
-                locEndDate: oEndDate.SelectedDate
-            });
-
-            UpdateContext(
-                {        
-                    count_of_days:
-                        RoundDown(
-                            DateDiff(oStartDate.SelectedDate, oEndDate.SelectedDate, TimeUnit.Days) / 7,
-                            0
-                        ) * 5 +
-                        Mod(5 + Weekday(oEndDate.SelectedDate) - Weekday(oStartDate.SelectedDate), 5) + 1
-                }
-            );
-
             /*Collect Production*/
             Patch(recPopups,First(recPopups),{Value: 20, Display_Text:"Collecting Production Data"});
             ClearCollect(colProduction,
                 ForAll(
                     Filter(Production,
-                        Hour_Ending <= DateAdd(varEndDate, 23, TimeUnit.Hours),
-                        Hour_Starting >= DateAdd(varStartDate, -1, TimeUnit.Hours)
+                        Hour_Ending <= DateAdd(oEndDate.SelectedDate, 23, TimeUnit.Hours),
+                        Hour_Starting >= DateAdd(oEndDate.SelectedDate, -1, TimeUnit.Hours)
                     ),
                     {
                         Id: Value(ThisRecord.ID),
@@ -95,8 +78,8 @@
                             Sum(
                                 Filter(
                                     colProduction,
-                                    Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
-                                    Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                    Hour_Starting >= DateAdd(oStartDate.SelectedDate, -1, TimeUnit.Hours),
+                                    Hour_Ending <= DateAdd(oEndDate.SelectedDate, 23, TimeUnit.Hours),
                                     Line = Value,
                                     If(
                                         oShift.Selected.Value = "All",
@@ -110,8 +93,8 @@
                             Sum(
                                 Filter(
                                     colProduction,
-                                    Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours),
-                                    Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                                    Hour_Starting >= DateAdd(oStartDate.SelectedDate, -1, TimeUnit.Hours),
+                                    Hour_Ending <= DateAdd(oEndDate.SelectedDate, 23, TimeUnit.Hours),
                                     Line = Value,
                                     If(
                                         oShift.Selected.Value = "All",
@@ -161,7 +144,7 @@
         - oTitle:
             Control: Label
             Properties:
-              Text: ="App Title"
+              Text: =APP_NAME
               Color: =gblTheme.Text_Light
               FillPortions: =1
               LayoutMinHeight: =10

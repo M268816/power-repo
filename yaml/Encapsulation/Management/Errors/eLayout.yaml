@@ -224,7 +224,7 @@
                   Height: =Parent.Height * 0.5
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =gblPadding
+                  LayoutGap: =gblPadding/2
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
@@ -273,7 +273,7 @@
                     Control: Rectangle
                     Properties:
                       Fill: =gblTheme.Pri_Complement
-                      Height: =Round(gblPadding/2,0)
+                      Height: =Round(gblPadding/3,0)
                       LayoutMinWidth: =10
                       Width: =10
                 - eOperatorLabel:
@@ -310,7 +310,7 @@
                     Control: Rectangle
                     Properties:
                       Fill: =gblTheme.Pri_Complement
-                      Height: =Round(gblPadding/2,0)
+                      Height: =Round(gblPadding/3,0)
                       LayoutMinWidth: =10
                       Width: =10
                 - eDateOrderLabel:
@@ -339,7 +339,7 @@
                     Control: Rectangle
                     Properties:
                       Fill: =gblTheme.Pri_Complement
-                      Height: =Round(gblPadding/2,0)
+                      Height: =Round(gblPadding/3,0)
                       LayoutMinWidth: =10
                       Width: =10
                 - eTypeLabel:
@@ -369,7 +369,7 @@
                     Control: Rectangle
                     Properties:
                       Fill: =gblTheme.Pri_Complement
-                      Height: =Round(gblPadding/2,0)
+                      Height: =Round(gblPadding/3,0)
                       LayoutMinWidth: =10
                       Width: =10
                 - eProcessLabel:
@@ -399,7 +399,7 @@
                     Control: Rectangle
                     Properties:
                       Fill: =gblTheme.Pri_Complement
-                      Height: =Round(gblPadding/2,0)
+                      Height: =Round(gblPadding/3,0)
                       LayoutMinWidth: =10
                       Width: =10
                 - eReviewedLabel:
@@ -418,11 +418,12 @@
                       FontColor: =gblTheme.Text_On_Light
                       FontSize: =Self.Width / 10
                       Label: =If(Self.Checked, "Yes", "No")
+                      AlignInContainer: =AlignInContainer.End
                       FillPortions: =1
                       Height: =40
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
-                      Width: =110
+                      Width: =Parent.Width / 1.7
                 - eCoachedLabel:
                     Control: Label
                     Properties:
@@ -439,16 +440,17 @@
                       FontColor: =gblTheme.Text_On_Light
                       FontSize: =Self.Width / 10
                       Label: =If(Self.Checked, "Yes", "No")
+                      AlignInContainer: =AlignInContainer.End
                       FillPortions: =1
                       Height: =40
                       LayoutMinHeight: =10
                       LayoutMinWidth: =10
-                      Width: =110
+                      Width: =Parent.Width / 1.7
                 - eFilterSeparator5:
                     Control: Rectangle
                     Properties:
                       Fill: =gblTheme.Pri_Complement
-                      Height: =Round(gblPadding/2,0)
+                      Height: =Round(gblPadding/3,0)
                       LayoutMinWidth: =10
                       Width: =10
                 - eResetFilters:
@@ -624,7 +626,7 @@
                     Properties:
                       OnSelect: |-
                         =Set(varErrorID, eGallery.Selected.ID);
-                        Navigate(Modify_Errors);
+                        Navigate(ErrorsEntry);
                       Items: |-
                         =Sort(
                             Filter(

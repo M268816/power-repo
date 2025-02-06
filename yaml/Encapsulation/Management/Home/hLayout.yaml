@@ -17,7 +17,7 @@
     - hCollect:
         Control: Classic/Button
         Properties:
-          OnSelect: "=/*Start*/\r\nPatch(recPopups,First(recPopups),{Visible: true, Value: 10, Display_Text: \"Loading\"});\r\n\r\nSet(gblTime,{Now: Now(), Today: Today()});\r\n\r\n/*Update Date Variables*/\r\nUpdateContext({\r\n    locEndDate: gblTime.Today,\r\n    locStartDate: DateAdd(gblTime.Today, -1, TimeUnit.Days)\r\n    \r\n});\r\n\r\n/*Collect Production*/\r\nPatch(recPopups,First(recPopups),{Value: 20, Display_Text: \"Collecting Production Data\"});\r\nClearCollect(colProduction,\r\n    ForAll(\r\n        Filter(Production,\r\n            Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n            Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)\r\n        ),\r\n        {\r\n            Id: Value(ThisRecord.ID),\r\n            Shift: Text(ThisRecord.Shift_Letter),\r\n            Line: Text(ThisRecord.Line.Value),\r\n            Lot: Text(ThisRecord.Lot),\r\n            Catalog: Text(ThisRecord.Catalog),\r\n            Size: Text(ThisRecord.Size),\r\n            Hour_Ending: DateTimeValue(ThisRecord.Hour_Ending),\r\n            Hour_Starting: DateTimeValue(ThisRecord.Hour_Starting),\r\n            Goal: Value(ThisRecord.Hourly_Goal),\r\n            Amount_Built: Value(ThisRecord.Amount_Built),\r\n            Unit_Starting: Value(ThisRecord.Unit_Starting),\r\n            Unit_Ending: Value(ThisRecord.Unit_Ending),\r\n            Reject_Labels: Value(ThisRecord.Reject_Labels),\r\n            Reject_Cartridges: Value(ThisRecord.Reject_Cartridges),\r\n            Reject_Units: Value(ThisRecord.Reject_Units),\r\n            QA_Units: Value(ThisRecord.QA_Units)\r\n        }\r\n    )\r\n);\r\n\r\nPatch(recPopups,First(recPopups),{Value: 30, Display_Text: \"Collecting Downtime Data\"});\r\nClearCollect(colDowntime,\r\n    ForAll(\r\n        Filter(Downtime,\r\n            Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n            Started >= DateAdd(locStartDate, -1, TimeUnit.Days)\r\n        ),\r\n        {\r\n            Id: Value(ThisRecord.ID),\r\n            Shift: Text(ThisRecord.Shift_Letter),\r\n            Line: Text(ThisRecord.Line.Value),\r\n            Lot: Text(ThisRecord.Lot),\r\n            Catalog: Text(ThisRecord.Catalog),\r\n            Size: Text(ThisRecord.Size),\r\n            Started: DateTimeValue(ThisRecord.Started),\r\n            Ended: DateTimeValue(ThisRecord.Ended),\r\n            Reason: Text(ThisRecord.Reason.Value),\r\n            Total_Downtime: Value(ThisRecord.Total_Downtime),\r\n            Comments: Text(ThisRecord.Comments)\r\n        }\r\n    )\r\n);\r\n\r\nSelect(hUpdate);"
+          OnSelect: "=/*Start*/\r\nPatch(recPopups,First(recPopups),{Visible: true, Value: 10, Popup: \"loading\", Display_Text: \"Loading\"});\r\n\r\nSet(gblTime,{Now: Now(), Today: Today()});\r\n\r\n/*Update Date Variables*/\r\nUpdateContext({\r\n    locEndDate: gblTime.Today,\r\n    locStartDate: gblTime.Today\r\n    \r\n});\r\n\r\n/*Collect Production*/\r\nPatch(recPopups,First(recPopups),{Value: 20, Display_Text: \"Collecting Production Data\"});\r\nClearCollect(colProduction,\r\n    ForAll(\r\n        Filter(Production,\r\n            Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n            Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)\r\n        ),\r\n        {\r\n            Id: Value(ThisRecord.ID),\r\n            Shift: Text(ThisRecord.Shift_Letter),\r\n            Line: Text(ThisRecord.Line.Value),\r\n            Lot: Text(ThisRecord.Lot),\r\n            Catalog: Text(ThisRecord.Catalog),\r\n            Size: Text(ThisRecord.Size),\r\n            Hour_Ending: DateTimeValue(ThisRecord.Hour_Ending),\r\n            Hour_Starting: DateTimeValue(ThisRecord.Hour_Starting),\r\n            Goal: Value(ThisRecord.Hourly_Goal),\r\n            Amount_Built: Value(ThisRecord.Amount_Built),\r\n            Unit_Starting: Value(ThisRecord.Unit_Starting),\r\n            Unit_Ending: Value(ThisRecord.Unit_Ending),\r\n            Reject_Labels: Value(ThisRecord.Reject_Labels),\r\n            Reject_Cartridges: Value(ThisRecord.Reject_Cartridges),\r\n            Reject_Units: Value(ThisRecord.Reject_Units),\r\n            QA_Units: Value(ThisRecord.QA_Units)\r\n        }\r\n    )\r\n);\r\n\r\nPatch(recPopups,First(recPopups),{Value: 30, Display_Text: \"Collecting Downtime Data\"});\r\nClearCollect(colDowntime,\r\n    ForAll(\r\n        Filter(Downtime,\r\n            Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),\r\n            Started >= DateAdd(locStartDate, -1, TimeUnit.Days)\r\n        ),\r\n        {\r\n            Id: Value(ThisRecord.ID),\r\n            Shift: Text(ThisRecord.Shift_Letter),\r\n            Line: Text(ThisRecord.Line.Value),\r\n            Lot: Text(ThisRecord.Lot),\r\n            Catalog: Text(ThisRecord.Catalog),\r\n            Size: Text(ThisRecord.Size),\r\n            Started: DateTimeValue(ThisRecord.Started),\r\n            Ended: DateTimeValue(ThisRecord.Ended),\r\n            Reason: Text(ThisRecord.Reason.Value),\r\n            Total_Downtime: Value(ThisRecord.Total_Downtime),\r\n            Comments: Text(ThisRecord.Comments)\r\n        }\r\n    )\r\n);\r\n\r\nSelect(hUpdate);"
           Text: ="collect"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
@@ -43,7 +43,7 @@
                                     IsEmpty(
                                     Filter(colProduction,
                                         Line = thisLine,
-                                        Hour(Hour_Starting) >= Hour(gblTime.Now)-1
+                                        Hour(Hour_Ending) >= Hour(gblTime.Now)-1
                                     )
                                     ),
                                     "Not Running",
@@ -118,6 +118,9 @@
 
 
             Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Display_Text:"Finishing Up"});
+            If(gblAnnouncement,
+                Patch(recPopups,First(recPopups),{Visible: true, Value: -1, Popup: "welcome", Display_Text: "Not Loading"})
+            );
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
           Visible: =false
@@ -332,7 +335,7 @@
                   DropShadow: =DropShadow.Regular
                   Fill: =gblTheme.Midground
                   FillPortions: =0
-                  Height: =Parent.Height * 0.5
+                  Height: =Parent.Height * 0.45
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutMode: =LayoutMode.Auto
@@ -376,6 +379,8 @@
                           OnSelect: =Select(Parent)
                           Text: =ThisItem.Line
                           Align: =Align.Center
+                          BorderStyle: =BorderStyle.Dotted
+                          BorderThickness: =1
                           Fill: =If(ThisItem.Status = "Running", gblTheme.Accent, gblTheme.Deny)
                           Height: =Parent.TemplateHeight
                           PaddingTop: =

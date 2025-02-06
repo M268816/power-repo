@@ -44,6 +44,7 @@
         - dePopupLoadingSpinner:
             Control: Spinner
             Properties:
+              FontColor: =gblTheme.Text_On_Light
               FontWeight: =FontWeight.Normal
               Label: =First(recPopups).Display_Text
               LabelPosition: ='Spinner.LabelPosition'.Below

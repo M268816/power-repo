@@ -87,6 +87,7 @@
             Select(hrUpdate);
           Text: ="collect"
           AlignInContainer: =AlignInContainer.Start
+          Visible: =false
     - hrSequentialCollect:
         Control: Timer
         Properties:
@@ -99,6 +100,7 @@
           OnSelect: "=/*Update Code*/\nPatch(recPopups,First(recPopups),{Visible: true, Value: 40, Popup: \"loading\", Display_Text: \"Updating\"});\n\n/*Create and reset Schema for displaying hourly informaiton*/\nClear(collectHourlySchema);\nForAll(Sequence(24),\n    With({thisItteration: ThisRecord.Value},\n        Collect(collectHourlySchema,\n            {\n                SCH_Hour_Starting: DateAdd(locStartDate, -2 + thisItteration, TimeUnit.Hours),\n                SCH_Hour_Ending: DateAdd(locStartDate, -1 + thisItteration, TimeUnit.Hours),\n                SCH_Shift_Letter:\n                    If(\n                        Hour(DateAdd(locStartDate, -2 + thisItteration, TimeUnit.Hours)) >= 23, \"C\",\n                        Hour(DateAdd(locStartDate, -2 + thisItteration, TimeUnit.Hours)) >= 15, \"B\",\n                        Hour(DateAdd(locStartDate, -2 + thisItteration, TimeUnit.Hours)) >= 7 , \"A\",\n                        \"C\" \n                    )\n            }\n        )\n    )\n);\n\n/*Join Schema (on visible) and Local Unit Data*/\nPatch(recPopups,First(recPopups),{Value: 50, Display_Text: \"Joining Unit Data\"});\nClearCollect(colProductionJoined,\n    // Iterate through all source records and join to destination collection\n    ForAll(\n \n        // Iterate through the source collection\n        collectHourlySchema,\n        { \n            // Columns to appear in dataset\n            Id: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Id,\n            \n            Catalog: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Catalog,\n            \n            Lot: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Lot,\n\n            Line: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Line,\n            \n            Hour_Starting: DateTimeValue(ThisRecord.SCH_Hour_Starting),\n\n            Hour_Ending: DateTimeValue(ThisRecord.SCH_Hour_Ending),\n            \n            Amount_Built: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Amount_Built,\n            \n            Goal: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Goal,\n            \n            Unit_Starting: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Unit_Starting,\n            \n            Unit_Ending: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Unit_Ending,\n            \n            QA: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).QA_Units,\n            \n            Reject_Labels: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Reject_Labels,\n            \n            Reject_Units: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Reject_Units,\n            \n            Reject_Cartridges: \n                LookUp(\n                    colProduction,\n                    SCH_Hour_Ending = Hour_Ending && Line =hrLine.Selected.Value).Reject_Cartridges,\n            \n            Shift_Letter: ThisRecord.SCH_Shift_Letter\n        }\n    )\n);\n\n/*Join Schema (on visible) and Local Downtime Data*/\nPatch(recPopups,First(recPopups),{Value: 60, Display_Text: \"Joining Downtime Data\"});\nClearCollect(colDowntimeJoined,\n    // Iterate through all source records and join to destination collection\n    ForAll(\n \n        // Iterate through the source collection\n        collectHourlySchema,\n        { \n            // Columns to appear in dataset\n            Id:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Id,\n\n            Line:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Line,\n\n            Lot:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Lot,\n            \n            Catalog:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Catalog,\n            \n            Started: ThisRecord.SCH_Hour_Starting,\n            Ended: ThisRecord.SCH_Hour_Ending,\n\n            Reason:\n                First(\n                    Sort(\n                        Sort(\n                            AddColumns(\n                                Filter(\n                                   colDowntime,\n                                    /*Both the...*/\n                                    And(\n                                        /*Time and Total_Downtime downtime must be...*/\n                                        /*Of the selected Line And,*/\n                                        Line =hrLine.Selected.Value,\n                                        Or(\n                                            /*Either the end time is between than the start and end schema hour*/\n                                            And(\n                                                Ended <= SCH_Hour_Ending,\n                                                Ended > SCH_Hour_Starting\n                                            ),\n                                            /*Or the start time is between the start and end schema hour*/\n                                            And(\n                                                Started >= SCH_Hour_Starting,\n                                                Started < SCH_Hour_Ending\n                                            ),\n                                            /*Or the time passes through this hour*/\n                                            And(\n                                                Started < SCH_Hour_Starting,\n                                                Ended > SCH_Hour_Starting\n                                            )\n                                        )\n                                    )\n                                ),\n                                Time_Calc,\n                                If(\n                                    And(\n                                        Started >= SCH_Hour_Starting,\n                                        Ended <= SCH_Hour_Ending\n                                    ),\n                                    Total_Downtime,\n                                    Total_Downtime -\n                                    If(\n                                        Started < SCH_Hour_Starting,\n                                        DateDiff(Started, SCH_Hour_Starting, TimeUnit.Minutes),\n                                        0\n                                    ) +\n                                    If(\n                                        Ended > SCH_Hour_Ending,\n                                        DateDiff(Ended, SCH_Hour_Ending, TimeUnit.Minutes),\n                                        0\n                                    )\n                                )\n                            ),\n                            Time_Calc,\n                            SortOrder.Descending\n                        ),\n                        Total_Downtime,\n                        SortOrder.Descending\n                    )\n                ).Reason,\n            \n            Total_Downtime:\n                If(                   \n                    !IsBlank(\n                        LookUp(\n                            colDowntime,\n                            And(\n                                /*Of the selected Line And,*/\n                                Line =hrLine.Selected.Value,\n                                Or(\n                                    /*Either the end time is between than the start and end schema hour*/\n                                    And(\n                                        Ended <= SCH_Hour_Ending,\n                                        Ended > SCH_Hour_Starting\n                                    ),\n                                    /*Or the start time is between the start and end schema hour*/\n                                    And(\n                                        Started >= SCH_Hour_Starting,\n                                        Started < SCH_Hour_Ending\n                                    ),\n                                    /*Or the time passes through this hour*/\n                                    And(\n                                        Started < SCH_Hour_Starting,\n                                        Ended > SCH_Hour_Starting\n                                    )\n                                )\n                            )\n                        )\n                    ),\n\n                    Sum(\n                        Filter(\n                            colDowntime,\n                            And(\n                                /*Of the selected Line And,*/\n                                Line =hrLine.Selected.Value,\n                                Or(\n                                    /*Either the end time is between than the start and end schema hour*/\n                                    And(\n                                        Ended <= SCH_Hour_Ending,\n                                        Ended > SCH_Hour_Starting\n                                    ),\n                                    /*Or the start time is between the start and end schema hour*/\n                                    And(\n                                        Started >= SCH_Hour_Starting,\n                                        Started < SCH_Hour_Ending\n                                    ),\n                                    /*Or the time passes through this hour*/\n                                    And(\n                                        Started < SCH_Hour_Starting,\n                                        Ended > SCH_Hour_Starting\n                                    )\n                                )\n                            )\n                        ),\n                        /*Difference between endtime and start time*/\n                        DateDiff(\n                            /*find the max starting time for that hour*/\n                            Max(\n                                Started,\n                                DateTime(\n                                    Year(Started),Month(SCH_Hour_Starting),Day(SCH_Hour_Starting),\n                                    Hour(SCH_Hour_Starting),0,0\n                                )\n                            ),\n                            /*Find the min ending time for that hour*/\n                            Min(\n                                Ended,\n                                DateTime(\n                                    Year(Ended),Month(SCH_Hour_Ending),Day(SCH_Hour_Ending),\n                                    Hour(SCH_Hour_Ending),0,0\n                                )\n                            ),\n                            TimeUnit.Minutes\n                        )\n                    )\n                ),\n            \n            Comments:\n                LookUp(\n                    colDowntime,\n                    /*Both the...*/\n                    And(\n                        /*Time and Total_Downtime downtime must be...*/\n                        /*Of the selected Line And,*/\n                        Line =hrLine.Selected.Value,\n                        Or(\n                            /*Either the end time is between than the start and end schema hour*/\n                            And(\n                                Ended <= SCH_Hour_Ending,\n                                Ended > SCH_Hour_Starting\n                            ),\n                            /*Or the start time is between the start and end schema hour*/\n                            And(\n                                Started >= SCH_Hour_Starting,\n                                Started < SCH_Hour_Ending\n                            ),\n                            /*Or the time passes through this hour*/\n                            And(\n                                Started < SCH_Hour_Starting,\n                                Ended > SCH_Hour_Starting\n                            )\n                        ),\n                        /*The Total_Downtime downtime must equal the greatest downtime within the hours*/\n                        Total_Downtime = Max(Total_Downtime)\n                    )\n                ).Comments,\n\n            Shift: ThisRecord.SCH_Shift_Letter\n        }\n    )\n);\n\nPatch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: \"\", Display_Text: \"Finishing Up\"});"
           Text: ="update"
           AlignInContainer: =AlignInContainer.Start
+          Visible: =false
     - hrHeader:
         Control: GroupContainer
         Variant: horizontalAutoLayoutContainer
@@ -364,6 +366,7 @@
                 - hrLine:
                     Control: Classic/DropDown
                     Properties:
+                      OnChange: =Select(hrUpdate);
                       Items: =gblLists.Lines
                       ChevronBackground: =gblTheme.Sec_Complement
                       ChevronFill: =gblTheme.Text_Dark
@@ -443,7 +446,7 @@
                 - hrOverviewGoalLabel:
                     Control: Label
                     Properties:
-                      Text: ="Hourly Goal"
+                      Text: ="Goal"
                       Align: =Align.Center
                       Color: =gblTheme.Text_On_Light
                       Fill: =gblTheme.Pri_Complement
@@ -502,7 +505,7 @@
                                     Line = hrLine.Selected.Value,
                                     Shift = hrShift.Selected.Value
                                 ),
-                                amount_built * 1
+                                Amount_Built * 1
                             )*1
                             &" / "&
                             Sum(
@@ -512,7 +515,7 @@
                                     Line = hrLine.Selected.Value,
                                     Shift = hrShift.Selected.Value
                                 ),
-                                goal
+                                Goal
                             )*1,
                             0
                         )
@@ -526,7 +529,7 @@
                 - hrOverviewAverageLabel:
                     Control: Label
                     Properties:
-                      Text: ="Average Hourly Build Amount"
+                      Text: ="Average"
                       Align: =Align.Center
                       Color: =gblTheme.Text_On_Light
                       Fill: =gblTheme.Pri_Complement
@@ -677,25 +680,6 @@
                           Width: =Parent.Width
                           X: =1-1
                           Y: =1-1
-                    - hrUnitsAddEntry:
-                        Control: Classic/Button
-                        Properties:
-                          OnSelect: |-
-                            =Set(gblHourlyFormMode, FormMode.New);
-                            Set(gblHourlyID, "");
-                            Navigate(Modify_Hourly);
-                          Text: ="Add New Entry"
-                          Color: =gblTheme.Text_Dark
-                          Fill: =gblTheme.Accent
-                          Font: =Font.Verdana
-                          FontWeight: =FontWeight.Normal
-                          Height: =Parent.Height * 0.75
-                          HoverColor: =varColor5
-                          HoverFill: =ColorFade(Self.Fill, -50%)
-                          Size: =Self.Height / 4
-                          Width: =Hourly.Width * 0.075
-                          X: =Parent.Width * 0.01
-                          Y: =Parent.Height/2 - Self.Height/2
                     - hrUnitsExpand:
                         Control: Classic/Icon
                         Variant: 3DPrinting
@@ -1025,7 +1009,7 @@
                               Text: =ThisItem.Amount_Built
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
-                              Fill: =RGBA(0,0,0,0)
+                              Fill: =If(Value(Self.Text) > Value(hrUnitGalleryGoal.Text), gblTheme.Accept, Value(Self.Text) = 0 || Value(Self.Text) = Blank(), RGBA(0,0,0,0), gblTheme.Deny)
                               FillPortions: =1
                               Font: =Font.Verdana
                               Height: =1
@@ -1314,7 +1298,7 @@
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
                           Fill: =gblTheme.Sec_Complement
-                          FillPortions: =1
+                          FillPortions: =0.5
                           Font: =Font.Verdana
                           Height: =1
                           LayoutMinWidth: =1
@@ -1338,7 +1322,7 @@
                           Align: =Align.Center
                           Color: =gblTheme.Text_On_Light
                           Fill: =gblTheme.Sec_Complement
-                          FillPortions: =1
+                          FillPortions: =1.5
                           Font: =Font.Verdana
                           Height: =1
                           LayoutMinWidth: =1
@@ -1481,12 +1465,12 @@
                               Align: =Align.Center
                               Color: =gblTheme.Text_On_Light
                               Fill: =RGBA(0,0,0,0)
-                              FillPortions: =1
+                              FillPortions: =0.5
                               Font: =Font.Verdana
                               Height: =1
                               LayoutMinWidth: =1
                               PaddingRight: =1
-                              Size: =Self.Width / 8
+                              Size: =Round(Self.Height/8,0)
                         - hrDowntimeGalleryReason:
                             Control: Label
                             Properties:
@@ -1508,13 +1492,13 @@
                               Text: =ThisItem.Comments
                               Color: =gblTheme.Text_On_Light
                               Fill: =RGBA(0,0,0,0)
-                              FillPortions: =1
+                              FillPortions: =1.5
                               Font: =Font.Verdana
                               Height: =1
                               LayoutMinWidth: =1
                               Overflow: =Overflow.Scroll
                               PaddingRight: =1
-                              Size: =Self.Width / 12
+                              Size: =Round(Self.Height/10,0)
                     - hrDowntimeGallerySeparator:
                         Control: Rectangle
                         Properties:

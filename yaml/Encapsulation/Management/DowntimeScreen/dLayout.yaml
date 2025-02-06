@@ -279,7 +279,7 @@
                   Height: =Parent.Height * 0.5
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =gblPadding
+                  LayoutGap: =gblPadding/2
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LayoutMode: =LayoutMode.Auto
@@ -664,7 +664,7 @@
                                             ),
                                         6
                                         ),
-                                    Downtime_Reason & Char(9) & Total_Downtime & Char(9) & Downtime_Comments,
+                                    Downtime_Reason & Char(9) & Total_Downtime & Char(9) & Trim(Downtime_Comments),
                                     Char(13)
                                 )
                             ),
@@ -679,7 +679,7 @@
                             Notify("Copied top downtime for " & dLine.Selected.Value, NotificationType.Success)
                         );
                       Text: ="Copy Downtime for DOR"
-                      Color: =gblTheme.Text_On_Light
+                      Color: =gblTheme.Text_Dark
                       Fill: =gblTheme.Accent
                       FillPortions: =1
                       Font: =Font.Verdana

@@ -220,9 +220,12 @@
                           SelectMultiple: =false
                           Tooltip: =Parent.DisplayName
                           BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                          ChevronBackground: =gblTheme.Secondary
                           ChevronFill: =gblTheme.Background
                           ChevronHoverFill: =gblTheme.Background
+                          Color: =gblTheme.Text_On_Light
                           DisplayMode: =Parent.DisplayMode
+                          Fill: =gblTheme.Background
                           Font: =Font.Verdana
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           PressedColor: =gblTheme.Background
@@ -759,7 +762,7 @@
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =Parent.Width
-                      Y: =7
+                      Y: =8
                     Children:
                     - StarVisible3:
                         Control: Label
@@ -844,7 +847,7 @@
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =Parent.Width
-                      Y: =8
+                      Y: =9
                     Children:
                     - StarVisible4:
                         Control: Label
@@ -928,7 +931,7 @@
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =Parent.Width
-                      Y: =9
+                      Y: =10
                     Children:
                     - StarVisible9:
                         Control: Label
@@ -1001,7 +1004,7 @@
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =Parent.Width
-                      Y: =10
+                      Y: =11
                     Children:
                     - StarVisible10:
                         Control: Label
@@ -1077,7 +1080,7 @@
                       Height: =Parent.Height * 0.25
                       Width: =Parent.Width
                       WidthFit: =true
-                      Y: =11
+                      Y: =12
                     Children:
                     - StarVisible5:
                         Control: Label
@@ -1160,7 +1163,8 @@
                       DisplayMode: =Parent.DisplayMode
                       Height: =50
                       Width: =663
-                      Y: =12
+                      WidthFit: =true
+                      Y: =7
                     Children:
                     - StarVisible51:
                         Control: Label
@@ -1203,14 +1207,15 @@
                           PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
                           PressedColor: =gblTheme.Background
                           SelectionColor: =gblTheme.Background
-                          Width: =(Parent.Width - 60) * 0.6
-                          X: =DataCardKey51.X + DataCardKey51.Width
+                          Width: =DataCardValue2.Width
+                          X: =DataCardValue2.X
                           Y: =10
                     - DataCardKey51:
                         Control: Label
                         Properties:
-                          Text: =Parent.DisplayName
+                          Text: ="Found At"
                           AutoHeight: =true
+                          Color: =gblTheme.Text_On_Light
                           Height: =34
                           Width: =(Parent.Width - 60) * 0.4
                           Wrap: =false
@@ -1297,5 +1302,6 @@
             Control: GroupContainer
             Variant: manualLayoutContainer
             Properties:
+              Fill: =gblTheme.Midground
               FillPortions: =0
               Width: =Parent.Width * 0.35

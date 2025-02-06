@@ -38,11 +38,13 @@
           RadiusBottomRight: =0
           RadiusTopLeft: =0
           RadiusTopRight: =0
+          Visible: =First(recPopups).Popup = "loading"
           Width: =Parent.Width * 0.25
         Children:
         - hPopupLoadingSpinner:
             Control: Spinner
             Properties:
+              FontColor: =gblTheme.Text_On_Light
               FontWeight: =FontWeight.Normal
               Label: =First(recPopups).Display_Text
               LabelPosition: ='Spinner.LabelPosition'.Below
@@ -61,3 +63,62 @@
               LayoutMinHeight: =10
               LayoutMinWidth: =10
               Width: =
+    - hPopupWelcome:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light",0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.3
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutGap: =gblPadding
+          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Visible: =First(recPopups).Popup = "welcome"
+          Width: =Parent.Width * 0.3
+        Children:
+        - hPopupWelcomeTitle:
+            Control: Label
+            Properties:
+              Text: ="Welcome!"
+              Align: =Align.Center
+              AlignInContainer: =AlignInContainer.Center
+              Color: =gblTheme.Text_Light
+              Fill: =gblTheme.Primary
+              Width: =Parent.Width
+        - hPopupWelcomeText:
+            Control: Label
+            Properties:
+              Text: ="Welcome to the new Encapsulation DMS App for Management. The app has been updated to the latest major design version. If you experience any bugs, have any feedback, or have a feature request, please use the bug report button on the top right of the application."
+              FillPortions: =1
+              Size: =Round(Self.Height/12,0)
+        - hPopupWelcomeButton:
+            Control: Classic/Button
+            Properties:
+              OnSelect: |-
+                =Set(gblAnnouncement, false);
+                Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Popup: "", Display_Text: "Not Loading"});
+              Text: ="Okay"
+              AlignInContainer: =AlignInContainer.Center
+              BorderThickness: =1
+              Color: =gblTheme.Text_On_Light
+              Fill: =gblTheme.Background
+              FontWeight: =FontWeight.Normal
+              RadiusBottomLeft: =Self.RadiusTopLeft
+              RadiusBottomRight: =Self.RadiusTopLeft
+              RadiusTopLeft: =0
+              RadiusTopRight: =Self.RadiusTopLeft
+              Size: =Self.Height / 4
+              Width: =Parent.Width * 0.4
