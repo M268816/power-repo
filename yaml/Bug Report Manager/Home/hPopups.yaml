@@ -1,0 +1,64 @@
+- hPopups:
+    Control: GroupContainer
+    Variant: verticalAutoLayoutContainer
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      LayoutMode: =LayoutMode.Auto
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =First(recPopups).Visible
+      Width: =Parent.Width
+    Children:
+    - hPopupLoading:
+        Control: GroupContainer
+        Variant: verticalAutoLayoutContainer
+        Properties:
+          AlignInContainer: =AlignInContainer.SetByContainer
+          BorderColor: =gblTheme.Sec_Complement
+          BorderThickness: =If(gblTheme.Mode = "Light",0,1)
+          DropShadow: =DropShadow.ExtraBold
+          Fill: =gblTheme.Background
+          FillPortions: =0
+          Height: =Parent.Height * 0.25
+          LayoutAlignItems: =LayoutAlignItems.Stretch
+          LayoutDirection: =LayoutDirection.Vertical
+          LayoutMode: =LayoutMode.Auto
+          PaddingBottom: =gblPadding
+          PaddingLeft: =gblPadding
+          PaddingRight: =gblPadding
+          PaddingTop: =gblPadding
+          RadiusBottomLeft: =0
+          RadiusBottomRight: =0
+          RadiusTopLeft: =0
+          RadiusTopRight: =0
+          Width: =Parent.Width * 0.25
+        Children:
+        - hPopupLoadingSpinner:
+            Control: Spinner
+            Properties:
+              FontColor: =gblTheme.Text_On_Light
+              FontWeight: =FontWeight.Normal
+              Label: =First(recPopups).Display_Text
+              LabelPosition: ='Spinner.LabelPosition'.Below
+              SpinnerSize: ='Spinner.SpinnerSize'.Medium
+              AlignInContainer: =AlignInContainer.Stretch
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+        - hPopupLoadingProgress:
+            Control: Progress
+            Properties:
+              Indeterminate: =First(recPopups).Value = -1
+              Thickness: ='Progress.Thickness'.Medium
+              Value: =First(recPopups).Value
+              FillPortions: =1
+              LayoutMinHeight: =10
+              LayoutMinWidth: =10
+              Width: =
