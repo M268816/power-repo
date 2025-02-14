@@ -219,23 +219,25 @@ The downtime data must be transferred from CSV files located on the r:\ drive to
     - Run the service once to create a log folder, and the output.csv file.
     - Stop the service and exit the program.
 3. Create a new Blank SharePoint List. Make sure to use the proper whitespace for the column names.
-    - Create Number Columns named
+    - Create a Datetime column named
+        - 'RecordDatetime'
+    - Create text columns named
         - 'CSV_ID'
-        - ' Downtime Minutes'
-    - Create Text Columns named
-        - ' Datetime Reason'
-        - ' Comments'
+        - 'ShiftLetter'
+        - 'DowntimeMinutes'
+        - 'DowntimeReason'
+        - 'RecordComments'
         - 'Pleater'
 4. Under settings, go to the advanced setting in the 'List Settings' Link.
 5. Create new Indexed columns by clicking the 'Indexed columns' link under the column list.
-    - Make the DateTime column an index.
+    - Make the RecordDatetime column an index.
 6. Return to the advanced settings and Create a new view
     - Name the view 'Last 30 Days'
     - Make the view the default
     - Deselect the Title column display Checkmark
     - Navigate to sorting and filters
-        - Sort the DateTime column in descending order
-        - Filter the DateTime column by 'greater than or equal to' [Today]-30
+        - Sort the RecordDatetime column in descending order
+        - Filter the RecordDatetime column by 'greater than or equal to' [Today]-30
     - Click Okay and close the new SharePoint List.
 7. Create a new Power Automate Flow for the cloud.
 
@@ -244,61 +246,119 @@ The downtime data must be transferred from CSV files located on the r:\ drive to
 1. From the power automate editor create a flow with the Recurrence Node
     - Set the interval to 1 and frequency to Hour
     - Set the appropriate time zone
-    - Enter '2024-01-01T00:10:00Z' as the start time
+    - Enter '2025-01-01T00:10:00Z' as the start time
 2. Add a Get File Content Node for OneDrive - Business
-    - Make sure it is named 'Get file content'
-    - Set the file to the output.csv file we created earlier
-3. Add a compose Node
-    - Make sure it is named 'Compose'
-    - Set the input to: base64ToString(outputs('Get_file_content')?['body']['$content'])
-4. Add another compose Node
+3. Add a Condition Node
+    - Name it 'Decide File'
+    - Use an AND expression and input this first condition:
+        - int(convertTimeZone(utcNow(), 'UTC', 'Eastern Standard Time', 'HH'))
+        - is greater or equal to
+        - 23
+4. In the true branch, add a Get File Content Node with OneDrive
+    - Name this node 'Get Daily Output'
+    - Set the file to the daily_output.csv file.
+5. In the false branch, add another Get File Content Node
+    - Name this node 'Get Hourly Output'
+    - Set the fle to the hourly_output.csv file.
+6. Add a compose Node
+    - Name it 'Compose'
+    - Set the input to:
+        if(greaterOrEquals(int(formatDateTime(utcNow(), 'HH')), 23), 
+            base64ToString(outputs('Get_Daily_Output')?['body']['$content']), 
+            base64ToString(outputs('Get_Hourly_Output')?['body']['$content'])
+        )
+7. Add another compose
     - Name it 'Delimiter'
     - Set the input to a comma: ,
-5. Add another compose Node
+8. Add another compose Node
     - Name it 'FileContent'
     - Set the input to: replace(outputs('Compose'),'"','')
-6. Add another compose Node
+9. Add another compose Node
     - Name it 'LineEnding'
     - Set the input to: if(equals(indexof(outputs('FileContent'), decodeUriComponent('%0D%0A')), -1), if(equals(indexof(outputs('FileContent'), decodeUriComponent('%0A')), -1), decodeUriComponent('%0D'), decodeUriComponent('%0A')), decodeUriComponent('%0D%0A'))
-7. Add another compose Node
+10. Add another compose Node
     - Name it 'Headers'
     - Set the input to: split(first(split(outputs('FileContent'),outputs('LineEnding'))),outputs('Delimiter'))
-8. Add an Apply to each Node
+11. Add an Apply to each Node
     - Make sure it is named 'Apply to each'
-9. Within the apply to each loop, add a filter Node
+12. Within the apply to each loop, add a filter Node
     - Name it 'EachObject'
     - Set the from field to: range(0,length(outputs('Headers')))
     - Create one map item with,
         - Key: outputs('Headers')?[item()]
         - Value: split(items('Apply_to_each'),outputs('Delimiter'))?[item()]
-10. Add another compose Node
+13. Add another compose Node
     - Name it 'replace'
     - Set the input to: replace(replace(replace(replace(string(body('EachObject')), '{', ''), '}', ''), '[', '{'), ']', '}')
-11. Add another compose Node
+14. Add another compose Node
     - Name it 'json'
     - Set the input to: json(outputs('replace'))
-12. Add a condition branch
+15. Add a condition branch
     - Name it 'Check for Null'
     - Select the AND expression
     - Set the first value to: not(empty(outputs('json')?['ID']))
     - Set the conditional to: 'is equal to'
     - Set the second value to: true
-13. In the true branch, Create a Get Items - SharePoint node
+16. Add another condition branch
+    - name it 'Check for Zero ID'
+    - Select the AND expression
+    - Set the first value to: outputs('json')?['ID'])
+    - Set the conditional to: 'is not equal to'
+    - Set the second value to: "0"
+17. Within this nested true branch, Create a Get Items - Sharepoint Node
     - Make sure it is named 'Get items'
     - Select the site address of your sharepoint site from the site address dropdown
     - Select the list from the list name dropdown
     - Add the filter query advanced parameter
-    - In the filter query field input: CSV_ID eq '@{outputs('json')?['ID']}' and Pleater ne '@{outputs('json')?['Pleater']}'
-14. Create a second condition branch
-    - Make sure it is named 'Condition'
+    - In the filter query field input: CSV_ID eq '@{outputs('json')?['ID']}' and Pleater eq '@{outputs('json')?['Pleater']}'
+18. Create another condition branch
+    - Make sure it is named 'No Duplicate Found'
     - Select the AND expression
     - Set the first value to: length(body('Get_items')?['value'])
     - Set the conditional to: 'is equal to'
     - Set the second value to: 0
-15. In the second true branch, Add a Create Item - SharePoint Node
+19. In this second true branch, Add a Create Item - SharePoint Node
     - Make sure it is named 'Create item'
     - Select the SharePoint site from the Site Address dropdown
     - Select the SharePoint list from the List Name dropdown
+    - Show these advanced parameters, and add the code to its input, DO NOT CHANGE THE WHITESPACE.
+        DateTime: outputs('json')?[' DateTime']
+        CSV_ID: outputs('json')?['ID']
+        Shift: outputs('json')?[' Shift']
+        Downtime Minutes: outputs('json')?[' Downtime Minutes']
+        Downtime Reason: outputs('json')?[' Downtime Reason']
+        Comments: outputs('json')?[' Comments']
+        Pleater: outputs('json')?['Pleater']
+20. Return to the 'Check for Zero ID' false branch, Create a Get Items - Sharepoint Node
+    - Make sure it is named 'Get update'
+    - Select the site address of your sharepoint site from the site address dropdown
+    - Select the list from the list name dropdown
+    - Add the filter query advanced parameter
+    - In the filter query field input:
+        CSV_ID eq '0' and Pleater eq '@{outputs('json')?['Pleater']}' and RecordDatetime eq '@{outputs('json')?['RecordDatetime']}' and ShiftLetter eq '@{outputs('json')?['ShiftLetter']}'
+21. Create another condition branch
+    - Make sure it is named 'Nothing To Update'
+    - Select the AND expression
+    - Set the first value to: length(body('Get_update')?['value'])
+    - Set the conditional to: 'is equal to'
+    - Set the second value to: 0
+22. In this second true branch, Add a Create Item - SharePoint Node
+    - Make sure it is named 'Create short stop'
+    - Select the SharePoint site from the Site Address dropdown
+    - Select the SharePoint list from the List Name dropdown
+    - Show these advanced parameters, and add the code to its input, DO NOT CHANGE THE WHITESPACE.
+        DateTime: outputs('json')?[' DateTime']
+        CSV_ID: outputs('json')?['ID']
+        Shift: outputs('json')?[' Shift']
+        Downtime Minutes: outputs('json')?[' Downtime Minutes']
+        Downtime Reason: outputs('json')?[' Downtime Reason']
+        Comments: outputs('json')?[' Comments']
+        Pleater: outputs('json')?['Pleater']
+23. In this second false branch, Add a Update Item - SharePoint Node
+    - Make sure it is named 'Update short stop'
+    - Select the SharePoint site from the Site Address dropdown
+    - Select the SharePoint list from the List Name dropdown
+    - Select the Id field and enter this code: first(body('Get_update')?['value'])?['ID']
     - Show these advanced parameters, and add the code to its input, DO NOT CHANGE THE WHITESPACE.
         DateTime: outputs('json')?[' DateTime']
         CSV_ID: outputs('json')?['ID']
