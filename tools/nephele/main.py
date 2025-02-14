@@ -81,14 +81,14 @@ def main():
             date=date.today(),
             time=time(datetime.now().hour)
         )
-    )
+    ) + timedelta(hours=1)
     
     time_filter_start = pd.to_datetime(
         datetime.combine(
             date=date.today(),
             time=time(datetime.now().hour)
         )
-    ) - timedelta(hours=4)
+    ) - timedelta(hours=1)
     
     input_files = FILES['Location'][:-1].tolist()
     output_folder = FILES['Location'].iloc[-1]
@@ -304,6 +304,17 @@ def main():
             ]
         )
         return filtered_file
+    
+    def rename_columns(input_file):
+        print('Renaming Columns')
+        input_file = input_file.rename(columns={
+                ' DateTime': 'RecordDatetime',
+                ' Shift': 'ShiftLetter',
+                ' Downtime Minutes': 'DowntimeMinutes',
+                ' Downtime Reason': 'DowntimeReason',
+                ' Comments': 'RecordComment'
+            })
+        return input_file
         
     def process_files():
         execute_time_start = datetime.now(timezone.utc)
@@ -311,6 +322,8 @@ def main():
         csv_file = filter_by_date(csv_file)
         csv_file = duplicate_check(csv_file)
         hourly_csv_file = filter_by_time(csv_file)
+        csv_file = rename_columns(csv_file)
+        hourly_csv_file = rename_columns(hourly_csv_file)
         
         # Try: Output to csv
         try:
