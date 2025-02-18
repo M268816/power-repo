@@ -1,0 +1,1 @@
+pyinstaller .\main.py --name Nephele-Insertion-cli --onefile --console --clean
