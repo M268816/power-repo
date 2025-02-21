@@ -1,0 +1,17 @@
+
+[ NEW OPERATION ] Operation Started at: 21-02-2025, 10:19:29.
+
+[ NEW OPERATION ] Operation Started at: 21-02-2025, 10:20:27.
+CSV Files Processed in 7062.0ms.
+CSV Files Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
+Service Ended: 21-02-2025, 10:21:30
+
+[ NEW OPERATION ] Operation Started at: 21-02-2025, 10:23:06.
+CSV Files Processed in 8173.0ms.
+CSV Files Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
+Service Ended: 21-02-2025, 10:23:32
+
+[ NEW OPERATION ] Operation Started at: 21-02-2025, 10:26:15.
+CSV Files Processed in 6277.0ms.
+CSV Files Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
+Service Ended: 21-02-2025, 10:26:44
