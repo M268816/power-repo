@@ -1,1 +1,1 @@
-pyinstaller .\main.py --name Nephele-cli --onefile --console --clean
+pyinstaller .\main.py --name Nephele_V2 --onefile --console --clean

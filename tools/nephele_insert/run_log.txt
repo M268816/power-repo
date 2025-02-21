@@ -1,0 +1,5 @@
+
+[ NEW OPERATION ] Operation Started at: 21-02-2025, 09:31:23.
+CSV Files Processed in 16901.0ms.
+CSV Files Saved into: C:\Users\M268816\OneDrive - MerckGroup\Special Projects\CSV_Output
+Service Ended: 21-02-2025, 09:32:34

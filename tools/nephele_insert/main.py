@@ -288,8 +288,8 @@ def main():
     def process_files():
         execute_time_start = datetime.now(timezone.utc)
         csv_file = clean_csvs()
-        csv_file = filter_by_date(csv_file)
         csv_file = duplicate_check(csv_file)
+        csv_file = filter_by_date(csv_file)
         csv_file = rename_columns(csv_file)
         
         # Try: Output to csv

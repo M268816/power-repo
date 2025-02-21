@@ -1,46 +1,84 @@
 # Todo
 
-## Aervent and High Area Calculations
+## Front End Pleater DMS
 
-ClearCollect(colAerventCatalogs,
-    {Value: "CTGR01TP1"}, {Value: "CTGR02TP1"}, {Value: "CTGR03TP1"}, // Code 0
-    {Value: "CTGR75S01"}, {Value: "CTGR71TP1"}, {Value: "CTGR72TP1"}, {Value: "CTGR73TP1"} // Code 7
-);
+### Aervent and High Area Calculations
 
-ClearCollect(colHighAreaCatalogs,
-    // Code 7
-    {Value: "CHGE71HS3"}, {Value: "CHGE72HS3"}, {Value: "CHGE73HS3"},
-    {Value: "CHVE71HS3"}, {Value: "CHVE72HS3"}, {Value: "CHVE73HS3"}
-);
+Completed, needs review with chad
 
-## Power Automate Flow Fixes
-Downtime Data pulling in duplicate short stop data.
+### Power Automate Flow Fixes
 
-## Nephele needs review
+Implementation needed
 
-## PowerApp Building
+New power automate flow properly pulls in downtime data
+
+### Nephele needs review
+
+Implementation needed.
+
+Nephele updated to pull both hourly and daily data.
+
+Hourly Data will be pulled in by hour into sharepoint lists by
+the power automate flow.
+
+Daily data will be pulled in once a day at 11:00PM to update/catch
+any errant data.
+
+### Database Refactoring
+
+Solidify Production Database structure, data.db transfer, and perm location.
+    FE_RollData
+
+Solidify Downtime Database structure, flow connections, and perm location.
+    FE_Downtime
+
+Solidify Trend Database perm location.
+    FE_OEE2Trends
+
+Solidify Constraint Database perm location.
+    FE_Constraints
+        Supplemented with the Pleater Speed collection.
+
+Solidify SlitPostPleat Database perm location.
+    FE_SlitsPostPleat
+
+
+### PowerApp Building
+
+Connect to perm databases.
+
 Refactor naming conventions to align with design docs
+
+Integrate new aervent calculations when pulling and parsing data
+
 Review versioning, galleries and quickchart.io connections breaking.
-### Home
-    Completed
-### Outputs
-    Completed
-### Downtime
-    Completed
-### OEE
-    Data Collection Review
-    General Reformatting
-### Loss
-    Data Collection Review
-    General Reformatting
-### Trend
-    Data Collection Review
-    Graphing with quickchart.io is broken
-### Bugs
-    Completed
-### Daily Operations Report / End of Day Processing / Tier 1?
-### Tier 2
 
+Build T2 and T3 Reports.
+
+#### Home
+    Completed
+#### Outputs
+    Update to new data collection
+    Integrate new aervent calculations
+#### Downtime
+    Update to new data collection
+#### OEE
+    Update to new data collection
+    Integrate new aervent calculations
+    Data Collection Review
+    General Reformatting
+#### Loss
+    Data Collection Review
+    General Reformatting
+#### Trend
+    Data Collection Review
+    Integrate new aervent calculations
+    Check on quickchart.io connection
+#### Bugs
+    Completed
+#### Daily Operations Report 
+    Full replacement for dor?
+#### Tier 2
 - Safety
     - Safety Moments
     - Safety Incidents
@@ -62,51 +100,21 @@ Review versioning, galleries and quickchart.io connections breaking.
     - Follow up Action
     - Owner
     - Due Date
-    - Comments
-### Tier 3
+    - Comments### Power Bi Integration
 
-- Safety
-    - Safety Moments
-    - Safety Incidents
-    - Overdue EHS Actions
-    - Upcoming EHS Actions
-    - Overdue Critical PMs
-- Quality
-    - Deviations
-    - ROEs
-- Supply
-    - Daily Targets
-- Completions
-    - Weekly Targets
-- Action Tracker
-    - Area
-    - Downtime
-    - Issue
-    - Primary Action
-    - Follow up Action
-    - Owner
-    - Due Date
-    - Comments
-### Power Bi Integration
+## Encapsulation ROE/Deviation Update
 
-- Requires pro license.
+Nothing yet.
 
 # Footage Algorithm
-> CHAD: (Ending S# - Beginning S# + 1) * ((Pleats per Unit * Pleat Height) / 6)
+> (Ending S# - Beginning S# + 1) * ((Pleats per Unit * Pleat Height) / 6)
 
 (73 + 1) * ((127 * 0.455) / 6)
 
 (74) * (9.6308)
 
-712.6816 ft
+712.6792 ft
 
-> PowerApp: ((End Cart # - Start Cart # + 1) * Pleats per Unit * pleat height) / 6
-
-((73 + 1) * 127 * 0.455) / 6
-
-(4276.09)/6
-
-712.6816 ft
 
 # Stable PowerApp Versions
 Encap Production = 1303
