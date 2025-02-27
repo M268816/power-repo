@@ -191,7 +191,7 @@ something I call universal. Here are the conventions that I use.
     - Prefix with 'gbl'.
     - Camel Case.
     ```cpp
-    Set(gblThemeMode, Theme.Mode.Dark);
+    Set(gblStyles, Theme.Mode.Dark);
     ```
 ### Universal
 
@@ -394,5 +394,402 @@ ForAll(Filter(colTopLevelData, DateTime = gblTime.Today),
                 + 1
         }
     )
+);
+```
+
+# Initialization
+
+Current versions of the PowerApp app properties include the OnStart action. This
+action has been planned to be removed from future versions of PowerApps. This
+poses a problem because many of the apps I build need to have various variables
+and processes run before the applications hand over control to the user.
+
+This includes simple instructions like setting global variables for formatting.
+However, this also includes instructions for updating login settings and user
+tracking. If power apps as a platform decides to remove the OnStart property
+from the editor, I needed to future proof these instructions by utilizing a
+stable initialization method.
+
+This brings us to the Init screen. I utilize a starting screen to init
+instructions into the app instead of the OnStart property. Currently, this
+system is automatic, as the OnStart property is still available. I create a
+CONSTANT that determines weather or not to load these initial instructions,
+explained why later.
+
+```cpp
+Set(INITIALIZE, true);
+```
+
+When the application loads, it first sets this constant. Then immediately 
+transfers the app to the screen stored in the 'StartScreen' property. I use
+the screen 'Init' for this purpose.
+
+This causes another action to fire for the Init screen called 'OnVisible'. If
+INITIALIZE is set to true, then the OnVisible property inits the instructions
+through the OnSelect property of a button.
+
+```cpp
+// The button is called iInit
+If(INITIALIZE, Select(iInit));
+```
+
+The flow of these properties and information causes an infinite loop that cannot
+be broken when the app starts this way. That is why I set the INITIALIZE
+constant at all. It gives me the ability to stop the automatic process and edit
+the init code as I need.
+
+In the future when PowerApps disables the OnStart property, this automatic
+process will most likely be offloaded onto a simple manual button press that
+starts the init instructions.
+
+```
+╔════════════════════╗
+║Click Here to Enter!║
+╚════════════════════╝
+```
+
+## Standard Variables
+
+The Templates come with some standard variables to use within the apps. 
+Navigation, Popups, and Icons have been separated and explained more in depth
+later on. These next variables I use as standard practice to increase some of
+the flexibility of the template.
+
+```cpp
+
+/*  
+    APP_NAME helps keep areas of the application consistent with the bug
+    reporting tool
+*/  
+Set(APP_NAME, "DMS Management Template");
+
+//  Setting a global padding helps keeps visuals consistent.
+Set(gblPadding, Round(App.Width * 0.005,0));
+
+/* 
+    Setting time variables is important because static objects will not
+    update these functions without a direct update to them. Setting these
+    functions to a variable updates this info whenever they load, in turn
+    updating the static objects.
+*/
+Set(gblTime,{Today:Today(),Now:Now()});
+
+/*
+    Using a global variable to pull in static data with dot notation is always
+    very valuable. These lists are used constantly throughout the app, for
+    many various applications.
+*/
+Set(gblLists,
+    {
+        Shifts: [
+            "C","A","B"
+        ],
+        Lines: [
+            "XL1", "XL2", "XL3", "XL4", "XL5",
+            "XLT", "XLT2", "XLT3",
+            "SSC", "SSC2"
+        ],
+        Downtime_Reasons: [
+            "Reason 1","Reason 2","Reason 3","Reason 4",
+            "Reason 5","Reason 6","Reason 7","Reason 8",
+        ]
+    }
+);
+```
+
+## Navigation
+
+The navigation system that I apply to my apps uses a collection of screens.
+
+```cpp
+ClearCollect(colNavigation,
+    {Screen: Home, Label: "Home"},
+    {Screen: Filterable, Label: "Filterable"},
+    {Screen: Singleton, Label: "Singleton"},
+    {Screen: Data, Label: "Data"}
+);
+```
+
+It holds the Screen Object in 'Screen' and a text label in 'Label'.
+
+With this collection initialization, it creates a data structure I can use to
+populate a gallery for navigation on each screen. This data structure can be
+edited from initialization and automatically update all other instances of the
+navigation gallery throughout the whole application.
+
+```yaml
+- hNavigationGallery:
+    Control: Gallery@2.15.0
+    Variant: Vertical
+    Properties:
+      AlignInContainer: =AlignInContainer.SetByContainer
+      Items: =colNavigation
+      LayoutMinHeight: =10
+      LayoutMinWidth: =10
+      TemplatePadding: =gblPadding
+      TemplateSize: =40
+    Children:
+      - hNavGalleryButton:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderThickness: =1
+            Color: =gblTheme.Text_Dark
+            DisplayMode: -|
+                =If(App.ActiveScreen.Name = ThisItem.Screen.Name,
+                    DisplayMode.Disabled,
+                    DisplayMode.Edit
+                )
+            Fill: =gblTheme.Accent
+            FontWeight: =FontWeight.Normal
+            Height: =Parent.TemplateHeight
+            OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+            RadiusBottomLeft: =Self.RadiusTopLeft
+            RadiusBottomRight: =Self.RadiusTopLeft
+            RadiusTopLeft: =100
+            RadiusTopRight: =Self.RadiusTopLeft
+            Size: =Self.Height / 4
+            Text: =ThisItem.Label
+            Width: =Parent.TemplateWidth
+```
+
+## The popup manager
+
+The popup manager uses a collection to store a single global record. This record
+is then mutable anywhere in the application. It allow us to dynamically change
+any variable associated with the record and pull the information through dot
+notation.
+
+```cpp
+// Popup Manager
+ClearCollect(recPopups,
+    {
+        Display_Text: "Not Loading",
+        Value: -1,
+        Popup: "",
+        Visible: false
+    }
+);
+// Setter: Patch(recPopups,First(recPopups),{Value: 10});
+// Getter: First(recPopups).Value
+```
+
+I'm not going to lie the variables that I use are very jank.
+
+Display_Text is used to display any type of loading information through any
+text object or property.
+
+Value is used to determine the status of the loading and spinner objects. I 
+typically use -1 to determine if properties should be turned off or
+indeterminate. For example, in a progress bar, the bar will cycle like a 
+spinner when indeterminate is set to true. Otherwise it will set the position of
+the inner colored loading bar.
+
+Visible is fairly well explained, as it determines if the popup manager should
+be visible.
+
+Popup, on the other hand is a very messy way I determined what popup should be
+displaying. Some screens have various popups that need to display, like
+errors, or simple loading prompts. To determine what popup to show, I use a
+string variable that describes the popup. For example, the loading popup would
+be named 'loading'. An error for bad information would be called 'error'. And 
+a confirmation dialog would be 'confirm'.
+
+The parent object that controls all popups will use the 'Visible' variable to
+determine weather or not to show a popup.
+
+But the 'Popup' variable determines what popup to display in the parent object.
+
+```yaml
+# Parent Properties
+- hPopups:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
+    Properties:
+      Visible: =First(recPopups).Visible # show the manager via boolean
+```
+
+```yaml
+# Child Properties
+- hPopupError:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
+    Properties:
+      Visible: = First(recPopups).Popup = 'error' # show the popup via equality
+```
+
+## Themes and theme modes
+
+A manual theme system was totally optional and I had no reason to implement it
+except that... I wanted dark mode.
+
+There are two steps to setting up this theme system.
+
+1. Define each style or mode.
+2. Apply a selected style or mode.
+
+Defining the styles or modes can be as complicated as you wish. For me, I just
+wanted a way to switch between light and dark modes that was controlled all in
+one place.
+
+This next large hunk of code is just the setup. I defined what each key
+represented and what each color value those were assigned. I did try my best
+to use the coloring guidelines from global that can be found [here]('https://brand-hub.emdgroup.com/en/login.html?requestUri=https://brand-hub.emdgroup.com/en/design-basics/colors.html').
+
+
+
+```cpp
+// Theme Mode Setup
+Set(gblStyles,
+    {
+        Light:
+        {
+            Style: "Light",
+            Text_Dark: ColorValue("#000000"),
+            Text_On_Dark: ColorValue("#FFFFFF"),
+            Text_Light: ColorValue("#FFFFFF"),
+            Text_On_Light: ColorValue("#000000"),
+            Background: ColorValue("#FFFFFF"),
+            Midground: ColorValue("#EEEEEE"),
+            Foreground: ColorValue("#DDDDDD"),
+            Primary: ColorValue("#503291"),
+            Pri_Complement: ColorValue("#2DBECD"),
+            Secondary: ColorValue("#0f69af"),
+            Sec_Complement: ColorValue("#FFDBC9"),
+            Accept: ColorValue("#149B5f"),
+            Deny: ColorValue("#e61e50"),
+            Accent: ColorValue("#FFC832"),
+            Chart_Black: "#121212",
+            Chart_White: "#FFFFFF",
+            Chart_Red: "#e61e50",
+            Chart_Blue: "#503291",
+            Chart_Accent: "#FFC832",
+            Chart_Dim: "#787878"
+        },
+        Dark:
+        {
+            Style: "Dark",
+            Text_Dark: ColorValue("#000000"),
+            Text_On_Dark: ColorValue("#000000"),
+            Text_Light: ColorValue("#FFFFFF"),
+            Text_On_Light: ColorValue("#FFFFFF"),
+            Background: ColorValue("#121212"),
+            Midground: ColorValue("#232323"),
+            Foreground: ColorValue("#343434"),
+            Primary: ColorValue("#565656"),
+            Pri_Complement: ColorValue("#ec9d99"),
+            Secondary: ColorValue("#676767"),
+            Sec_Complement: ColorValue("#af9ecf"),
+            Accept: ColorValue("#98d3b2"),
+            Deny: ColorValue("#f68da5"),
+            Accent: ColorValue("#ffdf85"),
+            Chart_Black: "#FFFFFF",
+            Chart_White: "#121212",
+            Chart_Red: "#f68da5",
+            Chart_Blue: "#0f69af",
+            Chart_Accent: "#ffdf85",
+            Chart_Dim: "#565656"
+        }
+    }
+);
+```
+
+Step two, make these settings easily accessible with dot notation.
+
+```cpp
+Set(gblTheme, gblStyles.Light);
+```
+
+I also set up a way to check what theme is currently active. Although, it does
+use the simple string system like the popup manager does. This is a simple setup
+to change from dark mode to light mode.
+
+```cpp
+If(gblTheme.Style = "Light",
+    Set(gblTheme, gblStyles.Dark),
+    Set(gblTheme, gblStyles.Light)
+)
+
+// I should probably change the variables to be more readable though, like this
+If(gblTheme.Style = "Light",
+    Set(gblTheme, gblStyles.Dark),
+    Set(gblTheme, gblStyles.Light)
+)
+```
+
+## Icon manager
+
+The icon manager that I have included uses raw SVG code encoded from the
+[global branding icon package]('https://brand-hub.emdgroup.com/en/design-basics/icons.html').
+
+Icons are set as variables that can be input into the app with image objects.
+I use SVGs instead of plain images because they scale cleaner and their colors
+can be updated on the fly.
+
+```js
+// Just look for this piece of code and change the hex color
+{fill:#0F69AF;}
+```
+
+The objects an simply use dot notation to apply them.
+
+```yaml
+- hBugs:
+    Control: Image@2.2.3
+    Properties:
+      BorderColor: =RGBA(0, 18, 107, 1)
+      HoverFill: =gblTheme.Pri_Complement
+      Image: =gblIcons.Bug # EZPZ
+      ImagePosition: =ImagePosition.Fill
+      LayoutMinHeight: =10
+      OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+      PaddingLeft: =
+      RadiusBottomLeft: =Self.Width
+      RadiusBottomRight: =Self.RadiusBottomLeft
+      RadiusTopLeft: =Self.RadiusBottomLeft
+      RadiusTopRight: =Self.RadiusBottomLeft
+      Width: =Self.Height
+
+```
+
+To add your own icons to this list you need pull the raw SVG code from icons
+taken from the global package and add them to the list. The easiest way would to
+copy and paste a key value pair and change the SVG code as necessary. Finally,
+run a find and replace on the SVG code block, change all double quotes (") into
+single quotes (').
+
+
+## Login catching
+
+One of the strangest things that I never thought that I would need to add.
+
+A way to capture who is logging into the application. I wanted to make sure the
+supervisors of my area were actually using the application. Office politics as
+it stands is a rough road to travel. I was asked to integrate more functionality
+into the apps but I needed to confirm user activity. I didn't want to waste time
+making features if the app wasn't being used.
+
+Its a simple patch function that needs to pull from the azure directory to 
+properly populate the sharepoint list that tracks the login info. What makes it
+interesting is the way you need to pull the person field, but it's pretty self
+explanatory. Its safe to remove completely if you don't want to setup login
+tracking.
+
+```cpp
+Patch(
+    LoginTracking,
+    Defaults(LoginTracking), 
+    {
+        Person: {
+            '@odata.type':"#Microsoft.Azure.Connectors.SharePoint.SPListExpandedUser",
+            Claims: "i:0#.f|membership|" & User().Email,
+            Department: "",
+            DisplayName: User().FullName,
+            Email: User().Email,
+            JobTitle: "",
+            Picture: ""
+        },
+
+        Application: APP_NAME
+    }
 );
 ```
