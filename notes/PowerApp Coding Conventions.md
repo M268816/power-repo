@@ -1,11 +1,38 @@
-
 # PowerApps coding conventions and syntax
 
 In an attempt to create some sort of consistency with my own code, I'm going to
 write up a code of ethics and conventions for writing PowerApps code and try and
 adhere to them.
 
+## Table of contents
+1. [Conventions and Syntax](#powerapps-coding-conventions-and-syntax)
+    1. [Initial Setup](#initial-setup)
+    2. [Commenting](#commenting)
+    3. [Databases and Data Sources](#databases-or-data-sources)
+    4. [User Preferences](#userpreferences)
+    5. [Screens](#screens)
+    6. [Objects / Controls](#objects--controls)
+    7. [Variables](#variables)
+        1. [Constant](#constant)
+        2. [Local](#local)
+        3. [Global](#global)
+        4. [Universal](#universal)
+    8. [Dates and Times](#dates-and-times)
+    9. [Collections](#collections)
+    10. [Records](#records)
+    11. [Field Names](#field-names)
+2. [Using the Templates](#using-the-templates)
+    1. [Initialization](#initialization)
+    2. [Standard Variables](#standard-variables)
+    3. [Navigation](#navigation)
+    4. [The popup manager](#the-popup-manager)
+    5. [Themes](#themes-and-theme-modes)
+    6. [Icon Manager](#icon-manager)
+    7. [Login Catching](#login-catching)
+
 ## Initial Setup
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 Before putting pen to paper... or I guess fingers to keys... mouse to clicks?.
 It's best to setup the applications Update settings. Enter the Settings menu in
@@ -23,6 +50,8 @@ application. New analysis engine should be turned on along with the rest of this
 tab. Again, I do highly recommend turning off the copilot features.
 
 ## Commenting
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 No big comment rules here, just be sure to use comments for tricky parts of
 formulas or functions
@@ -49,6 +78,8 @@ formulas or functions
 
 ## Databases or data sources
 
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
 When using outside data sources, it's good practice to first create the database
 you want to pull the information from. Once the initial data base structure is
 built, it makes linking to PowerApps a much simpler process.
@@ -65,6 +96,9 @@ their needs.
 | Someone    | Else      | someone.else@milliporesigma.com   | ( Dark )   |
 
 ## Screens
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
 > Home
 
 > OrderMaterials
@@ -82,6 +116,8 @@ OrderMaterials
 ```
 
 ## Objects / Controls
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 > Update Jan 28 2025: PowerApps handles kebab case by adding single quotes to the
 > yaml code. Using this for a while, I noticed how absolutely annoying it was.
@@ -159,6 +195,8 @@ within the header or footer, but only that its the bug button for that page.
 > hReportBug
 
 ## Variables
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 > Update Jan 28 2025: I really liked using the simpler 'g' from 'gbl or 'l' from
 > 'loc' for naming variables. But it was unfortunately hard to read sometimes.
@@ -252,6 +290,8 @@ and load them into the application on launch.
 
 ## Dates and Times
 
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
 The Today() and Now() functions will only update their values when first called
 or used to set parameters. This means for objects like the Text Label, when
 Today() and Now() are used it only pulls in the value stored the last time they
@@ -280,6 +320,8 @@ Set(gblTime,
 ```
 
 ## Collections
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 Collections in PowerApps are powerful data structures that can be used for a
 large variety of data management. These collections can be used to not only
@@ -315,6 +357,8 @@ ForAll(EncapsulationProductionData,
 ```
 
 ## Records
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 Single record collections are useful for creating mutable variables accessible
 with dot notation. I make sure to only ever init the collection, then change its
@@ -378,6 +422,8 @@ recOEE.Goal
 
 ## Field Names
 
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
 When naming field names within collections, tables, lists or dictionaries the
 field or column name will use snake case. Global collections will capitalize
 their first letters in field names, while sub collections or 'local' collections
@@ -419,6 +465,8 @@ ForAll(Filter(colTopLevelData, DateTime = gblTime.Today),
 
 # Using the Templates
 
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
 Using the yaml templates from the git repo is pretty simple. To get started,
 first create a new screen, then copy the yaml code form the repo, and paste it
 into the screen using the paste code menu item.
@@ -436,6 +484,8 @@ Production. Use find and replace in any text editor and replace the placeholder
 prefix with the prefix of the Screen you are setting up.
 
 ## Initialization
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 Current versions of the PowerApp app properties include the OnStart action. This
 action has been planned to be removed from future versions of PowerApps. This
@@ -488,6 +538,8 @@ starts the init instructions.
 
 ## Standard Variables
 
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
 The Templates come with some standard variables to use within the apps. 
 Navigation, Popups, and Icons have been separated and explained more in depth
 later on. These next variables I use as standard practice to increase some of
@@ -536,6 +588,8 @@ Set(gblLists,
 ```
 
 ## Navigation
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 The navigation system that I apply to my apps uses a collection of screens.
 
@@ -591,6 +645,8 @@ navigation gallery throughout the whole application.
 ```
 
 ## The popup manager
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 The popup manager uses a collection to store a single global record. This record
 is then mutable anywhere in the application. It allow us to dynamically change
@@ -656,6 +712,8 @@ But the 'Popup' variable determines what popup to display in the parent object.
 ```
 
 ## Themes and theme modes
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 A manual theme system was totally optional and I had no reason to implement it
 except that... I wanted dark mode.
@@ -756,6 +814,8 @@ If(gblTheme.Style = "Light",
 
 ## Icon manager
 
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
 The icon manager that I have included uses raw SVG code encoded from the
 [global branding icon package]('https://brand-hub.emdgroup.com/en/design-basics/icons.html').
 
@@ -797,6 +857,8 @@ single quotes (').
 
 
 ## Login catching
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
 
 One of the strangest things that I never thought that I would need to add.
 
