@@ -1,276 +1,328 @@
-- xHxLayout:
-    Control: GroupContainer
-    Variant: verticalAutoLayoutContainer
+- hLayout:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
     Properties:
       DropShadow: =DropShadow.None
       Fill: =gblTheme.Background
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical
-      LayoutMode: =LayoutMode.Auto
       RadiusBottomLeft: =0
       RadiusBottomRight: =0
       RadiusTopLeft: =0
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-    - xHxCollect:
-        Control: Classic/Button
-        Properties:
-          Text: ="collect"
-          AlignInContainer: =AlignInContainer.Start
-          Visible: =false
-    - xHxSequentialCollect:
-        Control: Timer
-        Properties:
-          Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
-          AlignInContainer: =AlignInContainer.Start
-          Visible: =false
-    - xHxUpdate:
-        Control: Classic/Button
-        Properties:
-          Text: ="update"
-          AlignInContainer: =AlignInContainer.Start
-          Visible: =false
-    - xHxHeader:
-        Control: GroupContainer
-        Variant: horizontalAutoLayoutContainer
-        Properties:
-          AlignInContainer: =AlignInContainer.SetByContainer
-          DropShadow: =DropShadow.None
-          Fill: =gblTheme.Primary
-          LayoutAlignItems: =LayoutAlignItems.Stretch
-          LayoutGap: =gblPadding
-          LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-          LayoutMinHeight: =10
-          LayoutMinWidth: =10
-          LayoutMode: =LayoutMode.Auto
-          PaddingBottom: =gblPadding
-          PaddingLeft: =gblPadding
-          PaddingRight: =gblPadding
-          PaddingTop: =gblPadding
-          RadiusBottomLeft: =0
-          RadiusBottomRight: =0
-          RadiusTopLeft: =0
-          RadiusTopRight: =0
-        Children:
-        - xHxLogo:
-            Control: Image
-            Properties:
-              Image: =If(gblTheme.Mode = "Light", logo1, logo2)
-              LayoutMinHeight: =10
-              Width: =xHxNavigationTitle.Width
-        - xHxTitle:
-            Control: Label
-            Properties:
-              Text: =APP_NAME
-              Color: =gblTheme.Text_Light
-              FillPortions: =1
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              Size: =Self.Height / 3
-        - xHxMode:
-            Control: Classic/Icon
-            Variant: HalfFilledCircle
-            Properties:
-              OnSelect: =If(gblTheme.Mode = "Light", Set(gblTheme, gblThemeMode.Dark),Set(gblTheme, gblThemeMode.Light))
-              Color: =gblTheme.Text_On_Dark
-              Height: =10
-              HoverColor: =gblTheme.Text_On_Light
-              Icon: =Icon.HalfFilledCircle
-              LayoutMinHeight: =10
-              PaddingBottom: =4
-              PaddingLeft: =4
-              PaddingRight: =4
-              PaddingTop: =4
-              Rotation: =If(gblTheme.Mode = "Light", 0, 180)
-              Width: =Self.Height
-        - xHxBugs:
-            Control: Image
-            Properties:
-              OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
-              Image: =gblIcons.Bug
-              HoverFill: =gblTheme.Pri_Complement
-              ImagePosition: =ImagePosition.Fill
-              LayoutMinHeight: =10
-              PaddingLeft: =
-              RadiusBottomLeft: =Self.Width
-              RadiusBottomRight: =Self.RadiusBottomLeft
-              RadiusTopLeft: =Self.RadiusBottomLeft
-              RadiusTopRight: =Self.RadiusBottomLeft
-              Width: =Self.Height
-        - xHxUserImg:
-            Control: Image
-            Properties:
-              Image: =User().Image
-              Fill: =RGBA(0, 0, 0, 1)
-              ImagePosition: =ImagePosition.Fill
-              LayoutMinHeight: =10
-              PaddingLeft: =
-              RadiusBottomLeft: =Self.Width
-              RadiusBottomRight: =Self.RadiusBottomLeft
-              RadiusTopLeft: =Self.RadiusBottomLeft
-              RadiusTopRight: =Self.RadiusBottomLeft
-              Width: =Self.Height
-    - xHxMain:
-        Control: GroupContainer
-        Variant: horizontalAutoLayoutContainer
-        Properties:
-          AlignInContainer: =AlignInContainer.SetByContainer
-          DropShadow: =DropShadow.None
-          FillPortions: =11
-          LayoutAlignItems: =LayoutAlignItems.Stretch
-          LayoutMinHeight: =10
-          LayoutMinWidth: =10
-          LayoutMode: =LayoutMode.Auto
-          RadiusBottomLeft: =0
-          RadiusBottomRight: =0
-          RadiusTopLeft: =0
-          RadiusTopRight: =0
-        Children:
-        - xHxNavigation:
-            Control: GroupContainer
-            Variant: verticalAutoLayoutContainer
-            Properties:
-              AlignInContainer: =AlignInContainer.SetByContainer
-              DropShadow: =DropShadow.None
-              Fill: =gblTheme.Midground
-              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
-              LayoutAlignItems: =LayoutAlignItems.Stretch
-              LayoutDirection: =LayoutDirection.Vertical
-              LayoutGap: =gblPadding
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =gblPadding
-              PaddingLeft: =gblPadding
-              PaddingRight: =gblPadding
-              PaddingTop: =gblPadding
-              RadiusBottomLeft: =0
-              RadiusBottomRight: =0
-              RadiusTopLeft: =0
-              RadiusTopRight: =0
-            Children:
-            - xHxNavigationTitle:
-                Control: Label
+      - hCollect:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            BorderColor: =ColorFade(Self.Fill, -15%)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            Fill: =RGBA(56, 96, 178, 1)
+            Font: =Font.'Open Sans'
+            HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            PressedBorderColor: =Self.Fill
+            PressedColor: =Self.Fill
+            PressedFill: =Self.Color
+            Text: ="collect"
+            Visible: =false
+      - hSequentialCollect:
+          Control: Timer@2.1.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            BorderColor: =ColorFade(Self.Fill, -15%)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledBorderColor: =ColorFade(Self.BorderColor, 70%)
+            DisabledColor: =ColorFade(Self.Fill, 90%)
+            DisabledFill: =ColorFade(Self.Fill, 70%)
+            Fill: =RGBA(56, 96, 178, 1)
+            Font: =Font.'Open Sans'
+            HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            PressedBorderColor: =Self.Fill
+            PressedColor: =Self.Fill
+            PressedFill: =Self.Color
+            Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+            Visible: =false
+      - hUpdate:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            BorderColor: =ColorFade(Self.Fill, -15%)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            Fill: =RGBA(56, 96, 178, 1)
+            Font: =Font.'Open Sans'
+            HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            PressedBorderColor: =Self.Fill
+            PressedColor: =Self.Fill
+            PressedFill: =Self.Color
+            Text: ="update"
+            Visible: =false
+      - hHeader:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            Fill: =gblTheme.Primary
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =gblPadding
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            PaddingBottom: =gblPadding
+            PaddingLeft: =gblPadding
+            PaddingRight: =gblPadding
+            PaddingTop: =gblPadding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - hLogo:
+                Control: Image@2.2.3
                 Properties:
-                  Text: =App.ActiveScreen.Name
-                  Align: =Align.Center
-                  Color: =gblTheme.Text_On_Light
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 3
-            - xHxNavigationSeparator:
-                Control: Rectangle
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Image: =If(gblTheme.Style = "Light", logo1, logo2)
+                  LayoutMinHeight: =10
+                  Width: =hNavigationTitle.Width
+            - hTitle:
+                Control: Label@2.5.1
                 Properties:
-                  Fill: =gblTheme.Pri_Complement
-                  Height: =Round(gblPadding/2,0)
-                  LayoutMinWidth: =10
-                  Width: =10
-            - xHxNavigationGallery:
-                Control: Gallery
-                Variant: galleryVertical
-                Properties:
-                  Items: =colNavigation
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  DelayItemLoading: =true
-                  Layout: =Layout.Vertical
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =gblTheme.Text_Light
+                  FillPortions: =1
+                  Font: =Font.'Open Sans'
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
-                  LoadingSpinner: =LoadingSpinner.Data
-                  TemplatePadding: =gblPadding
-                  TemplateSize: =40
-                Children:
-                - xHxNavGalleryButton:
-                    Control: Classic/Button
-                    Properties:
-                      OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
-                      Text: =ThisItem.Label
-                      BorderThickness: =1
-                      Color: =gblTheme.Text_Dark
-                      DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
-                      Fill: =gblTheme.Accent
-                      FontWeight: =FontWeight.Normal
-                      Height: =Parent.TemplateHeight
-                      RadiusBottomLeft: =Self.RadiusTopLeft
-                      RadiusBottomRight: =Self.RadiusTopLeft
-                      RadiusTopLeft: =100
-                      RadiusTopRight: =Self.RadiusTopLeft
-                      Size: =Self.Height / 4
-                      Width: =Parent.TemplateWidth
-            - xHxNavigationFooter:
-                Control: Label
+                  Size: =Self.Height / 3
+                  Text: =APP_NAME
+            - hMode:
+                Control: Classic/Icon@2.5.0
                 Properties:
-                  Text: |-
-                    =
-                    "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
-                    &Char(13)&Char(13)&
-                    "© 2025 EMD Millipore. All rights reserved."
-                  Align: =Align.Center
-                  Color: =gblTheme.Text_On_Light
-                  Height: =Parent.Height * 0.1
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 14
-                  VerticalAlign: =VerticalAlign.Bottom
-        - xHxBody:
-            Control: GroupContainer
-            Variant: verticalAutoLayoutContainer
-            Properties:
-              AlignInContainer: =AlignInContainer.SetByContainer
-              DropShadow: =DropShadow.None
-              FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 20, 21)
-              LayoutDirection: =LayoutDirection.Vertical
-              LayoutGap: =gblPadding
-              LayoutMinHeight: =10
-              LayoutMinWidth: =10
-              LayoutMode: =LayoutMode.Auto
-              PaddingBottom: =gblPadding
-              PaddingLeft: =gblPadding
-              PaddingRight: =gblPadding
-              PaddingTop: =gblPadding
-              RadiusBottomLeft: =0
-              RadiusBottomRight: =0
-              RadiusTopLeft: =0
-              RadiusTopRight: =0
-            Children:
-            - xHxSection0:
-                Control: GroupContainer
-                Variant: verticalAutoLayoutContainer
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =gblTheme.Text_On_Dark
+                  Height: =10
+                  HoverColor: =gblTheme.Text_On_Light
+                  Icon: =Icon.HalfFilledCircle
+                  LayoutMinHeight: =10
+                  OnSelect: =If(gblTheme.Style = "Light", Set(gblTheme, gblStyles.Dark),Set(gblTheme, gblStyles.Light))
+                  PaddingBottom: =4
+                  PaddingLeft: =4
+                  PaddingRight: =4
+                  PaddingTop: =4
+                  Rotation: =If(gblTheme.Style = "Light", 0, 180)
+                  Width: =Self.Height
+            - hBugs:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  HoverFill: =gblTheme.Pri_Complement
+                  Image: =gblIcons.Bug
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+            - hUserImg:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Fill: =RGBA(0, 0, 0, 1)
+                  Image: =User().Image
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+      - hMain:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            FillPortions: =11
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - hNavigation:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.Regular
-                  Fill: =gblTheme.Foreground
-                  FillPortions: =0
-                  Height: =500
+                  DropShadow: =DropShadow.None
+                  Fill: =gblTheme.Midground
+                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gblPadding
+                  LayoutMinHeight: =10
                   LayoutMinWidth: =10
-                  LayoutMode: =LayoutMode.Auto
-                  LayoutOverflowY: =LayoutOverflow.Scroll
-                  PaddingRight: =
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
                 Children:
-                - xHxSection0Title:
-                    Control: Label
-                    Properties:
-                      Text: ="Section Zero"
-                      Align: =Align.Center
-                      AlignInContainer: =AlignInContainer.Start
-                      Color: =gblTheme.Text_Light
-                      Fill: =gblTheme.Secondary
-                      LayoutMinHeight: =10
-                      LayoutMinWidth: =10
-                      Size: =Self.Height / 3
-                      Width: =Parent.Width
-                - xHxSection0Content:
-                    Control: Label
-                    Properties:
-                      Text: |-
-                        ="Lorem ipsum odor amet, consectetuer adipiscing elit. Ac vitae lacus blandit dis pellentesque sed. Sagittis penatibus ante phasellus consequat sociosqu faucibus malesuada tellus habitasse. Sem aenean orci, malesuada fames erat morbi dis. Fringilla vehicula magnis vel habitant vitae non viverra massa. Imperdiet nulla at maximus pharetra; gravida imperdiet volutpat nullam laoreet. Fames vivamus vulputate primis netus ad libero. Tempor proin ornare viverra, congue enim ullamcorper. Sodales nam ligula ipsum suspendisse nam eros congue efficitur. Tempus lectus vel consectetur cubilia ornare maximus auctor ut nulla.
+                  - hNavigationTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =gblTheme.Text_On_Light
+                        Font: =Font.'Open Sans'
+                        LayoutMinWidth: =10
+                        Size: =Self.Height / 3
+                        Text: =App.ActiveScreen.Name
+                  - hNavigationSeparator:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Fill: =gblTheme.Pri_Complement
+                        Height: =Round(gblPadding/2,0)
+                        LayoutMinWidth: =10
+                        Width: =10
+                  - hNavigationGallery:
+                      Control: Gallery@2.15.0
+                      Variant: Vertical
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Items: =colNavigation
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        TemplatePadding: =gblPadding
+                        TemplateSize: =40
+                      Children:
+                        - hNavGalleryButton:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_Dark
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                              Fill: =gblTheme.Accent
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Normal
+                              Height: =Parent.TemplateHeight
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =Self.RadiusTopLeft
+                              RadiusBottomRight: =Self.RadiusTopLeft
+                              RadiusTopLeft: =100
+                              RadiusTopRight: =Self.RadiusTopLeft
+                              Size: =Self.Height / 4
+                              Text: =ThisItem.Label
+                              Width: =Parent.TemplateWidth
+                  - hNavigationFooter:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =gblTheme.Text_On_Light
+                        Font: =Font.'Open Sans'
+                        Height: =Parent.Height * 0.1
+                        LayoutMinWidth: =10
+                        Size: =Self.Height / 14
+                        Text: |-
+                          =
+                          "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                          &Char(13)&Char(13)&
+                          "© 2025 EMD Millipore. All rights reserved."
+                        VerticalAlign: =VerticalAlign.Bottom
+            - hBody:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 20, 21)
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gblPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - hSection0:
+                      Control: GroupContainer@1.3.0
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        DropShadow: =DropShadow.Regular
+                        Fill: =gblTheme.Foreground
+                        FillPortions: =0
+                        Height: =500
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinWidth: =10
+                        LayoutOverflowY: =LayoutOverflow.Scroll
+                        PaddingRight: =
+                      Children:
+                        - hSection0Title:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gblTheme.Text_Light
+                              Fill: =gblTheme.Secondary
+                              Font: =Font.'Open Sans'
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: =10
+                              Size: =Self.Height / 3
+                              Text: ="Section Zero"
+                              Width: =Parent.Width
+                        - hSection0Content:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Color: =gblTheme.Text_On_Light
+                              FillPortions: =1
+                              Font: =Font.'Open Sans'
+                              Overflow: =Overflow.Scroll
+                              PaddingBottom: =gblPadding
+                              PaddingLeft: =gblPadding
+                              PaddingRight: =gblPadding
+                              PaddingTop: =gblPadding
+                              Text: |-
+                                ="Lorem ipsum odor amet, consectetuer adipiscing elit. Ac vitae lacus blandit dis pellentesque sed. Sagittis penatibus ante phasellus consequat sociosqu faucibus malesuada tellus habitasse. Sem aenean orci, malesuada fames erat morbi dis. Fringilla vehicula magnis vel habitant vitae non viverra massa. Imperdiet nulla at maximus pharetra; gravida imperdiet volutpat nullam laoreet. Fames vivamus vulputate primis netus ad libero. Tempor proin ornare viverra, congue enim ullamcorper. Sodales nam ligula ipsum suspendisse nam eros congue efficitur. Tempus lectus vel consectetur cubilia ornare maximus auctor ut nulla.
 
-                        Orci felis aptent interdum interdum finibus per praesent mattis habitant. Torquent et vivamus maecenas nunc ornare ante vulputate. Molestie class nascetur lorem diam nec congue ut montes lacinia. Bibendum dignissim volutpat donec, pellentesque donec nam curabitur. Cras nibh arcu donec elementum ultricies venenatis elementum. Magnis imperdiet blandit litora ex tellus tempus rhoncus nisi. Consequat amet dui natoque varius vivamus taciti finibus ornare."
-                      Color: =gblTheme.Text_On_Light
-                      FillPortions: =1
-                      Overflow: =Overflow.Scroll
-                      PaddingBottom: =gblPadding
-                      PaddingLeft: =gblPadding
-                      PaddingRight: =gblPadding
-                      PaddingTop: =gblPadding
+                                Orci felis aptent interdum interdum finibus per praesent mattis habitant. Torquent et vivamus maecenas nunc ornare ante vulputate. Molestie class nascetur lorem diam nec congue ut montes lacinia. Bibendum dignissim volutpat donec, pellentesque donec nam curabitur. Cras nibh arcu donec elementum ultricies venenatis elementum. Magnis imperdiet blandit litora ex tellus tempus rhoncus nisi. Consequat amet dui natoque varius vivamus taciti finibus ornare."

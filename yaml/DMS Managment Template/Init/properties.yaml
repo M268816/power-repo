@@ -1,2 +1,2 @@
 Properties:
-  OnVisible: =Select('iInit');
+  OnVisible: =If(INITIALIZE, Select('iInit'));

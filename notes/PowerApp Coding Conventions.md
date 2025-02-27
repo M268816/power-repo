@@ -1,8 +1,26 @@
+
 # PowerApps coding conventions and syntax
 
 In an attempt to create some sort of consistency with my own code, I'm going to
 write up a code of ethics and conventions for writing PowerApps code and try and
 adhere to them.
+
+## Initial Setup
+
+Before putting pen to paper... or I guess fingers to keys... mouse to clicks?.
+It's best to setup the applications Update settings. Enter the Settings menu in
+the application editor, located at the bottom left as a gear icon, then select
+'Updates'. From here select the retired tab and turn off all options. Next,
+turn off all options within the 'Experimental' tab. You can turn these on if
+you need them later, but for now should not be used by default. Under the
+preview tab, you can turn on pretty much everything as these features are
+currently in testing and should be available soon anyway. I highly recommend
+turning off any copilot features though, most of them are simply annoying.
+Within the New tab, its best to leave Coauthoring off unless working closely on
+a joint project. Modern controls and themes can be turned on, as creating a new
+default theme comes in very handy when changing the font style of the whole 
+application. New analysis engine should be turned on along with the rest of this
+tab. Again, I do highly recommend turning off the copilot features.
 
 ## Commenting
 
@@ -25,6 +43,8 @@ formulas or functions
     Not very skibity of you.
 
 */
+
+// Sorry for the brainrot
 ```
 
 ## Databases or data sources
@@ -397,7 +417,25 @@ ForAll(Filter(colTopLevelData, DateTime = gblTime.Today),
 );
 ```
 
-# Initialization
+# Using the Templates
+
+Using the yaml templates from the git repo is pretty simple. To get started,
+first create a new screen, then copy the yaml code form the repo, and paste it
+into the screen using the paste code menu item.
+
+The yaml code for the Init, Home, and Bug Screens have pre-configured naming
+conventions. Other yaml code should be configured with 'find and replace' to set
+the naming conventions appropriately.
+
+For example, we make an Init  and Home screen and paste the Init yaml into those
+screens. The naming conventions for these screens are already setup. We also
+need to add a production screen that will display filterable data. First lookup
+the yaml for the filterable template, and then within this template, the names
+of the controls need to be changed from the placeholder prefix 'xFx' to 'p' for
+Production. Use find and replace in any text editor and replace the placeholder
+prefix with the prefix of the Screen you are setting up.
+
+## Initialization
 
 Current versions of the PowerApp app properties include the OnStart action. This
 action has been planned to be removed from future versions of PowerApps. This
