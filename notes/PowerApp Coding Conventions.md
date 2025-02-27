@@ -43,7 +43,7 @@ you need them later, but for now should not be used by default. Under the
 preview tab, you can turn on pretty much everything as these features are
 currently in testing and should be available soon anyway. I highly recommend
 turning off any copilot features though, most of them are simply annoying.
-Within the New tab, its best to leave Coauthoring off unless working closely on
+Within the 'New' tab, its best to leave Coauthoring off unless working closely on
 a joint project. Modern controls and themes can be turned on, as creating a new
 default theme comes in very handy when changing the font style of the whole 
 application. New analysis engine should be turned on along with the rest of this
