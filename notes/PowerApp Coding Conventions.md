@@ -34,7 +34,7 @@ adhere to them.
 
 [Back To Top](#powerapps-coding-conventions-and-syntax)
 
-Before putting pen to paper... or I guess fingers to keys... mouse to clicks?.
+Before putting pen to paper... or I guess fingers to keys... mouse to clicks?
 It's best to setup the applications Update settings. Enter the Settings menu in
 the application editor, located at the bottom left as a gear icon, then select
 'Updates'. From here select the retired tab and turn off all options. Next,
