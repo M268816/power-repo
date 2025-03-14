@@ -1,0 +1,182 @@
+- reLayout:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+      - reCollect:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            Text: ="collect"
+            Visible: =false
+      - reSequentialCollect:
+          Control: Timer@2.1.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+            Visible: =false
+      - reUpdate:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            Text: ="update"
+            Visible: =false
+      - reHeader:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            Fill: =gblTheme.Primary
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =gblPadding
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            PaddingBottom: =gblPadding
+            PaddingLeft: =gblPadding
+            PaddingRight: =gblPadding
+            PaddingTop: =gblPadding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - reBack:
+                Control: Image@2.2.3
+                Properties:
+                  HoverFill: =gblTheme.Pri_Complement
+                  Image: =gblIcons.Back
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  OnSelect: =Back(ScreenTransition.Fade)
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+            - reTitle:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =gblTheme.Text_Light
+                  FillPortions: =1
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+                  Text: =APP_NAME
+            - reMode:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Color: =gblTheme.Text_On_Dark
+                  Height: =10
+                  HoverColor: =gblTheme.Text_On_Light
+                  Icon: =Icon.HalfFilledCircle
+                  LayoutMinHeight: =10
+                  OnSelect: =If(gblTheme.Style = "Light", Set(gblTheme, gblStyles.Dark),Set(gblTheme, gblStyles.Light))
+                  PaddingBottom: =4
+                  PaddingLeft: =4
+                  PaddingRight: =4
+                  PaddingTop: =4
+                  Rotation: =If(gblTheme.Style = "Light", 0, 180)
+                  Width: =Self.Height
+            - reBugs:
+                Control: Image@2.2.3
+                Properties:
+                  HoverFill: =gblTheme.Pri_Complement
+                  Image: =gblIcons.Bug
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+            - reUserImg:
+                Control: Image@2.2.3
+                Properties:
+                  Fill: =RGBA(0, 0, 0, 1)
+                  Image: =User().Image
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+      - reMain:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            FillPortions: =11
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutJustifyContent: =LayoutJustifyContent.Center
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            PaddingBottom: =gblPadding
+            PaddingLeft: =gblPadding
+            PaddingRight: =gblPadding
+            PaddingTop: =gblPadding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - reSection0:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gblTheme.Foreground
+                  FillPortions: =0
+                  Height: =500
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinWidth: =10
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingRight: =
+                Children:
+                  - reSection0Title:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Start
+                        Color: =gblTheme.Text_Light
+                        Fill: =gblTheme.Secondary
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        Size: =Self.Height / 3
+                        Text: ="Section Zero"
+                        Width: =Parent.Width
+                  - reSection0Content:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =gblTheme.Text_On_Light
+                        FillPortions: =1
+                        Overflow: =Overflow.Scroll
+                        PaddingBottom: =gblPadding
+                        PaddingLeft: =gblPadding
+                        PaddingRight: =gblPadding
+                        PaddingTop: =gblPadding
+                        Text: |-
+                          ="Lorem ipsum odor amet, consectetuer adipiscing elit. Ac vitae lacus blandit dis pellentesque sed. Sagittis penatibus ante phasellus consequat sociosqu faucibus malesuada tellus habitasse. Sem aenean orci, malesuada fames erat morbi dis. Fringilla vehicula magnis vel habitant vitae non viverra massa. Imperdiet nulla at maximus pharetra; gravida imperdiet volutpat nullam laoreet. Fames vivamus vulputate primis netus ad libero. Tempor proin ornare viverra, congue enim ullamcorper. Sodales nam ligula ipsum suspendisse nam eros congue efficitur. Tempus lectus vel consectetur cubilia ornare maximus auctor ut nulla.
+
+                          Orci felis aptent interdum interdum finibus per praesent mattis habitant. Torquent et vivamus maecenas nunc ornare ante vulputate. Molestie class nascetur lorem diam nec congue ut montes lacinia. Bibendum dignissim volutpat donec, pellentesque donec nam curabitur. Cras nibh arcu donec elementum ultricies venenatis elementum. Magnis imperdiet blandit litora ex tellus tempus rhoncus nisi. Consequat amet dui natoque varius vivamus taciti finibus ornare."

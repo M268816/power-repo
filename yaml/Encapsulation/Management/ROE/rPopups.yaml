@@ -1,4 +1,4 @@
-- xHxPopups:
+- rPopups:
     Control: GroupContainer
     Variant: verticalAutoLayoutContainer
     Properties:
@@ -16,13 +16,13 @@
       Visible: =First(recPopups).Visible
       Width: =Parent.Width
     Children:
-    - xHxPopupLoading:
+    - rPopupLoading:
         Control: GroupContainer
         Variant: verticalAutoLayoutContainer
         Properties:
           AlignInContainer: =AlignInContainer.SetByContainer
           BorderColor: =gblTheme.Sec_Complement
-          BorderThickness: =If(gblTheme.Style = "Light",0,1)
+          BorderThickness: =If(gblTheme.Mode = "Light",0,1)
           DropShadow: =DropShadow.ExtraBold
           Fill: =gblTheme.Background
           FillPortions: =0
@@ -40,7 +40,7 @@
           RadiusTopRight: =0
           Width: =Parent.Width * 0.25
         Children:
-        - xHxPopupLoadingSpinner:
+        - rPopupLoadingSpinner:
             Control: Spinner
             Properties:
               FontColor: =gblTheme.Text_On_Light
@@ -52,7 +52,7 @@
               FillPortions: =1
               LayoutMinHeight: =10
               LayoutMinWidth: =10
-        - xHxPopupLoadingProgress:
+        - rPopupLoadingProgress:
             Control: Progress
             Properties:
               Indeterminate: =First(recPopups).Value = -1
