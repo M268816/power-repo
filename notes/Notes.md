@@ -26,12 +26,11 @@ Data points/Headers to consider:
  - Date
  - Count of Catalog per Line
 
-
 ## Front End Pleater DMS
 
 ### Aervent and High Area Calculations
 
-Completed, needs review with chad
+Completed
 
 ### Power Automate Flow Fixes
 
@@ -60,7 +59,7 @@ Solidify Downtime Database structure, flow connections, and perm location.
     FE_Downtime
 
 Solidify Trend Database perm location.
-    FE_OEE2Trends
+    FE_OEE2_Trends
 
 Solidify Constraint Database perm location.
     FE_Constraints
@@ -72,40 +71,29 @@ Solidify SlitPostPleat Database perm location.
 
 ### PowerApp Building
 
-Connect to perm databases.
+Permanent home for databases needed. Can run from my account for a while, but
+should be offloaded onto its own sharepoint environment.
 
-Refactor naming conventions to align with design docs
-
-Integrate new aervent calculations when pulling and parsing data
-
-Review versioning, galleries and quickchart.io connections breaking.
-
-Build T2 and T3 Reports.
+DOR and tier 2 reporting, needs scope definition from Jonathan
 
 #### Home
     Completed
 #### Outputs
-    Update to new data collection
-    Integrate new aervent calculations
+    Completed
 #### Downtime
-    Update to new data collection
+    Completed
 #### OEE
-    Update to new data collection
-    Integrate new aervent calculations
-    Data Collection Review
-    General Reformatting
+    Completed
 #### Loss
-    Data Collection Review
-    General Reformatting
+    Completed
 #### Trend
-    Data Collection Review
-    Integrate new aervent calculations
-    Check on quickchart.io connection
+    Completed
 #### Bugs
     Completed
 #### Daily Operations Report 
-    Full replacement for dor?
+Scope definition needed from management.
 #### Tier 2
+Scope definition needed from management.
 - Safety
     - Safety Moments
     - Safety Incidents
@@ -131,9 +119,13 @@ Build T2 and T3 Reports.
 
 ## Encapsulation ROE/Deviation Update
 
-Nothing yet.
+Databases being built by Michelle Thompson
 
-# Footage Algorithm
+Alpha build can begin soon.
+
+# Notes
+
+## Footage Algorithm
 > (Ending S# - Beginning S# + 1) * ((Pleats per Unit * Pleat Height) / 6)
 
 (73 + 1) * ((127 * 0.455) / 6)
@@ -143,7 +135,7 @@ Nothing yet.
 712.6792 ft
 
 
-# Stable PowerApp Versions
+## Stable PowerApp Versions
 Encap Production = 1303
 Encap Management = ????
 Encap Accountability = ????
