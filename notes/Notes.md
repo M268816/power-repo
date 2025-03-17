@@ -13,24 +13,7 @@ Risk assessment form needed to continue.
         - Express
         - Lamination
 
-## Encapsulation Staffing Challenge
-
-Determine the staffing needs through Catalog run percentages by line.
-
-Determine total demand demonstrated by output per shift.
-
-Data points/Headers to consider:
- - Catalog
- - Average Good Units per Lot Run
- - Line
- - Date
- - Count of Catalog per Line
-
 ## Front End Pleater DMS
-
-### Aervent and High Area Calculations
-
-Completed
 
 ### Power Automate Flow Fixes
 
@@ -120,6 +103,7 @@ Scope definition needed from management.
 ## Encapsulation ROE/Deviation Update
 
 Databases being built by Michelle Thompson
+Template Created For Management DMS
 
 Alpha build can begin soon.
 

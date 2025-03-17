@@ -1,4 +1,4 @@
-- xHxLayout:
+-  ttLayout:
     Control: GroupContainer@1.3.0
     Variant: AutoLayout
     Properties:
@@ -13,7 +13,7 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-      - xHxCollect:
+      -  ttCollect:
           Control: Classic/Button@2.2.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
@@ -30,7 +30,7 @@
             PressedFill: =Self.Color
             Text: ="collect"
             Visible: =false
-      - xHxSequentialCollect:
+      -  ttSequentialCollect:
           Control: Timer@2.1.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
@@ -49,7 +49,7 @@
             PressedFill: =Self.Color
             Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
             Visible: =false
-      - xHxUpdate:
+      -  ttUpdate:
           Control: Classic/Button@2.2.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
@@ -66,7 +66,7 @@
             PressedFill: =Self.Color
             Text: ="update"
             Visible: =false
-      - xHxHeader:
+      -  ttHeader:
           Control: GroupContainer@1.3.0
           Variant: AutoLayout
           Properties:
@@ -88,14 +88,14 @@
             RadiusTopLeft: =0
             RadiusTopRight: =0
           Children:
-            - xHxLogo:
+            -  ttLogo:
                 Control: Image@2.2.3
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
                   Image: =If(gblTheme.Style = "Light", logo1, logo2)
                   LayoutMinHeight: =10
-                  Width: =xHxNavigationTitle.Width
-            - xHxTitle:
+                  Width: =ttNavigationTitle.Width
+            -  ttTitle:
                 Control: Label@2.5.1
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
@@ -106,7 +106,7 @@
                   LayoutMinWidth: =10
                   Size: =Self.Height / 3
                   Text: =APP_NAME
-            - xHxMode:
+            -  ttMode:
                 Control: Classic/Icon@2.5.0
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
@@ -122,7 +122,7 @@
                   PaddingTop: =4
                   Rotation: =If(gblTheme.Style = "Light", 0, 180)
                   Width: =Self.Height
-            - xHxBugs:
+            -  ttBugs:
                 Control: Image@2.2.3
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
@@ -137,7 +137,7 @@
                   RadiusTopLeft: =Self.RadiusBottomLeft
                   RadiusTopRight: =Self.RadiusBottomLeft
                   Width: =Self.Height
-            - xHxUserImg:
+            -  ttUserImg:
                 Control: Image@2.2.3
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
@@ -151,7 +151,7 @@
                   RadiusTopLeft: =Self.RadiusBottomLeft
                   RadiusTopRight: =Self.RadiusBottomLeft
                   Width: =Self.Height
-      - xHxMain:
+      -  ttMain:
           Control: GroupContainer@1.3.0
           Variant: AutoLayout
           Properties:
@@ -167,7 +167,7 @@
             RadiusTopLeft: =0
             RadiusTopRight: =0
           Children:
-            - xHxNavigation:
+            -  ttNavigation:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
@@ -189,7 +189,7 @@
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                  - xHxNavigationTitle:
+                  -  ttNavigationTitle:
                       Control: Label@2.5.1
                       Properties:
                         Align: =Align.Center
@@ -199,7 +199,7 @@
                         LayoutMinWidth: =10
                         Size: =Self.Height / 3
                         Text: =App.ActiveScreen.Name
-                  - xHxNavigationSeparator:
+                  -  ttNavigationSeparator:
                       Control: Rectangle@2.3.0
                       Properties:
                         BorderColor: =RGBA(0, 18, 107, 1)
@@ -207,7 +207,7 @@
                         Height: =Round(gblPadding/2,0)
                         LayoutMinWidth: =10
                         Width: =10
-                  - xHxNavigationGallery:
+                  -  ttNavigationGallery:
                       Control: Gallery@2.15.0
                       Variant: Vertical
                       Properties:
@@ -219,7 +219,7 @@
                         TemplatePadding: =gblPadding
                         TemplateSize: =40
                       Children:
-                        - xHxNavGalleryButton:
+                        -  ttNavGalleryButton:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =ColorFade(Self.Fill, -15%)
@@ -245,7 +245,7 @@
                               Size: =Self.Height / 4
                               Text: =ThisItem.Label
                               Width: =Parent.TemplateWidth
-                  - xHxNavigationFooter:
+                  -  ttNavigationFooter:
                       Control: Label@2.5.1
                       Properties:
                         Align: =Align.Center
@@ -261,7 +261,7 @@
                           &Char(13)&Char(13)&
                           "© 2025 EMD Millipore. All rights reserved."
                         VerticalAlign: =VerticalAlign.Bottom
-            - xHxBody:
+            -  ttBody:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
@@ -281,7 +281,7 @@
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                  - xHxSection0:
+                  -  ttSection0:
                       Control: GroupContainer@1.3.0
                       Variant: AutoLayout
                       Properties:
@@ -296,7 +296,7 @@
                         LayoutOverflowY: =LayoutOverflow.Scroll
                         PaddingRight: =
                       Children:
-                        - xHxSection0Title:
+                        -  ttSection0Title:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
@@ -310,7 +310,7 @@
                               Size: =Self.Height / 3
                               Text: ="Section Zero"
                               Width: =Parent.Width
-                        - xHxSection0Content:
+                        -  ttSection0Content:
                             Control: Label@2.5.1
                             Properties:
                               BorderColor: =RGBA(0, 18, 107, 1)
@@ -323,6 +323,6 @@
                               PaddingRight: =gblPadding
                               PaddingTop: =gblPadding
                               Text: |-
-                                ="Lorem ipsum odor amet, consectetuer adipiscing elit. Ac vitae lacus blandit dis pellentesque sed. Sagittis penatibus ante phasellus consequat sociosqu faucibus malesuada tellus xHxabitasse. Sem aenean orci, malesuada fames erat morbi dis. Fringilla vehicula magnis vel xHxabitant vitae non viverra massa. Imperdiet nulla at maximus pharetra; gravida imperdiet volutpat nullam laoreet. Fames vivamus vulputate primis netus ad libero. Tempor proin ornare viverra, congue enim ullamcorper. Sodales nam ligula ipsum suspendisse nam eros congue efficitur. Tempus lectus vel consectetur cubilia ornare maximus auctor ut nulla.
+                                ="Lorem ipsum odor amet, consectetuer adipiscing elit. Ac vitae lacus blandit dis pellentesque sed. Sagittis penatibus ante phasellus consequat sociosqu faucibus malesuada tellus  ttabitasse. Sem aenean orci, malesuada fames erat morbi dis. Fringilla vehicula magnis vel  ttabitant vitae non viverra massa. Imperdiet nulla at maximus pharetra; gravida imperdiet volutpat nullam laoreet. Fames vivamus vulputate primis netus ad libero. Tempor proin ornare viverra, congue enim ullamcorper. Sodales nam ligula ipsum suspendisse nam eros congue efficitur. Tempus lectus vel consectetur cubilia ornare maximus auctor ut nulla.
 
-                                Orci felis aptent interdum interdum finibus per praesent mattis xHxabitant. Torquent et vivamus maecenas nunc ornare ante vulputate. Molestie class nascetur lorem diam nec congue ut montes lacinia. Bibendum dignissim volutpat donec, pellentesque donec nam curabitur. Cras nibh arcu donec elementum ultricies venenatis elementum. Magnis imperdiet blandit litora ex tellus tempus rhoncus nisi. Consequat amet dui natoque varius vivamus taciti finibus ornare."
+                                Orci felis aptent interdum interdum finibus per praesent mattis  ttabitant. Torquent et vivamus maecenas nunc ornare ante vulputate. Molestie class nascetur lorem diam nec congue ut montes lacinia. Bibendum dignissim volutpat donec, pellentesque donec nam curabitur. Cras nibh arcu donec elementum ultricies venenatis elementum. Magnis imperdiet blandit litora ex tellus tempus rhoncus nisi. Consequat amet dui natoque varius vivamus taciti finibus ornare."
