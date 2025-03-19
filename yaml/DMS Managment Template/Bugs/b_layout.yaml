@@ -1,0 +1,951 @@
+- b_layout:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gbl_theme.background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+      - b_collect:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
+            Text: ="collect"
+            Visible: =false
+      - b_sequential_collect:
+          Control: Timer@2.1.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
+            Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+            Visible: =false
+      - b_update:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
+            Text: ="update"
+            Visible: =false
+      - b_header:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            Fill: =gbl_theme.primary
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =gbl_padding
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            PaddingBottom: =gbl_padding
+            PaddingLeft: =gbl_padding
+            PaddingRight: =gbl_padding
+            PaddingTop: =gbl_padding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - b_back:
+                Control: Image@2.2.3
+                Properties:
+                  HoverFill: =gbl_theme.pri_complement
+                  Image: =gbl_icons.back
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  OnSelect: =Back(ScreenTransition.Fade)
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+            - b_title:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =gbl_theme.text_light
+                  FillPortions: =1
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+                  Text: ="Report a Bug"
+            - b_mode:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  Color: =gbl_theme.text_on_dark
+                  Height: =10
+                  HoverColor: =gbl_theme.text_on_light
+                  Icon: =Icon.HalfFilledCircle
+                  LayoutMinHeight: =10
+                  OnSelect: =If(gbl_theme.style = "light", Set(gbl_theme, gbl_styles.dark),Set(gbl_theme, gbl_styles.light))
+                  PaddingBottom: =4
+                  PaddingLeft: =4
+                  PaddingRight: =4
+                  PaddingTop: =4
+                  Rotation: =If(gbl_theme.style = "light", 0, 180)
+                  Width: =Self.Height
+      - b_main:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            FillPortions: =11
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutJustifyContent: =LayoutJustifyContent.Center
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            PaddingBottom: =gbl_padding
+            PaddingLeft: =gbl_padding
+            PaddingRight: =gbl_padding
+            PaddingTop: =gbl_padding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - b_form_parent:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Start
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gbl_theme.foreground
+                  FillPortions: =0
+                  Height: =If(App.Width > Index(App.SizeBreakpoints,3).Value, Parent.Height * 0.8, Parent.Height * 0.95)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =10
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingRight: =
+                  Width: =If(App.Width > Index(App.SizeBreakpoints,3).Value, Parent.Width * 0.35, Parent.Width * 0.7)
+                Children:
+                  - b_form_title:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        Color: =gbl_theme.text_light
+                        Fill: =gbl_theme.secondary
+                        Height: =b_title.Height / 2
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        Size: =Round(Self.Height / 3,0)
+                        Text: ="Bug Report Form"
+                        Width: =Parent.Width
+                  - b_form:
+                      Control: Form@2.4.2
+                      Variant: Classic
+                      Layout: Horizontal
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        DataSource: =BugReports
+                        DefaultMode: =FormMode.New
+                        FillPortions: =10
+                        Height: =Parent.Height
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        Width: =Parent.Width
+                        X: =1-1
+                        Y: =1-1
+                      Children:
+                        - b_form_line_card:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicTextualEdit
+                            IsLocked: true
+                            Properties:
+                              DataField: ="Line"
+                              Default: =ThisItem.Line
+                              DisplayMode: =DisplayMode.View
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Line)
+                              MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Line)
+                              Required: =true
+                              Update: =b_form_line_value.Text
+                              Visible: =false
+                              Width: =672
+                              WidthFit: =true
+                              Y: =2
+                            Children:
+                              - b_form_line_key:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =gbl_theme.text_on_light
+                                    Text: ="Effected Line"
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: '=5   '
+                              - b_form_line_value:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    Color: =gbl_theme.text_on_light
+                                    Default: ="NULL"
+                                    DelayOutput: =true
+                                    DisplayMode: =Parent.DisplayMode
+                                    Fill: =gbl_theme.background
+                                    Height: =50
+                                    MaxLength: =Parent.MaxLength
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =b_form_line_key.X + b_form_line_key.Width
+                                    Y: =5
+                              - b_form_line_error:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =b_form_line_value.Y + b_form_line_value.Height
+                              - b_form_line_star:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Height: =b_form_line_key.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =b_form_line_key.Y
+                        - b_form_status_card:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicComboBoxEdit
+                            IsLocked: true
+                            Properties:
+                              DataField: ="Status"
+                              Default: =ThisItem.Status
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Status)
+                              Height: =Parent.Height / 7.2
+                              Required: =true
+                              Update: =b_form_status_value.Selected
+                              Visible: =false
+                              Width: =672
+                              WidthFit: =true
+                              Y: =7
+                            Children:
+                              - b_form_status_key:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Height: =34
+                                    Text: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: =10 + (b_form_status_value.Height / 2) - (Self.Height / 2)
+                              - b_form_status_value:
+                                  Control: Classic/ComboBox@2.4.0
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    ChevronBackground: =gbl_theme.primary
+                                    ChevronFill: =RGBA(255, 255, 255, 1)
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    DefaultSelectedItems: =LookUp(Choices([@BugReports].Status), Value = "Open")
+                                    DisplayFields: =["Value"]
+                                    DisplayMode: =Parent.DisplayMode
+                                    Items: =Choices([@BugReports].Status)
+                                    PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    SearchFields: =["Value"]
+                                    SelectMultiple: =false
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =gbl_theme.primary
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =b_form_status_key.X + b_form_status_key.Width
+                                    Y: =10
+                              - b_form_status_error:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =b_form_status_value.Y + b_form_status_value.Height
+                              - b_form_status_star:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Height: =b_form_status_key.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =b_form_status_key.Y
+                        - b_form_actual_card:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicTextualEdit
+                            IsLocked: true
+                            Properties:
+                              DataField: ="Actual_Result"
+                              Default: =ThisItem.Actual_Result
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Actual_Result)
+                              MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Actual_Result)
+                              Required: =true
+                              Update: =b_form_actual_value.Text
+                              Width: =672
+                              WidthFit: =true
+                              Y: =6
+                            Children:
+                              - b_form_actual_key:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =34
+                                    Text: ="Actual Result"
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: =10 + (b_form_actual_value.Height / 2) - (Self.Height / 2)
+                              - b_form_actual_value:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    Color: =gbl_theme.text_on_light
+                                    Default: =Parent.Default
+                                    DelayOutput: =true
+                                    DisplayMode: =Parent.DisplayMode
+                                    Fill: =gbl_theme.background
+                                    Height: =100
+                                    MaxLength: =Parent.MaxLength
+                                    Mode: =TextMode.MultiLine
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =b_form_actual_key.X + b_form_actual_key.Width
+                                    Y: =10
+                              - b_form_actual_error:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =b_form_actual_value.Y + b_form_actual_value.Height
+                              - b_form_actual_star:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =b_form_actual_key.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =b_form_actual_key.Y
+                        - b_form_expected_card:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicTextualEdit
+                            IsLocked: true
+                            Properties:
+                              DataField: ="Expected_Result"
+                              Default: =ThisItem.Expected_Result
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Expected_Result)
+                              MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Expected_Result)
+                              Required: =true
+                              Update: =b_form_expected_value.Text
+                              Width: =672
+                              WidthFit: =true
+                              Y: =5
+                            Children:
+                              - b_form_expected_key:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =34
+                                    Text: ="Expected Result"
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: =10 + (b_form_expected_value.Height / 2) - (Self.Height / 2)
+                              - b_form_expected_value:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    Color: =gbl_theme.text_on_light
+                                    Default: =Parent.Default
+                                    DelayOutput: =true
+                                    DisplayMode: =Parent.DisplayMode
+                                    Fill: =gbl_theme.background
+                                    Height: =100
+                                    MaxLength: =Parent.MaxLength
+                                    Mode: =TextMode.MultiLine
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =b_form_expected_key.X + b_form_expected_key.Width
+                                    Y: =10
+                              - b_form_expected_error:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =b_form_expected_value.Y + b_form_expected_value.Height
+                              - b_form_expected_star:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =b_form_expected_key.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =b_form_expected_key.Y
+                        - b_form_type_card:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicComboBoxEdit
+                            IsLocked: true
+                            Properties:
+                              DataField: ="ProblemType"
+                              Default: =ThisItem.'Problem Type'
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Problem Type')
+                              Required: =true
+                              Update: =b_form_type_value.Selected
+                              Width: =672
+                              WidthFit: =true
+                              Y: =4
+                            Children:
+                              - b_form_type_key:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =34
+                                    Text: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: =10 + (b_form_type_value.Height / 2) - (Self.Height / 2)
+                              - b_form_type_value:
+                                  Control: Classic/ComboBox@2.4.0
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    ChevronBackground: =gbl_theme.secondary
+                                    ChevronFill: =gbl_theme.text_light
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    Color: =gbl_theme.text_on_light
+                                    DefaultSelectedItems: =Parent.Default
+                                    DisplayFields: =["Value"]
+                                    DisplayMode: =Parent.DisplayMode
+                                    Fill: =gbl_theme.background
+                                    Height: =50
+                                    Items: =Choices([@BugReports].'Problem Type')
+                                    PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    SearchFields: =["Value"]
+                                    SelectMultiple: =false
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =gbl_theme.primary
+                                    Size: =Self.Height / 4
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =b_form_type_key.X + b_form_type_key.Width
+                                    Y: =10
+                              - b_form_type_error:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =b_form_type_value.Y + b_form_type_value.Height
+                              - b_form_type_star:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =b_form_type_key.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =b_form_type_key.Y
+                        - b_form_environment_card:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicComboBoxEdit
+                            IsLocked: true
+                            Properties:
+                              DataField: ="Environment"
+                              Default: =LookUp(Choices([@BugReports].Environment),Value = "FE Data Bridge DMS")
+                              DisplayMode: =DisplayMode.View
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Environment)
+                              Height: =55
+                              Required: =true
+                              Update: =b_form_environment_value.Selected
+                              Width: =672
+                              WidthFit: =true
+                              Y: =1
+                            Children:
+                              - b_form_environment_key:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =34
+                                    Text: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: =10 + (b_form_environment_value.Height / 2) - (Self.Height / 2)
+                              - b_form_environment_value:
+                                  Control: Classic/ComboBox@2.4.0
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    ChevronBackground: =gbl_theme.primary
+                                    ChevronFill: =RGBA(255, 255, 255, 1)
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    Color: =gbl_theme.text_on_light
+                                    DefaultSelectedItems: =Parent.Default
+                                    DisplayFields: =["Value"]
+                                    DisplayMode: =Parent.DisplayMode
+                                    Fill: =gbl_theme.background
+                                    Items: =Choices([@BugReports].Environment)
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    SearchFields: =["Value"]
+                                    SelectMultiple: =false
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =gbl_theme.primary
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =b_form_environment_key.X + b_form_environment_key.Width
+                                    Y: =10
+                              - b_form_environment_error:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =b_form_environment_value.Y + b_form_environment_value.Height
+                              - b_form_environment_star:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Height: =b_form_environment_key.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =b_form_environment_key.Y
+                        - b_form_title_card:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicTextualEdit
+                            IsLocked: true
+                            Properties:
+                              DataField: ="Title"
+                              Default: =ThisItem.Title
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,Title)
+                              MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, Title)
+                              Required: =true
+                              Update: =b_form_title_value.Text
+                              Width: =672
+                              WidthFit: =true
+                              Y: =3
+                            Children:
+                              - b_form_title_key:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =34
+                                    Text: ="Enter a short description."
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: =10 + (b_form_title_value.Height / 2) - (Self.Height / 2)
+                              - b_form_title_value:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    Color: =gbl_theme.text_on_light
+                                    Default: =Parent.Default
+                                    DelayOutput: =true
+                                    DisplayMode: =Parent.DisplayMode
+                                    Fill: =gbl_theme.background
+                                    Height: =50
+                                    MaxLength: =Parent.MaxLength
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Size: =Self.Height / 3
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =b_form_title_key.X + b_form_title_key.Width
+                                    Y: =10
+                              - b_form_title_error:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =b_form_title_value.Y + b_form_title_value.Height
+                              - b_form_title_star:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =b_form_title_key.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =b_form_title_key.Y
+                        - b_form_user_card:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicComboBoxEdit
+                            IsLocked: true
+                            Properties:
+                              DataField: ="User"
+                              Default: =ThisItem.User
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,User)
+                              Required: =true
+                              Update: =b_form_user_value.Selected
+                              Width: =672
+                              WidthFit: =true
+                              Y: =0
+                            Children:
+                              - b_form_user_key:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =34
+                                    Text: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: =10 + (b_form_user_value.Height / 2) - (Self.Height / 2)
+                              - b_form_user_value:
+                                  Control: Classic/ComboBox@2.4.0
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    ChevronBackground: =gbl_theme.secondary
+                                    ChevronFill: =gbl_theme.text_light
+                                    ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                                    Color: =gbl_theme.text_on_light
+                                    DefaultSelectedItems: =Parent.Default
+                                    DisplayFields: =["DisplayName"]
+                                    DisplayMode: =Parent.DisplayMode
+                                    Fill: =gbl_theme.background
+                                    Height: =50
+                                    InputTextPlaceholder: ="Search Users"
+                                    Items: =Choices([@BugReports].User)
+                                    PaddingLeft: =If(Self.DisplayMode = DisplayMode.Edit, 5, 0)
+                                    PressedColor: =RGBA(255, 255, 255, 1)
+                                    SearchFields: =["DisplayName"]
+                                    SelectMultiple: =false
+                                    SelectionColor: =RGBA(255, 255, 255, 1)
+                                    SelectionFill: =gbl_theme.primary
+                                    Size: =Self.Height / 4
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =b_form_user_key.X + b_form_user_key.Width
+                                    Y: =10
+                              - b_form_user_error:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =b_form_user_value.Y + b_form_user_value.Height
+                              - b_form_user_star:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =gbl_theme.text_on_light
+                                    Height: =b_form_user_key.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =b_form_user_key.Y
+                  - b_form_buttons:
+                      Control: GroupContainer@1.3.0
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        DropShadow: =DropShadow.ExtraBold
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =gbl_padding
+                        LayoutJustifyContent: =LayoutJustifyContent.End
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        PaddingBottom: =gbl_padding
+                        PaddingLeft: =gbl_padding
+                        PaddingRight: =gbl_padding
+                        PaddingTop: =gbl_padding
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                      Children:
+                        - b_form_submit:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =gbl_theme.primary
+                              BorderThickness: =1
+                              Color: =gbl_theme.text_on_light
+                              Fill: =gbl_theme.background
+                              FontWeight: =FontWeight.Normal
+                              HoverColor: =gbl_theme.text_on_dark
+                              HoverFill: =gbl_theme.accept
+                              OnSelect: |-
+                                =Set(EmailBody,
+                                "<!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <style>
+                                        body {
+                                            font-family: Arial, sans-serif;
+                                            color: #333333;
+                                            margin: 0;
+                                            padding: 0; /* Removed padding to prevent extra space */
+                                        }
+                                        .email-container {
+                                            border: 1px solid #dddddd;
+                                            border-radius: 5px;
+                                            overflow: hidden;
+                                            width: 100%; /* Ensure the table uses full width */
+                                        }
+                                        .email-header {
+                                            background-color: #5585b5;
+                                            color: #ffffff;
+                                            padding: 20px;
+                                            text-align: center;
+                                        }
+                                        .email-header h1 {
+                                            margin: 0;
+                                            font-size: 24px;
+                                        }
+                                        .email-body {
+                                            padding: 20px;
+                                        }
+                                        .bug-report-table {
+                                            width: 100%;
+                                            border-collapse: collapse;
+                                        }
+                                        .bug-report-table th, .bug-report-table td {
+                                            padding: 12px;
+                                            text-align: left;
+                                            vertical-align: top;
+                                            border-bottom: 1px solid #dddddd;
+                                        }
+                                        .bug-report-table th {
+                                            background-color: #f5f5f5;
+                                            width: 150px;
+                                        }
+                                        .footer {
+                                            text-align: center;
+                                            color: #aaaaaa;
+                                            font-size: 12px;
+                                            padding: 10px;
+                                        }
+                                        /* Inline styles may be more reliable in emails */
+                                    </style>
+                                </head>
+                                <body>
+                                <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                    <tr>
+                                        <!-- Left Margin -->
+                                        <td width='15%'>&nbsp;</td>
+                                        
+                                        <!-- Main Content -->
+                                        <td width='70%'>
+                                            <div class='email-container'>
+                                                <!-- Email Header -->
+                                                <div class='email-header'>
+                                                    <h1>DMS Bug Report System</h1>
+                                                </div>
+                                    
+                                                <!-- Email Body -->
+                                                <div class='email-body'>
+                                                    <table class='bug-report-table'>
+                                                        <tr>
+                                                            <th>Title</th>
+                                                            <td>"& b_form_title_value.Text &"</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Environment</th>
+                                                            <td>"& b_form_environment_value.Selected.Value &"</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Line</th>
+                                                            <td>"& b_form_line_value.Text &"</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Problem Type</th>
+                                                            <td>"& b_form_type_value.Selected.Value &"</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Expected Result</th>
+                                                            <td>"& b_form_expected_value.Text &"</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Actual Result</th>
+                                                            <td>"& b_form_actual_value.Text &"</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Status</th>
+                                                            <td>"& b_form_status_value.Selected.Value &"</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                    
+                                                <!-- Email Footer -->
+                                                <div class='footer'>
+                                                    &copy; 2025 EMD Millipore. All rights reserved.
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- Right Margin -->
+                                        <td width='15%'>&nbsp;</td>
+                                    </tr>
+                                </table>
+                                </body>
+                                </html>"
+                            );
+
+                            IfError(SubmitForm(b_form),
+                                Notify("Submission Error. Check that all required fields are populated.",NotificationType.Error),
+                                
+                                Office365Outlook.SendEmailV2(
+                                    gbl_lists.bug_report_contacts,
+                                    "A bug report was submitted for the " & app_name,
+                                    EmailBody,
+                                    {
+                                        Cc: b_form_user_value.Selected.Email
+                                    }
+                                );
+                                
+                                ResetForm(b_form);
+
+                                Back(ScreenTransition.Fade);
+
+                            ); 
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Size: =Self.Height / 3
+                              Text: ="Submit"
+                              Width: =Parent.Width * 0.28
+                        - b_form_cancel:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =gbl_theme.primary
+                              BorderThickness: =1
+                              Color: =gbl_theme.text_light
+                              Fill: =gbl_theme.primary
+                              FontWeight: =FontWeight.Normal
+                              HoverColor: =gbl_theme.text_on_dark
+                              HoverFill: =gbl_theme.deny
+                              LayoutMinHeight: =1
+                              OnSelect: =ResetForm(b_form);
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Size: =Self.Height / 3
+                              Text: ="Cancel"
+                              Width: =Parent.Width * 0.28
