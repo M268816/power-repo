@@ -1,26 +1,47 @@
 # PowerApps coding conventions and syntax
 
-In an attempt to create some sort of consistency with my own code, I'm going to
-write up a code of ethics and conventions for writing PowerApps code and try and
-adhere to them.
+> UPDATE 19 MAR 2025:
+>
+> After engorging myself with python tutorials and docs from various libraries,
+> I took to the YouTubes to enlighten myself to the current programming culture
+> and study the market for driven self taught little coding Jimmies. I found
+> myself listening to a rant by Michael B Paulson, also known as ThePrimeagen,
+> and realized I may have made a mistake. I name... *everything* in my PowerApps
+> projects like a structurizing *psychopath*.
+>
+> Prime's high pitched, nasally little temper told me that what I was doing in
+> PowerApps was unhinged. His 10+ year Netflix pedigree turned internet
+> personality convinced me at least, the way I tried to use different naming
+> conventions to describe the type of object I work with is more taxing than
+> just keeping consistency. I blame my foray into python and big brother
+> PEP 8 for showing me things like, variables use snake case, but classes use
+> pascal. Like Alice I too then traveled down the rabbit hole, went *a bit*
+> overboard, and used too many of these conventions to define separate
+> objects. A self taught vibe coding rookie over correction that over the next
+> few days I will be nuking with an orbital space laser and rectifying.
+>
+> Your little Jimmy,
+>
+> Ray
 
 ## Table of contents
 1. [Conventions and Syntax](#powerapps-coding-conventions-and-syntax)
     1. [Initial Setup](#initial-setup)
     2. [Commenting](#commenting)
-    3. [Databases and Data Sources](#databases-or-data-sources)
-    4. [User Preferences](#userpreferences)
-    5. [Screens](#screens)
-    6. [Objects / Controls](#objects--controls)
-    7. [Variables](#variables)
+    3. [Snake-Case](#deciding-on-snake_case)
+    4. [Databases and Data Sources](#databases-or-data-sources)
+    5. [User Preferences](#userpreferences)
+    6. [Screens](#screens)
+    7. [Objects / Controls](#objects--controls)
+    8. [Variables](#variables)
         1. [Constant](#constant)
         2. [Local](#local)
         3. [Global](#global)
         4. [Universal](#universal)
-    8. [Dates and Times](#dates-and-times)
-    9. [Collections](#collections)
-    10. [Records](#records)
-    11. [Field Names](#field-names)
+    9. [Dates and Times](#dates-and-times)
+    10. [Collections](#collections)
+    11. [Records](#records)
+    12. [Field Names](#field-names)
 2. [Using the Templates](#using-the-templates)
     1. [Initialization](#initialization)
     2. [Standard Variables](#standard-variables)
@@ -43,9 +64,9 @@ you need them later, but for now should not be used by default. Under the
 preview tab, you can turn on pretty much everything as these features are
 currently in testing and should be available soon anyway. I highly recommend
 turning off any copilot features though, most of them are simply annoying.
-Within the 'New' tab, its best to leave Coauthoring off unless working closely on
-a joint project. Modern controls and themes can be turned on, as creating a new
-default theme comes in very handy when changing the font style of the whole 
+Within the 'New' tab, its best to leave Coauthoring off unless working closely
+on a joint project. Modern controls and themes can be turned on, as creating a
+new default theme comes in very handy when changing the font style of the whole 
 application. New analysis engine should be turned on along with the rest of this
 tab. Again, I do highly recommend turning off the copilot features.
 
@@ -57,163 +78,198 @@ No big comment rules here, just be sure to use comments for tricky parts of
 formulas or functions
 
 ```cpp
-// Inline comments have so much rizz
+// Inline Comments!
 
 /*
-    I Got a lot to say here:
-    Look at all this freaking
-    code here.
-
-    It does something that chatGPT
-    told me worked so well.
-
-    It took 5 hrs to debug tho.
-    Thanks chatGPT 👎
-    Not very skibity of you.
+    Block
+    Comments!
 
 */
-
-// Sorry for the brainrot
 ```
+
+## Deciding on snake_case
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
+Previous versions of my conventions and syntax included multiple kinds of
+naming conventions to distinguish between types of objects in a PowerApp. This
+included Using PascalCase for databases, Proper_Snake for table headers, and
+the disastrous kebob-case for PowerApp widgets.
+
+I'm going to throw that all out the window and use snake_case, beloved by
+python devs and [PEP 8](https://peps.python.org/pep-0008/) users everywhere.
+
+Some takeaways from this type of naming are using PascalCase for custom
+functions (like Classes with python), CAPITAL or SCREAMING_SNAKE_CASE
+for constants, and always using lowercase for variables and applying snake_case
+to improve readability.
+
+I believe this will also help us with visibility, as the PowerApp conventions
+like to use camel case. So we will be able to determine with greater accuracy 
+what part of the code is built it PowerFX and what is our written scripting.
+
+I will explore some syntax for these conventions later on.
 
 ## Databases or data sources
 
 [Back To Top](#powerapps-coding-conventions-and-syntax)
 
 When using outside data sources, it's good practice to first create the database
-you want to pull the information from. Once the initial data base structure is
+you want to pull the information from. Once the initial database structure is
 built, it makes linking to PowerApps a much simpler process.
 
-Currently I use SharePoint Lists and format list names in pascal case, column
-names in capitalized snake case. Values can be formatted appropriately for
-their needs.
+For ease of setup and dissuade any Premium charges on built applications,
+I use SharePoint Lists as Databases for my applications. In naming lists I will
+use these conventions:
 
-### UserPreferences
+### user_preferences
 
-| First_Name | Last_Name | E_Mail                            | Theme_Mode |
+| first_name | last_name | email                             | theme_mode |
 |:---------- |:--------- |:--------------------------------- |:---------- |
-| Raymond    | Comeau    | raymond.comeau@milliporesigma.com | ( Light )  |
-| Someone    | Else      | someone.else@milliporesigma.com   | ( Dark )   |
+| Raymond    | Comeau    | raymond.comeau@milliporesigma.com | Light      |
+| Someone    | Else      | someone.else@milliporesigma.com   | Dark       |
 
 ## Screens
 
 [Back To Top](#powerapps-coding-conventions-and-syntax)
 
-> Home
+> scr_home
 
-> OrderMaterials
+> scr_order_materials
 
-Screen objects within PowerApps can be named in Pascal case and referenced in
+Screen objects within PowerApps will be prefixed with 'scr' and referenced in
 the tree structure by their first letter. Naming objects down the tree is
 explained in the next section.
 
-```
-Home
-  |_. hControl
+```cpp
+|_. scr_home
+    |_. h_widget_name
 
-OrderMaterials
-  |_. oControl
+|_. scr_order_materials
+    |_. o_widget_name
 ```
 
 ## Objects / Controls
 
 [Back To Top](#powerapps-coding-conventions-and-syntax)
 
-> Update Jan 28 2025: PowerApps handles kebab case by adding single quotes to the
-> yaml code. Using this for a while, I noticed how absolutely annoying it was.
-> It makes editing objects in yaml to import into the Editor a big
-> pain, changed conventions to use camelCaseInstead.
-
-```
-<screen><Parent><Object><Iteration>
-```
-
 Because the complexity of object trees can increase quickly naming objects in
-the app can get out of hand quickly. To combat this, I will use ~~kebab case~~
-camel case to distinguish between objects and variables. I begin the name of an
-object with the first initial of its parent screen then add the lowest significant
+the app can get out of hand quickly. To combat this, I begin the name of an
+object with the first initial of its parent screen then add the highest significant
 parent of the object on the tree until I need to use a unique identifier. For
 example, A button that would submit information on the home page, located in the
-main form content of the screen may be named 'hFormSubmit'.
+main form content of the screen may be named 'h_form_submit_btn'. Notice the 
+suffix 'btn'. I also add widget types to the end of the name when applicable.
 
-The parent structure looks like this.
+The parent structure now looks like this.
 
-```
-Home
-  |_. hPopups
-    |_. hPopupLoadError
-      |_. hPopupLoadErrorHeader
-      |_. hPopupLoadErrorBody
-      |_. hPopupLoadErrorFooter
-    |_. hPopupWarning
-      |_. hPopupWarningHeader
-      |_. hPopupWarningBody
-      |_. hPopupWarningFooter
-  |_. hMain
-    |_. hHeader
-    |_. hBody
-      |_. hFormParent
-        |_. hForm
-        |_. hFormButtons
-          |_. hFormSubmit
-          |_. hFormCancel
-    |_. hFooter
+```cpp
+|_. scr_Home
+    |_. h_popups
+        |_. h_popup_error
+        |_. h_popup_error_header
+        |_. h_popup_error_body
+        |_. h_popup_error_footer
+    |_. h_popup_warning
+      |_. h_popup_warning_header
+      |_. h_popup_warning_body
+      |_. h_popup_warning_footer
+    |_. h_main
+        |_. h_header
+            |_. h_title
+        |_. h_body
+        |_. h_form_parent
+            |_. h_form_title
+            |_. h_form
+            |_. h_form_buttons
+                |_. h_form_submit
+                |_. h_form_cancel
+        |_. h_footer
+            |_. h_legal
 ```
 
 Each object starts with the first letter of the screen's name. Then they receive
-either, their own name, becoming a parent, or their parent's name. With the
-submit button nested so far within the tree, naming it something like
-'hMainBodyFormButtonsSubmit' is too unwieldy. So, nested controls should only try
-and be as distinctive as their screen name and *lowest significant parent*.
+either, their own name, become a parent, or take their parent's name. We can see
+this with the submit button. The submit button in this tree takes its parent
+name 'form' to describe it is the submit button for the form. But, because this
+form may not be the only form within the application, we also give the form its
+parent screen's initial with 'h'. Therefore the button that submits the form on 
+the home screen would be called 'h_form_submit'.
 
-> hFormSubmit
+To reinforce that nested widgets should only try to be as distinctive as their 
+*highest significant parent*, we can also see the button does not need to relate
+to the body of the screen or even that it's a child of the 'h_form_buttons'
+container, but only that it relates to the form itself.
 
-But with objects like the popups, this does get ugly, as we need to distinguish 
-between the 'Load Error' popup and the 'Warning' popup structures.
+But with objects like the popups, this does get ugly. If we need to distinguish 
+between a loading error and a type error the names get pretty long.
+```cpp
+|_. h_popup_error_404_parent
+    |_. h_popup_error_404
+    |_. h_popup_error_404_buttons
+        |_. h_popup_error_404_submit
+        |_. h_popup_error_404_cancel
+|_.h_popup_error_502_parent
+    |_. h_popup_error_502
+    |_. h_popup_error_502_buttons
+        |_. h_popup_error_502_submit
+        |_. h_popup_error_502_cancel
+```
 
-> hPopupLoadErrorHeader
+Now what about the trailing suffix that I alluded to?
 
-> hPopupWarningHeader
+When working with objects that have the same principle, adding the widget type
+as a suffix will help determine what widget to access. For instance, lets take a
+date filtering system. We need a date picker widget to allow a filtering 
+selection, and also a label to help the user determine what the date picker does.
 
-We wont need to go so in depth for content. We just need to go deep enough into
-the tree to make it distinguishable between other objects within the same level.
+```cpp
+|_. h_filters_parent
+    |_. h_start_date_lbl
+    |_. h_start_date
+    |_. h_filter_separator // A rectangle used as a horizontal rule
+    |_. h_end_date_lbl
+    |_. h_end_date_dpk
 
-> ~~hLayoutMainBodyFormParentFormButtonsSubmit~~
->
-> hFormSubmit
+```
 
-> ~~hLayoutPopupsWarningBodyConfirm~~
->
-> hPopupWarningConfirm
+Here are two examples of how you could apply the suffixes. For the start date
+widgets, we only stated that the label widget as _lbl, but allowed the widget
+we would access in the formulas as the start_date.
 
-For items that only appear once I break all the rules and only prefix the screen
-of the control. Like a bug report button would not need to describe its located
-within the header or footer, but only that its the bug button for that page.
+```cpp
+Filter(some_data, Date >= h_start_date.SelectedDate)
+```
 
-> ~~hMainHeaderReportBug~~
->
-> hReportBug
+The second use with the end date is also valid, you can supply a suffix for both
+the label and the dropdown. As long as you know what widget to access to pull
+the date selection from.
+
+```cpp
+Filter(some_data, Date < h_end_date_dpk.SelectedDate)
+```
 
 ## Variables
 
 [Back To Top](#powerapps-coding-conventions-and-syntax)
 
-> Update Jan 28 2025: I really liked using the simpler 'g' from 'gbl or 'l' from
-> 'loc' for naming variables. But it was unfortunately hard to read sometimes.
-> Changing my convention to always use the three letter prefix instead.
-
 PowerApp development is in a fight with itself over where it wants to store its 
-variables using two functions 'Set()' and 'UpdateContext({})'. Set() is used
-for variables that need to span the entire app. They can be set and accessed
-anywhere in the app. UpdateContext({}) creates variables that can only be set
-and accessed in the screen they were initiated. You can use Set() to create any
-data structure you would need. UpdateContext({}) stores everything in a record.
-But, record values can then be set to whatever type you may need.
+variables. Instead of having a nice clean universal variable handler instead we
+need to use two functions: Set() and UpdateContext({}).
+
+Set() is used for variables that need to span the entire app. They can be set
+and accessed anywhere in the app. Set() variables are immutable, so to update a
+record used with Set() the whole variable must be updated. Individual pieces of
+the record cannot be updated separately.
+
+UpdateContext({}) creates variables that can only be set and accessed in the
+screen they were initialized. UpdateContext({}) record variables are mutable with
+the Patch() function.
 
 ```cpp
-Set(variable, value);
+Set(gbl_variable, value);
 
-UpdateContext({variable: value});
+UpdateContext({loc_variable: value});
 ```
 
 The variable scopes I use in a PowerApp are constant, local, global, and
@@ -224,12 +280,11 @@ something I call universal. Here are the conventions that I use.
 - Variables that should be set, and not changed.
     - Use the Set() function.
     - Screaming Snake case.
-    - All capital letters.
     - The actual concept of constants do no exist within PowerApps, so this must
     be self regulated. Whenever you need a constant set it on the app start
     property then make sure to only read the variable and not write it.
     ```cpp
-    Set(THEME_MODE, Theme.Mode.Dark);
+    Set(THEME_MODE, styles.dark);
     ```
 
 ### Local
@@ -237,9 +292,8 @@ something I call universal. Here are the conventions that I use.
 - Variables that only need to apply to the current loaded screen.
     - Use the UpdateContext({}) function.
     - Prefix with 'loc'.
-    - Camel case.
     ```cpp
-    UpdateContext({locThemeMode: Theme.Mode.Dark});
+    UpdateContext({loc_theme_mode: styles.dark});
     ```
 
 ### Global
@@ -247,9 +301,8 @@ something I call universal. Here are the conventions that I use.
 - Variables that need to be applied across the whole application.
     - Use the Set() function.
     - Prefix with 'gbl'.
-    - Camel Case.
     ```cpp
-    Set(gblStyles, Theme.Mode.Dark);
+    Set(gbl_theme_mode, styles.dark);
     ```
 ### Universal
 
@@ -257,16 +310,17 @@ something I call universal. Here are the conventions that I use.
     - Use the Set() function.
     - Prefix with 'UNI'.
     - Screaming Snake case.
-    - All capital letters.
     - Init the value from a data source.
     - Set new values to the data source.
     ```cpp
     // Init the value from the data source
-    Set(UNI_THEME_MODE, LookUp(UserPreferences, E_Mail = User().Email).Theme_Mode)
+    Set(UNI_THEME_MODE,
+        LookUp(user_preferences, email=User().Email).theme_mode
+    )
     
     // To set the variable, use Patch()
-    Patch(UserPreferences,
-        LookUp(UserPreferences, E_Mail = User().Email).ID,
+    Patch(user_preferences,
+        LookUp(user_preferences, email=User().Email).id,
         {
             Theme_Mode: {Value: "Dark"}
         }
@@ -274,8 +328,8 @@ something I call universal. Here are the conventions that I use.
     ```
     
 Because variables init at runtime, variables that need to be set and remembered
-across sessions cannot be used natively in PowerApps, they are not saved in
-memory. Let's use the dark mode variable above as an example.
+across sessions cannot be used natively in PowerApps. Let's use the dark mode
+variable above as an example.
 
 A user wants to set the application to dark mode and have this setting
 remembered every time the application opens with their credentials. We need to
@@ -292,8 +346,8 @@ and load them into the application on launch.
 
 [Back To Top](#powerapps-coding-conventions-and-syntax)
 
-The Today() and Now() functions will only update their values when first called
-or used to set parameters. This means for objects like the Text Label, when
+The Today() and Now() functions will only update their values when called or
+used to set parameters. This means for widgets like the Text Label, when
 Today() and Now() are used it only pulls in the value stored the last time they
 were called. Other times it works as intended. These are so inconsistent that
 I fix this by assigning the functions to variables.
@@ -302,21 +356,23 @@ The variables are set at a global level each time a screen is loaded or
 logic needs to be run. The variables I set for these purposes is as follows:
 
 ```cpp
-Set(gblToday, Today());
+Set(gbl_today, Today());
 
-Set(gblNow, Now());
+Set(gbl_now, Now());
 
-Set(gblHour, Hour(Now()));
+Set(gbl_hour, Hour(Now()));
 
 /*Or to allow for dot notation*/
 
-Set(gblTime,
+Set(gbl_time,
     {
-        Today: Today(),
-        Now: Now(),
-        Hour: Hour(Now())
+        today: Today(),
+        now: Now(),
+        hour: Hour(Now())
     }
 );
+
+// getter: gbl_time.today etc
 ```
 
 ## Collections
@@ -327,30 +383,30 @@ Collections in PowerApps are powerful data structures that can be used for a
 large variety of data management. These collections can be used to not only
 store and display data from within the app, but you can pull data from outside
 databases like share point lists to create local copies. These local copies can
-be manipulated without needing to worry about delegation. Collections can even be
-used to create static lists, dictionaries, arrays, or tables of variables.
+be manipulated without needing to worry about delegation and are often much
+more performant. Collections can even be used to create static lists,
+dictionaries, arrays, or tables of variables.
 
 - Collections
     - Use Collect() for initialization, or within ForALL() loops.
     - Use ClearCollect() for everything else.
     - Prefix the collection with 'col'
-    - Camel case.
 
 ```cpp
 // Clear the collection for new data
-Clear(colProduction);
+Clear(col_production);
 // For all Records in this data
-ForAll(EncapsulationProductionData,
+ForAll(encapsulation_production,
     //Collect each record into colProduction
-    Collect(colProduction,
+    Collect(col_production,
         {
-            Id: ThisRecord.Id,
-            Line: ThisRecord.Line,
-            Unit_Start: ThisRecord.Unit_Start,
-            Unit_End: ThisRecord.Unit_End,
-            Date_Start: ThisRecord.Date_Start,
-            Date_End: ThisRecord.Date_End,
-            Shift: ThisRecord.Shift_Letter,
+            id: ThisRecord.ID,
+            line: ThisRecord.line,
+            unit_start: ThisRecord.unit_start,
+            unit_end: ThisRecord.unit_end,
+            date_start: ThisRecord.date_start,
+            date_end: ThisRecord.date_end,
+            shift: ThisRecord.shift_letter,
         }
     )
 );
@@ -370,94 +426,94 @@ structures and variables that can use dot notation.
 - Mutable Records
     - Use Collect() for initialization.
     - Prefix the collection with 'rec'
-    - Use camel case.
     - Set new values with Patch()
     - Get values with First()
 
 ```cpp
 // Initialize
-ClearCollect(recPopups,
+ClearCollect(rec_popups,
     {
-        Display_Text: "Not Loading",
-        Value: -1,
-        Popup: "",
-        Visible: false
+        display_text: "Not Loading",
+        value: -1,
+        popup: "",
+        visible: false
     }
 );
 
 // Setter
-Patch(recPopups,First(recPopups),{Value: 10});
+Patch(rec_popups,First(rec_popups),{value: 10});
 // Getter
-First(recPopups).Value
+First(rec_popups).Value
 ```
 
 When we only need to store a single immutable record. Instead of using a
 collection, we use the Set() function like we would set a variable. We structure
 the variable just like we would structure a record in a collection. Using single
 records this way allows us to use dot notation to pull in data more readily.
-This method also ensure we are using as little memory as possible with the app,
-as setting a record variable is less intensive than setting up a collection for
-a single record. The downside to this, is that Set() records must be updated in
-their entirety, as the Patch() function will not work with Set().
+I'm not sure that this method ensures we use as little memory as possible within
+the app, but when I changed to this system I seen recognizable performance
+increases. It seems setting a record variable is less intensive than setting up
+a collection for a single record. The downside to this, is that Set() records
+must be updated in their entirety, as the Patch() function will not work with
+Set().
 
-- Records
+- Immutable Records
     - Use Set() for initialization.
     - Prefix the record with 'rec'
-    - Use camel case.
 
 ```cpp
 // Initialize and Setter
-Set(recOEE,
+Set(rec_oee,
     {
-        OEE2: 0.5,
-        Amount_Built: 100,
-        Goal: 200,
-        Rejects: 5
+        oee2: 0.5,
+        amount_built: 100,
+        goal: 200,
+        rejects: 5
     }
 );
 
 // Getter
-recOEE.Goal
+rec_oee.goal
 ```
 
 ## Field Names
 
 [Back To Top](#powerapps-coding-conventions-and-syntax)
 
-When naming field names within collections, tables, lists or dictionaries the
-field or column name will use snake case. Global collections will capitalize
-their first letters in field names, while sub collections or 'local' collections
-should use all lower case.
+As shown in earlier examples when naming field names within collections, tables,
+lists or dictionaries the field or column name will use regular snake case and
+should try to keep the same name as its parent database.
 
-For example. We collect production data directly from a data source like a share
-point list. This data is a copy from the production date source and will be used
-throughout the app and can be considered the top level data structure for the
-production data for the application. Let's say, we then want to change the data,
-and filter it for another data display.
 ```cpp
-// Copy the original data source into a local copy. 'Top Level Collection'
-ForAll(DataSource,
-    Collect(colTopLevelData,
+// Copying the original data source into a local copy.
+ForAll(data_Source,
+    Collect(col_local_collection,
         {
-            Id: ThisRecord.ID,
-            DateTime: ThisRecord.DateTime,
-            First_Unit: ThisRecord.First_Unit,
-            Last_Unit: ThisRecord.Last_Unit
+            id: ThisRecord.ID,
+            datetime: ThisRecord.datetime,
+            first_unit: ThisRecord.first_unit,
+            last_unit: ThisRecord.last_unit
         }
     )
 );
+```
 
-// Create a sub-collection, a modified/filtered version.
-ForAll(Filter(colTopLevelData, DateTime = gblTime.Today),
-    Collect(colLowerLevelData,
+Because sharepoint has many fields that we may not use, if you need only a select
+group of information, using the ShowColumns() function is also a great way to
+improve performance. This will make sure that the initial lookup of the database
+only pulls in the relevant information to copy into the collection.
+
+```cpp
+// Copying the original data source into a local copy.
+ForAll(data_Source,
+    Collect(
+        ShowColumns(col_local_collection,
+            id,
+            datetime
+        ),
         {
-            id: ThisRecord.Id,
-            date: DateValue(ThisRecord.DateTime),
-            time: TimeValue(ThisRecord.DateTune),
-            total_units:
-                ThisRecord.Last_Unit
-                - ThisRecord. First_Unit
-                + 1
+            id: ThisRecord.ID,
+            datetime: ThisRecord.datetime
         }
     )
 );
@@ -471,17 +527,17 @@ Using the yaml templates from the git repo is pretty simple. To get started,
 first create a new screen, then copy the yaml code form the repo, and paste it
 into the screen using the paste code menu item.
 
-The yaml code for the Init, Home, and Bug Screens have pre-configured naming
+The yaml code for the Init and Bug Report Screens have pre-configured naming
 conventions. Other yaml code should be configured with 'find and replace' to set
 the naming conventions appropriately.
 
-For example, we make an Init  and Home screen and paste the Init yaml into those
-screens. The naming conventions for these screens are already setup. We also
-need to add a production screen that will display filterable data. First lookup
-the yaml for the filterable template, and then within this template, the names
-of the controls need to be changed from the placeholder prefix 'xFx' to 'p' for
-Production. Use find and replace in any text editor and replace the placeholder
-prefix with the prefix of the Screen you are setting up.
+For example, in PowerApps make a scr_init and scr_home screen. Then, paste the
+appropriate yaml into those screens. The naming conventions for initialization
+is already setup, but then the home screen will need to have the prefix changed.
+Within this template, the names of the controls need to be changed from the
+placeholder prefix 'xHx' to 'h' for home. Use can find and replace in any text
+editor with any template to find and replace the prefix with the prefix of the
+screen you are setting up.
 
 ## Initialization
 
@@ -518,7 +574,7 @@ through the OnSelect property of a button.
 
 ```cpp
 // The button is called iInit
-If(INITIALIZE, Select(iInit));
+If(INITIALIZE, Select(i_init));
 ```
 
 The flow of these properties and information causes an infinite loop that cannot
@@ -554,7 +610,7 @@ the flexibility of the template.
 Set(APP_NAME, "DMS Management Template");
 
 //  Setting a global padding helps keeps visuals consistent.
-Set(gblPadding, Round(App.Width * 0.005,0));
+Set(gbl_padding, Round(App.Width * 0.005,0));
 
 /* 
     Setting time variables is important because static objects will not
@@ -562,24 +618,24 @@ Set(gblPadding, Round(App.Width * 0.005,0));
     functions to a variable updates this info whenever they load, in turn
     updating the static objects.
 */
-Set(gblTime,{Today:Today(),Now:Now()});
+Set(gbl_time,{Today:Today(),Now:Now()});
 
 /*
     Using a global variable to pull in static data with dot notation is always
     very valuable. These lists are used constantly throughout the app, for
     many various applications.
 */
-Set(gblLists,
+Set(gbl_lists,
     {
-        Shifts: [
+        shifts: [
             "C","A","B"
         ],
-        Lines: [
+        lines: [
             "XL1", "XL2", "XL3", "XL4", "XL5",
             "XLT", "XLT2", "XLT3",
             "SSC", "SSC2"
         ],
-        Downtime_Reasons: [
+        downtime_reasons: [
             "Reason 1","Reason 2","Reason 3","Reason 4",
             "Reason 5","Reason 6","Reason 7","Reason 8",
         ]
@@ -594,11 +650,11 @@ Set(gblLists,
 The navigation system that I apply to my apps uses a collection of screens.
 
 ```cpp
-ClearCollect(colNavigation,
-    {Screen: Home, Label: "Home"},
-    {Screen: Filterable, Label: "Filterable"},
-    {Screen: Singleton, Label: "Singleton"},
-    {Screen: Data, Label: "Data"}
+ClearCollect(col_navigation,
+    {screen: Home, label: "Home"},
+    {screen: Filterable, label: "Filterable"},
+    {screen: Singleton, label: "Singleton"},
+    {screen: Data, label: "Data"}
 );
 ```
 
@@ -610,28 +666,28 @@ edited from initialization and automatically update all other instances of the
 navigation gallery throughout the whole application.
 
 ```yaml
-- hNavigationGallery:
+- h_navigation_gallery:
     Control: Gallery@2.15.0
     Variant: Vertical
     Properties:
       AlignInContainer: =AlignInContainer.SetByContainer
-      Items: =colNavigation
+      Items: =col_navigation
       LayoutMinHeight: =10
       LayoutMinWidth: =10
-      TemplatePadding: =gblPadding
+      TemplatePadding: =gbl_Padding
       TemplateSize: =40
     Children:
       - hNavGalleryButton:
           Control: Classic/Button@2.2.0
           Properties:
             BorderThickness: =1
-            Color: =gblTheme.Text_Dark
+            Color: =gbl_theme.text_dark
             DisplayMode: -|
                 =If(App.ActiveScreen.Name = ThisItem.Screen.Name,
                     DisplayMode.Disabled,
                     DisplayMode.Edit
                 )
-            Fill: =gblTheme.Accent
+            Fill: =gbl_theme.accent
             FontWeight: =FontWeight.Normal
             Height: =Parent.TemplateHeight
             OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
@@ -655,60 +711,60 @@ notation.
 
 ```cpp
 // Popup Manager
-ClearCollect(recPopups,
+ClearCollect(rec_popups,
     {
-        Display_Text: "Not Loading",
-        Value: -1,
-        Popup: "",
-        Visible: false
+        display_text: "Not Loading",
+        value: -1,
+        popup: "",
+        visible: false
     }
 );
-// Setter: Patch(recPopups,First(recPopups),{Value: 10});
-// Getter: First(recPopups).Value
+// Setter: Patch(rec_popups,First(rec_popups),{value: 10});
+// Getter: First(rec_popups).value
 ```
 
 I'm not going to lie the variables that I use are very jank.
 
-Display_Text is used to display any type of loading information through any
+'display_text' is used to display any type of loading information through any
 text object or property.
 
-Value is used to determine the status of the loading and spinner objects. I 
+'value' is used to determine the status of the loading and spinner objects. I 
 typically use -1 to determine if properties should be turned off or
 indeterminate. For example, in a progress bar, the bar will cycle like a 
 spinner when indeterminate is set to true. Otherwise it will set the position of
 the inner colored loading bar.
 
-Visible is fairly well explained, as it determines if the popup manager should
+'visible' is fairly well explained, as it determines if the popup manager should
 be visible.
 
-Popup, on the other hand is a very messy way I determined what popup should be
+'popup', on the other hand is a very messy way I determined what popup should be
 displaying. Some screens have various popups that need to display, like
 errors, or simple loading prompts. To determine what popup to show, I use a
 string variable that describes the popup. For example, the loading popup would
 be named 'loading'. An error for bad information would be called 'error'. And 
 a confirmation dialog would be 'confirm'.
 
-The parent object that controls all popups will use the 'Visible' variable to
+The parent object that controls all popups will use the 'visible' variable to
 determine weather or not to show a popup.
 
-But the 'Popup' variable determines what popup to display in the parent object.
+But the 'popup' variable determines what popup to display in the parent object.
 
 ```yaml
 # Parent Properties
-- hPopups:
+- h_popups:
     Control: GroupContainer@1.3.0
     Variant: AutoLayout
     Properties:
-      Visible: =First(recPopups).Visible # show the manager via boolean
+      Visible: =First(rec_popups).visible # show the manager via boolean
 ```
 
 ```yaml
 # Child Properties
-- hPopupError:
+- h_popup_error:
     Control: GroupContainer@1.3.0
     Variant: AutoLayout
     Properties:
-      Visible: = First(recPopups).Popup = 'error' # show the popup via equality
+      Visible: = First(rec_popups).popup = "error" # show the popup via equality
 ```
 
 ## Themes and theme modes
@@ -735,55 +791,55 @@ to use the coloring guidelines from global that can be found [here]('https://bra
 
 ```cpp
 // Theme Mode Setup
-Set(gblStyles,
+Set(gbl_styles,
     {
-        Light:
+        light:
         {
-            Style: "Light",
-            Text_Dark: ColorValue("#000000"),
-            Text_On_Dark: ColorValue("#FFFFFF"),
+            style: "light",
+            text_dark: ColorValue("#000000"),
+            text_on_dark: ColorValue("#FFFFFF"),
             Text_Light: ColorValue("#FFFFFF"),
             Text_On_Light: ColorValue("#000000"),
-            Background: ColorValue("#FFFFFF"),
-            Midground: ColorValue("#EEEEEE"),
-            Foreground: ColorValue("#DDDDDD"),
-            Primary: ColorValue("#503291"),
-            Pri_Complement: ColorValue("#2DBECD"),
-            Secondary: ColorValue("#0f69af"),
-            Sec_Complement: ColorValue("#FFDBC9"),
-            Accept: ColorValue("#149B5f"),
-            Deny: ColorValue("#e61e50"),
-            Accent: ColorValue("#FFC832"),
-            Chart_Black: "#121212",
-            Chart_White: "#FFFFFF",
-            Chart_Red: "#e61e50",
-            Chart_Blue: "#503291",
-            Chart_Accent: "#FFC832",
-            Chart_Dim: "#787878"
+            background: ColorValue("#FFFFFF"),
+            midground: ColorValue("#EEEEEE"),
+            foreground: ColorValue("#DDDDDD"),
+            primary: ColorValue("#503291"),
+            pri_complement: ColorValue("#2DBECD"),
+            secondary: ColorValue("#0f69af"),
+            sec_complement: ColorValue("#FFDBC9"),
+            accept: ColorValue("#149B5f"),
+            deny: ColorValue("#e61e50"),
+            accent: ColorValue("#FFC832"),
+            chart_black: "#121212",
+            chart_white: "#FFFFFF",
+            chart_red: "#e61e50",
+            chart_blue: "#503291",
+            chart_accent: "#FFC832",
+            chart_dim: "#787878"
         },
-        Dark:
+        dark:
         {
-            Style: "Dark",
-            Text_Dark: ColorValue("#000000"),
-            Text_On_Dark: ColorValue("#000000"),
+            Style: "dark",
+            text_dark: ColorValue("#000000"),
+            text_on_dark: ColorValue("#000000"),
             Text_Light: ColorValue("#FFFFFF"),
             Text_On_Light: ColorValue("#FFFFFF"),
-            Background: ColorValue("#121212"),
-            Midground: ColorValue("#232323"),
-            Foreground: ColorValue("#343434"),
-            Primary: ColorValue("#565656"),
-            Pri_Complement: ColorValue("#ec9d99"),
-            Secondary: ColorValue("#676767"),
-            Sec_Complement: ColorValue("#af9ecf"),
-            Accept: ColorValue("#98d3b2"),
-            Deny: ColorValue("#f68da5"),
-            Accent: ColorValue("#ffdf85"),
-            Chart_Black: "#FFFFFF",
-            Chart_White: "#121212",
-            Chart_Red: "#f68da5",
-            Chart_Blue: "#0f69af",
-            Chart_Accent: "#ffdf85",
-            Chart_Dim: "#565656"
+            background: ColorValue("#121212"),
+            midground: ColorValue("#232323"),
+            foreground: ColorValue("#343434"),
+            primary: ColorValue("#565656"),
+            pri_complement: ColorValue("#ec9d99"),
+            secondary: ColorValue("#676767"),
+            sec_complement: ColorValue("#af9ecf"),
+            accept: ColorValue("#98d3b2"),
+            deny: ColorValue("#f68da5"),
+            accent: ColorValue("#ffdf85"),
+            chart_black: "#FFFFFF",
+            chart_white: "#121212",
+            chart_red: "#f68da5",
+            chart_blue: "#0f69af",
+            chart_accent: "#ffdf85",
+            chart_dim: "#565656"
         }
     }
 );
@@ -792,7 +848,7 @@ Set(gblStyles,
 Step two, make these settings easily accessible with dot notation.
 
 ```cpp
-Set(gblTheme, gblStyles.Light);
+Set(gbl_theme, gbl_styles.light);
 ```
 
 I also set up a way to check what theme is currently active. Although, it does
@@ -800,15 +856,15 @@ use the simple string system like the popup manager does. This is a simple setup
 to change from dark mode to light mode.
 
 ```cpp
-If(gblTheme.Style = "Light",
-    Set(gblTheme, gblStyles.Dark),
-    Set(gblTheme, gblStyles.Light)
+If(gbl_theme.Style = "light",
+    Set(gbl_theme, gbl_styles.dark),
+    Set(gbl_theme, gbl_styles.light)
 )
 
 // I should probably change the variables to be more readable though, like this
-If(gblTheme.Style = "Light",
-    Set(gblTheme, gblStyles.Dark),
-    Set(gblTheme, gblStyles.Light)
+If(gbl_theme.Style = "light",
+    Set(gbl_theme, gbl_styles.dark),
+    Set(gbl_theme, gbl_styles.light)
 )
 ```
 
@@ -831,15 +887,15 @@ can be updated on the fly.
 The objects an simply use dot notation to apply them.
 
 ```yaml
-- hBugs:
+- h_bugs:
     Control: Image@2.2.3
     Properties:
       BorderColor: =RGBA(0, 18, 107, 1)
-      HoverFill: =gblTheme.Pri_Complement
-      Image: =gblIcons.Bug # EZPZ
+      HoverFill: =gbl_theme.pri_complement
+      Image: =gbl_icons.bug # EZPZ
       ImagePosition: =ImagePosition.Fill
       LayoutMinHeight: =10
-      OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+      OnSelect: =Navigate(scr_bugs,ScreenTransition.Fade)
       PaddingLeft: =
       RadiusBottomLeft: =Self.Width
       RadiusBottomRight: =Self.RadiusBottomLeft
