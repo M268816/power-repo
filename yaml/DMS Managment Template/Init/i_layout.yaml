@@ -25,7 +25,7 @@
             HoverColor: =RGBA(255, 255, 255, 1)
             HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
             OnSelect: |-
-              // Navigation Setup
+              =// Navigation Setup
               ClearCollect(col_navigation,
                   {screen: scr_home, label: "Home"},
                   {screen: scr_data, label: "Sequential Data Example"},
