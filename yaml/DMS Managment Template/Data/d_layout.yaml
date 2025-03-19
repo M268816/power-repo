@@ -1,9 +1,9 @@
-- xDxLayout:
+- d_layout:
     Control: GroupContainer@1.3.0
     Variant: AutoLayout
     Properties:
       DropShadow: =DropShadow.None
-      Fill: =gblTheme.Background
+      Fill: =gbl_theme.background
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical
@@ -13,88 +13,96 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-      - xDxInit:
+      - d_init:
           Control: Classic/Button@2.2.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
             OnSelect: |-
-              =Patch(recPopups,First(recPopups),
+              =Patch(rec_popups,First(rec_popups),
                   {
-                      Visible:true,
-                      Value:10,
-                      Display_Text:"Updating Variables",
-                      Popup:"Loading"
+                      visible:true,
+                      value:10,
+                      display_text:"Updating Variables",
+                      popup:"Loading"
                   }
               );
 
-              Set(gTime,{Today: Today(), Now: Now()});
+              Set(gbl_time,{Today: Today(), Now: Now()});
               UpdateContext({
-                  lStartDate: DateAdd(xDxStartDate.SelectedDate, -1, TimeUnit.Hours),
-                  lEndDate: DateAdd(xDxEndDate.SelectedDate, 23, TimeUnit.Hours),
-                  lMaxCollectionLength: 31,
-                  lItteration: 0
+                  loc_start_date: DateAdd(d_start_date.SelectedDate, -1, TimeUnit.Hours),
+                  loc_end_date: DateAdd(d_end_date.SelectedDate, 23, TimeUnit.Hours),
+                  loc_max_collection_length: 31,
+                  loc_iteration: 0
               });
               UpdateContext({
-                  lCountOfDays: DateDiff(lStartDate,lEndDate)
+                  loc_count_of_days: DateDiff(loc_start_date,loc_end_date)
               });
               UpdateContext({
-                  lItterations: RoundUp(lCountOfDays/lMaxCollectionLength,0)
+                  loc_iterations: RoundUp(loc_count_of_days/loc_max_collection_length,0)
               });
 
-              Clear(cDatePairs);
-              ForAll(Sequence(lItterations),
+              Clear(c_date_pairs);
+              ForAll(Sequence(loc_iterations),
                   With({i:ThisRecord.Value},
-                      Collect(cDatePairs,
+                      Collect(c_date_pairs,
                           {
-                              Itteration: i,
-                              Start_Date: DateAdd(DateAdd(lStartDate, (i-1)*lMaxCollectionLength, TimeUnit.Days), 23, TimeUnit.Hours),
+                              iteration: i,
+                              Start_Date: DateAdd(DateAdd(loc_start_date, (i-1)*loc_max_collection_length, TimeUnit.Days), 23, TimeUnit.Hours),
                               End_Date:
-                                  If(DateAdd(DateAdd(lStartDate, ((i-1)*lMaxCollectionLength)+lMaxCollectionLength, TimeUnit.Days), 23, TimeUnit.Hours) > lEndDate,
-                                      DateAdd(lEndDate, 23, TimeUnit.Hours),
-                                      DateAdd(DateAdd(lStartDate, ((i-1)*lMaxCollectionLength)+lMaxCollectionLength, TimeUnit.Days), 23, TimeUnit.Hours)
+                                  If(DateAdd(DateAdd(loc_start_date, ((i-1)*loc_max_collection_length)+loc_max_collection_length, TimeUnit.Days), 23, TimeUnit.Hours) > loc_end_date,
+                                      DateAdd(loc_end_date, 23, TimeUnit.Hours),
+                                      DateAdd(DateAdd(loc_start_date, ((i-1)*loc_max_collection_length)+loc_max_collection_length, TimeUnit.Days), 23, TimeUnit.Hours)
                                   )
                           }
                       );
                   )
               );
 
-              Patch(recPopups,First(recPopups),
+              Patch(rec_popups,First(rec_popups),
                   {
-                      Visible:true,
-                      Value:20,
-                      Display_Text:"Starting Collection",
-                      Popup:"Loading"
+                      visible:true,
+                      value:20,
+                      display_text:"Starting Collection",
+                      popup:"Loading"
                   }
               );
-              ClearCollect(cProduction, {ID:0});
-              Clear(cProduction);
-              If(lCountOfDays <= lMaxCollectionLength,
-                  Select(xDxCollect);,
-                  Select(xDxSequentialCollect);
+              ClearCollect(c_production, {ID:0});
+              Clear(c_production);
+              If(loc_count_of_days <= loc_max_collection_length,
+                  Select(d_collect);,
+                  Select(d_sequential_collect);
               );
             Text: ="init"
             Visible: =false
-      - xDxCollect:
+      - d_collect:
           Control: Classic/Button@2.2.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
             OnSelect: |-
-              =Patch(recPopups,First(recPopups),
+              =Patch(rec_popups,First(rec_popups),
                   {
-                      Visible:true,
-                      Value:30,
-                      Display_Text:"Collecting Data",
-                      Popup:"Loading"
+                      visible:true,
+                      value:30,
+                      display_text:"Collecting Data",
+                      popup:"Loading"
                   }
               );
 
               // Collect Production Data
               ForAll(
                   Filter(Production,
-                      Hour_Starting >= lStartDate,
-                      Hour_Ending <= lEndDate
+                      Hour_Starting >= loc_start_date,
+                      Hour_Ending <= loc_end_date
                   ),
-                  Collect(cProduction,
+                  Collect(c_production,
                       {
                           ID: ThisRecord.ID,
                           Line: ThisRecord.Line.Value,
@@ -107,34 +115,38 @@
                   )
               );
 
-              Select(xDxUpdate);
+              Select(d_update);
             Text: ="collect"
             Visible: =false
-      - xDxSequentialCollect:
+      - d_sequential_collect:
           Control: Timer@2.1.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
             AutoPause: =false
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
             Duration: =25000
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
             OnSelect: |-
-              =UpdateContext({lTimer: true});
+              =UpdateContext({l_timer: true});
             OnTimerEnd: =
             OnTimerStart: |+
-              =UpdateContext({lItteration: lItteration+1});
+              =UpdateContext({loc_iteration: loc_iteration+1});
 
-              Patch(recPopups,First(recPopups),
+              Patch(rec_popups,First(rec_popups),
                   {
-                      Display_Text: "Collecting Data Batch: "&lItteration&" of "&lItterations&".",
-                      Value: First(recPopups).Value+(lItteration*10)
+                      display_text: "Collecting Data Batch: "&loc_iteration&" of "&loc_iterations&".",
+                      value: First(rec_popups).value+(loc_iteration*10)
                   }
               );
 
               ForAll(
                   Filter(Production,
-                      Hour_Starting >= Index(cDatePairs,lItteration).Start_Date,
-                      Hour_Ending <= Index(cDatePairs,lItteration).End_Date
+                      Hour_Starting >= Index(c_date_pairs,loc_iteration).Start_Date,
+                      Hour_Ending <= Index(c_date_pairs,loc_iteration).End_Date
                   ),
-                  Collect(cProduction,
+                  Collect(c_production,
                       {
                           ID: ThisRecord.ID,
                           Line: ThisRecord.Line.Value,
@@ -147,116 +159,119 @@
                   )
               );
 
-              If(lItteration = lItterations,
-                  UpdateContext({lTimer:false});
-                  Patch(recPopups,First(recPopups),
+              If(loc_iteration = loc_iterations,
+                  UpdateContext({l_timer:false});
+                  Patch(rec_popups,First(rec_popups),
                       {
-                          Visible:false,
-                          Value:-1,
-                          Display_Text:"Finishing Up",
-                          Popup:""
+                          visible:false,
+                          value:-1,
+                          display_text:"Finishing Up",
+                          popup:""
                       }
                   );
               )
 
-
             Repeat: =true
-            Start: =lTimer
+            Start: =l_timer
             Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
             Visible: =false
-      - xDxUpdate:
+      - d_update:
           Control: Classic/Button@2.2.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
             OnSelect: |-
-              =Patch(recPopups,First(recPopups),
+              =Patch(rec_popups,First(rec_popups),
                   {
-                      Value:90,
-                      Display_Text:"Updating"
+                      value:90,
+                      display_text:"Updating"
                   }
               );
 
               UpdateContext({
-                  lTotal: Sum(1,3)
+                  l_total: Sum(1,3)
               });
 
-              Patch(recPopups,First(recPopups),
+              Patch(rec_popups,First(rec_popups),
                   {
-                      Visible:false,
-                      Value:-1,
-                      Display_Text:"Not Loading",
-                      Popup:""
+                      visible:false,
+                      value:-1,
+                      display_text:"Not Loading",
+                      popup:""
                   }
               );
             Text: ="update"
             Visible: =false
-      - xDxHeader:
+      - d_header:
           Control: GroupContainer@1.3.0
           Variant: AutoLayout
           Properties:
             AlignInContainer: =AlignInContainer.SetByContainer
             DropShadow: =DropShadow.None
-            Fill: =gblTheme.Primary
+            Fill: =gbl_theme.primary
             LayoutAlignItems: =LayoutAlignItems.Stretch
             LayoutDirection: =LayoutDirection.Horizontal
-            LayoutGap: =gblPadding
+            LayoutGap: =gbl_padding
             LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
             LayoutMinHeight: =10
             LayoutMinWidth: =10
-            PaddingBottom: =gblPadding
-            PaddingLeft: =gblPadding
-            PaddingRight: =gblPadding
-            PaddingTop: =gblPadding
+            PaddingBottom: =gbl_padding
+            PaddingLeft: =gbl_padding
+            PaddingRight: =gbl_padding
+            PaddingTop: =gbl_padding
             RadiusBottomLeft: =0
             RadiusBottomRight: =0
             RadiusTopLeft: =0
             RadiusTopRight: =0
           Children:
-            - xDxLogo:
+            - d_logo:
                 Control: Image@2.2.3
                 Properties:
-                  Image: =If(gblTheme.Style = "Light", logo1, logo2)
+                  Image: =If(gbl_theme.style = "light", logo1, logo2)
                   LayoutMinHeight: =10
-                  Width: =xDxNavigationTitle.Width
-            - xDxTitle:
+                  Width: =d_navigation_title.Width
+            - d_title:
                 Control: Label@2.5.1
                 Properties:
-                  Color: =gblTheme.Text_Light
+                  Color: =gbl_theme.text_light
                   FillPortions: =1
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   Size: =Round(Self.Height / 3,0)
-                  Text: =APP_NAME
-            - xDxMode:
+                  Text: =app_name
+            - d_mode:
                 Control: Classic/Icon@2.5.0
                 Properties:
-                  Color: =gblTheme.Text_On_Dark
+                  Color: =gbl_theme.text_on_dark
                   Height: =10
-                  HoverColor: =gblTheme.Text_On_Light
+                  HoverColor: =gbl_theme.text_on_light
                   Icon: =Icon.HalfFilledCircle
                   LayoutMinHeight: =10
-                  OnSelect: =If(gblTheme.Style = "Light", Set(gblTheme, gblStyles.Dark),Set(gblTheme, gblStyles.Light))
+                  OnSelect: =If(gbl_theme.style = "light", Set(gbl_theme, gbl_styles.dark),Set(gbl_theme, gbl_styles.light))
                   PaddingBottom: =4
                   PaddingLeft: =4
                   PaddingRight: =4
                   PaddingTop: =4
-                  Rotation: =If(gblTheme.Style = "Light", 0, 180)
+                  Rotation: =If(gbl_theme.style = "light", 0, 180)
                   Width: =Self.Height
-            - xDxBugs:
+            - d_bugs:
                 Control: Image@2.2.3
                 Properties:
-                  HoverFill: =gblTheme.Pri_Complement
-                  Image: =gblIcons.Bug
+                  HoverFill: =gbl_theme.pri_complement
+                  Image: =gbl_icons.bug
                   ImagePosition: =ImagePosition.Fill
                   LayoutMinHeight: =10
-                  OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+                  OnSelect: =Navigate(scr_bugs,ScreenTransition.Fade)
                   PaddingLeft: =
                   RadiusBottomLeft: =Self.Width
                   RadiusBottomRight: =Self.RadiusBottomLeft
                   RadiusTopLeft: =Self.RadiusBottomLeft
                   RadiusTopRight: =Self.RadiusBottomLeft
                   Width: =Self.Height
-            - xDxUserImg:
+            - d_user_img:
                 Control: Image@2.2.3
                 Properties:
                   Fill: =RGBA(0, 0, 0, 1)
@@ -269,7 +284,7 @@
                   RadiusTopLeft: =Self.RadiusBottomLeft
                   RadiusTopRight: =Self.RadiusBottomLeft
                   Width: =Self.Height
-      - xDxMain:
+      - d_main:
           Control: GroupContainer@1.3.0
           Variant: AutoLayout
           Properties:
@@ -285,76 +300,78 @@
             RadiusTopLeft: =0
             RadiusTopRight: =0
           Children:
-            - xDxNavigation:
+            - d_navigation:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.None
-                  Fill: =gblTheme.Midground
+                  Fill: =gbl_theme.midground
                   FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =gblPadding
+                  LayoutGap: =gbl_padding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
-                  PaddingBottom: =gblPadding
-                  PaddingLeft: =gblPadding
-                  PaddingRight: =gblPadding
-                  PaddingTop: =gblPadding
+                  PaddingBottom: =gbl_padding
+                  PaddingLeft: =gbl_padding
+                  PaddingRight: =gbl_padding
+                  PaddingTop: =gbl_padding
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                  - xDxNavigationTitle:
+                  - d_navigation_title:
                       Control: Label@2.5.1
                       Properties:
                         Align: =Align.Center
-                        Color: =gblTheme.Text_On_Light
+                        Color: =gbl_theme.text_on_light
                         LayoutMinWidth: =10
                         Size: =Round(Self.Height / 3,0)
                         Text: =App.ActiveScreen.Name
-                  - xDxNavigationSeparator:
+                  - d_navigation_separator:
                       Control: Rectangle@2.3.0
                       Properties:
-                        Fill: =gblTheme.Pri_Complement
-                        Height: =Round(gblPadding/2,0)
+                        Fill: =gbl_theme.pri_complement
+                        Height: =Round(gbl_padding/2,0)
                         LayoutMinWidth: =10
                         Width: =10
-                  - xDxNavigationGallery:
+                  - d_navigation_gallery:
                       Control: Gallery@2.15.0
                       Variant: Vertical
                       Properties:
                         AlignInContainer: =AlignInContainer.SetByContainer
-                        Items: =colNavigation
+                        Items: =col_navigation
                         LayoutMinHeight: =10
                         LayoutMinWidth: =10
-                        TemplatePadding: =gblPadding
+                        TemplatePadding: =gbl_padding
                         TemplateSize: =40
                       Children:
-                        - xDxNavigationGalleryButton:
+                        - d_navigation_gallery_button:
                             Control: Classic/Button@2.2.0
                             Properties:
+                              BorderColor: =gbl_theme.primary
                               BorderThickness: =1
-                              Color: =gblTheme.Text_Dark
-                              DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
-                              Fill: =gblTheme.Accent
+                              Color: =gbl_theme.text_dark
+                              DisplayMode: =If(App.ActiveScreen.Name = ThisItem.screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                              Fill: =gbl_theme.accent
                               FontWeight: =FontWeight.Normal
                               Height: =Parent.TemplateHeight
-                              OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                              HoverColor: =gbl_theme.primary
+                              OnSelect: =Navigate(ThisItem.screen,ScreenTransition.Fade)
                               RadiusBottomLeft: =100
                               RadiusBottomRight: =100
                               RadiusTopLeft: =100
                               RadiusTopRight: =100
                               Size: =Round(Self.Height / 4,0)
-                              Text: =ThisItem.Label
+                              Text: =ThisItem.label
                               Width: =Parent.TemplateWidth
-                  - xDxNavigationFooter:
+                  - d_navigation_footer:
                       Control: Label@2.5.1
                       Properties:
                         Align: =Align.Center
-                        Color: =gblTheme.Text_On_Light
+                        Color: =gbl_theme.text_on_light
                         Height: =Parent.Height * 0.1
                         LayoutMinWidth: =10
                         Size: =RoundDown(Self.Height / 14,0)
@@ -364,116 +381,119 @@
                           &Char(13)&Char(13)&
                           "© 2025 EMD Millipore. All rights reserved."
                         VerticalAlign: =VerticalAlign.Bottom
-            - xDxfilterParent:
+            - d_filter_parent:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.None
-                  Fill: =gblTheme.Background
+                  Fill: =gbl_theme.background
                   FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =gblPadding
+                  LayoutGap: =gbl_padding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
-                  PaddingBottom: =gblPadding
-                  PaddingLeft: =gblPadding
-                  PaddingRight: =gblPadding
-                  PaddingTop: =gblPadding
+                  PaddingBottom: =gbl_padding
+                  PaddingLeft: =gbl_padding
+                  PaddingRight: =gbl_padding
+                  PaddingTop: =gbl_padding
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                  - xDxFilters:
+                  - d_filters:
                       Control: GroupContainer@1.3.0
                       Variant: AutoLayout
                       Properties:
                         AlignInContainer: =AlignInContainer.SetByContainer
-                        Fill: =gblTheme.Foreground
+                        Fill: =gbl_theme.foreground
                         Height: =Parent.Height * 0.5
                         LayoutAlignItems: =LayoutAlignItems.Stretch
                         LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =gblPadding
-                        LayoutMinHeight: =10
+                        LayoutGap: =gbl_padding
                         LayoutMinWidth: =10
-                        PaddingBottom: =gblPadding
-                        PaddingLeft: =gblPadding
-                        PaddingRight: =gblPadding
+                        LayoutOverflowY: =LayoutOverflow.Scroll
+                        PaddingBottom: =gbl_padding
+                        PaddingLeft: =gbl_padding
+                        PaddingRight: =gbl_padding
                       Children:
-                        - xDxFiltersTitle:
+                        - d_filters_title:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
                               AlignInContainer: =AlignInContainer.Center
-                              Color: =gblTheme.Text_Light
-                              Fill: =gblTheme.Secondary
-                              LayoutMinWidth: =10
-                              Size: =Round(Self.Height / 4,0)
+                              Color: =gbl_theme.text_light
+                              Fill: =gbl_theme.secondary
+                              LayoutMinHeight: =10
+                              LayoutMinWidth: '=10  '
+                              Size: =Round(Self.Height / 3,0)
                               Text: ="Filters"
                               Width: =Parent.Width
-                        - xDxStartDateLabel:
+                        - d_start_date_label:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
-                              Color: =gblTheme.Text_On_Light
+                              Color: =gbl_theme.text_on_light
                               LayoutMinWidth: =10
                               Size: =Round(Self.Height / 4,0)
                               Text: ="Start Date"
-                        - xDxStartDate:
+                        - d_start_date:
                             Control: Classic/DatePicker@2.6.0
                             Properties:
                               BorderThickness: =1
-                              Color: =gblTheme.Text_On_Light
-                              Fill: =gblTheme.Background
+                              Color: =gbl_theme.text_on_light
+                              Fill: =gbl_theme.background
                               FocusedBorderThickness: =1
-                              IconBackground: =gblTheme.Sec_Complement
-                              IconFill: =gblTheme.Text_On_Light
+                              IconBackground: =gbl_theme.sec_complement
+                              IconFill: =gbl_theme.text_on_light
                               LayoutMinWidth: =10
                               Size: =Round(Self.Height / 5,0)
-                        - xDxFiltersSeparator0:
+                        - d_filters_separator0:
                             Control: Rectangle@2.3.0
                             Properties:
-                              Fill: =gblTheme.Pri_Complement
-                              Height: =Round(gblPadding/2,0)
+                              Fill: =gbl_theme.pri_complement
+                              Height: =Round(gbl_padding/2,0)
                               LayoutMinWidth: =10
                               Width: =10
-                        - xDxEndDateLabel:
+                        - d_end_date_label:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
-                              Color: =gblTheme.Text_On_Light
+                              Color: =gbl_theme.text_on_light
                               LayoutMinWidth: =10
                               Size: =Round(Self.Height / 4,0)
                               Text: ="End Date"
-                        - xDxEndDate:
+                        - d_end_date:
                             Control: Classic/DatePicker@2.6.0
                             Properties:
                               BorderThickness: =1
-                              Color: =gblTheme.Text_On_Light
-                              Fill: =gblTheme.Background
+                              Color: =gbl_theme.text_on_light
+                              Fill: =gbl_theme.background
                               FocusedBorderThickness: =1
-                              IconBackground: =gblTheme.Sec_Complement
-                              IconFill: =gblTheme.Text_On_Light
+                              IconBackground: =gbl_theme.sec_complement
+                              IconFill: =gbl_theme.text_on_light
                               LayoutMinWidth: =10
                               Size: =Round(Self.Height / 5,0)
-                        - xDxFiltersSeparator1:
+                        - d_filters_separator1:
                             Control: Rectangle@2.3.0
                             Properties:
-                              Fill: =gblTheme.Pri_Complement
-                              Height: =Round(gblPadding/2,0)
+                              Fill: =gbl_theme.pri_complement
+                              Height: =Round(gbl_padding/2,0)
                               LayoutMinWidth: =10
                               Width: =10
-                        - xDxFiltersButton:
+                        - d_filters_button:
                             Control: Classic/Button@2.2.0
                             Properties:
+                              BorderColor: =gbl_theme.primary
                               BorderThickness: =1
-                              Color: =gblTheme.Text_Dark
-                              Fill: =gblTheme.Accent
+                              Color: =gbl_theme.text_dark
+                              Fill: =gbl_theme.accent
                               FontWeight: =FontWeight.Normal
+                              HoverColor: =gbl_theme.primary
                               LayoutMinWidth: =10
-                              OnSelect: =Select(xDxInit);
+                              OnSelect: =Select(d_init);
                               RadiusBottomLeft: =100
                               RadiusBottomRight: =100
                               RadiusTopLeft: =100
@@ -481,7 +501,7 @@
                               Size: =Round(Self.Height / 4,0)
                               Text: ="Update Filter"
                               Width: =10
-            - xDxBody:
+            - d_body:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
@@ -490,25 +510,25 @@
                   FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 16,18)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =gblPadding
+                  LayoutGap: =gbl_padding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
-                  PaddingBottom: =gblPadding
-                  PaddingLeft: =gblPadding
-                  PaddingRight: =gblPadding
-                  PaddingTop: =gblPadding
+                  PaddingBottom: =gbl_padding
+                  PaddingLeft: =gbl_padding
+                  PaddingRight: =gbl_padding
+                  PaddingTop: =gbl_padding
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                  - xDxGalleryParent:
+                  - d_gallery_parent:
                       Control: GroupContainer@1.3.0
                       Variant: AutoLayout
                       Properties:
                         AlignInContainer: =AlignInContainer.SetByContainer
                         DropShadow: =DropShadow.Regular
-                        Fill: =gblTheme.Foreground
+                        Fill: =gbl_theme.foreground
                         Height: =500
                         LayoutAlignItems: =LayoutAlignItems.Stretch
                         LayoutDirection: =LayoutDirection.Vertical
@@ -516,24 +536,24 @@
                         LayoutOverflowY: =LayoutOverflow.Scroll
                         PaddingRight: =
                       Children:
-                        - xDxGalleryTitle:
+                        - d_gallery_title:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
                               AlignInContainer: =AlignInContainer.Start
-                              Color: =gblTheme.Text_Light
-                              Fill: =gblTheme.Secondary
+                              Color: =gbl_theme.text_light
+                              Fill: =gbl_theme.secondary
                               LayoutMinHeight: =10
                               LayoutMinWidth: =10
                               Size: =Round(Self.Height / 3,0)
                               Text: ="Data Example taken from Encapsulation Production"
                               Width: =Parent.Width
-                        - xDxGalleryColumns:
+                        - d_gallery_columns:
                             Control: GroupContainer@1.3.0
                             Variant: AutoLayout
                             Properties:
                               DropShadow: =DropShadow.Regular
-                              Fill: =gblTheme.Sec_Complement
+                              Fill: =gbl_theme.sec_complement
                               FillPortions: =0
                               Height: =40
                               LayoutAlignItems: =LayoutAlignItems.Stretch
@@ -542,103 +562,103 @@
                               RadiusTopLeft: =0
                               RadiusTopRight: '=0   '
                             Children:
-                              - xDxGalleryIdLabel:
+                              - d_gallery_id_label:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="ID"
-                              - xDxGalleryStartDateLabel:
+                              - d_gallery_start_date_label:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Start Date"
-                              - xDxGalleryEndDateLabel:
+                              - d_gallery_end_date_label:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="End Date"
-                              - xDxGalleryShiftLabel:
+                              - d_gallery_shift_label:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Shift"
-                              - xDxGalleryLineLabel:
+                              - d_gallery_line_label:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Line"
-                              - xDxGalleryLotLabel:
+                              - d_gallery_lot_label:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1.5
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Lot"
-                              - xDxGalleryCatalogLabel:
+                              - d_gallery_catalog_label:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1.5
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Catalog"
-                        - xDxGallery:
+                        - d_gallery:
                             Control: Gallery@2.15.0
                             Variant: Vertical
                             Properties:
                               FocusedBorderThickness: =0
-                              Items: =Sort(cProduction, Hour_Ending)
+                              Items: =Sort(c_production, Hour_Ending)
                               Selectable: =false
                               ShowScrollbar: =false
                               TemplatePadding: =1
                               TemplateSize: =50
                               Transition: =Transition.Pop
                             Children:
-                              - xDxGalleryData:
+                              - d_gallery_data:
                                   Control: GroupContainer@1.3.0
                                   Variant: AutoLayout
                                   Properties:
@@ -653,91 +673,91 @@
                                     RadiusTopRight: =0
                                     Width: =Parent.TemplateWidth
                                   Children:
-                                    - xDxGalleryId:
+                                    - d_gallery_id:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.ID
-                                    - xDxGalleryStartDate:
+                                    - d_gallery_start_date:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Hour_Starting
-                                    - xDxGalleryEndDate:
+                                    - d_gallery_end_date:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Hour_Ending
-                                    - xDxGalleryShift:
+                                    - d_gallery_shift:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Shift
-                                    - xDxGalleryLine:
+                                    - d_gallery_line:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Line
-                                    - xDxGalleryLot:
+                                    - d_gallery_lot:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1.5
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Lot
-                                    - xDxGalleryCatalog:
+                                    - d_gallery_catalog:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1.5
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
