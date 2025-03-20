@@ -29,19 +29,20 @@
     1. [Initial Setup](#initial-setup)
     2. [Commenting](#commenting)
     3. [Snake-Case](#deciding-on-snake_case)
-    4. [Databases and Data Sources](#databases-or-data-sources)
-    5. [User Preferences](#userpreferences)
-    6. [Screens](#screens)
-    7. [Objects / Controls](#objects--controls)
-    8. [Variables](#variables)
+    4. [Versioning](#versioning)
+    5. [Databases and Data Sources](#databases-or-data-sources)
+    6. [User Preferences](#userpreferences)
+    7. [Screens](#screens)
+    8. [Objects / Controls](#objects--controls)
+    9. [Variables](#variables)
         1. [Constant](#constant)
         2. [Local](#local)
         3. [Global](#global)
         4. [Universal](#universal)
-    9. [Dates and Times](#dates-and-times)
-    10. [Collections](#collections)
-    11. [Records](#records)
-    12. [Field Names](#field-names)
+    10. [Dates and Times](#dates-and-times)
+    11. [Collections](#collections)
+    12. [Records](#records)
+    13. [Field Names](#field-names)
 2. [Using the Templates](#using-the-templates)
     1. [Initialization](#initialization)
     2. [Standard Variables](#standard-variables)
@@ -109,6 +110,19 @@ like to use camel case. So we will be able to determine with greater accuracy
 what part of the code is built it PowerFX and what is our written scripting.
 
 I will explore some syntax for these conventions later on.
+
+## Versioning
+
+The default PowerApp updater is lost to many users. The apps unfortunately do
+not automatically update for users when the app is opened. Instead, it prompts
+the user with a very small banner at the top of the app to refresh the app to
+update to a new version. Because the update banner can be missed so easily,
+users seem to miss updates consistently.
+
+This has prompted me to include a version control system that uses an external
+database to check the current version of an app to the stored version manually.
+
+I plan to use a simple [semver](https://semver.org/) system.
 
 ## Databases or data sources
 
