@@ -1,0 +1,75 @@
+- i_modals:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Visible: =First(recPopups).Visible
+      Width: =Parent.Width
+    Children:
+      - i_popup_version:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            BorderColor: =gblTheme.Sec_Complement
+            BorderThickness: =If(gblTheme.Style = "Light",0,1)
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =gblTheme.Background
+            FillPortions: =0
+            Height: =Parent.Height * 0.25
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            PaddingBottom: =gblPadding
+            PaddingLeft: =gblPadding
+            PaddingRight: =gblPadding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Visible: =First(recPopups).modal = Self
+            Width: =Parent.Width * 0.25
+          Children:
+            - i_popup_version_header:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  Color: =gblTheme.Text_Light
+                  Fill: =gblTheme.Primary
+                  Text: ="Version Error"
+                  Width: =Parent.Width
+            - i_popup_version_body:
+                Control: Label@2.5.1
+                Properties:
+                  FillPortions: =1
+                  Size: =10
+                  Text: ="    The system has detected you are using a old version of this application. Please refresh to continue."
+                  VerticalAlign: =VerticalAlign.Top
+            - i_popup_version_btn:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  BorderThickness: =1
+                  Color: =gblTheme.Text_Dark
+                  Fill: =gblTheme.Accent
+                  FontWeight: =FontWeight.Normal
+                  OnSelect: |-
+                    =Launch("https://apps.powerapps.com/play/e/default-db76fb59-a377-4120-bc54-59dead7d39c9/a/a033bc4c-adca-4543-8078-eeac5993432a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=5bb92e6f-7693-4ca2-b4f6-6e15f44896bb&sourcetime=1711973878070&source=portal",
+                        {hidenavbar: true, hideappsplash: true},
+                        LaunchTarget.Replace
+                    )
+                  RadiusBottomLeft: =Self.RadiusTopLeft
+                  RadiusBottomRight: =Self.RadiusTopLeft
+                  RadiusTopLeft: =100
+                  RadiusTopRight: =Self.RadiusTopLeft
+                  Size: =Self.Height / 4
+                  Text: ="Refresh"
+                  Width: =Parent.Width * 0.5
