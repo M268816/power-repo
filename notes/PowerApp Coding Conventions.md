@@ -1,29 +1,5 @@
 # PowerApps coding conventions and syntax
 
-> UPDATE 19 MAR 2025:
->
-> After engorging myself with python tutorials and docs from various libraries,
-> I took to the YouTubes to enlighten myself to the current programming culture
-> and study the market for driven self taught little coding Jimmies. I found
-> myself listening to a rant by Michael B Paulson, also known as ThePrimeagen,
-> and realized I may have made a mistake. I name... *everything* in my PowerApps
-> projects like a structurizing *psychopath*.
->
-> Prime's high pitched, nasally little temper told me that what I was doing in
-> PowerApps was unhinged. His 10+ year Netflix pedigree turned internet
-> personality convinced me at least, the way I tried to use different naming
-> conventions to describe the type of object I work with is more taxing than
-> just keeping consistency. I blame my foray into python and big brother
-> PEP 8 for showing me things like, variables use snake case, but classes use
-> pascal. Like Alice I too then traveled down the rabbit hole, went *a bit*
-> overboard, and used too many of these conventions to define separate
-> objects. A self taught vibe coding rookie over correction that over the next
-> few days I will be nuking with an orbital space laser and rectifying.
->
-> Your little Jimmy,
->
-> Ray
-
 ## Table of contents
 1. [Conventions and Syntax](#powerapps-coding-conventions-and-syntax)
     1. [Initial Setup](#initial-setup)
@@ -84,7 +60,6 @@ formulas or functions
 /*
     Block
     Comments!
-
 */
 ```
 
@@ -445,7 +420,7 @@ structures and variables that can use dot notation.
 
 ```cpp
 // Initialize
-ClearCollect(rec_popups,
+Set(popups,
     {
         display_text: "Not Loading",
         value: -1,
