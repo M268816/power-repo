@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .email-header {
+            background-color: #5585b5;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .email-body {
+            padding: 20px;
+        }
+        .bug-report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .bug-report-table th, .bug-report-table td {
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid #dddddd;
+        }
+        .bug-report-table th {
+            background-color: #f5f5f5;
+            width: 150px;
+        }
+        .footer {
+            text-align: center;
+            color: #aaaaaa;
+            font-size: 12px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<table width='100%' cellpadding='0' cellspacing='0' border='0'>
+    <tr>
+        <!-- Left Margin -->
+        <td width='15%'>&nbsp;</td>
+        
+        <!-- Main Content -->
+        <td width='70%'>
+            <div class='email-container'>
+                <!-- Email Header -->
+                <div class='email-header'>
+                    <h1>DMS Bug Report System</h1>
+                </div>
+    
+                <!-- Resolution Body -->
+                <div class='email-body'>
+                    <table class='bug-report-table'>    
+                        <tr>
+                            <th>Status</th>
+                            <td>"& bFormStatusValue.Selected.Value &"</td>
+                        </tr>
+                        <tr>
+                            <th>Resolution</th>
+                            <td>"& bFormResolutionValue.Selected.Value &"</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Report Body -->
+                <div class='email-body'>
+                    <table class='bug-report-table'>
+                        <tr>
+                            <th>Title</th>
+                            <td>"& bFormTitleValue.Text &"</td>
+                        </tr>
+                        <tr>
+                            <th>Problem Type</th>
+                            <td>"& bFormTypeValue.Selected.Value &"</td>
+                        </tr>
+                        <tr>
+                            <th>Expected Result</th>
+                            <td>"& bFormExpectedValue.Text &"</td>
+                        </tr>
+                        <tr>
+                            <th>Actual Result</th>
+                            <td>"& bFormActualValue.Text &"</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Data Body -->
+                <div class='email-body'>
+                    <table class='bug-report-table'>
+                        <tr>
+                            <th>Environment</th>
+                            <td>"& bFormEnvironmentValue.Selected.Value &"</td>
+                        </tr>
+                        <tr>
+                            <th>App Version</th>
+                            <td>"& VERSION &"</td>
+                        </tr>
+                    </table>
+                </div>
+    
+                <!-- Email Footer -->
+                <div class='footer'>
+                    &copy; 2025 EMD Millipore. All rights reserved.
+                </div>
+            </div>
+        </td>
+        
+        <!-- Right Margin -->
+        <td width='15%'>&nbsp;</td>
+    </tr>
+</table>
+</body>
+</html>

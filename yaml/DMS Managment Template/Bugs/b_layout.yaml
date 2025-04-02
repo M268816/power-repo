@@ -904,25 +904,25 @@
                                 </table>
                                 </body>
                                 </html>"
-                            );
-
-                            IfError(SubmitForm(b_form),
-                                Notify("Submission Error. Check that all required fields are populated.",NotificationType.Error),
-                                
-                                Office365Outlook.SendEmailV2(
-                                    gbl_lists.bug_report_contacts,
-                                    "A bug report was submitted for the " & app_name,
-                                    EmailBody,
-                                    {
-                                        Cc: b_form_user_value.Selected.Email
-                                    }
                                 );
-                                
-                                ResetForm(b_form);
 
-                                Back(ScreenTransition.Fade);
+                                IfError(SubmitForm(b_form),
+                                    Notify("Submission Error. Check that all required fields are populated.",NotificationType.Error),
+                                    
+                                    Office365Outlook.SendEmailV2(
+                                        gbl_lists.bug_report_contacts,
+                                        "A bug report was submitted for the " & app_name,
+                                        EmailBody,
+                                        {
+                                            Cc: b_form_user_value.Selected.Email
+                                        }
+                                    );
+                                    
+                                    ResetForm(b_form);
 
-                            ); 
+                                    Back(ScreenTransition.Fade);
+
+                                ); 
                               RadiusBottomLeft: =0
                               RadiusBottomRight: =0
                               RadiusTopLeft: =0

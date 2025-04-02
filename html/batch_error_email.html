@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .email-header {
+            background-color: #5585b5;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .email-body {
+            padding: 20px;
+        }
+        .bug-report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .bug-report-table th, .bug-report-table td {
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid #dddddd;
+        }
+        .bug-report-table th {
+            background-color: #f5f5f5;
+            width: 150px;
+        }
+        .footer {
+            text-align: center;
+            color: #aaaaaa;
+            font-size: 12px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<table width='100%' cellpadding='0' cellspacing='0' border='0'>
+    <tr>
+        <!-- Left Margin -->
+        <td width='15%'>&nbsp;</td>
+        
+        <!-- Main Content -->
+        <td width='70%'>
+            <div class='email-container'>
+                <!-- Email Header -->
+                <div class='email-header'>
+                    <h1>Accountability Batch Error Report</h1>
+                </div>
+
+                <!-- Email Announcement -->
+                 <div style='padding: 0% 10%;'>
+                    <p>
+                        This email was automatically generated to inform you about an error identified during the accountability
+                        process. As part of our "Right First Time" initiative, these findings are crucial for both your
+                        professional development and the continuous improvement of our processes. Addressing these errors
+                        helps us enhance individual training and identify areas where our procedures may need updates or
+                        clarification. Please review the information below and the attached document (if provided) for a detailed
+                        explanation of your error.
+                    </p>
+                 </div>
+
+                <hr />
+    
+                <!-- Report Body -->
+                <div class='email-body'>
+                    <table class='bug-report-table'>
+                        <tr>
+                            <th>Date of Occurrence</th>
+                            <td>@{triggerBody()?['text_3']}</td>
+                        </tr>
+                        <tr>
+                            <th>Error Type:</th>
+                            <td>@{triggerBody()?['text_1']}</td>
+                        </tr>
+                        <tr>
+                            <th>Production Line:</th>
+                            <td>@{triggerBody()?['text']}</td>
+                        </tr>
+                        <tr>
+                            <th>Process Area:</th>
+                            <td>@{triggerBody()?['text_2']}</td>
+                        </tr>
+                        <tr>
+                            <th>WJ:</th>
+                            <td>@{triggerBody()?['text_5']}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Comment Body -->
+                <div>
+                    <h4 style='text-align: center;'>Additional Comments:</h4>
+                    <p style='padding: 0% 10%;'>
+                        @{triggerBody()?['text_4']}
+                    </p>
+                </div>
+    
+                <!-- Email Footer -->
+                <div class='footer'>
+                    &copy; 2025 EMD Millipore. All rights reserved.
+                </div>
+            </div>
+        </td>
+        
+        <!-- Right Margin -->
+        <td width='15%'>&nbsp;</td>
+    </tr>
+</table>
+</body>
+</html>
