@@ -1,0 +1,110 @@
+- s_main:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gbl_theme.background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+      - s_collect:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            Text: ="collect"
+            Visible: =false
+      - s_sequential_collect:
+          Control: Timer@2.1.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
+            Visible: =false
+      - s_update:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            Text: ="update"
+            Visible: =false
+      - s_header:
+          Control: CanvasComponent
+          ComponentName: comp_header_return
+          Properties:
+            Height: =If(App.Width < Index(App.SizeBreakpoints,2).Value,60,App.Width < Index(App.SizeBreakpoints,3).Value,50,40)
+            logo_width: =Self.Height
+            styles: =gbl_styles
+            text_color: =gbl_theme.highlight
+            title: =LookUp(col_navigation, screen = App.ActiveScreen).label
+      - s_body:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutJustifyContent: =LayoutJustifyContent.Center
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            PaddingBottom: =gbl_padding
+            PaddingLeft: =gbl_padding
+            PaddingRight: =gbl_padding
+            PaddingTop: =gbl_padding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - s_section_0:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.Regular
+                  Fill: =gbl_theme.foreground
+                  FillPortions: =0
+                  Height: =500
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinWidth: =10
+                  LayoutOverflowY: =LayoutOverflow.Scroll
+                  PaddingRight: =
+                Children:
+                  - s_Section0Title:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        AlignInContainer: =AlignInContainer.Start
+                        Color: =gbl_theme.text_light
+                        Fill: =gbl_theme.secondary
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        Size: =Self.Height / 3
+                        Text: ="Section Zero"
+                        Width: =Parent.Width
+                  - s_Section0Content:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =gbl_theme.text_on_light
+                        FillPortions: =1
+                        Overflow: =Overflow.Scroll
+                        PaddingBottom: =gbl_padding
+                        PaddingLeft: =gbl_padding
+                        PaddingRight: =gbl_padding
+                        PaddingTop: =gbl_padding
+                        Text: |-
+                          ="Lorem ipsum odor amet, consectetuer adipiscing elit. Ac vitae lacus blandit dis pellentesque sed. Sagittis penatibus ante phasellus consequat sociosqu faucibus malesuada tellus habitasse. Sem aenean orci, malesuada fames erat morbi dis. Fringilla vehicula magnis vel habitant vitae non viverra massa. Imperdiet nulla at maximus pharetra; gravida imperdiet volutpat nullam laoreet. Fames vivamus vulputate primis netus ad libero. Tempor proin ornare viverra, congue enim ullamcorper. Sodales nam ligula ipsum suspendisse nam eros congue efficitur. Tempus lectus vel consectetur cubilia ornare maximus auctor ut nulla.
+
+                          Orci felis aptent interdum interdum finibus per praesent mattis habitant. Torquent et vivamus maecenas nunc ornare ante vulputate. Molestie class nascetur lorem diam nec congue ut montes lacinia. Bibendum dignissim volutpat donec, pellentesque donec nam curabitur. Cras nibh arcu donec elementum ultricies venenatis elementum. Magnis imperdiet blandit litora ex tellus tempus rhoncus nisi. Consequat amet dui natoque varius vivamus taciti finibus ornare."
+      - s_footer:
+          Control: CanvasComponent
+          ComponentName: comp_footer
+          Properties:
+            Fill: =ColorValue(gbl_theme.chart_dim)
+            Height: =20
+            content: ="Place Footer Content Here"

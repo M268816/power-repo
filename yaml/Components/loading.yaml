@@ -1,0 +1,70 @@
+ComponentDefinitions:
+  comp_modal_loading:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    Properties:
+      Height: =720
+      Width: =1280
+    Children:
+      - comp_modal_loading_bg:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            Fill: =RGBA(0, 0, 0, 0.5)
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutJustifyContent: =LayoutJustifyContent.Center
+            Width: =Parent.Width
+          Children:
+            - comp_modal_loading_main:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.ExtraBold
+                  Fill: =gbl_theme.background
+                  FillPortions: =0
+                  Height: =Parent.Height * 0.3
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width * 0.3
+                Children:
+                  - comp_modal_loading_content:
+                      Control: Text@0.0.50
+                      Properties:
+                        Align: ='TextCanvas.Align'.Center
+                        Fill: =RGBA(0,0,0,0)
+                        FillPortions: =2
+                        Font: =App.Theme.Font
+                        FontColor: =gbl_theme.text_on_light
+                        Height: =40
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        Size: =Round(Self.Height/6,0)
+                        Text: =First(gbl_modals).display_text
+                        VerticalAlign: =VerticalAlign.Middle
+                        Wrap: =false
+                  - comp_modal_spinner:
+                      Control: Spinner@1.4.6
+                      Properties:
+                        FillPortions: =1
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        SpinnerSize: ='Spinner.SpinnerSize'.Small
+                  - comp_modal_progress:
+                      Control: Progress@1.1.34
+                      Properties:
+                        AlignInContainer: =AlignInContainer.Center
+                        FillPortions: =2
+                        Indeterminate: =First(gbl_modals).value < 0
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        Shape: ='Progress.Shape'.Rounded
+                        Thickness: ='Progress.Thickness'.Medium
+                        Value: =First(gbl_modals).value
+                        Width: =Parent.Width * 0.9

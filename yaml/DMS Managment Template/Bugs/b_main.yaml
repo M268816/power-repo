@@ -1,4 +1,4 @@
-- b_layout:
+- b_main:
     Control: GroupContainer@1.3.0
     Variant: AutoLayout
     Properties:
@@ -43,67 +43,16 @@
             HoverColor: =gbl_theme.primary
             Text: ="update"
             Visible: =false
-      - b_header:
-          Control: GroupContainer@1.3.0
-          Variant: AutoLayout
+      - b_header_return:
+          Control: CanvasComponent
+          ComponentName: comp_header_return
           Properties:
-            AlignInContainer: =AlignInContainer.SetByContainer
-            DropShadow: =DropShadow.None
-            Fill: =gbl_theme.primary
-            LayoutAlignItems: =LayoutAlignItems.Stretch
-            LayoutDirection: =LayoutDirection.Horizontal
-            LayoutGap: =gbl_padding
-            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-            LayoutMinHeight: =10
-            LayoutMinWidth: =10
-            PaddingBottom: =gbl_padding
-            PaddingLeft: =gbl_padding
-            PaddingRight: =gbl_padding
-            PaddingTop: =gbl_padding
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-          Children:
-            - b_back:
-                Control: Image@2.2.3
-                Properties:
-                  HoverFill: =gbl_theme.pri_complement
-                  Image: =gbl_icons.back
-                  ImagePosition: =ImagePosition.Fill
-                  LayoutMinHeight: =10
-                  OnSelect: =Back(ScreenTransition.Fade)
-                  PaddingLeft: =
-                  RadiusBottomLeft: =Self.Width
-                  RadiusBottomRight: =Self.RadiusBottomLeft
-                  RadiusTopLeft: =Self.RadiusBottomLeft
-                  RadiusTopRight: =Self.RadiusBottomLeft
-                  Width: =Self.Height
-            - b_title:
-                Control: Label@2.5.1
-                Properties:
-                  Color: =gbl_theme.text_light
-                  FillPortions: =1
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 3
-                  Text: ="Report a Bug"
-            - b_mode:
-                Control: Classic/Icon@2.5.0
-                Properties:
-                  Color: =gbl_theme.text_on_dark
-                  Height: =10
-                  HoverColor: =gbl_theme.text_on_light
-                  Icon: =Icon.HalfFilledCircle
-                  LayoutMinHeight: =10
-                  OnSelect: =If(gbl_theme.style = "light", Set(gbl_theme, gbl_styles.dark),Set(gbl_theme, gbl_styles.light))
-                  PaddingBottom: =4
-                  PaddingLeft: =4
-                  PaddingRight: =4
-                  PaddingTop: =4
-                  Rotation: =If(gbl_theme.style = "light", 0, 180)
-                  Width: =Self.Height
-      - b_main:
+            Height: =If(App.Width < Index(App.SizeBreakpoints,2).Value,60,App.Width < Index(App.SizeBreakpoints,3).Value,50,40)
+            logo_width: =Self.Height
+            styles: =gbl_styles
+            text_color: =gbl_theme.highlight
+            title: ="Report a Bug"
+      - b_body:
           Control: GroupContainer@1.3.0
           Variant: AutoLayout
           Properties:
@@ -138,7 +87,7 @@
                   LayoutMinHeight: =10
                   LayoutOverflowY: =LayoutOverflow.Scroll
                   PaddingRight: =
-                  Width: =If(App.Width > Index(App.SizeBreakpoints,3).Value, Parent.Width * 0.35, Parent.Width * 0.7)
+                  Width: =If(App.Width < Index(App.SizeBreakpoints,2).Value, Parent.Width * 0.70, App.Width < Index(App.SizeBreakpoints,3).Value, Parent.Width * 0.50, Parent.Width * 0.4)
                 Children:
                   - b_form_title:
                       Control: Label@2.5.1
@@ -146,7 +95,6 @@
                         Align: =Align.Center
                         Color: =gbl_theme.text_light
                         Fill: =gbl_theme.secondary
-                        Height: =b_title.Height / 2
                         LayoutMinHeight: =10
                         LayoutMinWidth: =10
                         Size: =Round(Self.Height / 3,0)
@@ -157,10 +105,9 @@
                       Variant: Classic
                       Layout: Horizontal
                       Properties:
-                        AlignInContainer: =AlignInContainer.SetByContainer
                         DataSource: =BugReports
                         DefaultMode: =FormMode.New
-                        FillPortions: =10
+                        FillPortions: =11
                         Height: =Parent.Height
                         LayoutMinHeight: =10
                         LayoutMinWidth: =10
@@ -239,6 +186,81 @@
                                     Width: =30
                                     Wrap: =false
                                     Y: =b_form_line_key.Y
+                        - Environment_Version_DataCard1:
+                            Control: TypedDataCard@1.0.6
+                            Variant: ClassicTextualEdit
+                            Properties:
+                              DataField: ="Environment_Version"
+                              Default: =VERSION
+                              DisplayName: =DataSourceInfo([@BugReports],DataSourceInfo.DisplayName,'Environment_Version')
+                              MaxLength: =DataSourceInfo([@BugReports], DataSourceInfo.MaxLength, 'Environment_Version')
+                              Required: =false
+                              Update: =DataCardValue1.Text
+                              Visible: =false
+                              Width: =318
+                              X: =1
+                              Y: =7
+                            Children:
+                              - DataCardKey1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    Color: =App.Theme.Colors.Darker30
+                                    Height: =34
+                                    Text: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.4
+                                    Wrap: =false
+                                    X: =30
+                                    Y: =10 + (DataCardValue1.Height / 2) - (Self.Height / 2)
+                              - DataCardValue1:
+                                  Control: Classic/TextInput@2.3.2
+                                  Properties:
+                                    BorderColor: =If(IsBlank(Parent.Error), Parent.BorderColor, Color.Red)
+                                    Default: =Parent.Default
+                                    DelayOutput: =true
+                                    DisplayMode: =Parent.DisplayMode
+                                    MaxLength: =Parent.MaxLength
+                                    PaddingLeft: =5
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Tooltip: =Parent.DisplayName
+                                    Width: =(Parent.Width - 60) * 0.6
+                                    X: =DataCardKey1.X + DataCardKey1.Width
+                                    Y: =10
+                              - ErrorMessage1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    AutoHeight: =true
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    Color: =RGBA(168, 0, 0, 1)
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =10
+                                    Live: =Live.Assertive
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: =Parent.Error
+                                    Visible: =Parent.DisplayMode=DisplayMode.Edit
+                                    Width: =Parent.Width - 60
+                                    X: =30
+                                    Y: =DataCardValue1.Y + DataCardValue1.Height
+                              - StarVisible1:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    BorderColor: =RGBA(0, 0, 0, 1)
+                                    Color: =App.Theme.Colors.Darker30
+                                    Height: =DataCardKey1.Height
+                                    Text: ="*"
+                                    Visible: =And(Parent.Required, Parent.DisplayMode=DisplayMode.Edit)
+                                    Width: =30
+                                    Wrap: =false
+                                    Y: =DataCardKey1.Y
                         - b_form_status_card:
                             Control: TypedDataCard@1.0.6
                             Variant: ClassicComboBoxEdit
@@ -789,140 +811,7 @@
                               FontWeight: =FontWeight.Normal
                               HoverColor: =gbl_theme.text_on_dark
                               HoverFill: =gbl_theme.accept
-                              OnSelect: |-
-                                =Set(EmailBody,
-                                "<!DOCTYPE html>
-                                <html>
-                                <head>
-                                    <style>
-                                        body {
-                                            font-family: Arial, sans-serif;
-                                            color: #333333;
-                                            margin: 0;
-                                            padding: 0; /* Removed padding to prevent extra space */
-                                        }
-                                        .email-container {
-                                            border: 1px solid #dddddd;
-                                            border-radius: 5px;
-                                            overflow: hidden;
-                                            width: 100%; /* Ensure the table uses full width */
-                                        }
-                                        .email-header {
-                                            background-color: #5585b5;
-                                            color: #ffffff;
-                                            padding: 20px;
-                                            text-align: center;
-                                        }
-                                        .email-header h1 {
-                                            margin: 0;
-                                            font-size: 24px;
-                                        }
-                                        .email-body {
-                                            padding: 20px;
-                                        }
-                                        .bug-report-table {
-                                            width: 100%;
-                                            border-collapse: collapse;
-                                        }
-                                        .bug-report-table th, .bug-report-table td {
-                                            padding: 12px;
-                                            text-align: left;
-                                            vertical-align: top;
-                                            border-bottom: 1px solid #dddddd;
-                                        }
-                                        .bug-report-table th {
-                                            background-color: #f5f5f5;
-                                            width: 150px;
-                                        }
-                                        .footer {
-                                            text-align: center;
-                                            color: #aaaaaa;
-                                            font-size: 12px;
-                                            padding: 10px;
-                                        }
-                                        /* Inline styles may be more reliable in emails */
-                                    </style>
-                                </head>
-                                <body>
-                                <table width='100%' cellpadding='0' cellspacing='0' border='0'>
-                                    <tr>
-                                        <!-- Left Margin -->
-                                        <td width='15%'>&nbsp;</td>
-                                        
-                                        <!-- Main Content -->
-                                        <td width='70%'>
-                                            <div class='email-container'>
-                                                <!-- Email Header -->
-                                                <div class='email-header'>
-                                                    <h1>DMS Bug Report System</h1>
-                                                </div>
-                                    
-                                                <!-- Email Body -->
-                                                <div class='email-body'>
-                                                    <table class='bug-report-table'>
-                                                        <tr>
-                                                            <th>Title</th>
-                                                            <td>"& b_form_title_value.Text &"</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Environment</th>
-                                                            <td>"& b_form_environment_value.Selected.Value &"</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Line</th>
-                                                            <td>"& b_form_line_value.Text &"</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Problem Type</th>
-                                                            <td>"& b_form_type_value.Selected.Value &"</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Expected Result</th>
-                                                            <td>"& b_form_expected_value.Text &"</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Actual Result</th>
-                                                            <td>"& b_form_actual_value.Text &"</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Status</th>
-                                                            <td>"& b_form_status_value.Selected.Value &"</td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                    
-                                                <!-- Email Footer -->
-                                                <div class='footer'>
-                                                    &copy; 2025 EMD Millipore. All rights reserved.
-                                                </div>
-                                            </div>
-                                        </td>
-                                        
-                                        <!-- Right Margin -->
-                                        <td width='15%'>&nbsp;</td>
-                                    </tr>
-                                </table>
-                                </body>
-                                </html>"
-                                );
-
-                                IfError(SubmitForm(b_form),
-                                    Notify("Submission Error. Check that all required fields are populated.",NotificationType.Error),
-                                    
-                                    Office365Outlook.SendEmailV2(
-                                        gbl_lists.bug_report_contacts,
-                                        "A bug report was submitted for the " & app_name,
-                                        EmailBody,
-                                        {
-                                            Cc: b_form_user_value.Selected.Email
-                                        }
-                                    );
-                                    
-                                    ResetForm(b_form);
-
-                                    Back(ScreenTransition.Fade);
-
-                                ); 
+                              OnSelect: "=Set(EmailBody,\n    \"<!DOCTYPE html>\n    <html>\n    <head>\n        <style>\n            body {\n                font-family: Arial, sans-serif;\n                color: #333333;\n                margin: 0;\n                padding: 0; /* Removed padding to prevent extra space */\n            }\n            .email-container {\n                border: 1px solid #dddddd;\n                border-radius: 5px;\n                overflow: hidden;\n                width: 100%; /* Ensure the table uses full width */\n            }\n            .email-header {\n                background-color: #5585b5;\n                color: #ffffff;\n                padding: 20px;\n                text-align: center;\n            }\n            .email-header h1 {\n                margin: 0;\n                font-size: 24px;\n            }\n            .email-body {\n                padding: 20px;\n            }\n            .bug-report-table {\n                width: 100%;\n                border-collapse: collapse;\n            }\n            .bug-report-table th, .bug-report-table td {\n                padding: 12px;\n                text-align: left;\n                vertical-align: top;\n                border-bottom: 1px solid #dddddd;\n            }\n            .bug-report-table th {\n                background-color: #f5f5f5;\n                width: 150px;\n            }\n            .footer {\n                text-align: center;\n                color: #aaaaaa;\n                font-size: 12px;\n                padding: 10px;\n            }\n            /* Inline styles may be more reliable in emails */\n        </style>\n    </head>\n    <body>\n    <table width='100%' cellpadding='0' cellspacing='0' border='0'>\n        <tr>\n            <!-- Left Margin -->\n            <td width='15%'>&nbsp;</td>\n            \n            <!-- Main Content -->\n            <td width='70%'>\n                <div class='email-container'>\n                    <!-- Email Header -->\n                    <div class='email-header'>\n                        <h1>DMS Bug Report System</h1>\n                    </div>\n        \n                    <!-- Email Body -->\n                    <div class='email-body'>\n                        <table class='bug-report-table'>\n                            <tr>\n                                <th>Title</th>\n                                <td>\"& b_form_title_value.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Environment</th>\n                                <td>\"& b_form_environment_value.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Line</th>\n                                <td>\"& b_form_line_value.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Problem Type</th>\n                                <td>\"& b_form_type_value.Selected.Value &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Expected Result</th>\n                                <td>\"& b_form_expected_value.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Actual Result</th>\n                                <td>\"& b_form_actual_value.Text &\"</td>\n                            </tr>\n                            <tr>\n                                <th>Status</th>\n                                <td>\"& b_form_status_value.Selected.Value &\"</td>\n                            </tr>\n                        </table>\n                    </div>\n        \n                    <!-- Email Footer -->\n                    <div class='footer'>\n                        &copy; 2025 EMD Millipore. All rights reserved.\n                    </div>\n                </div>\n            </td>\n            \n            <!-- Right Margin -->\n            <td width='15%'>&nbsp;</td>\n        </tr>\n    </table>\n    </body>\n    </html>\"\n);\n\nIfError(SubmitForm(b_form),\n    Notify(\"Submission Error. Check that all required fields are populated.\",NotificationType.Error),\n    \n    Office365Outlook.SendEmailV2(\n        gbl_lists.bug_report_contacts,\n        \"A bug report was submitted for the \" & APP_NAME,\n        EmailBody,\n        {\n            Cc: b_form_user_value.Selected.Email\n        }\n    );\n    \n    ResetForm(b_form);\n\n    Back(ScreenTransition.Fade);\n\n);"
                               RadiusBottomLeft: =0
                               RadiusBottomRight: =0
                               RadiusTopLeft: =0
@@ -949,3 +838,10 @@
                               Size: =Self.Height / 3
                               Text: ="Cancel"
                               Width: =Parent.Width * 0.28
+      - b_footer:
+          Control: CanvasComponent
+          ComponentName: comp_footer
+          Properties:
+            Fill: =ColorValue(gbl_theme.chart_dim)
+            Height: =20
+            content: ="Place Footer Content Here"
