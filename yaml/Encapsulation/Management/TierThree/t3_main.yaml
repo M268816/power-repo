@@ -1,0 +1,1971 @@
+- t3_main:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =gblTheme.Background
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Stretch
+      LayoutDirection: =LayoutDirection.Vertical
+      RadiusBottomLeft: =0
+      RadiusBottomRight: =0
+      RadiusTopLeft: =0
+      RadiusTopRight: =0
+      Width: =Parent.Width
+    Children:
+      - t3_collect:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            BorderColor: =ColorFade(Self.Fill, -15%)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            Fill: =RGBA(56, 96, 178, 1)
+            Font: =Font.'Open Sans'
+            FontWeight: =FontWeight.Bold
+            HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            OnSelect: |-
+              =/*Start*/
+              Patch(recPopups,First(recPopups),{Visible: true, Value: 10, Popup: "loading", Display_Text: "Loading"});
+
+              Set(gblTime,{Today:Today(),Now:Now()});
+              Set(gbl_tier_two_verifying, false);
+              Set(gbl_tier_two_week, WeekNum(tt_date.SelectedDate));
+
+              UpdateContext({
+                  locWeekList:
+                      [
+                          {Index: 0, Day: "Monday"},
+                          {Index: 1, Day: "Tuesday"},
+                          {Index: 2, Day: "Wednesday"},
+                          {Index: 3, Day: "Thursday"},
+                          {Index: 4, Day: "Friday"}
+                      ],
+
+                  locWeek: WeekNum(tt_date.SelectedDate),
+
+                  loc_targets:
+                      LookUp(Encap_TierTwo, Date = t3_date.SelectedDate)
+              });
+
+              UpdateContext({
+                  locWeekEnd:
+                      DateAdd(
+                          Date(Year(tt_date.SelectedDate), 1, 1) +
+                          (locWeek-1)*7 -
+                          Weekday(Date(Year(tt_date.SelectedDate), 1, 1)) + 6,
+                          23,
+                          TimeUnit.Hours
+                      ),
+
+                  locWeekStart:
+                      DateAdd(
+                          Date(Year(tt_date.SelectedDate), 1, 1) + 
+                          (locWeek-1)*7 - 
+                          Weekday(Date(Year(tt_date.SelectedDate), 1, 1)) + 2,
+                          -1,
+                          TimeUnit.Hours
+                      )
+              });
+
+              /*Capture Local Date Selection*/
+              UpdateContext({
+                  locEndDate: locWeekEnd,
+                  locStartDate: locWeekStart
+              });
+
+              /*Collect Production*/
+              Patch(recPopups,First(recPopups),{Value: 20, Display_Text: "Collecting Production Data"});
+
+              ClearCollect(colProduction,
+                  ForAll(
+                      Filter(Production,
+                          Hour_Ending <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                          Hour_Starting >= DateAdd(locStartDate, -1, TimeUnit.Hours)
+                      ),
+                      {
+                          Id: Value(ThisRecord.ID),
+                          Shift: Text(ThisRecord.Shift_Letter),
+                          Line: Text(ThisRecord.Line.Value),
+                          Lot: Text(ThisRecord.Lot),
+                          Catalog: Text(ThisRecord.Catalog),
+                          Size: Text(ThisRecord.Size),
+                          Hour_Ending: DateTimeValue(ThisRecord.Hour_Ending),
+                          Hour_Starting: DateTimeValue(ThisRecord.Hour_Starting),
+                          Goal: Value(ThisRecord.Hourly_Goal),
+                          Amount_Built: Value(ThisRecord.Amount_Built),
+                          Unit_Starting: Value(ThisRecord.Unit_Starting),
+                          Unit_Ending: Value(ThisRecord.Unit_Ending),
+                          Reject_Labels: Value(ThisRecord.Reject_Labels),
+                          Reject_Cartridges: Value(ThisRecord.Reject_Cartridges),
+                          Reject_Units: Value(ThisRecord.Reject_Units),
+                          QA_Units: Value(ThisRecord.QA_Units),
+                          Safety: ThisRecord.Safety
+                      }
+                  )
+              );
+
+              /*Collect Downtime*/
+              Patch(recPopups,First(recPopups),{Value: 30, Display_Text: "Collecting Downtime Data"});
+
+              ClearCollect(colDowntime,
+                  ForAll(
+                      Filter(Downtime,
+                          Ended <= DateAdd(locEndDate, 23, TimeUnit.Hours),
+                          Started >= DateAdd(locStartDate, -1, TimeUnit.Hours)
+                      ),
+                      {
+                          Id: Value(ThisRecord.ID),
+                          Shift: Text(ThisRecord.Shift_Letter),
+                          Line: Text(ThisRecord.Line.Value),
+                          Lot: Text(ThisRecord.Lot),
+                          Catalog: Text(ThisRecord.Catalog),
+                          Size: Text(ThisRecord.Size),
+                          Started: DateTimeValue(ThisRecord.Started),
+                          Ended: DateTimeValue(ThisRecord.Ended),
+                          Reason: Text(ThisRecord.Reason.Value),
+                          Total_Downtime: Value(ThisRecord.Total_Downtime),
+                          Comments: Text(ThisRecord.Comments)
+                      }
+                  )
+              );
+
+              /*Collect ROEs/Deviations*/
+              Patch(recPopups,First(recPopups),{Value: 35, Display_Text: "Collecting ROE/Deviation Data"});
+
+              Clear(col_roes_and_deviations);
+              ForAll(
+                  Filter('DSP ROE Tracking',
+                      'Date of Event Occurrence' >= t3_date.SelectedDate,
+                      'Date of Event Occurrence' <= t3_date.SelectedDate,
+                      'Work Center'.Value = "Encapsulation"
+                  ),
+                  Collect(col_roes_and_deviations,
+                      {
+                          id: ThisRecord.ID,
+                          date: ThisRecord.'Date of Event Occurrence',
+                          work_center: ThisRecord.'Work Center',
+                          catalog: ThisRecord.'Catalog/Part Number',
+                          lot: ThisRecord.'Batch/Lot Number',
+                          location: ThisRecord.'Location Event was Discovered',
+                          work_step: ThisRecord.'Work Step/Product Line:',
+                          shift: ThisRecord.'Shift of Occurrence',
+                          deviation: ThisRecord.'Deviation or Intercompany Complaint required'
+
+                      }
+                  )
+              );
+
+              /*Collect Tier Two Targets*/
+              Patch(recPopups,First(recPopups),{Value: 38, Display_Text: "Collecting Weekly Targets"});
+
+              Clear(col_daily_targets);
+              ForAll(
+                  Filter(Encap_TierTwo,
+                      Date >= locWeekStart,
+                      Date <= locWeekEnd
+                  ),
+                  Collect(col_daily_targets,
+                      {
+                          id: ThisRecord.ID,
+                          date: ThisRecord.Date,
+                          weekday: ThisRecord.Weekday.Value,
+                          safety_moment: ThisRecord.Safety_Moment,
+                          safety_incident: ThisRecord.Safety_Incident,
+                          ehs_overdue: ThisRecord.EHS_Overdue,
+                          ehs_upcoming: ThisRecord.EHS_Upcoming,
+                          overdue_critical_pm: ThisRecord.Overdue_Critical_PM,
+                          deviation: ThisRecord.Quality_Deviations_Encap,
+                          roe: ThisRecord.Quality_ROE_Encap,
+                          XL1_target: ThisRecord.Supply_XL1_Target,
+                          XL2_target: ThisRecord.Supply_XL2_Target,
+                          XL3_target: ThisRecord.Supply_XL3_Target,
+                          XL4_target: ThisRecord.Supply_XL4_Target,
+                          XL5_target: ThisRecord.Supply_XL5_Target,
+                          XLT_target: ThisRecord.Supply_XLT_Target,
+                          XLT2_target: ThisRecord.Supply_XLT2_Target,
+                          XLT3_target: ThisRecord.Supply_XLT3_Target,
+                          SSC_target: ThisRecord.Supply_SSC_Target,
+                          SSC2_target: ThisRecord.Supply_SSC2_Target,
+                          XL1_supply: ThisRecord.Supply_XL1,
+                          XL2_supply: ThisRecord.Supply_XL2,
+                          XL3_supply: ThisRecord.Supply_XL3,
+                          XL4_supply: ThisRecord.Supply_XL4,
+                          XL5_supply: ThisRecord.Supply_XL5,
+                          XLT_supply: ThisRecord.Supply_XLT,
+                          XLT2_supply: ThisRecord.Supply_XLT2,
+                          XLT3_supply: ThisRecord.Supply_XLT3,
+                          SSC_supply: ThisRecord.Supply_SSC,
+                          SSC2_supply: ThisRecord.Supply_SSC2,
+                          weekly_target: 0,
+                          weekly_supply: 0,
+                          delta: 0
+
+                      }
+                  )
+              );
+
+              UpdateContext({loc_weekly_targets:
+                  {
+                          XL1_target: Sum(col_daily_targets, XL1_target),
+                          XL2_target: Sum(col_daily_targets, XL2_target),
+                          XL3_target: Sum(col_daily_targets, XL3_target),
+                          XL4_target: Sum(col_daily_targets, XL4_target),
+                          XL5_target: Sum(col_daily_targets, XL5_target),
+                          XLT_target: Sum(col_daily_targets, XLT_target),
+                          XLT2_target: Sum(col_daily_targets, XLT2_target),
+                          XLT3_target: Sum(col_daily_targets, XLT3_target),
+                          SSC_target: Sum(col_daily_targets, SSC_target),
+                          SSC2_target: Sum(col_daily_targets, SSC2_target),
+                          XL1_supply: Sum(col_daily_targets, XL1_supply),
+                          XL2_supply: Sum(col_daily_targets, XL2_supply),
+                          XL3_supply: Sum(col_daily_targets, XL3_supply),
+                          XL4_supply: Sum(col_daily_targets, XL4_supply),
+                          XL5_supply: Sum(col_daily_targets, XL5_supply),
+                          XLT_supply: Sum(col_daily_targets, XLT_supply),
+                          XLT2_supply: Sum(col_daily_targets, XLT2_supply),
+                          XLT3_supply: Sum(col_daily_targets, XLT3_supply),
+                          SSC_supply: Sum(col_daily_targets, SSC_supply),
+                          SSC2_supply: Sum(col_daily_targets, SSC2_supply),
+                          XL1_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, XL1_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).XL1_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          XL2_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, XL2_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).XL2_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          XL3_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, XL3_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).XL3_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          XL4_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, XL4_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).XL4_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          XL5_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, XL5_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).XL5_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          XLT_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, XLT_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).XLT_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          XLT2_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, XLT2_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).XLT2_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          XLT3_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, XLT3_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).XLT3_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          SSC_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, SSC_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).SSC_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%",
+                          SSC2_delta:
+                              IfError(
+                                  Round(
+                                      Sum(col_daily_targets, SSC2_supply)
+                                      / LookUp(encap_planning, Week = gbl_tier_two_week).SSC2_Target
+                                      * 100
+                                      ,2
+                                  ),
+                                  0
+                              ) & "%"
+                  }
+              });
+
+              Select(tt_update);
+            PressedBorderColor: =Self.Fill
+            PressedColor: =Self.Fill
+            PressedFill: =Self.Color
+            Text: ="collect"
+            Visible: =false
+      - t3_update:
+          Control: Classic/Button@2.2.0
+          Properties:
+            AlignInContainer: =AlignInContainer.Start
+            BorderColor: =ColorFade(Self.Fill, -15%)
+            Color: =RGBA(255, 255, 255, 1)
+            DisabledBorderColor: =RGBA(166, 166, 166, 1)
+            Fill: =RGBA(56, 96, 178, 1)
+            Font: =Font.'Open Sans'
+            HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+            OnSelect: "=/*Collect Tier Two Targets*/\r\nPatch(recPopups,First(recPopups),{Value: 70, Display_Text: \"Loading Completions\"});\r\n\r\nUpdateContext({\r\n    loc_teir_two_completions:\r\n        ForAll(gblLists.Lines,\r\n            With({thisLine: ThisRecord.Value},\r\n                {Value: Sum(Filter(colProduction, Line = thisLine),Amount_Built), Line: thisLine}\r\n            )\r\n        ),\r\n    loc_teir_two_completions_daily:\r\n        ForAll(gblLists.Lines,\r\n            With({thisLine: ThisRecord.Value},\r\n                {\r\n                    Line: thisLine,\r\n                    Value:\r\n                        Sum(\r\n                            Filter(colProduction,\r\n                                Line = thisLine,\r\n                                Hour_Ending <= DateAdd(tt_date.SelectedDate, 23, TimeUnit.Hours),\r\n                                Hour_Starting >= DateAdd(tt_date.SelectedDate, -1, TimeUnit.Hours)\r\n                            ),\r\n                            Amount_Built\r\n                        )\r\n                }\r\n            )\r\n        ),\r\n        \r\n    loc_tier_two_today:\r\n        First(Filter(col_daily_targets, date = t3_date.SelectedDate))\r\n});\r\n\r\n/*Collect Tier Two Targets*/\r\nPatch(recPopups,First(recPopups),{Visible: false, Value: -1, Display_Text: \"Finishing Up\", Popup: \"\"});"
+            PressedBorderColor: =Self.Fill
+            PressedColor: =Self.Fill
+            PressedFill: =Self.Color
+            Text: ="update"
+            Visible: =false
+      - t3_header:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            Fill: =gblTheme.Primary
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =gblPadding
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            PaddingBottom: =gblPadding
+            PaddingLeft: =gblPadding
+            PaddingRight: =gblPadding
+            PaddingTop: =gblPadding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - t3_logo:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Image: =If(gblTheme.Style = "Light", logo1, logo2)
+                  LayoutMinHeight: =10
+                  Width: =tt_navigation_title.Width
+            - t3_title:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =gblTheme.Text_Light
+                  FillPortions: =1
+                  Font: =Font.'Open Sans'
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Self.Height / 3
+                  Text: =APP_NAME
+            - t3_mode:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =gblTheme.Text_On_Dark
+                  Height: =10
+                  HoverColor: =gblTheme.Text_On_Light
+                  Icon: =Icon.HalfFilledCircle
+                  LayoutMinHeight: =10
+                  OnSelect: =If(gblTheme.Style = "Light", Set(gblTheme, gblStyles.Dark),Set(gblTheme, gblStyles.Light))
+                  PaddingBottom: =4
+                  PaddingLeft: =4
+                  PaddingRight: =4
+                  PaddingTop: =4
+                  Rotation: =If(gblTheme.Style = "Light", 0, 180)
+                  Width: =Self.Height
+            - t3_bugs:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  HoverFill: =gblTheme.Pri_Complement
+                  Image: =gblIcons.Bug
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+            - t3_user_img:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Fill: =RGBA(0, 0, 0, 1)
+                  Image: =User().Image
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+      - t3_body:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.None
+            FillPortions: =11
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutMinHeight: =10
+            LayoutMinWidth: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+          Children:
+            - t3_navigation:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  Fill: =gblTheme.Midground
+                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =gblPadding
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  PaddingBottom: =gblPadding
+                  PaddingLeft: =gblPadding
+                  PaddingRight: =gblPadding
+                  PaddingTop: =gblPadding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - t3_navigation_title:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =gblTheme.Text_On_Light
+                        Font: =Font.'Open Sans'
+                        LayoutMinWidth: =10
+                        Size: =Self.Height / 3
+                        Text: ="Tier II"
+                  - t3_navigation_separator:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Fill: =gblTheme.Pri_Complement
+                        Height: =Round(gblPadding/2,0)
+                        LayoutMinWidth: =10
+                        Width: =10
+                  - t3_navigation_gallery:
+                      Control: Gallery@2.15.0
+                      Variant: Vertical
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Items: =colNavigation
+                        LayoutMinHeight: =10
+                        LayoutMinWidth: =10
+                        TemplatePadding: =gblPadding
+                        TemplateSize: =40
+                      Children:
+                        - t3_navigation_gallery_btn:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =ColorFade(Self.Fill, -15%)
+                              BorderThickness: =1
+                              Color: =gblTheme.Text_Dark
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
+                              Fill: =gblTheme.Accent
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Normal
+                              Height: =Parent.TemplateHeight
+                              HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                              HoverColor: =RGBA(255, 255, 255, 1)
+                              HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                              OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
+                              PressedBorderColor: =Self.Fill
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =Self.RadiusTopLeft
+                              RadiusBottomRight: =Self.RadiusTopLeft
+                              RadiusTopLeft: =100
+                              RadiusTopRight: =Self.RadiusTopLeft
+                              Size: =Self.Height / 4
+                              Text: =ThisItem.Label
+                              Width: =Parent.TemplateWidth * 0.95
+                  - t3_navigation_footer:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: =gblTheme.Text_On_Light
+                        Font: =Font.'Open Sans'
+                        Height: =Parent.Height * 0.1
+                        LayoutMinWidth: =10
+                        Size: =Self.Height / 14
+                        Text: |-
+                          =
+                          "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
+                          &Char(13)&Char(13)&
+                          "© 2025 EMD Millipore. All rights reserved."
+                        VerticalAlign: =VerticalAlign.Bottom
+            - t3_column_0:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.None
+                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 20, 21)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - t3_column_1:
+                      Control: GroupContainer@1.3.0
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        DropShadow: =DropShadow.None
+                        FillPortions: =23
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =gblPadding * 2
+                        LayoutOverflowY: =LayoutOverflow.Scroll
+                        PaddingBottom: =gblPadding
+                        PaddingLeft: =gblPadding
+                        PaddingRight: =gblPadding
+                        PaddingTop: =gblPadding
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                      Children:
+                        - t3_date_parent:
+                            Control: GroupContainer@1.3.0
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              BorderColor: =gblTheme.Sec_Complement
+                              BorderThickness: =If(gblTheme.Style = "Light", 0, 1)
+                              DropShadow: =DropShadow.Regular
+                              Fill: =gblTheme.Secondary
+                              FillPortions: =0
+                              Height: =40
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =gblPadding * 2
+                              LayoutMinWidth: =10
+                              PaddingRight: =
+                              Width: =Parent.Width * 0.6
+                            Children:
+                              - t3_date:
+                                  Control: Classic/DatePicker@2.6.0
+                                  Properties:
+                                    BorderThickness: =0
+                                    Color: =gblTheme.Text_On_Light
+                                    DefaultDate: =Today()-1
+                                    Fill: =gblTheme.Text_On_Dark
+                                    FillPortions: =2
+                                    FocusedBorderThickness: =0
+                                    Format: =DateTimeFormat.LongDate
+                                    IconBackground: =gblTheme.Secondary
+                                    IconFill: =gblTheme.Text_On_Dark
+                                    LayoutMinWidth: =10
+                                    OnChange: |+
+                                      =Set(gbl_tier_two_date, t3_date.SelectedDate);
+                                      Select(tt_collect);
+                                    Size: =Round(Self.Height/4,0)
+                              - t3_date_lbl:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =gblTheme.Text_Light
+                                    FillPortions: =2
+                                    LayoutMinWidth: =10
+                                    Text: |-
+                                      ="Selected Week: " & locWeek
+                              - t3_modify_btn:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =gblTheme.Text_Dark
+                                    Fill: =gblTheme.Accent
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Normal
+                                    Height: =Parent.Height * 0.8
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    LayoutMinHeight: =10
+                                    LayoutMinWidth: =10
+                                    OnSelect: |-
+                                      =Set(gbl_tier_two_date, t3_date.SelectedDate);
+                                      Set(gbl_tier_two_verifying, false);
+                                      Navigate(scr_tier_two_entry, ScreenTransition.Fade);
+                                    Size: =Round(Self.Height/4,0)
+                                    Text: ="Daily Targets"
+                              - t3_verify_btn:
+                                  Control: Classic/Button@2.2.0
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =gblTheme.Text_Dark
+                                    DisplayMode: =If(Not(tt_date.SelectedDate >= gblTime.Today), DisplayMode.Edit, DisplayMode.Disabled)
+                                    Fill: =gblTheme.Accent
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Normal
+                                    Height: =Parent.Height * 0.9
+                                    HoverColor: =RGBA(255, 255, 255, 1)
+                                    LayoutMinHeight: =10
+                                    LayoutMinWidth: =10
+                                    OnSelect: |-
+                                      =Set(gbl_tier_two_date, t3_date.SelectedDate);
+                                      Set(gbl_tier_two_verifying, true);
+                                      Navigate(scr_tier_two_entry, ScreenTransition.Fade);
+                                    RadiusBottomRight: =0
+                                    RadiusTopRight: =0
+                                    Size: =Round(Self.Height/5,0)
+                                    Text: ="Verify Communication"
+                        - t3_safety_parent:
+                            Control: GroupContainer@1.3.0
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Fill: =gblTheme.Foreground
+                              FillPortions: =0
+                              Height: =250
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinWidth: =10
+                              PaddingRight: =
+                              Width: =Parent.Width * 0.33
+                            Children:
+                              - t3_safety_title:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Start
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gblTheme.Text_Light
+                                    Fill: =gblTheme.Secondary
+                                    Font: =Font.'Open Sans'
+                                    LayoutMinHeight: =10
+                                    LayoutMinWidth: =10
+                                    Size: =Round(Self.Height / 3,0)
+                                    Text: ="Safety"
+                                    Width: =Parent.Width
+                              - t3_safety_body:
+                                  Control: GroupContainer@1.3.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutMinHeight: =40
+                                    LayoutMinWidth: =10
+                                    LayoutOverflowY: =LayoutOverflow.Scroll
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                  Children:
+                                    - t3_safety_keys:
+                                        Control: GroupContainer@1.3.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =2
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =gblPadding * 2
+                                          LayoutMinHeight: =40
+                                          LayoutMinWidth: =10
+                                          PaddingBottom: =gblPadding
+                                          PaddingLeft: =gblPadding
+                                          PaddingRight: =gblPadding
+                                          PaddingTop: =gblPadding
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - t3_safety_key:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: ="Safety Moments:"
+                                          - t3_safety_key_1:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: ="Safety Incidents:"
+                                          - t3_safety_key_2:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: ="Overdue EHS Actions:"
+                                          - t3_safety_key_3:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: ="Upcoming EHS Actions:"
+                                          - t3_safety_key_4:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: ="Overdue Critical PMs:"
+                                    - t3_safety_values:
+                                        Control: GroupContainer@1.3.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =gblPadding * 2
+                                          LayoutMinHeight: =40
+                                          LayoutMinWidth: =10
+                                          PaddingBottom: =gblPadding
+                                          PaddingLeft: =gblPadding
+                                          PaddingRight: =gblPadding
+                                          PaddingTop: =gblPadding
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - t3_safety_value:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Midground
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: =Sum(col_daily_targets, safety_moment)
+                                          - t3_safety_value_1:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Midground
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: =Sum(col_daily_targets, safety_incident)
+                                          - t3_safety_value_2:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Midground
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: =Sum(col_daily_targets, ehs_overdue)
+                                          - t3_safety_value_3:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Midground
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: =Sum(col_daily_targets, ehs_upcoming)
+                                          - t3_safety_value_4:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Midground
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: =Sum(col_daily_targets, overdue_critical_pm)
+                        - t3_quality_parent:
+                            Control: GroupContainer@1.3.0
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Fill: =gblTheme.Foreground
+                              FillPortions: =0
+                              Height: =150
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinWidth: =10
+                              LayoutOverflowY: =LayoutOverflow.Scroll
+                              PaddingRight: =
+                              Width: =Parent.Width * 0.33
+                            Children:
+                              - t3_quality_title:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Start
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gblTheme.Text_Light
+                                    Fill: =gblTheme.Secondary
+                                    Font: =Font.'Open Sans'
+                                    LayoutMinHeight: =10
+                                    LayoutMinWidth: =10
+                                    Size: =Round(Self.Height / 3,0)
+                                    Text: ="Quality"
+                                    Width: =Parent.Width
+                              - t3_quality_body:
+                                  Control: GroupContainer@1.3.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                  Children:
+                                    - t3_quality_keys:
+                                        Control: GroupContainer@1.3.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =2
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =gblPadding * 2
+                                          LayoutMinHeight: =80
+                                          LayoutMinWidth: =10
+                                          PaddingBottom: =gblPadding
+                                          PaddingLeft: =gblPadding
+                                          PaddingRight: =gblPadding
+                                          PaddingTop: =gblPadding
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - t3_quality_key_0:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: ="Deviations:"
+                                          - t3_quality_key_1:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: ="ROEs:"
+                                    - t3_quality_values:
+                                        Control: GroupContainer@1.3.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =gblPadding * 2
+                                          LayoutMinHeight: =80
+                                          LayoutMinWidth: =10
+                                          PaddingBottom: =gblPadding
+                                          PaddingLeft: =gblPadding
+                                          PaddingRight: =gblPadding
+                                          PaddingTop: =gblPadding
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - t3_quality_value_0:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Midground
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: =Sum(col_daily_targets, deviation)
+                                          - t3_quality_value_1:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Midground
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/3,0)
+                                                Text: =Sum(col_daily_targets, roe)
+                        - t3_supply_parent:
+                            Control: GroupContainer@1.3.0
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.SetByContainer
+                              DropShadow: =DropShadow.Regular
+                              Fill: =gblTheme.Foreground
+                              FillPortions: =0
+                              Height: =700
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinWidth: =10
+                              LayoutOverflowY: =LayoutOverflow.Scroll
+                              PaddingRight: =
+                              Width: =Parent.Width * 0.75
+                            Children:
+                              - t3_supply_title:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Start
+                                    BorderColor: =RGBA(0, 18, 107, 1)
+                                    Color: =gblTheme.Text_Light
+                                    Fill: =gblTheme.Secondary
+                                    Font: =Font.'Open Sans'
+                                    LayoutMinHeight: =10
+                                    LayoutMinWidth: =10
+                                    Size: =Round(Self.Height / 3,0)
+                                    Text: ="Supply"
+                                    Width: =Parent.Width
+                              - t3_supply_header:
+                                  Control: GroupContainer@1.3.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    Fill: =gblTheme.Pri_Complement
+                                    FillPortions: =0
+                                    Height: =40
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    PaddingLeft: =gblPadding
+                                    PaddingRight: =gblPadding
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                  Children:
+                                    - t3_supply_header_key_0:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =gblTheme.Text_On_Light
+                                          FillPortions: =1
+                                          LayoutMinWidth: =10
+                                          Size: =Round(Self.Height/4,0)
+                                          Text: ="Line"
+                                    - t3_supply_header_key_1:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =gblTheme.Text_On_Light
+                                          FillPortions: =1
+                                          LayoutMinWidth: =10
+                                          Size: =Round(Self.Height/4,0)
+                                          Text: ="Monday"
+                                    - t3_supply_header_key_2:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =gblTheme.Text_On_Light
+                                          FillPortions: =1
+                                          LayoutMinWidth: =10
+                                          Size: =Round(Self.Height/4,0)
+                                          Text: ="Tuesday"
+                                    - t3_supply_header_key_3:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =gblTheme.Text_On_Light
+                                          FillPortions: =1
+                                          LayoutMinWidth: =10
+                                          Size: =Round(Self.Height/4,0)
+                                          Text: ="Wednesday"
+                                    - t3_supply_header_key_4:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =gblTheme.Text_On_Light
+                                          FillPortions: =1
+                                          LayoutMinWidth: =10
+                                          Size: =Round(Self.Height/4,0)
+                                          Text: ="Thursday"
+                                    - t3_supply_header_key_5:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =gblTheme.Text_On_Light
+                                          FillPortions: =1
+                                          LayoutMinWidth: =10
+                                          Size: =Round(Self.Height/4,0)
+                                          Text: ="Friday"
+                                    - t3_supply_header_key_6:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =gblTheme.Text_On_Light
+                                          FillPortions: =1.5
+                                          LayoutMinWidth: =10
+                                          Size: =Round(Self.Height/4,0)
+                                          Text: ="Weekly Target"
+                                    - t3_supply_header_key_7:
+                                        Control: Label@2.5.1
+                                        Properties:
+                                          Align: =Align.Center
+                                          Color: =gblTheme.Text_On_Light
+                                          FillPortions: =1
+                                          LayoutMinWidth: =10
+                                          Size: =Round(Self.Height/4,0)
+                                          Text: ="Delta"
+                              - t3_supply_body:
+                                  Control: GroupContainer@1.3.0
+                                  Variant: AutoLayout
+                                  Properties:
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutOverflowY: =LayoutOverflow.Scroll
+                                  Children:
+                                    - t3_supply_keys:
+                                        Control: GroupContainer@1.3.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =80
+                                          LayoutMinWidth: =10
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - t3_supply_key_0:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XL1:"
+                                          - t3_supply_key_1:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XL2:"
+                                          - t3_supply_key_2:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XL3:"
+                                          - t3_supply_key_3:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XL4:"
+                                          - t3_supply_key_4:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XL5:"
+                                          - t3_supply_key_5:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XL Total:"
+                                          - t3_supply_key_6:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XLT:"
+                                          - t3_supply_key_7:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XLT2:"
+                                          - t3_supply_key_8:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XLT3:"
+                                          - t3_supply_key_9:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="XLT Total:"
+                                          - t3_supply_key_10:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="SSC:"
+                                          - t3_supply_key_11:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="SSC2:"
+                                          - t3_supply_key_12:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Right
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height/4,0)
+                                                Text: ="SSC Total:"
+                                    - t3_supply_gallery:
+                                        Control: Gallery@2.15.0
+                                        Variant: Horizontal
+                                        Properties:
+                                          FillPortions: =5
+                                          Items: '=Sort(col_daily_targets, date, SortOrder.Ascending) '
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          TemplatePadding: =0
+                                          TemplateSize: =Self.Width/5
+                                        Children:
+                                          - t3_supply_gallery_body:
+                                              Control: GroupContainer@1.3.0
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                Height: =Parent.TemplateHeight
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Width: =Parent.TemplateWidth
+                                              Children:
+                                                - t3_suppply_gallery_xl1:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.XL1_supply &"/"& ThisItem.XL1_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl2:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.XL2_supply &"/"& ThisItem.XL2_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl3:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.XL3_supply &"/"& ThisItem.XL3_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_3:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.XL4_supply &"/"& ThisItem.XL4_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_4:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.XL5_supply &"/"& ThisItem.XL5_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_5:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      Fill: =gblTheme.Sec_Complement
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: |-
+                                                        =Sum(
+                                                            ThisItem.XL1_supply,
+                                                            ThisItem.XL2_supply,
+                                                            ThisItem.XL3_supply,
+                                                            ThisItem.XL4_supply,
+                                                            ThisItem.XL5_supply
+                                                        )
+                                                        &"/"&
+                                                        Sum(
+                                                            ThisItem.XL1_target,
+                                                            ThisItem.XL2_target,
+                                                            ThisItem.XL3_target,
+                                                            ThisItem.XL4_target,
+                                                            ThisItem.XL5_target
+                                                        )
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_6:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.XLT_supply &"/"& ThisItem.XLT_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_7:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.XLT2_supply &"/"& ThisItem.XLT2_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_8:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.XLT3_supply &"/"& ThisItem.XLT3_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_9:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      Fill: =gblTheme.Sec_Complement
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: |-
+                                                        =Sum(
+                                                            ThisItem.XLT_supply,
+                                                            ThisItem.XLT2_supply,
+                                                            ThisItem.XLT3_supply
+                                                        )
+                                                        &"/"&
+                                                        Sum(
+                                                            ThisItem.XLT_target,
+                                                            ThisItem.XLT2_target,
+                                                            ThisItem.XLT3_target
+                                                        )
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_10:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.SSC_supply &"/"& ThisItem.SSC_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_11:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: =ThisItem.SSC2_supply &"/"& ThisItem.SSC2_target
+                                                      Tooltip: ="Daily Supply / Target"
+                                                - t3_suppply_gallery_xl1_12:
+                                                    Control: Label@2.5.1
+                                                    Properties:
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      BorderColor: =gblTheme.Midground
+                                                      BorderThickness: =1
+                                                      Color: =gblTheme.Text_On_Light
+                                                      Fill: =gblTheme.Sec_Complement
+                                                      FillPortions: =1
+                                                      LayoutMinHeight: =10
+                                                      LayoutMinWidth: =10
+                                                      Size: =Round(Self.Height / 4,0)
+                                                      Text: |-
+                                                        =Sum(
+                                                            ThisItem.SSC_supply,
+                                                            ThisItem.SSC2_supply
+                                                        )
+                                                        &"/"&
+                                                        Sum(
+                                                            ThisItem.SSC_target,
+                                                            ThisItem.SSC2_target
+                                                        )
+                                                      Tooltip: ="Daily Supply / Target"
+                                    - t3_supply_weekly:
+                                        Control: GroupContainer@1.3.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =1.5
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - t3_supply_weekly_xl1:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL1_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).XL1_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl2:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL2_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).XL2_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl3:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL3_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).XL3_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_3:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL4_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).XL4_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_4:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL5_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).XL5_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_5:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: |-
+                                                  =Sum(
+                                                      loc_weekly_targets.XL1_supply,
+                                                      loc_weekly_targets.XL2_supply,
+                                                      loc_weekly_targets.XL3_supply,
+                                                      loc_weekly_targets.XL4_supply,
+                                                      loc_weekly_targets.XL5_supply
+                                                  )
+                                                  &"/"&
+                                                  Sum(
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).XL1_Target,
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).XL2_Target,
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).XL3_Target,
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).XL4_Target,
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).XL5_Target
+                                                  )
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_6:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XLT_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).XLT_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_7:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XLT2_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).XLT2_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_8:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XLT3_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).XLT3_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_9:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: |-
+                                                  =Sum(
+                                                      loc_weekly_targets.XLT_supply,
+                                                      loc_weekly_targets.XLT2_supply,
+                                                      loc_weekly_targets.XLT3_supply
+                                                  )
+                                                  &"/"&
+                                                  Sum(
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).XLT_Target,
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).XLT2_Target,
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).XLT3_Target
+                                                  )
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_10:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.SSC_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).SSC_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_11:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.SSC2_supply &"/"& LookUp(encap_planning, Week = gbl_tier_two_week).SSC2_Target
+                                                Tooltip: ="Weekly Supply / Target"
+                                          - t3_supply_weekly_xl1_12:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =gblTheme.Midground
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: |-
+                                                  =Sum(
+                                                      loc_weekly_targets.SSC_supply,
+                                                      loc_weekly_targets.SSC2_supply
+                                                  )
+                                                  &"/"&
+                                                  Sum(
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).SSC_Target,
+                                                      LookUp(encap_planning, Week = gbl_tier_two_week).SSC2_Target
+                                                  )
+                                                Tooltip: ="Weekly Supply / Target"
+                                    - t3_supply_delta:
+                                        Control: GroupContainer@1.3.0
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutMinHeight: =10
+                                          LayoutMinWidth: =10
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - t3_supply_delta_xl1:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL1_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl2:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL2_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl3:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL3_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_3:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL4_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_4:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XL5_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_5:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: |-
+                                                  =Round(
+                                                      Sum(
+                                                          loc_weekly_targets.XL1_supply,
+                                                          loc_weekly_targets.XL2_supply,
+                                                          loc_weekly_targets.XL3_supply,
+                                                          loc_weekly_targets.XL4_supply,
+                                                          loc_weekly_targets.XL5_supply
+                                                      )
+                                                      /
+                                                      Sum(
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).XL1_Target,
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).XL2_Target,
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).XL3_Target,
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).XL4_Target,
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).XL5_Target
+                                                      )
+                                                      * 100
+                                                      , 2
+                                                  ) & "%"
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_6:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XLT_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_7:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XLT2_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_8:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.XLT3_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_9:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: |-
+                                                  =Round(
+                                                      Sum(
+                                                          loc_weekly_targets.XLT_supply,
+                                                          loc_weekly_targets.XLT2_supply,
+                                                          loc_weekly_targets.XLT3_supply
+                                                      )
+                                                      /
+                                                      Sum(
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).XLT_Target,
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).XLT2_Target,
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).XLT3_Target
+                                                      )
+                                                      * 100
+                                                      , 2
+                                                  ) & "%"
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_10:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.SSC_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_11:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: =loc_weekly_targets.SSC2_delta
+                                                Tooltip: ="Daily Supply / Target"
+                                          - t3_supply_delta_xl1_12:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                BorderColor: =If(Value(Self.Text) > 1, gblTheme.Accept, gblTheme.Midground)
+                                                BorderThickness: =1
+                                                Color: =gblTheme.Text_On_Light
+                                                Fill: =gblTheme.Sec_Complement
+                                                FillPortions: =1
+                                                LayoutMinHeight: =10
+                                                LayoutMinWidth: =10
+                                                Size: =Round(Self.Height / 4,0)
+                                                Text: |-
+                                                  =Round(
+                                                      Sum(
+                                                          loc_weekly_targets.SSC_supply,
+                                                          loc_weekly_targets.SSC2_supply
+                                                      )
+                                                      /
+                                                      Sum(
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).SSC_Target,
+                                                          LookUp(encap_planning, Week = gbl_tier_two_week).SSC2_Target
+                                                      )
+                                                      * 100
+                                                      , 2
+                                                  ) & "%"
+                                                Tooltip: ="Daily Supply / Target"
+                        - t3_supply_padding:
+                            Control: GroupContainer@1.3.0
+                            Variant: ManualLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =20
+                              LayoutMinWidth: =10
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                  - t3_footer:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Right
+                        Color: =gblTheme.Primary
+                        FillPortions: =1
+                        LayoutMinHeight: =10
+                        Size: =Self.Height / 3
+                        Text: |-
+                          ="▒ Last Database Update: "& gbl_last_update &" ▒ App Version: "& VERSION &" ▒"

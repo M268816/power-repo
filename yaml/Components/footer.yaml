@@ -1,0 +1,43 @@
+ComponentDefinitions:
+  comp_footer:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      content:
+        PropertyKind: Input
+        DisplayName: content
+        Description: A custom property
+        DataType: Text
+        Default: ="Place Footer Content Here"
+    Properties:
+      Fill: =ColorValue(gbl_theme.chart_dim)
+      Height: =20
+    Children:
+      - comp_footer_body:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =gbl_padding
+            LayoutJustifyContent: =LayoutJustifyContent.End
+            PaddingLeft: =gbl_padding
+            PaddingRight: =gbl_padding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - comp_footer_text:
+                Control: Text@0.0.50
+                Properties:
+                  Align: ='TextCanvas.Align'.End
+                  FillPortions: =1
+                  FontColor: =gbl_theme.text_light
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Text: =comp_footer.content
+                  VerticalAlign: =VerticalAlign.Middle

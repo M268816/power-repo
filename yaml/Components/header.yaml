@@ -1,0 +1,128 @@
+ComponentDefinitions:
+  comp_header:
+    DefinitionType: CanvasComponent
+    AccessAppScope: true
+    CustomProperties:
+      change_mode:
+        PropertyKind: Action
+        DisplayName: change_mode
+        Description: A custom property
+        ReturnType: None
+        Parameters:
+          - theme:
+              Description: A parameter
+              DataType: Record
+              Default: |-
+                ={SampleStringField: "SampleText", SampleNumberField: 10, SampleBooleanField: true}
+          - styles:
+              Description: A parameter
+              DataType: Text
+              Default: ="Text"
+      logo_width:
+        PropertyKind: Input
+        DisplayName: logo_width
+        Description: A custom property
+        DataType: Number
+        Default: =Self.Height
+      styles:
+        PropertyKind: Input
+        DisplayName: styles
+        Description: A custom property
+        DataType: Record
+        Default: =gbl_styles
+      text_color:
+        PropertyKind: Input
+        DisplayName: text_color
+        Description: A custom property
+        DataType: Color
+        Default: =gbl_theme.highlight
+      title:
+        PropertyKind: Input
+        DisplayName: title
+        Description: A custom property
+        DataType: Text
+        Default: =LookUp(col_navigation, screen = App.ActiveScreen).label
+    Properties:
+      Height: =If(App.Width < Index(App.SizeBreakpoints,2).Value,60,App.Width < Index(App.SizeBreakpoints,3).Value,50,40)
+      change_mode: =
+    Children:
+      - comp_header_body:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =gbl_theme.primary
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =gbl_padding
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            PaddingBottom: =gbl_padding
+            PaddingLeft: =gbl_padding
+            PaddingRight: =gbl_padding
+            PaddingTop: =gbl_padding
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - comp_header_logo:
+                Control: Image@2.2.3
+                Properties:
+                  Image: =If(gbl_theme.style = "light", logo1, logo2)
+                  LayoutMinHeight: =10
+                  Width: =comp_header.logo_width
+            - comp_header_title:
+                Control: Text@0.0.50
+                Properties:
+                  Align: ='TextCanvas.Align'.Start
+                  FillPortions: =1
+                  Font: =App.Theme.Font
+                  FontColor: =comp_header.text_color
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Round(Self.Height/1.5,0)
+                  Text: =If(IsBlank(comp_header.title), "TESTING", comp_header.title & " | " & APP_NAME)
+                  VerticalAlign: =VerticalAlign.Middle
+            - comp_toggle_mode:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =gbl_theme.text_on_dark
+                  Height: =10
+                  HoverColor: =gbl_theme.text_on_light
+                  Icon: =Icon.HalfFilledCircle
+                  LayoutMinHeight: =10
+                  OnSelect: =If(gbl_theme.style = "light", Set(gbl_theme, gbl_styles.dark),Set(gbl_theme, gbl_styles.light))
+                  Rotation: =If(gbl_theme.style = "light", 0, 180)
+                  Width: =Self.Height
+            - comp_bug_btn:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  HoverFill: =gbl_theme.pri_complement
+                  Image: =gbl_icons.bug
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  OnSelect: =Navigate(scr_bugs,ScreenTransition.Fade)
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height
+            - comp_user_img:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Fill: =RGBA(0, 0, 0, 1)
+                  Image: =User().Image
+                  ImagePosition: =ImagePosition.Fill
+                  LayoutMinHeight: =10
+                  PaddingLeft: =
+                  RadiusBottomLeft: =Self.Width
+                  RadiusBottomRight: =Self.RadiusBottomLeft
+                  RadiusTopLeft: =Self.RadiusBottomLeft
+                  RadiusTopRight: =Self.RadiusBottomLeft
+                  Width: =Self.Height

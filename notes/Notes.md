@@ -1,6 +1,6 @@
 # Todo
 
-NEW APW OEE FIXED, BE SURE TO CHECK ENCAP VERSION AND UPDATE FE VERSION.
+NEW APQ OEE FIXED, BE SURE TO CHECK ENCAP VERSION AND UPDATE FE VERSION.
 
 ## Shared Account Remediation
 
@@ -92,7 +92,7 @@ Scope definition needed from management.
     - Daily Targets
 - Completions
     - Weekly Targets
-- Action Tracker
+##### Action Tracker
     - Area
     - Downtime
     - Issue
