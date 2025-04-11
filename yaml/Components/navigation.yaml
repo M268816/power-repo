@@ -21,6 +21,16 @@ ComponentDefinitions:
             RadiusTopRight: =0
             Width: =Parent.Width
           Children:
+            - comp_logo:
+                Control: Image@2.2.3
+                Properties:
+                  Height: =If(App.Width < Index(App.SizeBreakpoints,2).Value,60+gbl_padding,App.Width < Index(App.SizeBreakpoints,3).Value,50+gbl_padding,40+gbl_padding)
+                  Image: =If(gbl_theme.style = "light", logo1, logo2)
+                  LayoutMinHeight: =10
+                  OnSelect: =Set(gbl_navigation_toggle, !gbl_navigation_toggle);
+                  PaddingBottom: =gbl_padding
+                  PaddingTop: =gbl_padding
+                  Width: =10
             - comp_navigation_separator_0:
                 Control: Rectangle@2.3.0
                 Properties:

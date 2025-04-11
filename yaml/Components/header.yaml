@@ -67,13 +67,23 @@ ComponentDefinitions:
             RadiusTopRight: =0
             Width: =Parent.Width
           Children:
-            - comp_header_logo:
-                Control: Image@2.2.3
+            - comp_hamburger:
+                Control: Classic/Icon@2.5.0
                 Properties:
-                  Image: =If(gbl_theme.style = "light", logo1, logo2)
+                  Color: =gbl_theme.text_light
+                  HoverColor: =gbl_theme.pri_complement
+                  Icon: =Icon.Hamburger
                   LayoutMinHeight: =10
                   OnSelect: =Set(gbl_navigation_toggle, !gbl_navigation_toggle);
-                  Width: =comp_header.logo_width
+                  Width: =Self.Height
+            - comp_header_separator_0:
+                Control: Rectangle@2.3.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Center
+                  Fill: =gbl_theme.midground
+                  Height: =Parent.Height
+                  LayoutMinHeight: =10
+                  Width: =Round(gbl_padding/2,0)
             - comp_header_title:
                 Control: Text@0.0.50
                 Properties:
@@ -84,7 +94,7 @@ ComponentDefinitions:
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   Size: =Round(Self.Height/1.5,0)
-                  Text: =If(IsBlank(comp_header.title), "TESTING", comp_header.title & " ║ " & APP_NAME)
+                  Text: =If(IsBlank(comp_header.title), "TESTING", APP_NAME & " ║ " & comp_header.title )
                   VerticalAlign: =VerticalAlign.Middle
             - comp_toggle_mode:
                 Control: Classic/Icon@2.5.0

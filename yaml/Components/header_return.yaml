@@ -91,7 +91,7 @@ ComponentDefinitions:
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   Size: =Round(Self.Height/1.5,0)
-                  Text: =If(IsBlank(comp_header_return.title), "TESTING", comp_header_return.title & " ║ " & APP_NAME)
+                  Text: =If(IsBlank(comp_header_return.title), "TESTING", APP_NAME & " ║ " & comp_header_return.title )
                   VerticalAlign: =VerticalAlign.Middle
             - comp_toggle_mode_return:
                 Control: Classic/Icon@2.5.0

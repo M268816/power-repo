@@ -1,0 +1,102 @@
+- h_announcement_parent:
+    Control: GroupContainer@1.3.0
+    Variant: AutoLayout
+    Properties:
+      Fill: =RGBA(0, 0, 0, 0.5)
+      Height: =Parent.Height
+      LayoutAlignItems: =LayoutAlignItems.Center
+      LayoutDirection: =LayoutDirection.Vertical
+      LayoutJustifyContent: =LayoutJustifyContent.Center
+      Visible: =SHOW_ANNOUNCEMENTS
+      Width: =Parent.Width
+    Children:
+      - h_announcement:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            AlignInContainer: =AlignInContainer.SetByContainer
+            DropShadow: =DropShadow.ExtraBold
+            Fill: =gbl_theme.background
+            FillPortions: =0
+            Height: =Parent.Height * 0.5
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width * 0.5
+          Children:
+            - h_announcements_title:
+                Control: Text@0.0.50
+                Properties:
+                  Align: ='TextCanvas.Align'.Center
+                  Fill: =gbl_theme.primary
+                  Font: =App.Theme.Font
+                  FontColor: =gbl_theme.text_light
+                  Height: =40
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Size: =Round(Self.Height/2,0)
+                  Text: ="Announcement!"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Wrap: =false
+            - h_announcements_content:
+                Control: Text@0.0.50
+                Properties:
+                  Align: ='TextCanvas.Align'.Start
+                  Fill: =RGBA(0,0,0,0)
+                  FillPortions: =7
+                  Font: =Font.'Courier New'
+                  FontColor: =gbl_theme.text_on_light
+                  Height: =40
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  PaddingLeft: =gbl_padding
+                  PaddingTop: =gbl_padding
+                  Size: =Round(Self.Height/18,0)
+                  Text: |-
+                    ="Here is where I would put my announcements.
+
+                    IF I HAD ONE!"
+                  VerticalAlign: =VerticalAlign.Top
+            - h_announcements_buttons:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.SetByContainer
+                  DropShadow: =DropShadow.ExtraBold
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =gbl_padding
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  PaddingBottom: =gbl_padding
+                  PaddingLeft: =gbl_padding
+                  PaddingRight: =gbl_padding
+                  PaddingTop: =gbl_padding
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - h_announcement_cancel:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =gbl_theme.primary
+                        BorderThickness: =1
+                        Color: =gbl_theme.text_light
+                        Fill: =gbl_theme.primary
+                        FontWeight: =FontWeight.Normal
+                        HoverColor: =gbl_theme.text_on_dark
+                        HoverFill: =gbl_theme.deny
+                        LayoutMinHeight: =1
+                        OnSelect: =Set(SHOW_ANNOUNCEMENTS, false);
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Size: =Self.Height / 3
+                        Text: ="Okay"
+                        Width: =Parent.Width * 0.2
