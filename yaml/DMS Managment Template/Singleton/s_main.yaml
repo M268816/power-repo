@@ -107,4 +107,5 @@
           Properties:
             Fill: =ColorValue(gbl_theme.chart_dim)
             Height: =20
-            content: ="Place Footer Content Here"
+            content: |-
+              ="║ App Verrsion: " & VERSION & " ║"

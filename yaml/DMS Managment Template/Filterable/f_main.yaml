@@ -1,9 +1,9 @@
-- xFxLayout:
+- f_main:
     Control: GroupContainer@1.3.0
     Variant: AutoLayout
     Properties:
       DropShadow: =DropShadow.None
-      Fill: =gblTheme.Background
+      Fill: =gbl_theme.background
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical
@@ -13,17 +13,21 @@
       RadiusTopRight: =0
       Width: =Parent.Width
     Children:
-      - xFxCollect:
+      - f_collect:
           Control: Classic/Button@2.2.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
             OnSelect: |-
-              =Patch(recPopups,First(recPopups),{Visible: true, Value: -1, Display_Text: "Loading Data"});
+              =Patch(gbl_modals,First(gbl_modals),{visible: true, value: -1, display_text: "Loading Data"});
 
               ForAll(
                   Filter(Production,
-                      Hour_Starting >= DateAdd(xFxDate.SelectedDate, -1, TimeUnit.Hours),
-                      Hour_Ending <= DateAdd(xFxDate.SelectedDate, 23, TimeUnit.Hours)
+                      Hour_Starting >= DateAdd(f_date.SelectedDate, -1, TimeUnit.Hours),
+                      Hour_Ending <= DateAdd(f_date.SelectedDate, 23, TimeUnit.Hours)
                   ),
                   Collect(cProduction,
                       {
@@ -38,102 +42,40 @@
                   )
               );
 
-              Patch(recPopups,First(recPopups),{Visible: false, Value: -1, Display_Text: ""});
+              Patch(gbl_modals,First(gbl_modals),{visible: true, value: -1, display_text: "Loading Data"});
             Text: ="collect"
             Visible: =false
-      - xFxSequentialCollect:
+      - f_sequential_collect:
           Control: Timer@2.1.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
             Text: =Text(Time(0, 0, Self.Duration/1000 - Self.Value/1000), "hh:mm:ss")
             Visible: =false
-      - xFxUpdate:
+      - f_update:
           Control: Classic/Button@2.2.0
           Properties:
             AlignInContainer: =AlignInContainer.Start
+            BorderColor: =gbl_theme.primary
+            Color: =gbl_theme.primary
+            Fill: =gbl_theme.primary
+            HoverColor: =gbl_theme.primary
             OnSelect: =
             Text: ="update"
             Visible: =false
-      - xFxHeader:
-          Control: GroupContainer@1.3.0
-          Variant: AutoLayout
+      - f_header:
+          Control: CanvasComponent
+          ComponentName: comp_header
           Properties:
-            AlignInContainer: =AlignInContainer.SetByContainer
-            DropShadow: =DropShadow.None
-            Fill: =gblTheme.Primary
-            LayoutAlignItems: =LayoutAlignItems.Stretch
-            LayoutDirection: =LayoutDirection.Horizontal
-            LayoutGap: =gblPadding
-            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
-            LayoutMinHeight: =10
-            LayoutMinWidth: =10
-            PaddingBottom: =gblPadding
-            PaddingLeft: =gblPadding
-            PaddingRight: =gblPadding
-            PaddingTop: =gblPadding
-            RadiusBottomLeft: =0
-            RadiusBottomRight: =0
-            RadiusTopLeft: =0
-            RadiusTopRight: =0
-          Children:
-            - xFxLogo:
-                Control: Image@2.2.3
-                Properties:
-                  Image: =If(gblTheme.Style = "Light", logo1, logo2)
-                  LayoutMinHeight: =10
-                  Width: =xFxNavigationTitle.Width
-            - xFxTitle:
-                Control: Label@2.5.1
-                Properties:
-                  Color: =gblTheme.Text_Light
-                  FillPortions: =1
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  Size: =Self.Height / 3
-                  Text: =APP_NAME
-            - xFxMode:
-                Control: Classic/Icon@2.5.0
-                Properties:
-                  Color: =gblTheme.Text_On_Dark
-                  Height: =10
-                  HoverColor: =gblTheme.Text_On_Light
-                  Icon: =Icon.HalfFilledCircle
-                  LayoutMinHeight: =10
-                  OnSelect: =If(gblTheme.Style = "Light", Set(gblTheme, gblStyles.Dark),Set(gblTheme, gblStyles.Light))
-                  PaddingBottom: =4
-                  PaddingLeft: =4
-                  PaddingRight: =4
-                  PaddingTop: =4
-                  Rotation: =If(gblTheme.Style = "Light", 0, 180)
-                  Width: =Self.Height
-            - xFxBugs:
-                Control: Image@2.2.3
-                Properties:
-                  HoverFill: =gblTheme.Pri_Complement
-                  Image: =gblIcons.Bug
-                  ImagePosition: =ImagePosition.Fill
-                  LayoutMinHeight: =10
-                  OnSelect: =Navigate(Bugs,ScreenTransition.Fade)
-                  PaddingLeft: =
-                  RadiusBottomLeft: =Self.Width
-                  RadiusBottomRight: =Self.RadiusBottomLeft
-                  RadiusTopLeft: =Self.RadiusBottomLeft
-                  RadiusTopRight: =Self.RadiusBottomLeft
-                  Width: =Self.Height
-            - xFxUserImg:
-                Control: Image@2.2.3
-                Properties:
-                  Fill: =RGBA(0, 0, 0, 1)
-                  Image: =User().Image
-                  ImagePosition: =ImagePosition.Fill
-                  LayoutMinHeight: =10
-                  PaddingLeft: =
-                  RadiusBottomLeft: =Self.Width
-                  RadiusBottomRight: =Self.RadiusBottomLeft
-                  RadiusTopLeft: =Self.RadiusBottomLeft
-                  RadiusTopRight: =Self.RadiusBottomLeft
-                  Width: =Self.Height
-      - xFxMain:
+            Height: =If(App.Width < Index(App.SizeBreakpoints,2).Value,60+gbl_padding,App.Width < Index(App.SizeBreakpoints,3).Value,50+gbl_padding,40+gbl_padding)
+            logo_width: =Self.Height
+            styles: =gbl_styles
+            text_color: =gbl_theme.highlight
+            title: =LookUp(col_navigation, screen = App.ActiveScreen).label
+      - f_body:
           Control: GroupContainer@1.3.0
           Variant: AutoLayout
           Properties:
@@ -149,194 +91,131 @@
             RadiusTopLeft: =0
             RadiusTopRight: =0
           Children:
-            - xFxNavigation:
+            - f_navigation:
+                Control: CanvasComponent
+                ComponentName: comp_navigation
+                Properties:
+                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,2).Value,5,App.Width < Index(App.SizeBreakpoints,3).Value,4,3)
+                  LayoutMinHeight: =10
+                  LayoutMinWidth: =10
+                  Visible: =gbl_navigation_toggle
+                  Width: =300
+            - f_filter_parent:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.None
-                  Fill: =gblTheme.Midground
-                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
+                  Fill: =gbl_theme.background
+                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,2).Value,5,App.Width < Index(App.SizeBreakpoints,3).Value,4,3)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =gblPadding
+                  LayoutGap: =gbl_padding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
-                  PaddingBottom: =gblPadding
-                  PaddingLeft: =gblPadding
-                  PaddingRight: =gblPadding
-                  PaddingTop: =gblPadding
+                  PaddingBottom: =gbl_padding
+                  PaddingLeft: =gbl_padding
+                  PaddingRight: =gbl_padding
+                  PaddingTop: =gbl_padding
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                  - xFxNavigationTitle:
-                      Control: Label@2.5.1
-                      Properties:
-                        Align: =Align.Center
-                        Color: =gblTheme.Text_On_Light
-                        LayoutMinWidth: =10
-                        Size: =Self.Height / 3
-                        Text: =App.ActiveScreen.Name
-                  - xFxNavigationSeparator:
-                      Control: Rectangle@2.3.0
-                      Properties:
-                        Fill: =gblTheme.Pri_Complement
-                        Height: =Round(gblPadding/2,0)
-                        LayoutMinWidth: =10
-                        Width: =10
-                  - xFxNavigationGallery:
-                      Control: Gallery@2.15.0
-                      Variant: Vertical
-                      Properties:
-                        AlignInContainer: =AlignInContainer.SetByContainer
-                        Items: =colNavigation
-                        LayoutMinHeight: =10
-                        LayoutMinWidth: =10
-                        TemplatePadding: =gblPadding
-                        TemplateSize: =40
-                      Children:
-                        - xFxNavigationGalleryButton:
-                            Control: Classic/Button@2.2.0
-                            Properties:
-                              BorderThickness: =1
-                              Color: =gblTheme.Text_Dark
-                              DisplayMode: =If(App.ActiveScreen.Name = ThisItem.Screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
-                              Fill: =gblTheme.Accent
-                              FontWeight: =FontWeight.Normal
-                              Height: =Parent.TemplateHeight
-                              OnSelect: =Navigate(ThisItem.Screen,ScreenTransition.Fade)
-                              RadiusBottomLeft: =100
-                              RadiusBottomRight: =100
-                              RadiusTopLeft: =100
-                              RadiusTopRight: =100
-                              Size: =Self.Height / 4
-                              Text: =ThisItem.Label
-                              Width: =Parent.TemplateWidth
-                  - xFxNavigationFooter:
-                      Control: Label@2.5.1
-                      Properties:
-                        Align: =Align.Center
-                        Color: =gblTheme.Text_On_Light
-                        Height: =Parent.Height * 0.1
-                        LayoutMinWidth: =10
-                        Size: =Self.Height / 14
-                        Text: |-
-                          =
-                          "MilliporeSigma is the U.S. and Canada Life Science business of Merck KGaA, Darmstadt, Germany."
-                          &Char(13)&Char(13)&
-                          "© 2025 EMD Millipore. All rights reserved."
-                        VerticalAlign: =VerticalAlign.Bottom
-            - xFxFilterParent:
-                Control: GroupContainer@1.3.0
-                Variant: AutoLayout
-                Properties:
-                  AlignInContainer: =AlignInContainer.SetByContainer
-                  DropShadow: =DropShadow.None
-                  Fill: =gblTheme.Background
-                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 4,3)
-                  LayoutAlignItems: =LayoutAlignItems.Stretch
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =gblPadding
-                  LayoutMinHeight: =10
-                  LayoutMinWidth: =10
-                  PaddingBottom: =gblPadding
-                  PaddingLeft: =gblPadding
-                  PaddingRight: =gblPadding
-                  PaddingTop: =gblPadding
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                Children:
-                  - xFxFilters:
+                  - f_filters:
                       Control: GroupContainer@1.3.0
                       Variant: AutoLayout
                       Properties:
                         AlignInContainer: =AlignInContainer.SetByContainer
-                        Fill: =gblTheme.Foreground
+                        Fill: =gbl_theme.foreground
                         Height: =Parent.Height * 0.5
                         LayoutAlignItems: =LayoutAlignItems.Stretch
                         LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =gblPadding
+                        LayoutGap: =gbl_padding
                         LayoutMinHeight: =10
                         LayoutMinWidth: =10
-                        PaddingBottom: =gblPadding
-                        PaddingLeft: =gblPadding
-                        PaddingRight: =gblPadding
+                        PaddingBottom: =gbl_padding
+                        PaddingLeft: =gbl_padding
+                        PaddingRight: =gbl_padding
                       Children:
-                        - xFxFilterTitle:
+                        - f_filter_title:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
                               AlignInContainer: =AlignInContainer.Center
-                              Color: =gblTheme.Text_Light
-                              Fill: =gblTheme.Secondary
+                              Color: =gbl_theme.text_light
+                              Fill: =gbl_theme.secondary
                               LayoutMinWidth: =10
                               Size: =Self.Height / 4
                               Text: ="Filters"
                               Width: =Parent.Width
-                        - xFxDateLabel:
+                        - f_date_label:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
-                              Color: =gblTheme.Text_On_Light
+                              Color: =gbl_theme.text_on_light
                               LayoutMinWidth: =10
                               Size: =Self.Height / 4
                               Text: ="Date"
-                        - xFxDate:
+                        - f_date:
                             Control: Classic/DatePicker@2.6.0
                             Properties:
                               BorderThickness: =1
-                              Color: =gblTheme.Text_On_Light
-                              Fill: =gblTheme.Background
+                              Color: =gbl_theme.text_on_light
+                              Fill: =gbl_theme.background
                               FocusedBorderThickness: =1
-                              IconBackground: =gblTheme.Sec_Complement
-                              IconFill: =gblTheme.Text_On_Light
+                              IconBackground: =gbl_theme.sec_complement
+                              IconFill: =gbl_theme.text_on_light
                               LayoutMinWidth: =10
                               Size: =Self.Height / 5
-                        - xFxFilterSeparator0:
+                        - f_filter_separator_0:
                             Control: Rectangle@2.3.0
                             Properties:
-                              Fill: =gblTheme.Pri_Complement
-                              Height: =Round(gblPadding/2,0)
+                              Fill: =gbl_theme.pri_complement
+                              Height: =Round(gbl_padding/2,0)
                               LayoutMinWidth: =10
                               Width: =10
-                        - xFxLineLabel:
+                        - f_line_label:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
-                              Color: =gblTheme.Text_On_Light
+                              Color: =gbl_theme.text_on_light
                               LayoutMinWidth: =10
                               Size: =Self.Height / 4
                               Text: ="Line"
-                        - xFxLine:
+                        - f_line:
                             Control: Classic/DropDown@2.3.1
                             Properties:
-                              ChevronBackground: =gblTheme.Sec_Complement
-                              ChevronFill: =gblTheme.Text_Dark
-                              Color: =gblTheme.Text_On_Light
-                              Fill: =gblTheme.Background
-                              Items: =gblLists.Lines
+                              ChevronBackground: =gbl_theme.sec_complement
+                              ChevronFill: =gbl_theme.text_dark
+                              ChevronHoverFill: =gbl_theme.primary
+                              Color: =gbl_theme.text_on_light
+                              Fill: =gbl_theme.background
+                              Items: =gbl_lists.lines
+                              Items.Value: =Value
                               LayoutMinWidth: =10
+                              PressedColor: =gbl_theme.primary
+                              SelectionColor: =gbl_theme.primary
+                              SelectionFill: =gbl_theme.primary
                               Size: =Self.Height / 5
-                        - xFxFilterSeparator1:
+                        - f_filter_separator_1:
                             Control: Rectangle@2.3.0
                             Properties:
-                              Fill: =gblTheme.Pri_Complement
-                              Height: =Round(gblPadding/2,0)
+                              Fill: =gbl_theme.pri_complement
+                              Height: =Round(gbl_padding/2,0)
                               LayoutMinWidth: =10
                               Width: =10
-                        - xFxFiltersButton:
+                        - f_filters_button:
                             Control: Classic/Button@2.2.0
                             Properties:
+                              BorderColor: =gbl_theme.primary
                               BorderThickness: =1
-                              Color: =gblTheme.Text_Dark
-                              Fill: =gblTheme.Accent
+                              Color: =gbl_theme.text_dark
+                              Fill: =gbl_theme.highlight
                               FontWeight: =FontWeight.Normal
+                              HoverColor: =gbl_theme.primary
                               LayoutMinWidth: =10
-                              OnSelect: =Select(xFxCollect);
+                              OnSelect: =Select(f_collect);
                               RadiusBottomLeft: =100
                               RadiusBottomRight: =100
                               RadiusTopLeft: =100
@@ -344,35 +223,35 @@
                               Size: =Round(Self.Height / 4,0)
                               Text: ="Update Filter"
                               Width: =10
-            - xFxBody:
+            - f_column_0:
                 Control: GroupContainer@1.3.0
                 Variant: AutoLayout
                 Properties:
                   AlignInContainer: =AlignInContainer.SetByContainer
                   DropShadow: =DropShadow.None
-                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,3).Value, 16,18)
+                  FillPortions: =If(App.Width < Index(App.SizeBreakpoints,2).Value,14,App.Width < Index(App.SizeBreakpoints,3).Value,16,18)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =gblPadding
+                  LayoutGap: =gbl_padding
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   LayoutOverflowY: =LayoutOverflow.Scroll
-                  PaddingBottom: =gblPadding
-                  PaddingLeft: =gblPadding
-                  PaddingRight: =gblPadding
-                  PaddingTop: =gblPadding
+                  PaddingBottom: =gbl_padding
+                  PaddingLeft: =gbl_padding
+                  PaddingRight: =gbl_padding
+                  PaddingTop: =gbl_padding
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
                 Children:
-                  - xFxGalleryParent:
+                  - f_gallery_parent:
                       Control: GroupContainer@1.3.0
                       Variant: AutoLayout
                       Properties:
                         AlignInContainer: =AlignInContainer.SetByContainer
                         DropShadow: =DropShadow.Regular
-                        Fill: =gblTheme.Foreground
+                        Fill: =gbl_theme.foreground
                         Height: =500
                         LayoutAlignItems: =LayoutAlignItems.Stretch
                         LayoutDirection: =LayoutDirection.Vertical
@@ -380,24 +259,24 @@
                         LayoutOverflowY: =LayoutOverflow.Scroll
                         PaddingRight: =
                       Children:
-                        - xFxGalleryTitle:
+                        - f_gallery_title:
                             Control: Label@2.5.1
                             Properties:
                               Align: =Align.Center
                               AlignInContainer: =AlignInContainer.Start
-                              Color: =gblTheme.Text_Light
-                              Fill: =gblTheme.Secondary
+                              Color: =gbl_theme.text_light
+                              Fill: =gbl_theme.secondary
                               LayoutMinHeight: =10
                               LayoutMinWidth: =10
                               Size: =Round(Self.Height / 3,0)
                               Text: ="Data Example taken from Encapsulation Production"
                               Width: =Parent.Width
-                        - xFxGalleryColumns:
+                        - f_gallery_columns:
                             Control: GroupContainer@1.3.0
                             Variant: AutoLayout
                             Properties:
                               DropShadow: =DropShadow.Regular
-                              Fill: =gblTheme.Sec_Complement
+                              Fill: =gbl_theme.sec_complement
                               FillPortions: =0
                               Height: =40
                               LayoutAlignItems: =LayoutAlignItems.Stretch
@@ -406,103 +285,103 @@
                               RadiusTopLeft: =0
                               RadiusTopRight: '=0   '
                             Children:
-                              - xFxGalleryIdLabel:
+                              - f_GalleryIdLabel:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="ID"
-                              - xFxGalleryStartDateLabel:
+                              - f_GalleryStartDateLabel:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Start Date"
-                              - xFxGalleryEndDateLabel:
+                              - f_GalleryEndDateLabel:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="End Date"
-                              - xFxGalleryShiftLabel:
+                              - f_GalleryShiftLabel:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Shift"
-                              - xFxGalleryLineLabel:
+                              - f_GalleryLineLabel:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Line"
-                              - xFxGalleryLotLabel:
+                              - f_GalleryLotLabel:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1.5
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Lot"
-                              - xFxGalleryCatalogLabel:
+                              - f_GalleryCatalogLabel:
                                   Control: Label@2.5.1
                                   Properties:
                                     Align: =Align.Center
-                                    BorderColor: =gblTheme.Background
+                                    BorderColor: =gbl_theme.background
                                     BorderThickness: =1
-                                    Color: =gblTheme.Text_On_Light
+                                    Color: =gbl_theme.text_on_light
                                     FillPortions: =1.5
                                     LayoutMinHeight: =1
                                     LayoutMinWidth: =1
                                     Size: =Round(Self.Height/3,0)
                                     Text: ="Catalog"
-                        - xFxGallery:
+                        - f_gallery:
                             Control: Gallery@2.15.0
                             Variant: Vertical
                             Properties:
                               FocusedBorderThickness: =0
-                              Items: =Sort(Filter(cProduction, Line = xFxLine.SelectedText.Value), Hour_Ending)
+                              Items: =Sort(Filter(cProduction, Line = f_line.SelectedText.Value), Hour_Ending)
                               Selectable: =false
                               ShowScrollbar: =false
                               TemplatePadding: =1
                               TemplateSize: =50
                               Transition: =Transition.Pop
                             Children:
-                              - xFxGalleryData:
+                              - f_gallery_data:
                                   Control: GroupContainer@1.3.0
                                   Variant: AutoLayout
                                   Properties:
@@ -517,94 +396,102 @@
                                     RadiusTopRight: =0
                                     Width: =Parent.TemplateWidth
                                   Children:
-                                    - xFxGalleryId:
+                                    - f_gallery_id:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.ID
-                                    - xFxGalleryStartDate:
+                                    - f_gallery_start_date:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Hour_Starting
-                                    - xFxGalleryEndDate:
+                                    - f_gallery_end_date:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Hour_Ending
-                                    - xFxGalleryShift:
+                                    - f_gallery_shift:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Shift
-                                    - xFxGalleryLine:
+                                    - f_gallery_line:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Line
-                                    - xFxGalleryLot:
+                                    - f_gallery_lot:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1.5
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Lot
-                                    - xFxGalleryCatalog:
+                                    - f_gallery_catalog:
                                         Control: Label@2.5.1
                                         Properties:
                                           Align: =Align.Center
-                                          BorderColor: =gblTheme.Background
+                                          BorderColor: =gbl_theme.background
                                           BorderThickness: =1
-                                          Color: =gblTheme.Text_On_Light
+                                          Color: =gbl_theme.text_on_light
                                           FillPortions: =1.5
                                           HoverFill: =RGBA(0,0,0,0.1)
                                           LayoutMinHeight: =1
                                           LayoutMinWidth: =1
                                           Size: =Round(Self.Height/4,0)
                                           Text: =ThisItem.Catalog
+      - f_footer:
+          Control: CanvasComponent
+          ComponentName: comp_footer
+          Properties:
+            Fill: =ColorValue(gbl_theme.chart_dim)
+            Height: =20
+            content: |-
+              ="║ App Version: " & VERSION & " ║"

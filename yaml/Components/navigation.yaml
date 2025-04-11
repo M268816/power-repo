@@ -3,7 +3,6 @@ ComponentDefinitions:
     DefinitionType: CanvasComponent
     AccessAppScope: true
     Properties:
-      Height: =650
       Width: =300
     Children:
       - h_navigation_body:
@@ -40,7 +39,7 @@ ComponentDefinitions:
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   TemplatePadding: =0
-                  TemplateSize: =If(App.Width < Index(App.SizeBreakpoints,2).Value, Parent.Height / 8, Parent.Height / 16)
+                  TemplateSize: =If(App.Width < Index(App.SizeBreakpoints,1).Value, Parent.Height / 8, App.Width < Index(App.SizeBreakpoints,2).Value, Parent.Height / 12, Parent.Height / 16)
                 Children:
                   - comp_nav_gallery_separator_0:
                       Control: Rectangle@2.3.0
@@ -59,11 +58,10 @@ ComponentDefinitions:
                         Color: =gbl_theme.text_on_light
                         DisabledBorderColor: =RGBA(166, 166, 166, 1)
                         DisabledColor: =gbl_theme.text_light
-                        DisabledFill: =RGBA(222,222,222,1)
+                        DisabledFill: =gbl_theme.pri_complement
                         DisplayMode: =If(App.ActiveScreen.Name = ThisItem.screen.Name, DisplayMode.Disabled, DisplayMode.Edit)
                         Fill: =RGBA(0,0,0,0)
                         FocusedBorderThickness: =0
-                        Font: =Font.'Open Sans'
                         FontWeight: =FontWeight.Normal
                         Height: =Parent.TemplateHeight - comp_nav_gallery_separator_0.Height
                         HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
@@ -94,12 +92,12 @@ ComponentDefinitions:
                 Control: Label@2.5.1
                 Properties:
                   Align: =Align.Center
+                  AutoHeight: =true
                   BorderColor: =RGBA(0, 18, 107, 1)
                   Color: =gbl_theme.text_on_light
-                  Font: =Font.'Open Sans'
                   Height: =Parent.Height * 0.05
                   LayoutMinWidth: =10
-                  Size: =Round(Self.Height / 6,0)
+                  Size: =6
                   Text: |-
                     ="MilliporeSigma is the U.S. and Canada Life Science business ofMerck KGaA, Darmstadt, Germany."
                     &Char(13)&

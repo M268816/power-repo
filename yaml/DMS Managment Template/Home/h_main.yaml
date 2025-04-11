@@ -51,7 +51,7 @@
           Control: CanvasComponent
           ComponentName: comp_header
           Properties:
-            Height: =If(App.Width < Index(App.SizeBreakpoints,2).Value,60,App.Width < Index(App.SizeBreakpoints,3).Value,50,40)
+            Height: =If(App.Width < Index(App.SizeBreakpoints,2).Value,60+gbl_padding,App.Width < Index(App.SizeBreakpoints,3).Value,50+gbl_padding,40+gbl_padding)
             logo_width: =Self.Height
             styles: =gbl_styles
             text_color: =gbl_theme.highlight
@@ -71,12 +71,11 @@
             RadiusTopLeft: =0
             RadiusTopRight: =0
           Children:
-            - h_navigation_comp:
+            - h_navigation:
                 Control: CanvasComponent
                 ComponentName: comp_navigation
                 Properties:
                   FillPortions: =If(App.Width < Index(App.SizeBreakpoints,2).Value,5,App.Width < Index(App.SizeBreakpoints,3).Value,4,3)
-                  Height: =650
                   LayoutMinHeight: =10
                   LayoutMinWidth: =10
                   Visible: =gbl_navigation_toggle
@@ -152,4 +151,5 @@
           Properties:
             Fill: =ColorValue(gbl_theme.chart_dim)
             Height: =20
-            content: ="Place Footer Content Here"
+            content: |-
+              ="║ App Verrsion: " & VERSION & " ║"

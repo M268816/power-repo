@@ -1,3 +1,5 @@
 Properties:
   OnStart: =Set(INITIALIZE, false)
-  SizeBreakPoints: =[900, 1200, 1600]
+  SizeBreakPoints: =[960, 1280, 1600]
+  MinScreenHeight: =720
+  MinScreenWidth: =1280
