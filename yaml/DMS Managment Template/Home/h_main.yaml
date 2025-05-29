@@ -3,7 +3,7 @@
     Variant: AutoLayout
     Properties:
       DropShadow: =DropShadow.None
-      Fill: =RGBA(0,0,0,0)
+      Fill: =gbl_theme.background
       Height: =Parent.Height
       LayoutAlignItems: =LayoutAlignItems.Stretch
       LayoutDirection: =LayoutDirection.Vertical

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            overflow: hidden;
+            width: 100%;
+        }
+        .email-header {
+            background-color: #5585b5;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .email-body {
+            padding: 20px;
+        }
+        .bug-report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .bug-report-table th, .bug-report-table td {
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid #dddddd;
+        }
+        .bug-report-table th {
+            background-color: #f5f5f5;
+            width: 150px;
+        }
+        .footer {
+            text-align: center;
+            color: #aaaaaa;
+            font-size: 12px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<table width='100%' cellpadding='0' cellspacing='0' border='0'>
+    <tr>
+        <!-- Left Margin -->
+        <td width='15%'>&nbsp;</td>
+        
+        <!-- Main Content -->
+        <td width='70%'>
+            <div class='email-container'>
+                <!-- Email Header -->
+                <div class='email-header'>
+                    <h1>Action Item Reported!</h1>
+                </div>
+
+                <!-- Email Announcement -->
+                <div style='padding: 0% 10%;'>
+                    <p style="text-align: center;">
+                        This email was automatically generated to inform you an actionable item was added to the action tracker through the DMS.
+                    </p>
+                </div>
+    
+                <!-- Resolution Body -->
+                <div class='email-body'>
+                    <table class='bug-report-table'>
+                        <tr>
+                            <th>Reported By</th>
+                            <td>"& a_form_reported_by_value.Selected.DisplayName &"</td>
+                        </tr>
+                        <tr>
+                            <th>Title</th>
+                            <td>"& a_form_title_value.Value &"</td>
+                        </tr>
+                        <tr>
+                            <th>Line</th>
+                            <td>"& a_form_line_value.Selected.Value &"</td>
+                        </tr>
+                        <tr>
+                            <th>Downtime Incurred?</th>
+                            <td>"& If(a_form_downtime_value.Checked, "Yes", "No") &"</td>
+                        </tr>
+                        <tr>
+                            <th>Mainsaver Ticket Created?</th>
+                            <td>"& If(a_form_maintenance_value.Checked, "Yes", "No") &"</td>
+                        </tr>
+                        <tr>
+                            <th>CR360 Ticket Created?</th>
+                            <td>"& If(a_form_safety_value.Checked, "Yes", "No") &"</td>
+                        </tr>
+                        <tr>
+                            <th>Additional Comments</th>
+                            <td>"& a_form_comment_value.Value &"</td>
+                        </tr>
+                    </table>
+                </div>
+    
+                <!-- Email Footer -->
+                <div class='footer'>
+                    &copy; 2025 EMD Millipore. All rights reserved.
+                </div>
+            </div>
+        </td>
+        
+        <!-- Right Margin -->
+        <td width='15%'>&nbsp;</td>
+    </tr>
+</table>
+</body>
+</html>
