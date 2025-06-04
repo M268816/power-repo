@@ -21,12 +21,13 @@
     13. [Field Names](#field-names)
 2. [Using the Templates](#using-the-templates)
     1. [Initialization](#initialization)
-    2. [Standard Variables](#standard-variables)
-    3. [Navigation](#navigation)
-    4. [The popup manager](#the-popup-manager)
-    5. [Themes](#themes-and-theme-modes)
-    6. [Icon Manager](#icon-manager)
-    7. [Login Catching](#login-catching)
+    2. [Font Sizing](#font-sizing)
+    3. [Standard Variables](#standard-variables)
+    4. [Navigation](#navigation)
+    5. [The popup manager](#the-popup-manager)
+    6. [Themes](#themes-and-theme-modes)
+    7. [Icon Manager](#icon-manager)
+    8. [Login Catching](#login-catching)
 
 ## Initial Setup
 
@@ -533,12 +534,12 @@ screen you are setting up.
 [Back To Top](#powerapps-coding-conventions-and-syntax)
 
 Current versions of the PowerApp app properties include the OnStart action. This
-action has been planned to be removed from future versions of PowerApps. This
+action was once planned to be removed from future versions of PowerApps. It
 poses a problem because many of the apps I build need to have various variables
 and processes run before the applications hand over control to the user.
 
-This includes simple instructions like setting global variables for formatting.
-However, this also includes instructions for updating login settings and user
+These processes include simple instructions like setting global variables for
+formatting but also includes instructions for updating login settings and user
 tracking. If power apps as a platform decides to remove the OnStart property
 from the editor, I needed to future proof these instructions by utilizing a
 stable initialization method.
@@ -580,6 +581,23 @@ starts the init instructions.
 ║Click Here to Enter!║
 ╚════════════════════╝
 ```
+
+## Font Sizing
+
+[Back To Top](#powerapps-coding-conventions-and-syntax)
+
+Font sizing for powerapps has become quite tricky. Using static font sizes in
+the property value of text objects will not auto adjust for screen resolution
+like in web development. So to account for differing screen sizes, I calculate
+font sizes by the relative size of the object.
+
+```cpp
+size: Round(Min(Self.Height/3,Self.Width/30),0)
+```
+
+I stick to 3 main font sizes, Headers at 20, Titles at 16, Text at 14,
+and subtext at ~>= 10px. 
+
 
 ## Standard Variables
 
