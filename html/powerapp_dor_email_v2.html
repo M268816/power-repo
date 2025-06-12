@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <style>
+        body{
+            width: 100%;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            padding: 0px;
+            margin: 0px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .container-table {
+            width: 100%;
+        }
+        .main-container {
+            width: 70%;
+        }
+        .main-container-margin {
+            width: 15%;
+        }
+        .main-table {
+            width: 100%;
+            border-radius: 8px;
+            border-collapse: collapse;
+            color: #FFFFFF;
+        }
+        .main-table tr {
+            background-color: #cccccc;
+            padding: 11px;
+        }
+        .main-table th {
+            background-color: #503291;
+            color: #FFFFFF;
+            font-size: 11pt;
+        }
+        .main-table td {
+            color: #000000;
+            padding: 8px;
+            font-size: 11pt;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background-color: #0F69AF;
+            border: 1px solid #000000;
+            padding: 8px;
+            font-weight: lighter;
+            font-size: 11pt;
+        }
+        .data-table th.subheader {
+            background-color: #FFDBC9;
+            color: #000000;
+            padding: 4px;
+            font-weight: lighter;
+            font-size: 11pt;
+        }
+        .data-table th.target {
+            background-color: #A5CD50;
+            color: #000000;
+            padding: 4px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .data-table th.large {
+            width: 20%
+        }
+        .data-table td {
+            border: 1px solid #000000;
+            background-color: #FFFFFF;
+            padding: 4px;
+            font-size: 11pt;
+        }
+
+        #header {
+            border-radius: 8px 8px 0px 0px;
+        }
+        #footer {
+            border-radius: 0px 0px 8px 8px;
+            background-color: #2DBECD;
+            color: #503291;
+            font-size: 11pt;
+        }
+        </style>
+    </head>
+    <body>
+        <!--Container Table-->
+        <table class='container-table'>
+            <tr>
+                <!-- Container Margin -->
+                <td class='main-container-margin'>&nbsp;</td>
+                
+                <!-- Main Container-->
+                <td class='main-container'>
+                    <!-- Main Table -->
+                    <table class='main-table'>
+                        
+                        <!-- Header -->
+                        <tr>
+                            <th id='header'>
+                                <h2>"& loc_email_shift &" Shift DMS Daily Operations Report</h2>
+                            </th>
+                        </tr>
+                        
+                        <!-- Context -->
+                        <tr>
+                            <td>
+                                <h4>
+                                    Week: "&Text(WeekNum(dor_date.SelectedDate))&"
+                                    <br />
+                                    "&Text(dor_date.SelectedDate,DateTimeFormat.LongDate)&"
+                                    <br />
+                                    This data was submitted by: "& User().FullName &" on "& gbl_time.now &"
+                                </h4>
+                                <h5>For more detailed information visit the <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true'>Encapsulation Digital Daily Management System</a></h5>
+                            </td>
+                        </tr>
+                        
+                        <!-- Summary -->
+                        <tr>
+                            <td>
+                                <!-- Summary Container Table -->
+                                <table class='container-table'>
+                                    <tr>
+                                        <!-- Container Margin -->
+                                        <td class='main-container-margin'>&nbsp;</td>
+                                        
+                                        <!-- Summary Main Container -->
+                                        <td class='main-container'>
+                                            <!-- Summary Table -->
+                                            <table class='data-table'>
+                                                <tr>
+                                                    <th colspan='4'>Summary</th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="subheader">Line</tr>
+                                                    <th class='subheader'>Labor Efficiency</th>
+                                                    <th class='subheader'>Productivity</td>
+                                                    <th class='subheader'>Yield</td>
+                                                    <th class='subheader'>Downtime</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class='target'>Target: 12.5</td>
+                                                    <th class='target'>Target: 93%</td>
+                                                    <th class='target'>Target: 98%</td>
+                                                    <th class='target'>Target: 960 minutes <br /> (2 hours per line per shift)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style='"&
+                                                        If(this_overall_data.labor_efficiency < 12.5,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&this_overall_data.labor_efficiency&"</td>
+                                                    <td style='"&
+                                                        If(Value(this_overall_data.productivity) < 0.93,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&this_overall_data.productivity&"</td>
+                                                    <td style='"&
+                                                        If(Value(this_overall_data.yield) < 0.98,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&this_overall_data.yield&"</td>
+                                                    <td style='"&
+                                                        If(this_overall_data.downtime > 960,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&this_overall_data.downtime&" minutes</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class='subheader'>SSC Output</td>
+                                                    <th class='subheader'>XL Output</td>
+                                                    <th class='subheader'>XLT Output</td>
+                                                    <th class='subheader'>Total Output</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class='target'>Target: "&this_overall_data.ssc_goal&"</td>
+                                                    <th class='target'>Target: "&this_overall_data.xl_goal&"</td>
+                                                    <th class='target'>Target: "&this_overall_data.xlt_goal&"</td>
+                                                    <th class='target'>Target: "&this_overall_data.total_goal&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style='"&
+                                                        If(this_overall_data.ssc < this_overall_data.ssc_goal,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&this_overall_data.ssc&" units</td>
+                                                    <td style='"&
+                                                        If(this_overall_data.ssc < this_overall_data.xl_goal,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&this_overall_data.xl&" units</td>
+                                                    <td style='"&
+                                                        If(this_overall_data.ssc < this_overall_data.xlt_goal,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&this_overall_data.xlt&" units</td>
+                                                    <td style='"&
+                                                        If(this_overall_data.total < this_overall_data.total_goal,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&this_overall_data.total&" units</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <!-- Container Margin -->
+                                        <td class='main-container-margin'>&nbsp;</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        <!-- Production Table -->
+                        <tr>
+                            <td>
+                                <table class='data-table' id='full-width'>
+                                    <tr>
+                                        <th class='line'>Line</th>
+                                        <th>Labor Hours</th>
+                                        <th>Output</th>
+                                        <th>Output Target</th>
+                                        <th>Output Delta</th>
+                                        <th>Total Downtime Minutes</th>
+                                        <th>Greatest Downtime Contributor</th>
+                                        <th class='large'>Tie-Off</th>
+                                    </tr>
+                                    <tr>
+                                        <th class='subheader'>SSC</th>
+                                        <td>"& LookUp(this_shift_data, line = "SSC").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "SSC").supply < LookUp(this_shift_data, line = "SSC").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "SSC").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "SSC").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "SSC").supply-LookUp(this_shift_data, line = "SSC").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "SSC").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "SSC").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "SSC").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "SSC").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>SSC2</th>
+                                        <td>"& LookUp(this_shift_data, line = "SSC2").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "SSC2").supply < LookUp(this_shift_data, line = "SSC2").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "SSC2").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "SSC2").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "SSC2").supply-LookUp(this_shift_data, line = "SSC2").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "SSC2").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "SSC2").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "SSC2").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "SSC2").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>XL1</th>
+                                        <td>"& LookUp(this_shift_data, line = "XL1").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL1").supply < LookUp(this_shift_data, line = "XL1").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL1").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL1").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL1").supply-LookUp(this_shift_data, line = "XL1").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL1").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL1").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL1").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL1").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>XL2</th>
+                                        <td>"& LookUp(this_shift_data, line = "XL2").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL2").supply < LookUp(this_shift_data, line = "XL2").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL2").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL2").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL2").supply-LookUp(this_shift_data, line = "XL2").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL2").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL2").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL2").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL2").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>XL3</th>
+                                        <td>"& LookUp(this_shift_data, line = "XL3").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL3").supply < LookUp(this_shift_data, line = "XL3").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL3").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL3").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL3").supply-LookUp(this_shift_data, line = "XL3").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL3").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL3").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL3").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL3").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>XL4</th>
+                                        <td>"& LookUp(this_shift_data, line = "XL4").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL4").supply < LookUp(this_shift_data, line = "XL4").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL4").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL4").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL4").supply-LookUp(this_shift_data, line = "XL4").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL4").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL4").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL4").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL4").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>XL5</th>
+                                        <td>"& LookUp(this_shift_data, line = "XL5").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL5").supply < LookUp(this_shift_data, line = "XL5").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL5").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL5").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL5").supply-LookUp(this_shift_data, line = "XL5").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XL5").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XL5").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL5").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "XL5").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>XLT</th>
+                                        <td>"& LookUp(this_shift_data, line = "XLT").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XLT").supply < LookUp(this_shift_data, line = "XLT").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XLT").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT").supply-LookUp(this_shift_data, line = "XLT").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XLT").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XLT").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>XLT2</th>
+                                        <td>"& LookUp(this_shift_data, line = "XLT2").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XLT2").supply < LookUp(this_shift_data, line = "XLT2").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XLT2").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT2").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT2").supply-LookUp(this_shift_data, line = "XLT2").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XLT2").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XLT2").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT2").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT2").comments &"</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th class='subheader'>XLT3</th>
+                                        <td>"& LookUp(this_shift_data, line = "XLT3").labor_hours &" hours</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XLT3").supply < LookUp(this_shift_data, line = "XLT3").goal,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XLT3").supply &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT3").goal &" units</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT3").supply-LookUp(this_shift_data, line = "XLT3").goal &" units</td>
+                                        <td style='"&
+                                                    If(LookUp(this_shift_data, line = "XLT3").downtime > 120,
+                                                        "color: white; background-color: red;",
+                                                        "color: black; background-color: green;"
+                                                    )
+                                                    &"'>"& LookUp(this_shift_data, line = "XLT3").downtime &" minutes</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT3").top_downtime &"</td>
+                                        <td>"& LookUp(this_shift_data, line = "XLT3").comments &"</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <th id='footer'>&copy; 2025 EMD Millipore. All rights reserved.</th>
+                        </tr>
+                    </table>
+                </td>
+                <!-- Container Margin -->
+                <td class='main-container-margin'>&nbsp;</td>
+            </tr>
+        </table>
+    </body>
+</html>

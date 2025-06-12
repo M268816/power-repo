@@ -48,7 +48,7 @@ SQL_CONNECTION = sql.connect(database_path)
 SQL_CURSOR = SQL_CONNECTION.cursor()
 
 # Create Summary SQL Database if none exists
-SQL_CURSOR.execute("""
+SQL_CURSOR.execute("""--sql
 CREATE TABLE IF NOT EXISTS summary (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     department TEXT NOT NULL,
@@ -86,9 +86,11 @@ for email in emails:
             
             # Check if the email has attachments
             if email.Attachments.Count > 0:
-                for i in range(1, email.Attachments.Count):
+                for i in range(1, email.Attachments.Count+1):
                     attachment = email.Attachments.Item(i)
+                    attachment_name = attachment.FileName
                     # Save the attachment
+                    print(f"Attachment pulled: {attachment_name}")
                     print(f"Saving to: {input_path}")
                     print("----------")
                     attachment.SaveAsFile(f"{input_path}")
@@ -154,20 +156,8 @@ summary = pd.DataFrame(
             "SSC Pleating",
             "Total"
         ],
-        "Date": [
-            received_time,
-            received_time,
-            received_time,
-            received_time,
-            received_time
-        ],
-        "Week": [
-            iso_week,
-            iso_week,
-            iso_week,
-            iso_week,
-            iso_week
-        ],
+        "Date": [received_time] * 5,
+        "Week": [iso_week] * 5,
         "Quantity": [
             xl_completed_qty,
             xlt_completed_qty,
@@ -189,14 +179,17 @@ print("--- NEW DATAFRAME CREATED ---")
 # Export dataframe to csv
 ### TODO: transfer csv to sharepoint list through power automate
 try:
-    summary.to_csv(output_path,index=False)
+    summary.to_csv(output_path,index=False,lineterminator="")
     print("--- DATAFRAME CSV SAVED ---")
 except Exception as e:
     print(f"Could not save file: {e}")
 
 # Add New Rows to SQL Database from summary dataframe
 for index, row in summary.iterrows():
-    SQL_CURSOR.execute("SELECT COUNT(*) from summary WHERE date = ? and department = ?",
+    SQL_CURSOR.execute("""--sql
+        SELECT COUNT(*) from summary
+        WHERE date = ? and department = ?
+        """,
         (row["Date"],row["Department"])
     )
     department = row["Department"]

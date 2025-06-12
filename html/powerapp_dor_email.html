@@ -1,0 +1,357 @@
+<!DOCTYPE html><html>
+<head>
+<style>
+    body {
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+    }
+    
+    .main-header {
+        background-color: #503291;
+        color: #ffffff;
+        padding: 16px;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .main-header h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+    
+    .main-footer {
+        text-align: center;
+        color: #503291;
+        background-color: #96D7D2;
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    .main-table{
+        width: 100%;
+        padding: 0px;
+        margin: 0px;
+        border-spacing: 0px;
+        border-collapse: collapse;
+    }
+    .main-container {
+        border: 1px solid #503291;
+        border-radius: 8px;
+    }
+    .main-body {
+        width: auto;
+        padding: 0px;
+        margin: 0px;
+    }
+    .main-margin {
+        width: 0%;
+    }
+
+    .centered-container {
+        padding: auto;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .summary-row{
+        width: 100%;
+        border-spacing: 0px;
+        border-collapse: collapse;
+    }
+    .summary-margin{
+        width: 25%;
+    }
+    .summary-body{
+        width: 50%;
+        padding: 0px;
+        margin: 0px;
+    }
+    .summary-table{
+        width: 100%;
+        margin: 8px;
+        border-spacing: 0px;
+        border-collapse: collapse;
+    }
+    .summary-table th{
+        padding: 8px;
+        background-color: #0F69AF;
+        color: #ffffff;
+        font-size: 16px;
+        border: 1px solid #000000;
+    }
+    .summary-table th.subheader{
+        padding: 4px;
+        color: #000000;
+        background-color: #96D7D2;
+        font-size: 14px;
+    }
+    .summary-table td{
+        padding: 8px;
+        margin: 0px;
+        background-color: #ffffff;
+        color: #000000;
+        font-size: 12px;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid #000000;
+    }
+
+    .line-table {
+        width: auto;
+        margin: 8px 16px 16px 16px;
+        border-spacing: 0px;
+        border-collapse: collapse;
+    }
+    .line-table th {
+        padding: 8px;
+        background-color: #0F69AF;
+        color: #ffffff;
+        font-size: 16px;
+        border: 1px solid #000000;
+    }
+    .line-table th.subheader{
+        padding: 4px;
+        color: #000000;
+        background-color: #96D7D2;
+        font-size: 14px;
+    }
+    .line-table th.large{
+        width: 30%;
+    }
+    .line-table td {
+        padding: 8px;
+        margin: 0px;
+        background-color: #ffffff;
+        color: #000000;
+        font-size: 12px;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid #000000;
+    }
+    .new-main-table {
+        width: 100%;
+        margin: 16px;
+        padding: 0px;
+        border: 1px solid #503291;
+        border-radius: 8px;
+    }
+    .new-main-table tr{
+        border-collapse: collapse;
+    }
+    .new-main-table th{
+        border: 1px solid #000000;
+        background-color: #503291;
+        color: #ffffff;
+    }
+    .new-main-table th.subheader{
+        background-color: #0F69AF;
+        color: #ffffff;
+    }
+    .new-main-table td{
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+</head>
+<body>
+<table class='new-main-table'>
+    <tr><th class=>Header</th></tr>
+    <tr><td><h4>Context</h4></td></tr>
+    <tr><th class='subheader'>Summary Table</td></tr>
+    <tr><td>Prod Table</td></tr>
+    <tr><td>Footer</td></Tr>
+</table>
+
+
+<table class='main-table'>
+    <tr>
+        
+        <!-- Main Left Margin -->
+        <td class='main-margin'>&nbsp;</td>
+        
+        <!-- Main Content -->
+        <td class='main-body'>
+
+            <div class='main-container'>
+                <!-- Main Header -->
+                <div class='main-header'>
+                    <h1></h1>
+                </div>
+
+                <!-- Context Row -->
+                <div class='centered-container'>
+                </div>
+                
+                <!-- Summary Row -->
+                <table class='summary-row'>
+                    <tr>
+                        <!-- Summary Left Margin -->
+                        <td class='summary-margin'>&nbsp;</td>
+                        
+                        <!-- Summary Main Content -->
+                        <td class='summary-body'>
+                            <!-- Summary Table -->
+                            <table class='summary-table'>
+                                <tr>
+                                    <th colspan='3'>Summary</th>
+                                </tr>
+                                <tr>
+                                    <th class='subheader'>Productivity</th>
+                                    <th class='subheader'>Yield</th>
+                                    <th class='subheader'>Total Downtime</th>
+                                </tr>
+                                <tr>
+                                    <td>"&this_overall_data.productivity&"</td>
+                                    <td>"&this_overall_data.yield&"</td>
+                                    <td>"&this_overall_data.downtime&"</td>
+                                </tr>
+                                <tr>
+                                    <th colspan='3'>Outputs</th>
+                                </tr>
+                                <tr>
+                                    <th  class='subheader'>SSC Output</th>
+                                    <th  class='subheader'>XL Output</th>
+                                    <th  class='subheader'>XLT Output</th>
+                                </tr>
+                                <tr>
+                                    <td style='text-align: center;'>"&this_overall_data.productivity&"</td>
+                                    <td style='text-align: center;'>"&this_overall_data.yield&"</td>
+                                    <td style='text-align: center;'>"&this_overall_data.downtime&"</td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <!-- Summary Right Margin -->
+                        <td class='summary-margin'>&nbsp;</td>
+                    </tr>
+                </table>
+    
+                <!-- Production Line Table -->
+                <table class='line-table'>
+                    <tr>
+                        <th>Line</th>
+                        <th>Labor Hours</th>
+                        <th>Output</th>
+                        <th>Output Goal</th>
+                        <th>Output Delta</th>
+                        <th>Total Downtime Minutes</th>
+                        <th>Greatest Downtime Contributor</th>
+                        <th class='large'>Tie-Off</th>
+                    </tr>
+                        <tr>
+                            <th class='subheader'>SSC</th>
+                            <td>"& LookUp(this_shift_data, line = "SSC").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC").supply-LookUp(this_shift_data, line = "SSC").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>SSC2</th>
+                            <td>"& LookUp(this_shift_data, line = "SSC2").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC2").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC2").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC2").supply-LookUp(this_shift_data, line = "SSC2").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC2").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC2").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "SSC2").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>XL1</th>
+                            <td>"& LookUp(this_shift_data, line = "XL1").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "XL1").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL1").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL1").supply-LookUp(this_shift_data, line = "XL1").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL1").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "XL1").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "XL1").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>XL2</th>
+                            <td>"& LookUp(this_shift_data, line = "XL2").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "XL2").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL2").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL2").supply-LookUp(this_shift_data, line = "XL2").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL2").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "XL2").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "XL2").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>XL3</th>
+                            <td>"& LookUp(this_shift_data, line = "XL3").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "XL3").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL3").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL3").supply-LookUp(this_shift_data, line = "XL3").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL3").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "XL3").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "XL3").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>XL4</th>
+                            <td>"& LookUp(this_shift_data, line = "XL4").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "XL4").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL4").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL4").supply-LookUp(this_shift_data, line = "XL4").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL4").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "XL4").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "XL4").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>XL5</th>
+                            <td>"& LookUp(this_shift_data, line = "XL5").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "XL5").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL5").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL5").supply-LookUp(this_shift_data, line = "XL5").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XL5").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "XL5").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "XL5").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>XLT</th>
+                            <td>"& LookUp(this_shift_data, line = "XLT").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT").supply-LookUp(this_shift_data, line = "XLT").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>XLT2</th>
+                            <td>"& LookUp(this_shift_data, line = "XLT2").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT2").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT2").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT2").supply-LookUp(this_shift_data, line = "XLT2").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT2").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT2").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT2").comments &"</td>
+                        </tr>
+                        <tr>
+                            <th class='subheader'>XLT3</th>
+                            <td>"& LookUp(this_shift_data, line = "XLT3").labor_hours &" hours</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT3").supply &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT3").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT3").supply-LookUp(this_shift_data, line = "XLT3").goal &" units</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT3").downtime &" minutes</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT3").top_downtime &"</td>
+                            <td>"& LookUp(this_shift_data, line = "XLT3").comments &"</td>
+                        </tr>
+                </table>
+    
+                <!-- Main Footer -->
+                <div class='main-footer'>
+                    &copy; 2025 EMD Millipore. All rights reserved.
+                </div>
+            
+            </div>
+        </td>
+        
+        <!-- Main Right Margin -->
+        <td class='main-margin'>&nbsp;</td>
+    </tr>
+</table>
+</body>
+</html>

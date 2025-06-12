@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <style>
+        body{
+            width: 100%;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            padding: 0px;
+            margin: 0px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .container-table {
+            width: 100%;
+        }
+        .main-container {
+            width: 70%;
+        }
+        .main-container-margin {
+            width: 15%;
+        }
+        .main-table {
+            width: 100%;
+            border-radius: 8px;
+            border-collapse: collapse;
+            color: #FFFFFF;
+        }
+        .main-table tr {
+            background-color: #cccccc;
+            padding: 8px;
+        }
+        .main-table th {
+            background-color: #503291;
+            color: #FFFFFF;
+            font-size: 12pt;
+        }
+        .main-table td {
+            color: #000000;
+            padding: 8px;
+            font-size: 10pt;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background-color: #0F69AF;
+            border: 1px solid #000000;
+            padding: 8px;
+            font-weight: lighter;
+            font-size: 12pt;
+        }
+        .data-table th.subheader {
+            background-color: #FFDBC9;
+            color: #000000;
+            padding: 4px;
+            font-weight: lighter;
+            font-size: 10pt;
+        }
+        .data-table th.target {
+            background-color: #A5CD50;
+            color: #000000;
+            padding: 4px;
+            font-weight: bold;
+            font-size: 8px;
+        }
+        .data-table th.large {
+            width: 20%
+        }
+        .data-table td {
+            border: 1px solid #000000;
+            background-color: #FFFFFF;
+            padding: 4px;
+            font-size: 8pt;
+        }
+
+        #header {
+            border-radius: 8px 8px 0px 0px;
+        }
+        #footer {
+            border-radius: 0px 0px 8px 8px;
+            background-color: #2DBECD;
+            color: #503291;
+            font-size: 10pt;
+        }
+        </style>
+    </head>
+    <body>
+        <!--Container Table-->
+        <table class='container-table'>
+            <tr>
+                <!-- Container Margin -->
+                <td class='main-container-margin'>&nbsp;</td>
+                
+                <!-- Main Container-->
+                <td class='main-container'>
+                    <!-- Main Table -->
+                    <table class='main-table'>
+                        
+                        <!-- Header -->
+                        <tr>
+                            <th id='header'>
+                                <h2>Digital DMS Encapsulation Tier 3 Report</h2>
+                            </th>
+                        </tr>
+                                                
+                        <!-- Summary -->
+                        <tr>
+                            <td>
+                                <!-- Summary Container Table -->
+                                <table class='container-table'>
+                                    <tr>
+                                        <!-- Container Margin -->
+                                        <td class='main-container-margin'>&nbsp;</td>
+                                        
+                                        <!-- Summary Main Container -->
+                                        <td class='main-container'>
+                                            <!-- Summary Table -->
+                                            <table class='data-table'>
+                                                <tr>
+                                                    <th rowspan='7' style='writing-mode: sideways-lr; text-orientation: sideways;'>ENCAPSULATION</th>
+                                                    <th>Key Performance Indicator</th>
+                                                    <th>Target</th>
+                                                    <th>Week<br />"&loc_week-5&"</th>
+                                                    <th>Week<br />"&loc_week-4&"</th>
+                                                    <th>Week<br />"&loc_week-3&"</th>
+                                                    <th>Week<br />"&loc_week-2&"</th>
+                                                    <th>Week<br />"&loc_week-1&"</th>
+                                                    <th>Week<br />"&loc_week&"</th>
+                                                </tr>
+                                                <tr>
+                                                    <th class='subheader'>Labor Productivity</th>
+                                                    <th class='target'>12.5 (units/labor hours)</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).labor_productivity < 12.5,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-5).labor_productivity&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-4).labor_productivity < 12.5,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-4).labor_productivity&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-3).labor_productivity < 12.5,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-3).labor_productivity&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-2).labor_productivity < 12.5,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-2).labor_productivity&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-1).labor_productivity < 12.5,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-1).labor_productivity&"</td>    
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week).labor_productivity < 12.5,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week).labor_productivity&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class='subheader'>OEE2</td>
+                                                    <th class='target'>58%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).oee2 < 0.58,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-5).oee2&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-4).oee2 < 0.58,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-4).oee2&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-3).oee2 < 0.58,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-3).oee2&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-2).oee2 < 0.58,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-2).oee2&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-1).oee2 < 0.58,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-1).oee2&"</td>    
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week).oee2 < 0.58,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week).oee2&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class='subheader'>Target Completion</td>
+                                                    <th class='target'>100%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).target_completion < 1,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-5).target_completion*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-4).target_completion < 1,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-4).target_completion*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-3).target_completion < 1,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-3).target_completion*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-2).target_completion < 1,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-2).target_completion*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-1).target_completion < 1,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-1).target_completion*100&"%</td>    
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week).target_completion < 1,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week).target_completion*100&"%</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class='subheader'>Lead Time</td>
+                                                    <th class='target'>10 (days)</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time > 10,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-4).lead_time > 10,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-4).lead_time&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time > 10,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-3).lead_time&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time > 10,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-2).lead_time&"</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time > 10,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-1).lead_time&"</td>    
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week).lead_time > 10,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week).lead_time&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class='subheader'>Downtime</td>
+                                                    <th class='target'>30%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).downtime_percent > 0.30,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-5).downtime_percent*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-4).downtime_percent > 0.30,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-4).downtime_percent*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-3).downtime_percent > 0.30,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-3).downtime_percent*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-2).downtime_percent > 0.30,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-2).downtime_percent*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-1).downtime_percent > 0.30,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-1).downtime_percent*100&"%</td>    
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week).downtime_percent > 0.30,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week).downtime_percent*100&"%</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class='subheader'>Yield</td>
+                                                    <th class='target'>98%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).yield < 0.98,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-5).yield*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-4).yield < 0.98,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-4).yield*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-3).yield < 0.98,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-3).yield*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-2).yield < 0.98,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-2).yield*100&"%</td>
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-1).yield < 0.98,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-1).yield*100&"%</td>    
+                                                    <td style='"&
+                                                        If(LookUp(t3_gallery.AllItems, week = loc_week).yield < 0.98,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>  "&LookUp(t3_gallery.AllItems, week = loc_week).yield*100&"%</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <!-- Container Margin -->
+                                        <td class='main-container-margin'>&nbsp;</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <th id='footer'>&copy; 2025 EMD Millipore. All rights reserved.</th>
+                        </tr>
+                    </table>
+                </td>
+                <!-- Container Margin -->
+                <td class='main-container-margin'>&nbsp;</td>
+            </tr>
+        </table>
+    </body>
+</html>
