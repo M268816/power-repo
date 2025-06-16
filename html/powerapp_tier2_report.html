@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <style>
+        body{
+            width: 100%;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 11pt;
+            padding: 0px;
+            margin: 0px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .container-table {
+            width: 100%;
+        }
+        .main-container {
+            width: 80%;
+        }
+        .main-container-margin {
+            width: 10%;
+        }
+        .main-table {
+            width: 100%;
+            border-radius: 8px;
+            border-collapse: collapse;
+            color: #FFFFFF;
+        }
+        .main-table tr {
+            background-color: #cccccc;
+            padding: 8px;
+        }
+        .main-table th {
+            background-color: #503291;
+            color: #FFFFFF;
+        }
+        .main-table td {
+            color: #000000;
+            padding: 8px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background-color: #0F69AF;
+            border: 1px solid #000000;
+            padding: 8px;
+            font-weight: lighter;
+        }
+        .data-table th.subheader {
+            background-color: #FFDBC9;
+            color: #000000;
+            padding: 4px;
+            font-weight: lighter;
+        }
+        .data-table th.target {
+            background-color: #A5CD50;
+            color: #000000;
+            padding: 4px;
+        }
+        .data-table th.large {
+            width: 20%
+        }
+        .data-table td {
+            border: 1px solid #000000;
+            background-color: #FFFFFF;
+            padding: 4px;
+        }
+        .data-table td.blank{
+            border: 0px;
+            background-color: #cccccc;
+        }
+        #header {
+            border-radius: 8px 8px 0px 0px;
+        }
+        #footer {
+            border-radius: 0px 0px 8px 8px;
+            background-color: #2DBECD;
+            color: #503291;
+        }
+        </style>
+    </head>
+    <body>
+        <!--Container Table-->
+        <table class='container-table'>
+            <tr>
+                <!-- Container Margin -->
+                <td class='main-container-margin'>&nbsp;</td>
+                
+                <!-- Main Container-->
+                <td class='main-container'>
+                    <!-- Main Table -->
+                    <table class='main-table'>
+                        
+                        <!-- Header -->
+                        <tr>
+                            <th id='header'>
+                                <h2>Digital DMS Encapsulation Tier 2 Report for Week "&loc_week&"</h2>
+                            </th>
+                        </tr>
+                        
+                        <!-- Context -->
+                        <tr>
+                            <td>
+                                <h5>This report looks better through your web browser! <a href='https://outlook.office.com/mail/'>Open Outlook.com.</a></h5>
+                                <h5>For more detailed information visit the <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true'>Encapsulation Digital Daily Management System</a></h5>
+                            </td>
+                        </tr>
+
+                        <!-- Summary -->
+                        <tr>
+                            <td>
+                                <!-- Summary Container Table -->
+                                <table class='container-table'>
+                                    <tr>
+                                        <!-- Container Margin -->
+                                        <td class='main-container-margin'>&nbsp;</td>
+                                        
+                                        <!-- Summary Main Container -->
+                                        <td class='main-container'>
+                                            <!-- Summary Table -->
+                                            <table class='data-table'>
+                                                <tr>
+                                                    <th>Safety Incidents</th>
+                                                    <th>Good Units</th>
+                                                    <th colspan='2'>Top Downtime Reasons</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>"&loc_overview.safety&"</td>
+                                                    <td>"&loc_overview.good_units&"</td>
+                                                    <th class='subheader'>"&Index(loc_overview.top_downtime,1).reason&"</td>
+                                                    <td>"&Concatenate(Round(Index(loc_overview.top_downtime,1).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,1).sum_group,60), "m")&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Quality Incidents</th>
+                                                    <th>Planned Target</th>
+                                                    <th class='subheader'>"&Index(loc_overview.top_downtime,2).reason&"</td>
+                                                    <td>"&Concatenate(Round(Index(loc_overview.top_downtime,2).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,2).sum_group,60), "m")&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>"&loc_overview.quality&"</td>
+                                                    <td>"&loc_overview.target_units&"</td>
+                                                    <th class='subheader'>"&Index(loc_overview.top_downtime,3).reason&"</td>
+                                                    <td>"&Concatenate(Round(Index(loc_overview.top_downtime,3).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,3).sum_group,60), "m")&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Total Downtime</th>
+                                                    <th>Total Rejects</th>
+                                                    <th class='subheader'>"&Index(loc_overview.top_downtime,4).reason&"</td>
+                                                    <td>"&Concatenate(Round(Index(loc_overview.top_downtime,4).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,4).sum_group,60), "m")&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>"&loc_overview.total_downtime&"</td>
+                                                    <td>"&loc_overview.total_rejects&"</td>
+                                                    <th class='subheader'>"&Index(loc_overview.top_downtime,5).reason&"</td>
+                                                    <td>"&Concatenate(Round(Index(loc_overview.top_downtime,5).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,6).sum_group,60), "m")&"</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class='blank'></td>
+                                                    <td class='blank'></td>
+                                                    <th class='subheader'>"&Index(loc_overview.top_downtime,6).reason&"</td>
+                                                    <td>"&Concatenate(Round(Index(loc_overview.top_downtime,6).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,6).sum_group,60), "m")&"</td>
+                                                </tr>
+                                            </table>
+
+                                        <!-- Container Margin -->
+                                        <td class='main-container-margin'>&nbsp;</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <!-- Week by Week Table -->
+                        <tr>
+                            <td>
+                                <table class='data-table'>
+                                        <tr>
+                                            <th colspan='2'>Monday</th>
+                                            <th colspan='2'>Tuesday</th>
+                                            <th colspan='2'>Wednesday</th>
+                                            <th colspan='2'>Thursday</th>
+                                            <th colspan='2'>Friday</th>
+                                        </tr>
+                                        <tr>
+                                            <th class='subheader'>Safety</th>
+                                            <th class='subheader'>Quality</th>
+                                            <th class='subheader'>Safety</th>
+                                            <th class='subheader'>Quality</th>
+                                            <th class='subheader'>Safety</th>
+                                            <th class='subheader'>Quality</th>
+                                            <th class='subheader'>Safety</th>
+                                            <th class='subheader'>Quality</th>
+                                            <th class='subheader'>Safety</th>
+                                            <th class='subheader'>Quality</th>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <!-- Monday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Monday").safety&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Monday").quality&"</td>
+                                            <!-- Tuesday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Tuesday").safety&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Tuesday").quality&"</td>
+                                            <!-- Wednesday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Wednesday").safety&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Wednesday").quality&"</td>
+                                            <!-- Thursday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Thursday").safety&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Thursday").quality&"</td>
+                                            <!-- Friday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Friday").safety&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Friday").quality&"</td>
+                                        </tr>
+
+                                        <tr>
+                                            <th colspan='2' class='subheader'>Productivity Target</th>
+                                            <th colspan='2' class='subheader'>Productivity Target</th>
+                                            <th colspan='2' class='subheader'>Productivity Target</th>
+                                            <th colspan='2' class='subheader'>Productivity Target</th>
+                                            <th colspan='2' class='subheader'>Productivity Target</th>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <!-- Monday -->
+                                            <td colspan='2'>"&LookUp(loc_data, this_weekday = "Monday").kpi_production&"%</td>
+                                            <!-- Tuesday -->
+                                            <td colspan='2'>"&LookUp(loc_data, this_weekday = "Tuesday").kpi_production&"%</td>
+                                            <!-- Wednesday -->
+                                            <td colspan='2'>"&LookUp(loc_data, this_weekday = "Wednesday").kpi_production&"%</td>
+                                            <!-- Thursday -->
+                                            <td colspan='2'>"&LookUp(loc_data, this_weekday = "Thursday").kpi_production&"%</td>
+                                            <!-- Friday -->
+                                            <td colspan='2'>"&LookUp(loc_data, this_weekday = "Friday").kpi_production&"%</td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <th class='subheader'>Good Units</th>
+                                            <th class='subheader'>Planned Target</th>
+                                            <th class='subheader'>Good Units</th>
+                                            <th class='subheader'>Planned Target</th>
+                                            <th class='subheader'>Good Units</th>
+                                            <th class='subheader'>Planned Target</th>
+                                            <th class='subheader'>Good Units</th>
+                                            <th class='subheader'>Planned Target</th>
+                                            <th class='subheader'>Good Units</th>
+                                            <th class='subheader'>Planned Target</th>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <!-- Monday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Monday").good_units&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Monday").target_units&"</td>
+                                            <!-- Tuesday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Tuesday").good_units&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Tuesday").target_units&"</td>
+                                            <!-- Wednesday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Wednesday").good_units&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Wednesday").target_units&"</td>
+                                            <!-- Thursday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Thursday").good_units&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Thursday").target_units&"</td>
+                                            <!-- Friday -->
+                                            <td>"&LookUp(loc_data, this_weekday = "Friday").good_units&"</td>
+                                            <td>"&LookUp(loc_data, this_weekday = "Friday").target_units&"</td>
+                                        </tr>
+
+                                        <tr>
+                                            <th colspan='2' class='subheader'>Total Downtime</th>
+                                            <th colspan='2' class='subheader'>Total Downtime</th>
+                                            <th colspan='2' class='subheader'>Total Downtime</th>
+                                            <th colspan='2' class='subheader'>Total Downtime</th>
+                                            <th colspan='2' class='subheader'>Total Downtime</th>
+                                        </tr>
+
+                                        <tr>
+                                            <!-- Monday -->
+                                            <td colspan='2'>"&
+                                                Concatenate(
+                                                    Round(LookUp(loc_data, this_weekday = "Monday").total_downtime/60,0),
+                                                    "H ",
+                                                    Mod(LookUp(loc_data, this_weekday = "Monday").total_downtime,60), 
+                                                    "m"
+                                                )&"
+                                            </td>
+                                            <!-- Tuesday -->
+                                            <td colspan='2'>"&
+                                                Concatenate(
+                                                    Round(LookUp(loc_data, this_weekday = "Tuesday").total_downtime/60,0),
+                                                    "H ",
+                                                    Mod(LookUp(loc_data, this_weekday = "Tuesday").total_downtime,60), 
+                                                    "m"
+                                                )&"
+                                            </td>
+                                            <!-- Wednesday -->
+                                            <td colspan='2'>"&
+                                                Concatenate(
+                                                    Round(LookUp(loc_data, this_weekday = "Wednesday").total_downtime/60,0),
+                                                    "H ",
+                                                    Mod(LookUp(loc_data, this_weekday = "Wednesday").total_downtime,60), 
+                                                    "m"
+                                                )&"
+                                            </td>
+                                            <!-- Thursday -->
+                                            <td colspan='2'>"&
+                                                Concatenate(
+                                                    Round(LookUp(loc_data, this_weekday = "Thursday").total_downtime/60,0),
+                                                    "H ",
+                                                    Mod(LookUp(loc_data, this_weekday = "Thursday").total_downtime,60), 
+                                                    "m"
+                                                )&"
+                                            </td>
+                                            <!-- Friday -->
+                                            <td colspan='2'>"&
+                                                Concatenate(
+                                                    Round(LookUp(loc_data, this_weekday = "Friday").total_downtime/60,0),
+                                                    "H ",
+                                                    Mod(LookUp(loc_data, this_weekday = "Friday").total_downtime,60), 
+                                                    "m"
+                                                )&"
+                                            </td>
+                                        </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <th id='footer'>&copy; 2025 EMD Millipore. All rights reserved.</th>
+                        </tr>
+                    </table>
+                </td>
+                <!-- Container Margin -->
+                <td class='main-container-margin'>&nbsp;</td>
+            </tr>
+        </table>
+    </body>
+</html>
