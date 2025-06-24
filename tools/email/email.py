@@ -16,21 +16,27 @@ print("--- STARTING ---")
 # init vars here because pylance is stupid
 received_time = None
 iso_week = None
-excel_file = pd.DataFrame()
+excel_completions = pd.DataFrame()
+excel_lead_times = pd.DataFrame()
 completed_qty = None
 trx_value = None
+lead_time_value = None
 xl_filter = None
 xl_completed_qty = None
 xl_trx_value = None
+xl_lead_time_value = None
 xlt_filter = None
 xlt_completed_qty = None
 xlt_trx_value = None
+xlt_lead_time_value = None
 ssc_filter = None
 ssc_completed_qty = None
 ssc_trx_value = None
+ssc_lead_time_value = None
 v_filter = None
 v_completed_qty = None
 v_trx_value = None
+v_lead_time_value = None
 
 # Init Save locations
 input_save_location = "C:\\Users\\M268816\\OneDrive - MerckGroup\\Desktop\\python_inputs"
@@ -55,7 +61,8 @@ CREATE TABLE IF NOT EXISTS summary (
     date DATETIME NOT NULL,
     week REAL NOT NULL,
     quantity REAL NOT NULL,
-    transactions REAL NOT NULL
+    transactions REAL NOT NULL,
+    lead_time REAL NOT NULL
     )
 """)
 SQL_CONNECTION.commit()
@@ -101,14 +108,16 @@ for email in emails:
 
 # Open excel file with pandas
 try:
-    excel_file = pd.read_excel(input_path)
-    print("--- EXCEL FILE LOADED ---")
+    excel_completions = pd.read_excel(input_path, sheet_name=0)
+    print("--- EXCEL COMPLETIONS LOADED ---")
+    excel_lead_times = pd.read_excel(input_path, sheet_name=1)
+    print("--- EXCEL LEAD TIMES LOADED ---")
 except Exception as e:
     print(f"Excel File Load Exception: {e}")
 
-# Summarize
+# Summarize Completions
 try:
-    working_file = excel_file.copy()
+    working_file = excel_completions.copy()
     print("--- WORKING FILE CREATED ---")
     
     # Total
@@ -142,9 +151,49 @@ try:
     ssc_trx_value = round(ssc_trx_value, 2)
     v_trx_value = round(v_trx_value, 2)
     
-    print("--- SUMMARIES CREATED ---")
+    print("--- COMPLETION SUMMARIES CREATED ---")
 except Exception as e:
-    print(f"Could not create summaries: {e}")
+    print(f"Could not create completion summaries: {e}")
+    
+# Summarize Lead Times
+try:
+    working_file = excel_lead_times.copy()
+    print("--- WORKING FILE CREATED ---")
+    
+    # Total
+    lead_time_value = round(working_file["LEAD_TIME_RELEASE"].mean(),2)*1
+    
+    # XL
+    xl_filter = working_file[working_file["CATEGORY DESCRIPTION"] == "Opti XL"].copy()
+    if xl_filter.empty:
+        xl_lead_time_value = 0
+    else:
+        xl_lead_time_value = round(xl_filter["LEAD_TIME_RELEASE"].mean(),2)*1
+    
+    # XLT
+    xlt_filter = working_file[working_file["CATEGORY DESCRIPTION"] == "Opti XLT"].copy()
+    if xlt_filter.empty:
+        xlt_lead_time_value = 0
+    else:
+        xlt_lead_time_value = round(xlt_filter["LEAD_TIME_RELEASE"].mean(),2)*1
+    
+    # SSC
+    ssc_filter = working_file[working_file["CATEGORY DESCRIPTION"] == "Small Scale Capsule"].copy()
+    if ssc_filter.empty:
+        ssc_lead_time_value = 0
+    else:
+        ssc_lead_time_value = round(ssc_filter["LEAD_TIME_RELEASE"].mean(),2)*1
+    
+    # SSC Pleating
+    v_filter = working_file[working_file["CATEGORY DESCRIPTION"] == "Opti XL Subs"].copy()
+    if v_filter.empty:
+        v_lead_time_value = 0
+    else:
+        v_lead_time_value = round(v_filter["LEAD_TIME_RELEASE"].mean(),2)
+    
+    print("--- COMPLETION SUMMARIES CREATED ---")
+except Exception as e:
+    print(f"Could not create lead time summaries: {e}")
 
 # Create new dataframe for sql transfer
 summary = pd.DataFrame(
@@ -171,6 +220,13 @@ summary = pd.DataFrame(
             ssc_trx_value,
             v_trx_value,
             trx_value
+        ],
+        "Lead_Time": [
+            xl_lead_time_value,
+            xlt_lead_time_value,
+            ssc_lead_time_value,
+            v_lead_time_value,
+            lead_time_value
         ]
     }
 )
@@ -196,15 +252,16 @@ for index, row in summary.iterrows():
     count = SQL_CURSOR.fetchone()[0]
     if count == 0:
         SQL_CURSOR.execute("""
-            INSERT INTO summary (department, date, week, quantity, transactions)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO summary (department, date, week, quantity, transactions, lead_time)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
                 row["Department"],
                 row["Date"],
                 row["Week"],
                 row["Quantity"],
-                row["Transactions"]
+                row["Transactions"],
+                row["Lead_Time"]
             )
         )
     else:

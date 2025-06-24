@@ -16,10 +16,10 @@
             width: 100%;
         }
         .main-container {
-            width: 70%;
+            width: 90%;
         }
         .main-container-margin {
-            width: 15%;
+            width: 5%;
         }
         .main-table {
             width: 100%;
@@ -43,6 +43,7 @@
         .data-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         .data-table th {
             background-color: #0F69AF;
@@ -62,7 +63,10 @@
             padding: 4px;
         }
         .data-table th.large {
-            width: 20%
+            width: 30%
+        }
+        .data-table th.medium {
+            width: 15%
         }
         .data-table td {
             border: 1px solid #000000;
@@ -179,7 +183,7 @@
                                                 </tr>
                                                 <tr>
                                                     <th class='subheader'>Labor Efficiency</th>
-                                                    <th class='subheader'>Productivity</td>
+                                                    <th class='subheader'>Target Completion</td>
                                                     <th class='subheader'>Yield</td>
                                                     <th class='subheader'>Downtime</td>
                                                 </tr>
@@ -278,7 +282,7 @@
                                                 <tr>
                                                     <th class='subheader'>Total</th>
                                                     <th class='target'>Target: "&this_overall_data.total_goal&"</td>
-                                                    <td style='"& If(this_overall_data.ssc < this_overall_data.total_goal,
+                                                    <td style='"& If(this_overall_data.total < this_overall_data.total_goal,
                                                         "color: white; background-color: red;",
                                                         "color: black; background-color: green;"
                                                         )&"'>
@@ -304,12 +308,16 @@
                                         <th>Output</th>
                                         <th>Output Target</th>
                                         <th>Output Delta</th>
-                                        <th>Total Downtime Minutes</th>
-                                        <th>Greatest Downtime Contributor</th>
+                                        <th class='medium'>Total Downtime Minutes</th>
+                                        <th class='medium'>Greatest Downtime Contributor</th>
                                         <th class='large'>Tie-Off</th>
                                     </tr>
                                     <tr>
-                                        <th class='subheader'>SSC</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=SSC&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                SSC
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "SSC").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "SSC").supply < LookUp(this_shift_data, line = "SSC").target,
@@ -330,7 +338,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>SSC2</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=SSC2&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                SSC2
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "SSC2").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "SSC2").supply < LookUp(this_shift_data, line = "SSC2").target,
@@ -351,7 +363,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>XL1</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=XL1&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                XL1
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "XL1").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "XL1").supply < LookUp(this_shift_data, line = "XL1").target,
@@ -372,7 +388,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>XL2</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=XL2&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                XL2
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "XL2").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "XL2").supply < LookUp(this_shift_data, line = "XL2").target,
@@ -393,7 +413,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>XL3</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=XL3&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                XL3
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "XL3").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "XL3").supply < LookUp(this_shift_data, line = "XL3").target,
@@ -414,7 +438,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>XL4</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=XL4&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                XL4
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "XL4").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "XL4").supply < LookUp(this_shift_data, line = "XL4").target,
@@ -435,7 +463,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>XL5</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=XL5&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                XL5
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "XL5").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "XL5").supply < LookUp(this_shift_data, line = "XL5").target,
@@ -456,7 +488,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>XLT</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=XLT&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                XLT
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "XLT").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "XLT").supply < LookUp(this_shift_data, line = "XLT").target,
@@ -477,7 +513,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>XLT2</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=XLT2&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                XLT2
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "XLT2").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "XLT2").supply < LookUp(this_shift_data, line = "XLT2").target,
@@ -498,7 +538,11 @@
                                     </tr>
 
                                     <tr>
-                                        <th class='subheader'>XLT3</th>
+                                        <th class='subheader'>
+                                            <a href='https://apps.powerapps.com/play/e/60165e8f-9742-ea2f-ba30-a527285b6746/a/ef1aaad5-8269-43fd-8df7-4643a845aa5a?tenantId=db76fb59-a377-4120-bc54-59dead7d39c9&hint=642d5ac8-2e0d-4e75-b591-0f538a29a20e&sourcetime=1744725417481&source=portal&hidenavbar=true&SCREEN=scr_hourly&LINE=XLT3&SHIFT="&loc_email_shift&"&TARGET_DATE="&dor_date.SelectedDate&"'> 
+                                                XLT3
+                                            </a>
+                                        </th>
                                         <td>"& LookUp(this_shift_data, line = "XLT3").labor_hours &" hours</td>
                                         <td style='"&
                                                     If(LookUp(this_shift_data, line = "XLT3").supply < LookUp(this_shift_data, line = "XLT3").target,

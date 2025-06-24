@@ -16,10 +16,10 @@
             width: 100%;
         }
         .main-container {
-            width: 80%;
+            width: 90%;
         }
         .main-container-margin {
-            width: 10%;
+            width: 5%;
         }
         .main-table {
             width: 100%;
@@ -43,6 +43,7 @@
         .data-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         .data-table th {
             background-color: #0F69AF;
@@ -60,6 +61,12 @@
             background-color: #A5CD50;
             color: #000000;
             padding: 4px;
+        }
+        .data-table th.small {
+            width: 1%
+        }
+        .data-table th.medium {
+            width: 15%
         }
         .data-table th.large {
             width: 20%
@@ -113,17 +120,15 @@
                                 <!-- Summary Container Table -->
                                 <table class='container-table'>
                                     <tr>
-                                        <!-- Container Margin -->
-                                        <td class='main-container-margin'>&nbsp;</td>
                                         
                                         <!-- Summary Main Container -->
                                         <td class='main-container'>
                                             <!-- Summary Table -->
                                             <table class='data-table'>
                                                 <tr>
-                                                    <th rowspan='7' style='writing-mode: sideways-lr; text-orientation: sideways;'>ENCAPSULATION</th>
-                                                    <th>Key Performance Indicator</th>
-                                                    <th>Target</th>
+                                                    <th class='small' rowspan='7' style='writing-mode: sideways-lr; text-orientation: sideways;'>ENCAPSULATION</th>
+                                                    <th class='medium'>Key Performance Indicator</th>
+                                                    <th class='large'>Target</th>
                                                     <th>Week<br />"&loc_week-5&"</th>
                                                     <th>Week<br />"&loc_week-4&"</th>
                                                     <th>Week<br />"&loc_week-3&"</th>
@@ -255,45 +260,45 @@
                                                     <th class='subheader'>Lead Time</td>
                                                     <th class='target'>10 (days)</td>
                                                     <td style='"&
-                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time > 10,
+                                                        If(Value(LookUp(t3_gallery.AllItems, week = loc_week-5).t3_gallery_lead_time.Value) > 10,
                                                             "color: white; background-color: red;",
                                                             "color: black; background-color: green;"
                                                         )
-                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time&"</td>
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-5).t3_gallery_lead_time.Value&"</td>
                                                     <td style='"&
-                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-4).lead_time > 10,
+                                                        If(Value(LookUp(t3_gallery.AllItems, week = loc_week-4).t3_gallery_lead_time.Value) > 10,
                                                             "color: white; background-color: red;",
                                                             "color: black; background-color: green;"
                                                         )
-                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-4).lead_time&"</td>
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-4).t3_gallery_lead_time.Value&"</td>
                                                     <td style='"&
-                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time > 10,
+                                                        If(Value(LookUp(t3_gallery.AllItems, week = loc_week-5).t3_gallery_lead_time.Value) > 10,
                                                             "color: white; background-color: red;",
                                                             "color: black; background-color: green;"
                                                         )
-                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-3).lead_time&"</td>
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-3).t3_gallery_lead_time.Value&"</td>
                                                     <td style='"&
-                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time > 10,
+                                                        If(Value(LookUp(t3_gallery.AllItems, week = loc_week-5).t3_gallery_lead_time.Value) > 10,
                                                             "color: white; background-color: red;",
                                                             "color: black; background-color: green;"
                                                         )
-                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-2).lead_time&"</td>
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-2).t3_gallery_lead_time.Value&"</td>
                                                     <td style='"&
-                                                        If(LookUp(t3_gallery.AllItems, week = loc_week-5).lead_time > 10,
+                                                        If(Value(LookUp(t3_gallery.AllItems, week = loc_week-5).t3_gallery_lead_time.Value) > 10,
                                                             "color: white; background-color: red;",
                                                             "color: black; background-color: green;"
                                                         )
-                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-1).lead_time&"</td>    
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week-1).t3_gallery_lead_time.Value&"</td>    
                                                     <td style='"&
-                                                        If(LookUp(t3_gallery.AllItems, week = loc_week).lead_time > 10,
+                                                        If(Value(LookUp(t3_gallery.AllItems, week = loc_week).t3_gallery_lead_time.Value) > 10,
                                                             "color: white; background-color: red;",
                                                             "color: black; background-color: green;"
                                                         )
-                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week).lead_time&"</td>
+                                                        &"'>"&LookUp(t3_gallery.AllItems, week = loc_week).t3_gallery_lead_time.Value&"</td>
                                                 </tr>
                                                 <tr>
                                                     <th class='subheader'>Downtime</td>
-                                                    <th class='target'> < 30% <br />(Unplanned Downtime / (Total Time - Planned Downtime))</td>
+                                                    <th class='target'> < 30% <br />(Unplanned Downtime / Planned Runtime)</td>
                                                     <td style='"&
                                                         If(LookUp(t3_gallery.AllItems, week = loc_week-5).downtime_percent > 0.30,
                                                             "color: white; background-color: red;",
@@ -373,8 +378,6 @@
                                                 </tr>
                                             </table>
                                         </td>
-                                        <!-- Container Margin -->
-                                        <td class='main-container-margin'>&nbsp;</td>
                                     </tr>
                                 </table>
                             </td>

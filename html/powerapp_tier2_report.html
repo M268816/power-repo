@@ -16,10 +16,10 @@
             width: 100%;
         }
         .main-container {
-            width: 80%;
+            width: 90%;
         }
         .main-container-margin {
-            width: 10%;
+            width: 5%;
         }
         .main-table {
             width: 100%;
@@ -129,8 +129,22 @@
                                                     <th colspan='2'>Top Downtime Reasons</th>
                                                 </tr>
                                                 <tr>
-                                                    <td>"&loc_overview.safety&"</td>
-                                                    <td>"&loc_overview.good_units&"</td>
+                                                    <td style='"&
+                                                        If(loc_overview.safety > 0,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>
+                                                        "&loc_overview.safety&"
+                                                    </td>
+                                                    <td style='"&
+                                                        If(loc_overview.good_units < loc_overview.target_units,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>
+                                                        "&loc_overview.good_units&"
+                                                    </td>
                                                     <th class='subheader'>"&Index(loc_overview.top_downtime,1).reason&"</td>
                                                     <td>"&Concatenate(Round(Index(loc_overview.top_downtime,1).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,1).sum_group,60), "m")&"</td>
                                                 </tr>
@@ -141,7 +155,14 @@
                                                     <td>"&Concatenate(Round(Index(loc_overview.top_downtime,2).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,2).sum_group,60), "m")&"</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>"&loc_overview.quality&"</td>
+                                                    <td style='"&
+                                                        If(loc_overview.quality > 0,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>
+                                                        "&loc_overview.quality&"
+                                                    </td>
                                                     <td>"&loc_overview.target_units&"</td>
                                                     <th class='subheader'>"&Index(loc_overview.top_downtime,3).reason&"</td>
                                                     <td>"&Concatenate(Round(Index(loc_overview.top_downtime,3).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,3).sum_group,60), "m")&"</td>
@@ -153,7 +174,14 @@
                                                     <td>"&Concatenate(Round(Index(loc_overview.top_downtime,4).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,4).sum_group,60), "m")&"</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>"&loc_overview.total_downtime&"</td>
+                                                    <td style='"&
+                                                        If(loc_overview.total_downtime > 18000,
+                                                            "color: white; background-color: red;",
+                                                            "color: black; background-color: green;"
+                                                        )
+                                                        &"'>
+                                                        "&Concatenate(Round(loc_overview.total_downtime/60,0), "H ", Mod(loc_overview.total_downtime,60), "m")&"
+                                                    </td>
                                                     <td>"&loc_overview.total_rejects&"</td>
                                                     <th class='subheader'>"&Index(loc_overview.top_downtime,5).reason&"</td>
                                                     <td>"&Concatenate(Round(Index(loc_overview.top_downtime,5).sum_group/60,0),"H ", Mod(Index(loc_overview.top_downtime,6).sum_group,60), "m")&"</td>
@@ -198,20 +226,90 @@
                                         
                                         <tr>
                                             <!-- Monday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Monday").safety&"</td>
-                                            <td>"&LookUp(loc_data, this_weekday = "Monday").quality&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Monday").safety > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Monday").safety&"
+                                            </td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Monday").quality > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Monday").quality&"
+                                            </td>
                                             <!-- Tuesday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Tuesday").safety&"</td>
-                                            <td>"&LookUp(loc_data, this_weekday = "Tuesday").quality&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Tuesday").safety > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Tuesday").safety&"
+                                            </td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Tuesday").quality > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Tuesday").quality&"
+                                            </td>
                                             <!-- Wednesday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Wednesday").safety&"</td>
-                                            <td>"&LookUp(loc_data, this_weekday = "Wednesday").quality&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Wednesday").safety > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Wednesday").safety&"
+                                            </td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Wednesday").quality > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Wednesday").quality&"
+                                            </td>
                                             <!-- Thursday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Thursday").safety&"</td>
-                                            <td>"&LookUp(loc_data, this_weekday = "Thursday").quality&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Thursday").safety > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Thursday").safety&"
+                                            </td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Thursday").quality > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Thursday").quality&"
+                                            </td>
                                             <!-- Friday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Friday").safety&"</td>
-                                            <td>"&LookUp(loc_data, this_weekday = "Friday").quality&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Friday").safety > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Friday").safety&"
+                                            </td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Friday").quality > 0,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Friday").quality&"
+                                            </td>
                                         </tr>
 
                                         <tr>
@@ -250,19 +348,54 @@
                                         
                                         <tr>
                                             <!-- Monday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Monday").good_units&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Monday").good_units < LookUp(loc_data, this_weekday = "Monday").target_units,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Monday").good_units&"
+                                            </td>
                                             <td>"&LookUp(loc_data, this_weekday = "Monday").target_units&"</td>
                                             <!-- Tuesday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Tuesday").good_units&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Tuesday").good_units < LookUp(loc_data, this_weekday = "Tuesday").target_units,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Tuesday").good_units&"
+                                            </td>
                                             <td>"&LookUp(loc_data, this_weekday = "Tuesday").target_units&"</td>
                                             <!-- Wednesday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Wednesday").good_units&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Wednesday").good_units < LookUp(loc_data, this_weekday = "Wednesday").target_units,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Wednesday").good_units&"
+                                            </td>
                                             <td>"&LookUp(loc_data, this_weekday = "Wednesday").target_units&"</td>
                                             <!-- Thursday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Thursday").good_units&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Thursday").good_units < LookUp(loc_data, this_weekday = "Thursday").target_units,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Thursday").good_units&"
+                                            </td>
                                             <td>"&LookUp(loc_data, this_weekday = "Thursday").target_units&"</td>
                                             <!-- Friday -->
-                                            <td>"&LookUp(loc_data, this_weekday = "Friday").good_units&"</td>
+                                            <td style='"&
+                                                If(LookUp(loc_data, this_weekday = "Friday").good_units < LookUp(loc_data, this_weekday = "Friday").target_units,
+                                                    "color: white; background-color: red;",
+                                                    "color: black; background-color: green;"
+                                                )
+                                                &"'>
+                                                "&LookUp(loc_data, this_weekday = "Friday").good_units&"
+                                            </td>
                                             <td>"&LookUp(loc_data, this_weekday = "Friday").target_units&"</td>
                                         </tr>
 
